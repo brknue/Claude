@@ -1,0 +1,2 @@
+function normalized(s){return String(s).trim().toLowerCase().replace(/\s/g,'').replace(/,/g,'.').replace(/−/g,'-').replace(/%$/,'');}
+export function checkAnswer(input,answer){let i=normalized(input),a=normalized(answer);if(i===a)return true;const numeric=x=>{if(/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(x))return Number(x);if(/^[+-]?\d+\/[+-]?\d+$/.test(x)){let [n,d]=x.split('/').map(Number);return d===0?NaN:n/d;}return NaN;};let ni=numeric(i),na=numeric(a);return Number.isFinite(ni)&&Number.isFinite(na)&&Math.abs(ni-na)<1e-8;}
