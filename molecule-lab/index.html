@@ -62,6 +62,9 @@ input[type=text]{width:100%;box-sizing:border-box;background:var(--bg);border:1p
 #dock .nf{display:grid;grid-template-columns:105px 1fr;gap:6px;align-items:center;margin:3px 0}#dock .nf span{font-size:12px;color:var(--mt)}#dock .nf input{letter-spacing:0;padding:5px 7px}
 #dock .out .big{font-size:18px;font-weight:700;margin:4px 0}
 @media(max-width:900px){#dock{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:68vh}#crowd{top:44px}}
+#lab{position:absolute;left:8px;top:46px;z-index:3;background:var(--pn);border:1px solid var(--bd);border-radius:14px;padding:8px 10px;width:min(440px,calc(100% - 20px));box-shadow:0 6px 22px #0000001f;font-size:12px}
+#lab .rw{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}#lab button,#lab select{padding:4px 8px;font-size:12px;border-radius:8px}#lab select{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}#lab input[type=range]{width:96px}#lab label{margin:0}
+#lab canvas{position:static;inset:auto;display:block;width:100%;height:46px;background:var(--bg);border-radius:8px;margin-top:4px}#lab .sw{border:1px solid var(--bd);border-radius:20px;padding:1px 8px;display:inline-flex;align-items:center;gap:5px}#lab .sw i{width:9px;height:9px;border-radius:50%;display:inline-block}#lab u{cursor:pointer;text-decoration:none;color:var(--mt)}
 </style></head><body>
 <header><h1><span>⚗️</span> <span class="gt">Molecule Lab</span></h1>
 <nav><button class="on" data-t="B">Molecule Builder</button><button data-t="D">DNA Lab</button></nav>
@@ -80,7 +83,7 @@ input[type=text]{width:100%;box-sizing:border-box;background:var(--bg);border:1p
 </aside>
 <section class="stage"><canvas id="cv"></canvas><div id="wt"></div>
 <div class="hint">Click empty space to place an atom. Drag from an atom to empty space to grow a new bonded atom, or onto another atom to bond (repeat for double/triple). Use ✋ Move to reposition.</div>
-<div id="hud"></div><div id="crowd" hidden><div id="crs"></div><div class="rw"><button id="crp">⏸ Pause</button><label style="margin:0">Heat <input type="range" id="crh" min="0" max="2" step=".05" value=".5"></label><button id="crm">🎲 Re-mix</button><button id="crc">🗑 Clear</button></div><div id="crl"></div></div><div id="zc"><button id="zo" title="Zoom out (−)">−</button><button id="zl" title="Reset view (0)">100%</button><button id="zi" title="Zoom in (+)">＋</button><button id="zf" title="Fit all atoms">⤢ Fit</button></div><div id="pt" hidden></div><div id="toast"></div></section>
+<div id="hud"></div><div id="lab" hidden><div id="lbs"></div><canvas id="lbc" width="260" height="46"></canvas><div class="rw"><select id="lbc2"><option value="piston">Piston cylinder (steel)</option><option value="metal">Metal box (sealed)</option><option value="bottle">Sealed glass bottle</option><option value="beaker">Glass beaker (open top)</option></select><select id="lbz"><option value="s">Small</option><option value="m">Medium</option><option value="l">Large</option><option value="x">Huge</option></select></div><div class="rw"><label>🔥 Heat <input type="range" id="lbt" min="0.05" max="6" step="0.05" value="0.5"></label><label>⬇ Gravity <input type="range" id="lbg" min="0" max="0.15" step="0.005" value="0.03"></label></div><div class="rw" id="lbpr"><label>⚖ Load <input type="range" id="lbw" min="0" max="4" step="0.05" value="0.6"></label><button id="lbpress">⬇ Press</button><button id="lbrel">⬆ Release</button></div><div class="rw"><button id="lbp">⏸ Pause</button><button id="lbe" title="Set all molecule speeds to the wall temperature">≈ Equilibrate</button><button id="lbk" title="Colour molecules by speed">🌡 Speed colours</button><button id="lbr" style="display:none">🔧 Replace container</button><button id="lbx">🗑 Empty</button></div><div id="lbl" style="display:flex;flex-wrap:wrap;gap:4px"></div></div><div id="crowd" hidden><div id="crs"></div><div class="rw"><button id="crp">⏸ Pause</button><label style="margin:0">Heat <input type="range" id="crh" min="0" max="2" step=".05" value=".5"></label><button id="crm">🎲 Re-mix</button><button id="crc">🗑 Clear</button></div><div id="crl"></div></div><div id="zc"><button id="zo" title="Zoom out (−)">−</button><button id="zl" title="Reset view (0)">100%</button><button id="zi" title="Zoom in (+)">＋</button><button id="zf" title="Fit all atoms">⤢ Fit</button></div><div id="pt" hidden></div><div id="toast"></div></section>
 <aside>
 <h3>Your molecule</h3><div class="f" id="fm">—</div><div id="nm" style="color:var(--mt);min-height:20px"></div>
 <div style="margin-top:8px" id="inf"></div>
@@ -425,9 +428,9 @@ const NAMES={};MOL.forEach(m=>{const[n,s]=m,p=parseSmi(s);if(p){const k=fkey(p);
 let atoms=[],bonds=[],sel=null,cur='C',tool='build',hist=[],drag=null,moved=false,down=[0,0],rings=new Map(),done=new Set(),tab='B',tt;
 try{done=new Set(JSON.parse(localStorage.getItem('mlab')||'[]'))}catch(e){}
 // ---- perf: cached topology ----
-let awake=90,needDraw=3,MVD=0,TV=0,_A=null,_B=null,_al=-1,_bl=-1;
+let awake=90,needDraw=3,MVD=0,settleT=0,TV=0,_A=null,_B=null,_al=-1,_bl=-1;
 const MAXA=150000,DET_AUTO=4000;
-const wake=(n=90)=>{if(n>awake)awake=n;needDraw=Math.max(needDraw,3)},inval=()=>{needDraw=Math.max(needDraw,3)};
+const wake=(n=90)=>{if(n>awake)awake=n;if(n>=60)settleT=0;needDraw=Math.max(needDraw,3)},inval=()=>{needDraw=Math.max(needDraw,3)};
 function topo(){if(_A===atoms&&_B===bonds&&_al===atoms.length&&_bl===bonds.length)return;
  for(let i=0;i<atoms.length;i++)atoms[i]._b=[];
  for(let i=0;i<bonds.length;i++){const b=bonds[i];b.a._b.push(b);b.b._b.push(b)}
@@ -447,8 +450,8 @@ function snap(){topo();const n=atoms.length,m=bonds.length,z=new Uint8Array(n),p
  for(let i=0;i<n;i++){const a=atoms[i];a._i=i;z[i]=ZI[a.e];p[2*i]=a.x;p[2*i+1]=a.y}
  for(let i=0;i<m;i++){const k=bonds[i];b[2*i]=k.a._i;b[2*i+1]=k.b._i;o[i]=k.o}
  return{z,p,b,o,sz:n*9+m*9+64}}
-const push=()=>{if(CR)return;hist.push(snap());let t=0;for(const h of hist)t+=h.sz;while(hist.length>60||(t>HMAX&&hist.length>1))t-=hist.shift().sz};
-function undo(){if(CR)return toast('Undo is for the detailed table — Crowd tables have a Clear button');if(!hist.length)return toast('Nothing to undo');const d=hist.pop(),n=d.z.length,m=d.o.length;atoms=new Array(n);for(let i=0;i<n;i++)atoms[i]={e:ZS[d.z[i]],x:d.p[2*i],y:d.p[2*i+1]};bonds=new Array(m);for(let i=0;i<m;i++)bonds[i]={a:atoms[d.b[2*i]],b:atoms[d.b[2*i+1]],o:d.o[i]};sel=null;changed()}
+const push=()=>{if(CR||LAB)return;hist.push(snap());let t=0;for(const h of hist)t+=h.sz;while(hist.length>60||(t>HMAX&&hist.length>1))t-=hist.shift().sz};
+function undo(){if(CR||LAB)return toast('Undo is for the detailed table — Crowd and Lab tables have their own Clear buttons');if(!hist.length)return toast('Nothing to undo');const d=hist.pop(),n=d.z.length,m=d.o.length;atoms=new Array(n);for(let i=0;i<n;i++)atoms[i]={e:ZS[d.z[i]],x:d.p[2*i],y:d.p[2*i+1]};bonds=new Array(m);for(let i=0;i<m;i++)bonds[i]={a:atoms[d.b[2*i]],b:atoms[d.b[2*i+1]],o:d.o[i]};sel=null;changed()}
 // ---------- structure ----------
 // ring membership = "atom's bonds are not bridges" (linear time, iterative lowlink)
 function calcRings(){rings.clear();topo();for(let i=0;i<bonds.length;i++)bonds[i]._br=false;let T=0;for(let i=0;i<atoms.length;i++)atoms[i]._d=0;
@@ -499,7 +502,7 @@ function cellsOf(x,y,inv,m){const cx=Math.floor(x*inv),cy=Math.floor(y*inv);let 
  for(let ox=-1;ox<=1;ox++)for(let oy=-1;oy<=1;oy++){const h=(Math.imul(cx+ox,73856093)^Math.imul(cy+oy,19349663))&m;let d=false;for(let q=0;q<nh;q++)if(GRS[q]===h){d=true;break}if(!d)GRS[nh++]=h}return nh}
 let RMAX=0;for(const k in E)RMAX=Math.max(RMAX,E[k][3]);
 let PXY=new Float32Array(1024);
-function relax(iso){topo();const n=atoms.length;if(!n)return 0;if(PXY.length<2*n)PXY=new Float32Array(2*n+2048);for(let i=0;i<n;i++){PXY[2*i]=atoms[i].x;PXY[2*i+1]=atoms[i].y}
+function relax(iso){topo();const n=atoms.length;if(!n)return 0;if(!iso)settleT++;if(PXY.length<2*n)PXY=new Float32Array(2*n+2048);for(let i=0;i<n;i++){PXY[2*i]=atoms[i].x;PXY[2*i+1]=atoms[i].y}
  for(let i=0;i<bonds.length;i++){const b=bonds[i],dx=b.b.x-b.a.x,dy=b.b.y-b.a.y,d=Math.hypot(dx,dy)||1,L=40+(E[b.a.e][3]+E[b.b.e][3])*.6-(b.o-1)*6,f=(d-L)/d*.25;mv(b.a,dx*f,dy*f);mv(b.b,-dx*f,-dy*f)}
  let rm=0;for(let i=0;i<n;i++){const r=E[atoms[i].e][3];if(r>rm)rm=r}
  const Rm=rm*3.2+34,inv=1/Rm,m=gridBuild(atoms,n,inv);
@@ -514,7 +517,7 @@ function relax(iso){topo();const n=atoms.length;if(!n)return 0;if(PXY.length<2*n
 // ---------- info ----------
 function hill(){const c={};atoms.forEach(a=>c[a.e]=(c[a.e]||0)+1);let k=Object.keys(c).sort();if(c.C)k=['C',...(c.H?['H']:[]),...k.filter(x=>x!='C'&&x!='H')];return[k,c]}
 function connected(){if(!atoms.length)return false;const s=new Set([atoms[0]]),q=[atoms[0]];while(q.length)for(const y of nbs(q.shift()))if(!s.has(y)){s.add(y);q.push(y)}return s.size==atoms.length}
-function info(){document.querySelector('#B .hint').hidden=!!CR;if(CR){crowdInfo();return}const[k,c]=hill(),open=atoms.filter(a=>need(a)>0).length;
+function info(){document.querySelector('#B .hint').hidden=!!(CR||LAB);if(LAB){labInfo();return}if(CR){crowdInfo();return}const[k,c]=hill(),open=atoms.filter(a=>need(a)>0).length;
  $('#fm').innerHTML=k.length?k.map(e=>e+(c[e]>1?'<sub>'+c[e]+'</sub>':'')).join(''):'—';
  const key=k.map(e=>e+(c[e]>1?c[e]:'')).join(''),nm=NAMES[key]||DBN(key),mass=atoms.reduce((s,a)=>s+E[a.e][1],0),ok=atoms.length&&!open&&connected();
  $('#nm').textContent=atoms.length?(nm?(ok?'':'Formula matches: ')+nm:(ok?'Unknown molecule — you invented something!':'')):'Build something or pick from the library';
@@ -564,11 +567,11 @@ function draw(t){const c=cx,n=atoms.length;topo();c.setTransform(DPR,0,0,DPR,0,0
 const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left-VX)/VZ,(e.clientY-r.top-VY)/VZ]};
 const hit=(x,y)=>{for(let i=atoms.length-1;i>=0;i--){const a=atoms[i];if(Math.abs(a.x-x)<E[a.e][3]+4&&Math.abs(a.y-y)<E[a.e][3]+4&&Math.hypot(a.x-x,a.y-y)<E[a.e][3]+4)return a}};
 const bondAt=(x,y)=>bonds.find(b=>{const dx=b.b.x-b.a.x,dy=b.b.y-b.a.y,l=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((x-b.a.x)*dx+(y-b.a.y)*dy)/l));return Math.hypot(b.a.x+t*dx-x,b.a.y+t*dy-y)<8});
-cv.onpointerdown=e=>{if(pz||pan||CR){cv.setPointerCapture(e.pointerId);return}cv.setPointerCapture(e.pointerId);const[x,y]=pt(e),h=hit(x,y);moved=false;down=[x,y];
+cv.onpointerdown=e=>{if(pz||pan||CR||LAB){cv.setPointerCapture(e.pointerId);return}cv.setPointerCapture(e.pointerId);const[x,y]=pt(e),h=hit(x,y);moved=false;down=[x,y];
  if(tool=='erase'){push();if(h)del(h);else{const b=bondAt(x,y);if(b)bonds.splice(bonds.indexOf(b),1)}changed();return}
  rub=null;drag=h||null};
 cv.onpointermove=e=>{if(!drag)return;const[x,y]=pt(e);if(!moved&&Math.hypot(x-down[0],y-down[1])<5)return;moved=true;if(tool=='move'){drag.x=x;drag.y=y}else rub=[x,y]};
-cv.onpointerup=e=>{if(CR){drag=null;return}wake();if(pz||pmv){if(!PTR.size){pz=false;pmv=false}drag=null;return}if(e.button==1||e.button==2)return;if(tool=='erase')return;if(tool=='move'){drag=null;return}const[x,y]=pt(e);
+cv.onpointerup=e=>{if(CR||LAB){drag=null;return}wake();if(pz||pmv){if(!PTR.size){pz=false;pmv=false}drag=null;return}if(e.button==1||e.button==2)return;if(tool=='erase')return;if(tool=='move'){drag=null;return}const[x,y]=pt(e);
  if(drag&&moved){const t2=hit(x,y);push();if(t2&&t2!==drag)bump(drag,t2);else if(!t2){if(atoms.length>=MAXA){toast('This table is full — use a Crowd table for huge amounts');drag=null;return}const a=addAtom(cur,x,y);if(free(drag)>0)addBond(drag,a,1);else{atoms.pop();toast('That atom is full')}}sel=null;changed()}else if(drag&&!moved){const h=drag;if(sel&&sel!==h){push();bump(sel,h);sel=h;changed()}else sel=sel===h?null:h}
  else if(!drag){const b=bondAt(x,y);push();
   if(b){bump(b.a,b.b)}else{if(atoms.length>=MAXA){toast('This table is full — use a Crowd table for huge amounts');return}const a=addAtom(cur,x,y),chain=$('#ch').checked&&!e.shiftKey;if(sel&&chain){if(free(sel)>0)addBond(sel,a,1);else toast('Selected atom is full — click it to deselect')}sel=chain?a:null}changed()}
@@ -612,10 +615,10 @@ async function askAI(q){q=(q||'').trim();if(!q)return toast('Type a molecule nam
 $('#ai').onclick=()=>askAI($('#ls').value);
 let WS=[{name:'Table 1',atoms:[],bonds:[],hist:[]}],wi=0,wn=1,armed=-1;
 const sub=s=>s.replace(/\d/g,d=>'₀₁₂₃₄₅₆₇₈₉'[d]);
-function renderWT(){$('#wt').innerHTML=WS.map((w,i)=>{const a=i==wi?atoms:w.atoms,f=w.crowd?' · 🌐 '+fmtN(w.crowd.N):a.length?' · '+sub(hk(a.reduce((c,x)=>(c[x.e]=(c[x.e]||0)+1,c),{}))):'';return `<button class="${i==wi?'on':''}" data-i="${i}"><span>${w.name}</span>${f}${WS.length>1?' <span class="x" data-x="'+i+'">✕</span>':''}</button>`}).join('')+'<button id="nt">＋ New table</button><button id="nct" title="A table for thousands to millions of molecules">🌐 New Crowd</button>';
- $('#wt').querySelectorAll('button[data-i]').forEach(b=>b.onclick=e=>{const x=e.target.dataset.x;x!=null?closeWS(+x):switchWS(+b.dataset.i)});$('#nt').onclick=newWS;$('#nct').onclick=newCrowdWS}
-function saveWS(){const w=WS[wi];w.atoms=atoms;w.bonds=bonds;w.hist=hist;w.crowd=CR;w.v=[VZ,VX,VY]}
-function loadWS(i){wi=i;const w=WS[i];CR=w.crowd||null;atoms=w.atoms;bonds=w.bonds;hist=w.hist;sel=null;drag=null;if(w.v){[VZ,VX,VY]=w.v;viewLabel()}else if(CR)viewFitCrowd();if(CR&&CR.N)crowdAff();$('#crp').textContent=CR&&!CR.run?'▶ Run':'⏸ Pause';if(CR)$('#crh').value=CR.heat;changed()}
+function renderWT(){$('#wt').innerHTML=WS.map((w,i)=>{const a=i==wi?atoms:w.atoms,f=w.lab?' · 🧪 '+w.lab.N.toLocaleString():w.crowd?' · 🌐 '+fmtN(w.crowd.N):a.length?' · '+sub(hk(a.reduce((c,x)=>(c[x.e]=(c[x.e]||0)+1,c),{}))):'';return `<button class="${i==wi?'on':''}" data-i="${i}"><span>${w.name}</span>${f}${WS.length>1?' <span class="x" data-x="'+i+'">✕</span>':''}</button>`}).join('')+'<button id="nt">＋ New table</button><button id="nct" title="A table for thousands to millions of molecules">🌐 New Crowd</button><button id="nlb" title="A container you can heat, press and fill: glass, metal box or piston">🧪 New Lab</button>';
+ $('#wt').querySelectorAll('button[data-i]').forEach(b=>b.onclick=e=>{const x=e.target.dataset.x;x!=null?closeWS(+x):switchWS(+b.dataset.i)});$('#nt').onclick=newWS;$('#nct').onclick=newCrowdWS;$('#nlb').onclick=()=>newLabWS()}
+function saveWS(){const w=WS[wi];w.atoms=atoms;w.bonds=bonds;w.hist=hist;w.crowd=CR;w.lab=LAB;w.v=[VZ,VX,VY]}
+function loadWS(i){wi=i;const w=WS[i];CR=w.crowd||null;LAB=w.lab||null;atoms=w.atoms;bonds=w.bonds;hist=w.hist;sel=null;drag=null;if(w.v){[VZ,VX,VY]=w.v;viewLabel()}else if(CR)viewFitCrowd();else if(LAB)viewFitLab();if(CR&&CR.N)crowdAff();$('#crp').textContent=CR&&!CR.run?'▶ Run':'⏸ Pause';if(CR)$('#crh').value=CR.heat;changed();labUI()}
 function switchWS(i){if(i==wi)return;saveWS();loadWS(i)}
 function newWS(){saveWS();wn++;WS.push({name:'Table '+wn,atoms:[],bonds:[],hist:[]});loadWS(WS.length-1);toast('New empty table — your other tables are kept')}
 function closeWS(i){if(WS.length<2)return;const n=i==wi?atoms.length:WS[i].atoms.length;if(n&&armed!=i){armed=i;setTimeout(()=>armed=-1,3000);return toast('Click ✕ again to close this table and lose its contents')}
@@ -815,10 +818,10 @@ let VZ=1,VX=0,VY=0,pz=false,pan=false,pmv=false;const PTR=new Map();
 function viewLabel(){$('#zl').textContent=(VZ>=.1?Math.round(VZ*100):+(VZ*100).toFixed(VZ<.01?2:1))+'%'}
 function zoomAt(sx,sy,f){const nz=Math.max(CR?.002:.01,Math.min(4,VZ*f));VX=sx-(sx-VX)*nz/VZ;VY=sy-(sy-VY)*nz/VZ;VZ=nz;viewLabel()}
 function viewReset(){VZ=1;VX=0;VY=0;viewLabel()}
-function viewFit(){if(CR)return viewFitCrowd();if(!atoms.length)return viewReset();let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const t of atoms){if(t.x<a)a=t.x;if(t.y<b)b=t.y;if(t.x>c)c=t.x;if(t.y>d)d=t.y}const bw=Math.max(c-a,60),bh=Math.max(d-b,60);VZ=Math.max(.01,Math.min(2,(W-160)/bw,(H-190)/bh));VX=W/2-(a+c)/2*VZ;VY=H/2+14-(b+d)/2*VZ;viewLabel()}
+function viewFit(){if(LAB)return viewFitLab();if(CR)return viewFitCrowd();if(!atoms.length)return viewReset();let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const t of atoms){if(t.x<a)a=t.x;if(t.y<b)b=t.y;if(t.x>c)c=t.x;if(t.y>d)d=t.y}const bw=Math.max(c-a,60),bh=Math.max(d-b,60);VZ=Math.max(.01,Math.min(2,(W-160)/bw,(H-190)/bh));VX=W/2-(a+c)/2*VZ;VY=H/2+14-(b+d)/2*VZ;viewLabel()}
 $('#zo').onclick=()=>zoomAt(W/2,H/2,.8);$('#zi').onclick=()=>zoomAt(W/2,H/2,1.25);$('#zl').onclick=viewReset;$('#zf').onclick=viewFit;
 cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,Math.exp(-e.deltaY*(e.ctrlKey?.01:.0015)))},{passive:false});
-cv.addEventListener('pointerdown',e=>{PTR.set(e.pointerId,[e.clientX,e.clientY]);if(PTR.size==2){pz=true;drag=null;rub=null}else{const[x,y]=pt(e);pan=!!CR||e.button==1||e.button==2||(tool=='move'&&!hit(x,y));pmv=false}},true);
+cv.addEventListener('pointerdown',e=>{PTR.set(e.pointerId,[e.clientX,e.clientY]);if(PTR.size==2){pz=true;drag=null;rub=null}else{const[x,y]=pt(e);pan=!!(CR||LAB)||e.button==1||e.button==2||(tool=='move'&&!hit(x,y));pmv=false}},true);
 cv.addEventListener('pointermove',e=>{const p=PTR.get(e.pointerId);if(!p)return;const r=cv.getBoundingClientRect();
  if(PTR.size==2){const o=[...PTR].find(([id])=>id!=e.pointerId)[1],d0=Math.hypot(p[0]-o[0],p[1]-o[1]),d1=Math.hypot(e.clientX-o[0],e.clientY-o[1]);VX+=(e.clientX-p[0])/2;VY+=(e.clientY-p[1])/2;if(d0>0)zoomAt((e.clientX+o[0])/2-r.left,(e.clientY+o[1])/2-r.top,d1/d0)}
  else if(pan){VX+=e.clientX-p[0];VY+=e.clientY-p[1];pmv=true}PTR.set(e.pointerId,[e.clientX,e.clientY])},true);
@@ -853,13 +856,13 @@ function hbonds(){topo();compIds();const out=[],acc=[];for(let i=0;i<atoms.lengt
   if(best)out.push([h,best,bd])}return out}
 function getHB(){const now=performance.now();if(HBv!==TV||now-HBt>(atoms.length<400?0:140)){HBc=hbonds();HBt=now;HBv=TV}return HBc}
 let pfr=0;
-function polar(){if(!$('#po').checked||atoms.length<2)return;topo();compIds();pfr++;
+function polar(){if(!$('#po').checked||atoms.length<2)return;topo();compIds();pfr++;const ann=Math.max(0,1-settleT/300);if(ann<=0)return;
  const ch=[],cq=[];for(let i=0;i<atoms.length;i++){const q=pcharge(atoms[i]);if(q){ch.push(atoms[i]);cq.push(q)}}
  const mN=ch.length;if(mN>1){const stride=mN>3000?Math.ceil(mN/3000):1,inv=1/420,m=gridBuild(ch,mN,inv);
   for(let i=pfr%stride;i<mN;i+=stride){const a=ch[i],qa=cq[i];const nh=cellsOf(a.x,a.y,inv,m);let evals=0;
    for(let q=0;q<nh&&evals<120;q++)for(let j=GRH[GRS[q]];j>=0&&evals<120;j=GRN[j]){if(j<=i)continue;const b=ch[j];if(a._c===b._c)continue;const qq=qa*cq[j];if(qq>=0)continue;evals++;
-    const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,R=(E[a.e][3]+E[b.e][3])*1.6+34;if(d>R&&d<420){const f=(d-R)/d*.006*Math.min(2,-qq)*stride;mv(a,dx*f,dy*f);mv(b,-dx*f,-dy*f)}}}}
- for(const[h,a,d]of getHB()){if(d>98){const dx=a.x-h.x,dy=a.y-h.y,f=(d-98)/d*.03;mv(h,dx*f,dy*f);mv(a,-dx*f,-dy*f)}}}
+    const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,R=(E[a.e][3]+E[b.e][3])*1.6+34;if(d>R&&d<420){const f=(d-R)/d*.006*Math.min(2,-qq)*stride*ann;mv(a,dx*f,dy*f);mv(b,-dx*f,-dy*f)}}}}
+ for(const[h,a,d]of getHB()){if(d>98){const dx=a.x-h.x,dy=a.y-h.y,f=(d-98)/d*.03*ann;mv(h,dx*f,dy*f);mv(a,-dx*f,-dy*f)}}}
 // ================= Crowd mode: huge numbers of molecules as cheap particles =================
 let CR=null;
 const CAPN=Math.min(10e6,Math.round((navigator.deviceMemory||2)*1.25e6));
@@ -940,12 +943,149 @@ function placeCopies(tpl,q){push();let ox=W/2,oy=H/2;const old=atoms.length;let 
   for(const[a,b,o]of tpl.bonds)bonds.push({a:na[a],b:na[b],o})}
  sel=null;changed();if(q>1)viewFit()}
 function addFromLib(smi,name){const q=QTY();
+ if(LAB){labAdd(smi,name,q);return}
  if(CR){crowdAdd(smi,name,q);return}
  if(q<=1){if(build(smi))toast('Added '+name+' to this table');return}
  const tpl=tplFrom(smi);if(!tpl)return toast('Could not read that molecule');
  if(q*tpl.atoms.length<=DET_AUTO&&atoms.length+q*tpl.atoms.length<=MAXA){placeCopies(tpl,q);toast('Added '+q+' × '+name+' to this table')}
  else{let k=WS.findIndex(w=>w.crowd);if(k<0)newCrowdWS();else if(k!=wi){switchWS(k)}
   crowdAdd(smi,name,q);toast(q.toLocaleString()+' × '+name+' is too many for the detailed table, so it went into a Crowd table. Zoom in to see the molecules.')}}
+
+// ================= Lab: container simulation (molecular dynamics) =================
+// 2D Lennard-Jones molecular dynamics with a cell list, velocity-Verlet integration, gravity,
+// thermal walls (heat flows through the walls), a free piston with a load, and bursting containers.
+// It is a physically based model, not a quantitative simulation of real chemistry.
+let LAB=null;
+const LU=40,LABMAX=30000,KSCALE=350;
+const LTYPES={beaker:{n:'Glass beaker (open top)',a:.3,open:1,burst:1e9},bottle:{n:'Sealed glass bottle',a:.3,burst:2.2},metal:{n:'Metal box (sealed)',a:.9,burst:9},piston:{n:'Piston cylinder (steel)',a:.7,burst:14}};
+const LSIZES={s:[30,22],m:[60,44],l:[120,88],x:[260,190]};
+function mkLab(type,size){const S=LSIZES[size||'s'];return{type,size:size||'s',W:S[0],H:S[1],N:0,cap:0,X:null,Y:null,VX:null,VY:null,AX:null,AY:null,T:null,sp:[],K:0,Tw:.5,g:.03,load:.6,yp:3,vp:0,Mp:2*S[0],broken:false,run:true,sub:2,P:0,Tm:.5,zn:0,esc:0,hist:[],imA:0,imB:0,imP:0,tacc:0,spd:false,fr:0,zc:0,zs:0,burstP:0,head:null,nx:null,ncx:1,ncy:1,cs:3}}
+function labSpecies(smi,name,tpl){const pol=$('#po').checked?tpl.pol:0,hb=$('#po').checked?tpl.hb:0;return{smi,name,tpl,m:Math.max(.25,tpl.mass/18),sig:Math.max(.8,Math.min(3,tpl.R/55)),pol0:tpl.pol,hb0:tpl.hb,col:SPC[LAB.sp.length%SPC.length],n:0}}
+function labPairs(){const L=LAB;if(!L)return;const K=L.sp.length,on=$('#po').checked;L.K=K;L.M=new Float64Array(K||1);L.RAD=new Float64Array(K||1);L.SG2=new Float64Array(K*K||1);L.EP=new Float64Array(K*K||1);L.RC2=new Float64Array(K*K||1);
+ let mx=0;const e=L.sp.map(s=>.7+(on?.9*s.pol0+.3*s.hb0:.5));
+ L.sp.forEach((s,i)=>{L.M[i]=s.m;L.RAD[i]=s.sig/2});
+ for(let i=0;i<K;i++)for(let j=0;j<K;j++){const a=L.sp[i],b=L.sp[j],sg=(a.sig+b.sig)/2,ep=Math.sqrt(e[i]*e[j])*(on?1-.35*Math.abs(a.pol0-b.pol0):1);L.SG2[i*K+j]=sg*sg;L.EP[i*K+j]=ep;L.RC2[i*K+j]=6.25*sg*sg;mx=Math.max(mx,2.5*sg)}
+ L.cs=Math.max(2.5,mx);L.ncx=Math.max(1,Math.ceil((L.W+2)/L.cs));L.ncy=Math.max(1,Math.ceil((L.H+2)/L.cs));if(!L.head||L.head.length!==L.ncx*L.ncy)L.head=new Int32Array(L.ncx*L.ncy)}
+function newLabWS(type,size){saveWS();wn++;WS.push({name:'Lab '+wn,atoms:[],bonds:[],hist:[],lab:mkLab(type||'piston',size)});loadWS(WS.length-1);toast('Lab table: pick molecules in the library to put them in the container. Use the controls above to heat, press and mix.')}
+function labFreeArea(L){return L.W*(L.H-(L.type=='piston'?L.yp:0))}
+function labAdd(smi,name,count){const L=LAB;if(!L)return false;let k=L.sp.findIndex(s=>s.smi==smi);
+ if(k<0){if(L.sp.length>=8){toast('A lab holds up to 8 different molecules');return false}const tpl=tplFrom(smi);if(!tpl){toast('Could not read that molecule');return false}L.sp.push(labSpecies(smi,name,tpl));k=L.sp.length-1;labPairs()}
+ const sp=L.sp[k];let used=0;for(const s of L.sp)used+=s.n*s.sig*s.sig*.785;const room=Math.floor((labFreeArea(L)*.6-used)/(sp.sig*sp.sig*.785)),room2=LABMAX-L.N;
+ let want=Math.min(count,room,room2);if(want<=0){toast(room2<=0?'Lab limit reached ('+LABMAX.toLocaleString()+' molecules)':'The container is full. Make it bigger, raise the piston or remove something.');return false}
+ const need=L.N+want;if(need>L.cap){const cap=Math.min(LABMAX,Math.max(need,Math.floor(L.cap*1.5),512)),g=(O,Tp)=>{const a=new Tp(cap);if(O)a.set(O.subarray(0,L.N));return a};L.X=g(L.X,Float64Array);L.Y=g(L.Y,Float64Array);L.VX=g(L.VX,Float64Array);L.VY=g(L.VY,Float64Array);L.AX=g(L.AX,Float64Array);L.AY=g(L.AY,Float64Array);L.T=g(L.T,Uint8Array);L.nx=new Int32Array(cap);L.cap=cap}
+ // free-spot placement on a coarse occupancy grid (no overlaps, so the first steps are stable)
+ const cs=1.2,gx=Math.ceil(L.W/cs)+1,gy=Math.ceil(L.H/cs)+1,occ=new Int32Array(gx*gy).fill(-1),nxo=new Int32Array(L.cap);
+ for(let i=0;i<L.N;i++){const c=((L.Y[i]/cs)|0)*gx+((L.X[i]/cs)|0);if(c>=0&&c<occ.length){nxo[i]=occ[c];occ[c]=i}}
+ const y0=(L.type=='piston'?L.yp:0)+sp.sig*.55,sd=Math.sqrt(L.Tw/sp.m);let placed=0;
+ const sp0=sp.sig*1.08,nxl=Math.max(1,Math.floor((L.W-sp.sig)/sp0)),nyl=Math.max(1,Math.floor((L.H-sp.sig*.55-y0)/sp0)),tot=nxl*nyl,ord=new Int32Array(tot);for(let i=0;i<tot;i++)ord[i]=i;
+ for(let q=0;q<tot&&placed<want;q++){const r=q+((Math.random()*(tot-q))|0),v=ord[r];ord[r]=ord[q];ord[q]=v;const a=(v/nyl)|0,b=v%nyl;
+  const x=sp.sig*.5+(a+.5)*sp0+(Math.random()-.5)*.06*sp.sig,y=y0+(b+.5)*sp0+(Math.random()-.5)*.06*sp.sig;let ok=true;const cx=(x/cs)|0,cy=(y/cs)|0;
+  for(let oy=-2;oy<=2&&ok;oy++)for(let ox=-2;ox<=2&&ok;ox++){const xx=cx+ox,yy=cy+oy;if(xx<0||yy<0||xx>=gx||yy>=gy)continue;for(let j=occ[yy*gx+xx];j>=0;j=nxo[j]){const dx=L.X[j]-x,dy=L.Y[j]-y,sg=(L.sp[L.T[j]].sig+sp.sig)/2*.97;if(dx*dx+dy*dy<sg*sg){ok=false;break}}}
+  if(!ok)continue;const i=L.N++;L.X[i]=x;L.Y[i]=y;L.T[i]=k;L.VX[i]=lgauss()*sd;L.VY[i]=lgauss()*sd;L.AX[i]=0;L.AY[i]=0;sp.n++;placed++;
+  const c=((y/cs)|0)*gx+((x/cs)|0);nxo[i]=occ[c];occ[c]=i}
+ if(!placed&&sp.n==0){const kk=L.sp.indexOf(sp);L.sp.splice(kk,1);labPairs()}
+ changed();labUI();toast(placed?('Added '+placed.toLocaleString()+' × '+name+(placed<count?' (the container is nearly full)':'')):'No free space found for '+name);return placed>0}
+const lgauss=()=>Math.sqrt(-2*Math.log(1-Math.random()))*Math.cos(6.2832*Math.random());
+function labRemove(L,i){const t=L.T[i];L.sp[t].n--;const l=--L.N;if(i!==l){L.X[i]=L.X[l];L.Y[i]=L.Y[l];L.VX[i]=L.VX[l];L.VY[i]=L.VY[l];L.AX[i]=L.AX[l];L.AY[i]=L.AY[l];L.T[i]=L.T[l]}}
+// reflect/thermalise a particle at a wall. axis 0 = x, 1 = y; sg = +1 if the inward normal points to +axis
+function labWall(L,i,axis,sg,al,bottom){const m=L.M[L.T[i]],V=axis?L.VY:L.VX,U=axis?L.VX:L.VY;const vn=V[i]*sg;if(vn>=0)return;let u;
+ if(Math.random()<al){u=Math.sqrt(-2*L.Tw/m*Math.log(1-Math.random()));U[i]=lgauss()*Math.sqrt(L.Tw/m)}else u=-vn;
+ V[i]=u*sg;const imp=m*(u-vn);L.imA+=imp;if(bottom)L.imB+=imp}
+function labBounds(L,dt){const al=LTYPES[L.type].a,open=LTYPES[L.type].open,piston=L.type=='piston',W=L.W,H=L.H,broken=L.broken;
+ for(let i=L.N-1;i>=0;i--){let x=L.X[i],y=L.Y[i];const t=L.T[i],pad=L.RAD[t];
+  if(broken||open){if(x<-30||x>W+30||y<-30||(broken&&y>H+30)){labRemove(L,i);L.esc++;continue}}
+  if(!broken){if(x<pad){L.X[i]=x=2*pad-x;labWall(L,i,0,1,al,0)}else if(x>W-pad){L.X[i]=x=2*(W-pad)-x;labWall(L,i,0,-1,al,0)}}
+  if(y>H-pad){L.Y[i]=y=2*(H-pad)-y;labWall(L,i,1,-1,al,1)}
+  if(!broken&&!open){
+   if(piston){const lim=L.yp+pad;if(y<lim){const vy=L.VY[i],m=L.M[t];L.Y[i]=y=lim+(lim-y>pad?0:lim-y);if(vy<L.vp){const Mp=L.Mp,nv=((m-Mp)*vy+2*Mp*L.vp)/(m+Mp),np=((Mp-m)*L.vp+2*m*vy)/(m+Mp);L.imP+=Math.abs(m*(nv-vy));L.imA+=Math.abs(m*(nv-vy));L.VY[i]=nv;L.vp=np}}}
+   else if(y<pad){L.Y[i]=y=2*pad-y;labWall(L,i,1,1,al,0)}}}}
+function labForces(L){const N=L.N,X=L.X,Y=L.Y,T=L.T,K=L.K,inv=1/L.cs,ncx=L.ncx,ncy=L.ncy,head=L.head,nx=L.nx,AX=L.AX,AY=L.AY,SG2=L.SG2,EP=L.EP,RC2=L.RC2,Mm=L.M,g=L.g,smp=L.zs;head.fill(-1);
+ for(let i=0;i<N;i++){let cx=(X[i]+1)*inv|0,cy=(Y[i]+1)*inv|0;if(cx<0)cx=0;else if(cx>=ncx)cx=ncx-1;if(cy<0)cy=0;else if(cy>=ncy)cy=ncy-1;const c=cy*ncx+cx;nx[i]=head[c];head[c]=i;AX[i]=0;AY[i]=0}
+ let zc=0;
+ for(let cy=0;cy<ncy;cy++)for(let cx=0;cx<ncx;cx++){const c=cy*ncx+cx;
+  for(let i=head[c];i>=0;i=nx[i]){const xi=X[i],yi=Y[i],ti=T[i]*K;let fx=0,fy=0;
+   for(let o=0;o<5;o++){let j;if(o===0)j=nx[i];else{const a=cx+(o===1?1:o===2?-1:o===3?0:1),b=cy+(o===1?0:1);if(a<0||a>=ncx||b>=ncy)continue;j=head[b*ncx+a]}
+    for(;j>=0;j=nx[j]){const dx=xi-X[j],dy=yi-Y[j],r2=dx*dx+dy*dy,t=ti+T[j];if(r2>=RC2[t])continue;const sg2=SG2[t],r2c=r2<.16*sg2?.16*sg2:r2,s2=sg2/r2c,s6=s2*s2*s2,f=24*EP[t]*(2*s6*s6-s6)/r2c,px=f*dx,py=f*dy;fx+=px;fy+=py;AX[j]-=px;AY[j]-=py;if(smp&&r2<1.7*sg2)zc+=2}}
+   AX[i]+=fx;AY[i]+=fy}}
+ for(let i=0;i<N;i++){const im=1/Mm[T[i]];AX[i]*=im;AY[i]=AY[i]*im+g}
+ if(smp){L.zc=zc}}
+function labSub(L,dt){const N=L.N,X=L.X,Y=L.Y,VX=L.VX,VY=L.VY,AX=L.AX,AY=L.AY,h=.5*dt;
+ for(let i=0;i<N;i++){VX[i]+=h*AX[i];VY[i]+=h*AY[i];X[i]+=dt*VX[i];Y[i]+=dt*VY[i]}
+ if(L.type=='piston'){L.vp+=dt*(L.load*L.W/L.Mp+L.g);L.yp+=dt*L.vp;if(L.yp<.9){L.yp=.9;if(L.vp<0)L.vp=0}const mx=L.H-3;if(L.yp>mx){L.yp=mx;if(L.vp>0)L.vp=0}}
+ labBounds(L,dt);labForces(L,dt);const n2=L.N;for(let i=0;i<n2;i++){VX[i]+=h*AX[i];VY[i]+=h*AY[i]}}
+function labStep(){const L=LAB;if(!L||!L.run||!L.N){if(L&&L.run)labMeasure(L,0);return}
+ const t0=performance.now(),dt=.006;L.fr++;L.zs=(L.fr%12==0)?1:0;let steps=0;
+ for(let s=0;s<L.sub;s++){labSub(L,dt);steps++;L.tacc+=dt}
+ labMeasure(L,steps);const ms=performance.now()-t0;L.msA=(L.msA||ms)*.9+ms*.1;if(L.msA>15&&L.sub>1)L.sub--;else if(L.msA<6&&L.sub<4)L.sub++}
+function labMeasure(L,steps){const N=L.N;let ke=0;if(N){for(let i=0;i<N;i++){const t=L.T[i];ke+=.5*L.M[t]*(L.VX[i]*L.VX[i]+L.VY[i]*L.VY[i])}}const T=N?ke/N:L.Tw;L.Tm=L.Tm*.9+T*.1;
+ if(steps&&L.tacc>0){const ty=LTYPES[L.type];let len,imp;if(L.type=='piston'){len=L.W;imp=L.imP}else if(ty.open){len=L.W;imp=L.imB}else{len=2*(L.W+L.H);imp=L.imA}const P=imp/(L.tacc*len);L.P=L.P*.93+P*.07;L.imA=L.imB=L.imP=0;L.tacc=0;
+  L.over=L.P>ty.burst?(L.over||0)+1:Math.max(0,(L.over||0)-2);if(!L.broken&&L.over>25&&L.fr>30){L.broken=true;L.over=0;L.burstP=L.P;toast((L.type=='bottle'?'The glass shattered':'The container burst')+' at pressure '+L.P.toFixed(1)+'. Use Replace container to try again.')}}
+ if(L.zs&&N)L.zn=L.zc/N;if(L.fr%4==0){L.hist.push([L.P,L.Tm]);if(L.hist.length>200)L.hist.shift()}}
+function labEquil(){const L=LAB;if(!L||!L.N)return;let ke=0;for(let i=0;i<L.N;i++)ke+=.5*L.M[L.T[i]]*(L.VX[i]**2+L.VY[i]**2);const T=ke/L.N,f=Math.sqrt(L.Tw/Math.max(1e-6,T));for(let i=0;i<L.N;i++){L.VX[i]*=f;L.VY[i]*=f}toast('Velocities rescaled to the wall temperature')}
+function labSetType(t){const L=LAB;if(!L)return;L.type=t;L.broken=false;if(t=='piston'){L.yp=Math.max(L.yp,3);L.vp=0;L.Mp=2*L.W;for(let i=0;i<L.N;i++){const lim=L.yp+L.RAD[L.T[i]];if(L.Y[i]<lim)L.Y[i]=lim+.05}}
+ else for(let i=0;i<L.N;i++){const r=L.RAD[L.T[i]];if(L.Y[i]<r)L.Y[i]=r}labUI();changed()}
+function labResize(s){const L=LAB;if(!L)return;const S=LSIZES[s],fx=S[0]/L.W,fy=S[1]/L.H;for(let i=0;i<L.N;i++){L.X[i]*=fx;L.Y[i]*=fy}L.W=S[0];L.H=S[1];L.size=s;L.yp*=fy;L.Mp=2*L.W;labPairs();viewFitLab();changed()}
+function viewFitLab(){const L=LAB;if(!L)return;VZ=Math.max(.01,Math.min(4,(W-50)/(L.W*LU),(H-190)/((L.H+10)*LU)));VX=(W-L.W*LU*VZ)/2;VY=140+(H-160-(L.H+10)*LU*VZ)/2+10*LU*VZ;viewLabel()}
+// ---------- drawing ----------
+const lmix=(a,b,t)=>{const p=s=>[parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)];const A=p(a),B=p(b);return'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')'};
+function labDraw(t){const L=LAB,c=cx;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,W,H);if(!L)return;const z=VZ;c.setTransform(DPR*z*LU,0,0,DPR*z*LU,DPR*VX,DPR*VY);
+ const w=L.W,h=L.H,type=L.type,piston=type=='piston',glass=type=='beaker'||type=='bottle',hot=Math.min(1,Math.max(0,(L.Tw-1)/3.2)),yt=piston?L.yp:0;
+ // interior
+ c.fillStyle=glass?'rgba(125,190,255,.10)':'rgba(148,163,184,.10)';c.fillRect(0,yt,w,h-yt);
+ // particles
+ const N=L.N,X=L.X,Y=L.Y,T=L.T,rect=N>6000,sc=z*LU,pix=N>2500&&L.RAD[0]*2*sc<7,vx0=-VX/sc-3,vx1=(W-VX)/sc+3,vy0=-VY/sc-3,vy1=(H-VY)/sc+3;
+ const u32=h=>{const n=parseInt(h.slice(1),16);return(255<<24)|((n&255)<<16)|(n&0xff00)|(n>>16)};
+ if(pix){const U=pixBuf(),w=PBc.width,hh=PBc.height;U.fill(0);let sc2=[];if(L.spd){sc2=['#1d4ed8','#2563eb','#0ea5e9','#22c55e','#eab308','#f97316','#ef4444','#b91c1c'].map(u32)}else sc2=L.sp.map(s=>u32(s.col));
+  const ref=Math.max(.05,L.Tm),ps=Math.max(1,Math.min(4,Math.round(L.RAD[0]*2*sc*.9)));
+  for(let i=0;i<N;i++){const sx=(X[i]*sc+VX)|0,sy=(Y[i]*sc+VY)|0;if(sx<0||sy<0||sx>=w-ps||sy>=hh-ps)continue;let cc;if(L.spd){const t=T[i],e=.5*L.M[t]*(L.VX[i]*L.VX[i]+L.VY[i]*L.VY[i])/ref;cc=sc2[Math.min(7,Math.floor(e*1.6))]}else cc=sc2[T[i]];
+   for(let a=0;a<ps;a++){const o=(sy+a)*w+sx;for(let b2=0;b2<ps;b2++)U[o+b2]=cc}}
+  PBx.putImageData(PBi,0,0);c.setTransform(DPR,0,0,DPR,0,0);c.drawImage(PBc,0,0);c.setTransform(DPR*z*LU,0,0,DPR*z*LU,DPR*VX,DPR*VY)}
+ else if(L.spd){const cols=['#1d4ed8','#2563eb','#0ea5e9','#22c55e','#eab308','#f97316','#ef4444','#b91c1c'],B=[];for(let k=0;k<8;k++)B.push(new Path2D);const ref=Math.max(.05,L.Tm);
+  for(let i=0;i<N;i++){if(X[i]<vx0||X[i]>vx1||Y[i]<vy0||Y[i]>vy1)continue;const m=L.M[T[i]],e=.5*m*(L.VX[i]*L.VX[i]+L.VY[i]*L.VY[i])/ref,b=Math.min(7,Math.floor(e*1.6)),r=L.RAD[T[i]]*.9;if(rect)B[b].rect(X[i]-r,Y[i]-r,2*r,2*r);else{B[b].moveTo(X[i]+r,Y[i]);B[b].arc(X[i],Y[i],r,0,7)}}
+  for(let k=0;k<8;k++){c.fillStyle=cols[k];c.fill(B[k])}}
+ else for(let k=0;k<L.K;k++){const P=new Path2D,r=L.RAD[k]*.9;for(let i=0;i<N;i++){if(T[i]!==k||X[i]<vx0||X[i]>vx1||Y[i]<vy0||Y[i]>vy1)continue;if(rect)P.rect(X[i]-r,Y[i]-r,2*r,2*r);else{P.moveTo(X[i]+r,Y[i]);P.arc(X[i],Y[i],r,0,7)}}c.fillStyle=L.sp[k].col;c.fill(P)}
+ // container
+ const th=.7;
+ if(glass){c.fillStyle='rgba(186,230,253,.55)';c.strokeStyle='rgba(56,189,248,.9)';c.lineWidth=.08;
+  const top=type=='beaker'?-3:-.2;
+  if(L.broken){c.fillRect(-th,h,w+2*th,th);c.strokeRect(-th,h,w+2*th,th);c.strokeStyle='rgba(56,189,248,.8)';for(let k=0;k<9;k++){c.beginPath();c.moveTo(w*(k/8),h);c.lineTo(w*(k/8)+(k%2?-1:1)*1.4,h-1.2-(k%3)*.5);c.stroke()}}
+  else{c.fillRect(-th,top,th,h-top+th);c.fillRect(w,top,th,h-top+th);c.fillRect(-th,h,w+2*th,th);if(type=='bottle')c.fillRect(-th,top-th,w+2*th,th+.2);c.strokeRect(-th,top,th,h-top+th);c.strokeRect(w,top,th,h-top+th);c.strokeRect(-th,h,w+2*th,th);if(type=='bottle')c.strokeRect(-th,top-th,w+2*th,th+.2);
+   c.strokeStyle='rgba(255,255,255,.7)';c.lineWidth=.12;c.beginPath();c.moveTo(.35,top+1);c.lineTo(.35,h-2);c.stroke();
+   c.fillStyle='rgba(15,23,42,.55)';c.font='.9px system-ui';for(let k=1;k<5;k++){const yy=h-k*h/5;c.fillRect(w-1.1,yy,1.1,.07)}}}
+ else{const base=lmix('#6b7280','#f97316',hot),dark=lmix('#374151','#b91c1c',hot);if(hot>.3){c.shadowColor='rgba(249,115,22,.9)';c.shadowBlur=hot*40*z}
+  if(L.broken){c.fillStyle=base;c.fillRect(-th,h,w+2*th,th)}
+  else{c.fillStyle=base;c.fillRect(-th,piston?-.5:-th,th,h+th+(piston?.5:th));c.fillRect(w,piston?-.5:-th,th,h+th+(piston?.5:th));c.fillRect(-th,h,w+2*th,th);if(!piston)c.fillRect(-th,-th,w+2*th,th)}
+  c.shadowBlur=0;c.fillStyle=dark;for(let k=0;k<Math.floor(w/3);k++){c.beginPath();c.arc(1.5+k*3,h+th/2,.12,0,7);c.fill()}
+  if(piston&&!L.broken){const py=L.yp;c.fillStyle='#9ca3af';c.fillRect(0,py-.8,w,.8);c.fillStyle='#6b7280';c.fillRect(w/2-.35,-9,.7,9+py-.8);
+   const nb=Math.max(0,Math.min(8,Math.ceil(L.load*1.2)));for(let k=0;k<nb;k++){c.fillStyle=k%2?'#475569':'#334155';c.fillRect(w/2-2.2,-9-(k+1)*.9,4.4,.8)}
+   c.fillStyle='#e2e8f0';c.font='bold 1px system-ui';c.textAlign='center';if(nb)c.fillText('load '+L.load.toFixed(1),w/2,-9-(nb+1)*.9-.2);
+   if(hot>.05){c.strokeStyle='rgba(249,115,22,'+(.3+.7*hot)+')';c.lineWidth=.25;c.beginPath();for(let k=0;k<=w*2;k++){const xx=k/2,yy=h-.3-(k%2?.4:0);k?c.lineTo(xx,yy):c.moveTo(xx,yy)}c.stroke()}}}
+ if(L.broken){c.fillStyle='rgba(239,68,68,.9)';c.font='bold 2px system-ui';c.textAlign='center';c.fillText(type=='bottle'?'SHATTERED':'BURST',w/2,h/2)}}
+function labCanvasChart(L){const g=$('#lbc');if(!g)return;const x=g.getContext('2d'),w=g.width,h=g.height;x.clearRect(0,0,w,h);const H=L.hist;if(H.length<2)return;
+ const line=(k,col,mx)=>{x.strokeStyle=col;x.lineWidth=1.5;x.beginPath();H.forEach((p,i)=>{const X=i/(H.length-1)*(w-2)+1,Y=h-2-Math.min(1,p[k]/mx)*(h-4);i?x.lineTo(X,Y):x.moveTo(X,Y)});x.stroke()};
+ const mp=Math.max(.5,...H.map(p=>p[0])),mt=Math.max(.5,...H.map(p=>p[1]));line(0,'#ef4444',mp);line(1,'#38bdf8',mt);x.fillStyle='#94a3b8';x.font='9px system-ui';x.fillText('P (red) · T (blue)',3,9)}
+function labUI(){const el=$('#lab');if(!el)return;el.hidden=!LAB||tab!='B';if(!LAB||el.hidden)return;const L=LAB;
+ $('#lbt').value=L.Tw;$('#lbg').value=L.g;$('#lbw').value=L.load;$('#lbc2').value=L.type;$('#lbz').value=L.size;$('#lbpr').style.display=L.type=='piston'?'':'none';$('#lbp').textContent=L.run?'⏸ Pause':'▶ Run';$('#lbk').classList.toggle('on',L.spd);$('#lbr').style.display=L.broken?'':'none';
+ labReadout();$('#lbl').innerHTML=L.sp.map((s,i)=>`<span class="sw"><i style="background:${s.col}"></i>${s.name} ×${s.n.toLocaleString()} <u data-k="${i}" title="Remove from the container">✕</u></span>`).join('')||'<span style="color:var(--mt)">Empty. Choose an amount in the library, then click a molecule to pour it in.</span>';
+ $('#lbl').querySelectorAll('u').forEach(u=>u.onclick=()=>labRemoveSpecies(+u.dataset.k))}
+function labRemoveSpecies(k){const L=LAB;if(!L)return;for(let i=L.N-1;i>=0;i--){if(L.T[i]===k)labRemove(L,i)}for(let i=0;i<L.N;i++)if(L.T[i]>k)L.T[i]--;L.sp.splice(k,1);labPairs();labUI();changed()}
+function labVol(L){return L.W*(L.H-(L.type=='piston'?L.yp:0))}
+function labState(L){if(!L.N)return'—';const z=L.zn;if(z<.7)return'gas';if(z>4.4&&L.Tm<.55)return'solid-like';return z>2.2?'liquid':'dense gas / vapour'}
+function labReadout(){const L=LAB;if(!L)return;const V=labVol(L),Z=L.N?L.P*V/(L.N*Math.max(1e-6,L.Tm)):0,K=L.Tm*KSCALE;
+ $('#lbs').innerHTML=`<b>${L.N.toLocaleString()}</b> molecules · P <b>${L.P.toFixed(2)}</b> · T <b>${L.Tm.toFixed(2)}</b> (≈${Math.round(K)} K) · V ${V.toFixed(0)} · looks like <b>${labState(L)}</b>`+(L.esc?` · escaped ${L.esc}`:'');labCanvasChart(L)}
+function labInfo(){const L=LAB;$('#fm').textContent=L.N?L.N.toLocaleString()+' molecules':'—';$('#nm').textContent=LTYPES[L.type].n+(L.broken?' (broken)':'');const V=labVol(L),Z=L.N?L.P*V/(L.N*Math.max(1e-6,L.Tm)):0;
+ const rows=[['Pressure (model units)',L.P.toFixed(2)],['Temperature (model)',L.Tm.toFixed(3)+' ≈ '+Math.round(L.Tm*KSCALE)+' K'],['Volume (area)',V.toFixed(0)],['Density',(L.N/Math.max(1,V)).toFixed(3)],['Z = PV / NkT',L.N&&L.type!='beaker'?Z.toFixed(2)+(Math.abs(Z-1)<.15?' (ideal-gas-like)':''):'—'],['State (rough guess)',labState(L)],['Wall temperature',L.Tw.toFixed(2)+' ≈ '+Math.round(L.Tw*KSCALE)+' K']].concat(L.sp.map(s=>[s.name,s.n.toLocaleString()+' · '+(s.pol0>.35?'polar':'nonpolar')]));
+ $('#inf').innerHTML=rows.map(r=>`<div class="row"><span>${String(r[0]).replace(/</g,'&lt;')}</span><b>${r[1]}</b></div>`).join('')+'<div style="color:var(--mt);font-size:11px;margin-top:6px">A physics-based 2D model (Lennard-Jones molecular dynamics). Values are in model units, with a rough kelvin scale. It does not simulate chemical reactions.</div>'}
+(function(){
+ const on=(id,ev,fn)=>$(id).addEventListener(ev,fn);
+ on('#lbt','input',()=>{if(LAB)LAB.Tw=+$('#lbt').value});on('#lbg','input',()=>{if(LAB)LAB.g=+$('#lbg').value});on('#lbw','input',()=>{if(LAB)LAB.load=+$('#lbw').value});
+ on('#lbc2','change',()=>labSetType($('#lbc2').value));on('#lbz','change',()=>labResize($('#lbz').value));
+ on('#lbp','click',()=>{if(LAB){LAB.run=!LAB.run;labUI()}});on('#lbe','click',labEquil);on('#lbk','click',()=>{if(LAB){LAB.spd=!LAB.spd;labUI()}});
+ on('#lbr','click',()=>{if(LAB){LAB.broken=false;LAB.P=0;LAB.fr=0;labUI();toast('New container fitted')}});
+ on('#lbx','click',()=>{const L=LAB;if(!L)return;L.N=0;L.sp=[];labPairs();L.esc=0;labUI();changed()});
+ on('#lbpress','click',()=>{if(LAB){LAB.load=Math.min(4,LAB.load*1.6+.3);labUI()}});on('#lbrel','click',()=>{if(LAB){LAB.load=Math.max(0,LAB.load*.6-.2);labUI()}});
+ on('#po','change',()=>{if(LAB)labPairs()});
+})();
 
 // ---------- performance governor, crowd controls, main loop ----------
 let qual=1,fps=60,hudT=0,pms=0,skipP=0;
@@ -970,13 +1110,14 @@ function loop(t){const ft=Math.max(1,t-last),dt=Math.min(50,ft)/1000;last=t;fps=
  if(tab=='B'){
   const heavy=CR?CR.N>20000:atoms.length>1500;
   if(heavy){if(ft>42&&qual>.12)qual*=.88;else if(ft<26&&qual<1)qual=Math.min(1,qual*1.03)}else if(qual<1)qual=Math.min(1,qual*1.1);
-  if(CR){crowdStep();if(CR.run||needDraw>0){crowdDraw(t)}if(needDraw>0)needDraw--}
+  if(LAB){labStep();labDraw(t)}
+  else if(CR){crowdStep();if(CR.run||needDraw>0){crowdDraw(t)}if(needDraw>0)needDraw--}
   else{
    const phOn=$('#ph').checked;if(!phOn)awake=0;
-   if(phOn&&!drag&&awake>0){if(skipP>0)skipP--;else{const t0=performance.now(),mvd=relax(),ms=performance.now()-t0;pms=pms*.7+ms*.3;skipP=pms>12?Math.min(8,Math.floor(pms/12)):0;if(mvd/Math.max(1,atoms.length)<.012)awake--;else if(awake<30)awake=30}}
+   if(phOn&&!drag&&awake>0){if(skipP>0)skipP--;else{const t0=performance.now(),mvd=relax(),ms=performance.now()-t0;pms=pms*.7+ms*.3;skipP=pms>12?Math.min(8,Math.floor(pms/12)):0;if(mvd<.02)awake--;else if(awake<30)awake=30}}
    if(awake>0||needDraw>0||sel||drag){const t0=performance.now();draw(t);if(needDraw>0)needDraw--;const dm=performance.now()-t0;if(dm>30&&qual>.12)qual*=.9}}
   if(t-hudT>350){hudT=t;const h=$('#hud');
-   if(CR){h.textContent='⚡ '+Math.round(fps)+' fps · auto quality '+Math.round(qual*100)+'%';crowdHUD()}
+   if(LAB){h.textContent='⚡ '+Math.round(fps)+' fps · simulation speed '+LAB.sub+'×';labReadout();labInfo()}else if(CR){h.textContent='⚡ '+Math.round(fps)+' fps · auto quality '+Math.round(qual*100)+'%';crowdHUD()}
    else{h.textContent='⚡ '+Math.round(fps)+' fps · '+atoms.length.toLocaleString()+' atoms'+(atoms.length>1500?' · auto quality '+Math.round(qual*100)+'%':'')+(awake<=0&&$('#ph').checked&&atoms.length?' · settled':'')}}
  }else{ph+=dt*spd;drawDNA(t)}
  requestAnimationFrame(loop)}
