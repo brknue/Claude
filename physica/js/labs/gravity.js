@@ -42,6 +42,7 @@ PhysLab.define({
     let tn = 0, simT = 0, subCount = 0;
     const cam = { x: 0, y: 0, z: 1 };
     let launch = null, pan = null, pred = null;
+    const stats = { merges: 0, rev: 0 };
     const TCOL = ['#9ad1ff', '#ffb38a', '#c9a6ff'];
     const starSpr = U.glow([255, 200, 110], 32, 0.12);
     const stars = [];
@@ -119,7 +120,7 @@ PhysLab.define({
             const big = a.m >= b.m ? a : b, sm = big === a ? b : a, M = a.m + b.m;
             big.x = (a.x * a.m + b.x * b.m) / M; big.y = (a.y * a.m + b.y * b.m) / M;
             big.vx = (a.vx * a.m + b.vx * b.m) / M; big.vy = (a.vy * a.m + b.vy * b.m) / M;
-            big.m = M; big.r = radius(M); sm.dead = true; merged = true;
+            big.m = M; big.r = radius(M); sm.dead = true; merged = true; stats.merges++;
             if (big.m >= 1e6 && !big.col.startsWith('#ffe')) big.col = '#ffe8a8';
           }
         }
@@ -261,7 +262,7 @@ PhysLab.define({
     const followSel = ui.select('Camera follows', [['com', 'Centre of mass'], ['heavy', 'Heaviest body'], ['none', 'Free camera']], S.follow, (v) => (S.follow = v));
     ui.toggle('Orbit trails', S.trails, (v) => (S.trails = v));
     ui.buttons([
-      { label: 'Reverse time', onClick: () => { for (const b of B) { b.vx = -b.vx; b.vy = -b.vy; } for (let k = 0; k < tn; k++) { TVX[k] = -TVX[k]; TVY[k] = -TVY[k]; } env.toast('All velocities reversed'); } },
+      { label: 'Reverse time', onClick: () => { for (const b of B) { b.vx = -b.vx; b.vy = -b.vy; } for (let k = 0; k < tn; k++) { TVX[k] = -TVX[k]; TVY[k] = -TVY[k]; } stats.rev++; env.toast('All velocities reversed'); } },
       { label: 'Clear trails', onClick: () => B.forEach((b) => { b.tn = 0; }) },
       { label: 'Remove all', onClick: () => { B = []; tn = 0; } },
     ]);
@@ -270,7 +271,54 @@ PhysLab.define({
 
     const toWorld = (sx, sy) => [(sx - env.W / 2) / cam.z + cam.x, (sy - env.H / 2) / cam.z + cam.y];
 
+    /* ===== v3 extras ===== */
+    const X3 = { inspect: true, potential: false };
+    function elements(b, pr) {
+      const mu = S.G * (pr.m + b.m), rx = b.x - pr.x, ry = b.y - pr.y, vx = b.vx - pr.vx, vy = b.vy - pr.vy;
+      const r = Math.hypot(rx, ry), v2 = vx * vx + vy * vy, en = v2 / 2 - mu / r, rv = rx * vx + ry * vy;
+      const ex = ((v2 - mu / r) * rx - rv * vx) / mu, ey = ((v2 - mu / r) * ry - rv * vy) / mu, e = Math.hypot(ex, ey), a = -mu / (2 * en);
+      return { r, v: Math.sqrt(v2), e, a, bound: en < 0, T: en < 0 ? U.TAU * Math.sqrt((a * a * a) / mu) : Infinity, w: Math.atan2(ey, ex) };
+    }
+    const heaviest = () => { let hb = B[0]; for (const b of B) if (b.m > hb.m) hb = b; return hb; };
+    ui.section('Orbit inspector');
+    ui.toggle('Hover a body to see its orbit', X3.inspect, (v) => (X3.inspect = v));
+    ui.note('Point at any planet: the dashed ellipse is its Kepler orbit around the heaviest body, with semi-major axis <b>a</b>, eccentricity <b>e</b> and period <b>T</b>.');
+    const ext = {
+      draw(ctx) {
+        if (!X3.inspect || !env.pointer.inside || launch || B.length < 2) return;
+        const W = env.W, H = env.H, [wx, wy] = toWorld(env.pointer.x, env.pointer.y), pr = heaviest();
+        let best = null, bd = (22 / cam.z) ** 2;
+        for (const b of B) { if (b === pr) continue; const d = (b.x - wx) ** 2 + (b.y - wy) ** 2; if (d < bd) { bd = d; best = b; } }
+        if (!best) return;
+        const el = elements(best, pr);
+        ctx.save();
+        ctx.translate(W / 2, H / 2); ctx.scale(cam.z, cam.z); ctx.translate(-cam.x, -cam.y);
+        ctx.lineWidth = 1.3 / cam.z; ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+        if (el.bound && el.e < 0.995) {
+          const c = el.a * el.e;
+          ctx.setLineDash([7 / cam.z, 5 / cam.z]);
+          ctx.beginPath(); ctx.ellipse(pr.x - Math.cos(el.w) * c, pr.y - Math.sin(el.w) * c, el.a, el.a * Math.sqrt(1 - el.e * el.e), el.w, 0, U.TAU); ctx.stroke();
+          ctx.setLineDash([]);
+          const px = pr.x + Math.cos(el.w) * el.a * (1 - el.e), py = pr.y + Math.sin(el.w) * el.a * (1 - el.e);
+          ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(px, py, 3 / cam.z, 0, U.TAU); ctx.fill();
+        }
+        ctx.beginPath(); ctx.arc(best.x, best.y, best.r + 6 / cam.z, 0, U.TAU); ctx.stroke();
+        ctx.restore();
+        const bx = Math.min(env.pointer.x + 16, W - 200), by = Math.min(env.pointer.y + 16, H - 130);
+        U.panel(ctx, bx, by, 186, 116, el.bound ? 'Bound orbit' : 'Escape trajectory');
+        ctx.fillStyle = '#e7eeff'; ctx.font = '11.5px Consolas, monospace'; ctx.textBaseline = 'top';
+        const rows = [['mass', U.fmt(best.m, 0)], ['distance r', el.r.toFixed(1)], ['speed v', el.v.toFixed(1)], ['semi-major a', el.bound ? el.a.toFixed(1) : '—'], ['eccentricity e', el.e.toFixed(3)], ['period T', el.bound ? el.T.toFixed(2) + ' s' : '∞']];
+        rows.forEach(([k, v], i) => { ctx.fillStyle = '#9fb3e0'; ctx.fillText(k, bx + 10, by + 24 + i * 15); ctx.fillStyle = '#fff'; ctx.fillText(v, bx + 110, by + 24 + i * 15); });
+      },
+    };
+
     return {
+      ext,
+      probe() {
+        let minE = 9;
+        if (B.length > 1) { const pr = heaviest(); for (const b of B) if (b !== pr && b.user !== undefined && simT - b.user > 4) { const el = elements(b, pr); if (el.bound && el.e < minE) minE = el.e; } }
+        return { minE, merges: stats.merges, rev: stats.rev };
+      },
       step(dt) {
         const n = Math.min(24, Math.max(1, Math.ceil(dt * 240)));
         for (let i = 0; i < n; i++) substep(dt / n);
@@ -384,7 +432,7 @@ PhysLab.define({
       pointerup(p) {
         if (launch) {
           const [cx, cy] = toWorld(p.x, p.y);
-          body(launch.x, launch.y, (cx - launch.x) * 1.4, (cy - launch.y) * 1.4, S.newMass);
+          body(launch.x, launch.y, (cx - launch.x) * 1.4, (cy - launch.y) * 1.4, S.newMass).user = simT;
           acc();
           launch = null; pred = null;
         }

@@ -46,7 +46,8 @@ PhysLab.define({
     for (const k in TYPES) sprites[k] = U.glow(TYPES[k].col, 10);
 
     /* ---------- fields per scenario ---------- */
-    function field(x, y, o) {
+    function field(x, y, o) { field0(x, y, o); o.Bz += paintB(x, y); }
+    function field0(x, y, o) {
       const W = env.W, H = env.H;
       o.Ex = 0; o.Ey = 0; o.Bz = 0;
       switch (S.preset) {
@@ -150,7 +151,46 @@ PhysLab.define({
 
     preset('uniform');
 
+    /* ===== v3 extras ===== */
+    const PG = { cell: 24, cols: 0, rows: 0, g: null, tool: 'launch', n: 0 };
+    function pgSize() {
+      const c = Math.ceil(env.W / PG.cell), r = Math.ceil(env.H / PG.cell);
+      if (!PG.g || c !== PG.cols || r !== PG.rows) { PG.cols = c; PG.rows = r; PG.g = new Float32Array(c * r); PG.n = 0; }
+    }
+    function paintB(x, y) {
+      if (!PG.g || !PG.n) return 0;
+      const cx = (x / PG.cell) | 0, cy = (y / PG.cell) | 0;
+      return cx >= 0 && cy >= 0 && cx < PG.cols && cy < PG.rows ? PG.g[cy * PG.cols + cx] : 0;
+    }
+    function paintAt(p) {
+      pgSize();
+      const v = PG.tool === 'in' ? 3 : PG.tool === 'out' ? -3 : 0, cx = (p.x / PG.cell) | 0, cy = (p.y / PG.cell) | 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = cx + dx, y = cy + dy; if (x >= 0 && y >= 0 && x < PG.cols && y < PG.rows) PG.g[y * PG.cols + x] = v; }
+      PG.n = 0; for (let i = 0; i < PG.g.length; i++) if (PG.g[i]) PG.n++;
+    }
+    ui.section('Field brush — design your own magnets');
+    ui.tools([{ id: 'launch', label: '➶ Launch particles' }, { id: 'in', label: '⊗ Paint B into screen' }, { id: 'out', label: '⊙ Paint B out of screen' }, { id: 'erase', label: '⌫ Erase painted field' }], PG.tool, (v) => (PG.tool = v));
+    ui.buttons([{ label: 'Clear painted field', onClick: () => { if (PG.g) PG.g.fill(0); PG.n = 0; } }]);
+    ui.note('Painted regions add to the scenario\'s own field. Try painting a row of magnets to steer a beam around a corner — that is how a synchrotron works.');
+    const ext = {
+      draw(ctx) {
+        if (PG.g && PG.n) {
+          for (let cy = 0; cy < PG.rows; cy++) for (let cx = 0; cx < PG.cols; cx++) {
+            const v = PG.g[cy * PG.cols + cx];
+            if (!v) continue;
+            ctx.fillStyle = v > 0 ? 'rgba(167,139,250,0.16)' : 'rgba(45,212,191,0.16)';
+            ctx.fillRect(cx * PG.cell, cy * PG.cell, PG.cell, PG.cell);
+          }
+        }
+        if (PG.tool !== 'launch' && env.pointer.inside) { ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1; ctx.strokeRect(((env.pointer.x / PG.cell) | 0) * PG.cell - PG.cell, ((env.pointer.y / PG.cell) | 0) * PG.cell - PG.cell, PG.cell * 3, PG.cell * 3); }
+      },
+      pointerdown(p) { if (PG.tool === 'launch') return false; paintAt(p); return true; },
+      pointermove(p) { if (env.pointer.down && PG.tool !== 'launch') paintAt(p); },
+    };
+
     return {
+      ext,
+      probe() { let vmax = 0; for (const p of parts) vmax = Math.max(vmax, Math.hypot(p.vx, p.vy)); return { preset: S.preset, hits: hits.length, vmax, painted: PG.n }; },
       _debug: () => ({ parts, t, S }),
       step(dt) {
         const n = Math.min(48, Math.max(1, Math.ceil(dt * 480))), h = dt / n;

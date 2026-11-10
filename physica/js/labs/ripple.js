@@ -231,7 +231,48 @@ PhysLab.define({
 
     const toCell = (p) => [p.x / cs, p.y / cs];
 
+    /* ===== v3 extras ===== */
+    const X3 = { screen: true, scope: true, scr: null, tr: new U.Ring(220) };
+    ui.section('Instruments');
+    ui.toggle('Detector screen (intensity along right edge)', X3.screen, (v) => (X3.screen = v));
+    ui.toggle('Oscilloscope at cursor', X3.scope, (v) => (X3.scope = v));
+    const ext = {
+      step() {
+        if (!X3.scr || X3.scr.length !== gh) X3.scr = new Float32Array(gh);
+        const x = gw - B - 3;
+        for (let y = 0; y < gh; y++) { const v = u[y * gw + x]; X3.scr[y] += (v * v - X3.scr[y]) * 0.02; }
+        const cx = U.clamp(Math.round(env.pointer.x / cs), 1, gw - 2), cy = U.clamp(Math.round(env.pointer.y / cs), 1, gh - 2);
+        X3.tr.push(u[cy * gw + cx]);
+      },
+      draw(ctx) {
+        const W = env.W, H = env.H;
+        if (X3.screen && X3.scr) {
+          let mx = 1e-6;
+          for (let y = B; y < gh - B; y++) mx = Math.max(mx, X3.scr[y]);
+          const x0 = (gw - B - 3) * cs;
+          ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+          ctx.beginPath(); ctx.moveTo(x0, B * cs); ctx.lineTo(x0, (gh - B) * cs); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = 'rgba(253,224,71,0.22)'; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(x0, B * cs);
+          for (let y = B; y < gh - B; y++) ctx.lineTo(x0 - (X3.scr[y] / mx) * 80, y * cs);
+          ctx.lineTo(x0, (gh - B) * cs); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fde047'; ctx.font = '11px Segoe UI, sans-serif'; ctx.textBaseline = 'bottom';
+          ctx.fillText('detector: ⟨u²⟩', x0 - 86, B * cs - 4);
+        }
+        if (X3.scope && env.pointer.inside) {
+          const pw = 240, ph = 92, x = 12, y = 12;
+          U.panel(ctx, x, y, pw, ph, 'Oscilloscope at cursor');
+          ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.beginPath(); ctx.moveTo(x + 10, y + 56); ctx.lineTo(x + pw - 10, y + 56); ctx.stroke();
+          ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 1.6;
+          X3.tr.draw(ctx, x + 10, y + 26, pw - 20, 60, -1.3 * S.amp, 1.3 * S.amp);
+          ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(env.pointer.x, env.pointer.y, 5, 0, U.TAU); ctx.stroke();
+        }
+      },
+    };
+
     return {
+      ext,
+      probe() { return { preset: S.preset, mach: S.mach, view: S.view, steps, nsrc: sources.filter((s) => s.kind === 'pt').length }; },
       step(dt) {
         const n = Math.max(1, Math.round(S.spf * Math.min(4, dt * 60)));
         for (let i = 0; i < n; i++) simStep();

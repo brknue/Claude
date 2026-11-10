@@ -128,7 +128,57 @@ PhysLab.define({
     }
     const toSim = (p) => { const [cx, cy] = cxy(); return [p.x - cx, p.y - cy]; };
 
+    /* ===== v3 extras ===== */
+    const LV = { on: false, c: document.createElement('canvas'), key: '', gx: 150, gy: -60, drag: false };
+    function renderLens() {
+      const sc = env.q >= 1 ? 3 : 4, w = Math.ceil(env.W / sc), h = Math.ceil(env.H / sc), R = rs();
+      LV.c.width = w; LV.c.height = h;
+      const g = LV.c.getContext('2d'), img = g.createImageData(w, h), d = img.data;
+      const bc = 2.598 * R, tE2 = (3.4 * R) ** 2, cx = w / 2, cy = h / 2, gx = LV.gx, gy = LV.gy;
+      const fr = (v) => v - Math.floor(v);
+      let o = 0;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++, o += 4) {
+        const dx = (x - cx) * sc, dy = (y - cy) * sc, b2 = dx * dx + dy * dy, b = Math.sqrt(b2);
+        d[o + 3] = 255;
+        if (b < bc) { d[o] = d[o + 1] = d[o + 2] = 0; continue; }
+        const f = 1 - tE2 / b2, sx = dx * f, sy = dy * f; // lens equation: source position seen at this pixel
+        const qx = sx - gx, qy = sy - gy, r2 = qx * qx + qy * qy, rr = Math.sqrt(r2);
+        const core = Math.exp(-r2 / 1500), arm = Math.exp(-rr / 85) * Math.pow(0.5 + 0.5 * Math.cos(2 * Math.atan2(qy, qx) - rr * 0.075), 3);
+        let r = 255 * core + 110 * arm, gg = 215 * core + 130 * arm, bl = 160 * core + 255 * arm;
+        const cs2 = 24, ix = Math.floor(sx / cs2), iy = Math.floor(sy / cs2), hs = fr(Math.sin(ix * 127.1 + iy * 311.7) * 43758.5453);
+        if (hs > 0.8) { const px = (ix + 0.2 + 0.6 * fr(hs * 17.3)) * cs2, py = (iy + 0.2 + 0.6 * fr(hs * 37.7)) * cs2, s = 300 * Math.exp(-((sx - px) ** 2 + (sy - py) ** 2) / (2 + (hs - 0.8) * 40)); r += s; gg += s; bl += s * 1.1; }
+        const ring = 150 * Math.exp(-(((b - bc) / (0.07 * R)) ** 2));
+        r += ring; gg += ring * 0.75; bl += ring * 0.45;
+        d[o] = r > 255 ? 255 : r; d[o + 1] = gg > 255 ? 255 : gg; d[o + 2] = bl > 255 ? 255 : bl;
+      }
+      g.putImageData(img, 0, 0);
+    }
+    ui.section('Lensing camera');
+    ui.toggle('📷 What a camera would see (gravitational lensing)', LV.on, (v) => (LV.on = v));
+    ui.note('Shows a background galaxy and stars as distorted by the black hole. <b>Drag the galaxy</b>: as it slides behind the hole it stretches into arcs and finally a complete <b>Einstein ring</b>.');
+    const ext = {
+      draw(ctx) {
+        if (!LV.on) return;
+        const W = env.W, H = env.H, key = [rs(), W, H, LV.gx | 0, LV.gy | 0].join(',');
+        if (key !== LV.key) { LV.key = key; renderLens(); }
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(LV.c, 0, 0, W, H);
+        ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '12px Segoe UI, sans-serif'; ctx.textBaseline = 'top';
+        ctx.fillText('Lensing camera — drag to move the background galaxy behind the black hole', 14, 12);
+        const d = Math.hypot(LV.gx, LV.gy);
+        if (d < rs() * 0.6) { ctx.fillStyle = '#fde047'; ctx.font = '600 14px Segoe UI, sans-serif'; ctx.fillText('✦ Einstein ring!', 14, 32); }
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(W / 2 + LV.gx, H / 2 + LV.gy, 12, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '10px Segoe UI, sans-serif'; ctx.fillText('true position', W / 2 + LV.gx + 16, H / 2 + LV.gy - 5);
+      },
+      pointerdown(p) { if (!LV.on) return false; LV.drag = true; LV.gx = p.x - env.W / 2; LV.gy = p.y - env.H / 2; return true; },
+      pointermove(p) { if (LV.on && LV.drag && env.pointer.down) { LV.gx = p.x - env.W / 2; LV.gy = p.y - env.H / 2; } },
+      pointerup() { LV.drag = false; },
+    };
+
     return {
+      ext,
+      probe() { return { captured, escaped, longOrbit: bodies.some((b) => b.alive && b.tr.length >= 1400), ring: LV.on && Math.hypot(LV.gx, LV.gy) < rs() * 0.6 }; },
       step(dt) {
         simT += dt;
         const R = rs(), far = Math.max(env.W, env.H) * 0.75, dist = C * dt;

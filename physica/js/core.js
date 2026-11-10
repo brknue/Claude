@@ -336,6 +336,9 @@
     env.q = computeQ();
     env.ui = UIBuilder(c);
     app.lab = app.def.create(env) || {};
+    app.extCap = false;
+    resetData();
+    renderMissions();
     renderReadouts();
   }
   function enterLab(id) {
@@ -372,6 +375,7 @@
     document.title = 'Physica — Virtual Physics Laboratory';
     resizeMenuBg();
     sizeThumbs();
+    updateStars();
   }
   function route() {
     const m = location.hash.match(/^#\/lab\/([\w-]+)/);
@@ -395,14 +399,117 @@
     toast('Lab reset');
   }
 
+  /* ---------------- Live data: readouts, click-to-graph, CSV log ---------------- */
+  const data = { t: [], cols: {}, pins: [], t0: 0, last: [] };
+  function resetData() { data.t = []; data.cols = {}; data.pins = []; data.last = []; data.t0 = performance.now(); const c = $('#charts'); if (c) c.innerHTML = ''; }
   function renderReadouts() {
     const lab = app.lab;
     if (!lab || !lab.readouts) return;
     const r = lab.readouts();
     if (!r) return;
+    data.last = r;
+    if (!app.paused) {
+      data.t.push((performance.now() - data.t0) / 1000);
+      const L = data.t.length;
+      for (const [k, v] of r) {
+        const n = parseFloat(v);
+        let col = data.cols[k];
+        if (!col) { col = data.cols[k] = []; while (col.length < L - 1) col.push(NaN); }
+        col.push(isFinite(n) ? n : NaN);
+      }
+      for (const k in data.cols) { const c = data.cols[k]; while (c.length < L) c.push(NaN); }
+      if (L > 1600) { data.t.shift(); for (const k in data.cols) data.cols[k].shift(); }
+    }
     let h = '';
-    for (const [k, v] of r) h += `<div class="ro"><span>${k}</span><b>${v}</b></div>`;
+    r.forEach(([k, v], i) => { h += `<div class="ro${data.pins.includes(k) ? ' pin' : ''}" data-i="${i}" title="Click to graph this value over time"><span>${k}</span><b>${v}</b></div>`; });
     $('#readouts').innerHTML = h;
+    drawCharts();
+  }
+  function togglePin(k) {
+    const i = data.pins.indexOf(k);
+    if (i >= 0) data.pins.splice(i, 1); else { data.pins.push(k); if (data.pins.length > 3) data.pins.shift(); }
+    const box = $('#charts');
+    box.innerHTML = '';
+    data.pins.forEach(() => { const c = el('canvas', 'chart'); c.width = 600; c.height = 150; box.appendChild(c); });
+    drawCharts();
+  }
+  function drawCharts() {
+    const cs = document.querySelectorAll('#charts canvas');
+    data.pins.forEach((k, idx) => {
+      const c = cs[idx]; if (!c) return;
+      const g = c.getContext('2d'), W = c.width, H = c.height, col = data.cols[k] || [];
+      g.fillStyle = '#0b1430'; g.fillRect(0, 0, W, H);
+      const n = Math.min(col.length, 400), st = col.length - n;
+      let lo = Infinity, hi = -Infinity;
+      for (let i = st; i < col.length; i++) { const v = col[i]; if (v === v) { if (v < lo) lo = v; if (v > hi) hi = v; } }
+      g.font = '22px Consolas, monospace'; g.textBaseline = 'top'; g.textAlign = 'left';
+      g.fillStyle = '#9fb3e0'; g.fillText(k, 12, 8);
+      if (lo === Infinity) { g.fillStyle = '#6b7aa5'; g.fillText('no numeric data yet', 12, 60); return; }
+      const pad = (hi - lo) * 0.1 || Math.abs(hi) * 0.1 || 1;
+      lo -= pad; hi += pad;
+      g.strokeStyle = (getComputedStyle(document.documentElement).getPropertyValue('--acc') || '#38bdf8').trim(); g.lineWidth = 3; g.beginPath();
+      let pen = false;
+      for (let i = 0; i < n; i++) {
+        const v = col[st + i]; if (v !== v) { pen = false; continue; }
+        const x = 10 + (i / Math.max(1, n - 1)) * (W - 20), y = H - 12 - ((v - lo) / (hi - lo)) * (H - 52);
+        if (pen) g.lineTo(x, y); else { g.moveTo(x, y); pen = true; }
+      }
+      g.stroke();
+      g.fillStyle = '#6b7aa5'; g.textAlign = 'right';
+      g.fillText(U.fmt(hi - pad, 3), W - 10, 8); g.textBaseline = 'bottom'; g.fillText(U.fmt(lo + pad, 3), W - 10, H - 6);
+      g.textAlign = 'left';
+    });
+  }
+  function exportCSV() {
+    const keys = Object.keys(data.cols);
+    if (!data.t.length) { toast('No data logged yet'); return; }
+    const q = (s) => '"' + String(s).replace(/"/g, '""') + '"';
+    let out = ['time_s', ...keys].map(q).join(',') + '\n';
+    for (let i = 0; i < data.t.length; i++) out += data.t[i].toFixed(2) + ',' + keys.map((k) => { const v = data.cols[k][i]; return v === v ? v : ''; }).join(',') + '\n';
+    const a = el('a'); a.href = URL.createObjectURL(new Blob([out], { type: 'text/csv' })); a.download = `physica-${app.def.id}-data.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast(`Exported ${data.t.length} samples of ${keys.length} quantities`);
+  }
+
+  /* ---------------- Missions (per-lab challenges, auto-checked) ---------------- */
+  const mKey = (id) => 'physica-missions-' + id;
+  function mLoad(id) { try { return JSON.parse(localStorage.getItem(mKey(id)) || '[]'); } catch (e) { return []; } }
+  const missionsOf = (id) => (window.PhysLab.missions && window.PhysLab.missions[id]) || [];
+  function renderMissions() {
+    const box = $('#tab-missions');
+    if (!app.def || !box) return;
+    const ms = missionsOf(app.def.id), done = mLoad(app.def.id), nd = ms.filter((m, i) => done[i]).length;
+    box.innerHTML = `<h3>Missions <span class="mcount">${nd} / ${ms.length} ★</span></h3><p class="note">Complete these experiments — the lab checks them automatically and saves your stars.</p>` +
+      ms.map((m, i) => `<div class="mission${done[i] ? ' done' : ''}"><span class="star">${done[i] ? '★' : '☆'}</span><div><b>${m.t}</b><small>${m.h || ''}</small></div></div>`).join('') +
+      (nd ? '<div class="btns"><button class="btn" id="m-reset">Reset this lab\'s stars</button></div>' : '');
+    const rb = $('#m-reset');
+    if (rb) rb.onclick = () => { localStorage.removeItem(mKey(app.def.id)); renderMissions(); };
+    const tab = document.querySelector('.ptab[data-tab="missions"]');
+    if (tab) tab.textContent = `Missions ${nd}/${ms.length}`;
+  }
+  function checkMissions() {
+    const lab = app.lab;
+    if (!lab || !lab.probe || !app.def) return;
+    const ms = missionsOf(app.def.id);
+    if (!ms.length) return;
+    const done = mLoad(app.def.id);
+    if (ms.every((m, i) => done[i])) return;
+    let p;
+    try { p = lab.probe(); } catch (e) { return; }
+    let ch = false;
+    ms.forEach((m, i) => {
+      if (done[i]) return;
+      let ok = false;
+      try { ok = !!m.ok(p); } catch (e) { ok = false; }
+      if (ok) { done[i] = 1; ch = true; toast('★ Mission complete: ' + m.t, 3800); }
+    });
+    if (ch) { for (let i = 0; i < ms.length; i++) done[i] = done[i] ? 1 : 0; localStorage.setItem(mKey(app.def.id), JSON.stringify(done)); renderMissions(); }
+  }
+  function updateStars() {
+    document.querySelectorAll('.stars').forEach((e) => {
+      const ms = missionsOf(e.dataset.id), done = mLoad(e.dataset.id), nd = ms.filter((m, i) => done[i]).length;
+      e.textContent = ms.length ? '★'.repeat(nd) + '☆'.repeat(ms.length - nd) : '';
+    });
   }
 
   /* ---------------- Main loop ---------------- */
@@ -430,10 +537,12 @@
     const lab = app.lab;
     try {
       if (!app.paused && lab.step) lab.step(rdt * app.speed, rdt);
+      if (!app.paused && lab.ext && lab.ext.step) lab.ext.step(rdt * app.speed, rdt);
       ctx.setTransform(app.dpr, 0, 0, app.dpr, 0, 0);
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
       if (lab.draw) lab.draw(ctx, rdt);
+      if (lab.ext && lab.ext.draw) { ctx.setTransform(app.dpr, 0, 0, app.dpr, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.setLineDash([]); ctx.textAlign = 'left'; lab.ext.draw(ctx, rdt); }
     } catch (err) {
       console.error(err);
       app.paused = true;
@@ -443,6 +552,7 @@
     if (now - app.lastReadout > 220) {
       app.lastReadout = now;
       renderReadouts();
+      checkMissions();
       $('#fps').textContent = `${Math.round(app.fpsEma)} fps · q${env.q} · ${app.dpr.toFixed(2)}x`;
     }
   }
@@ -502,7 +612,7 @@
         <div class="cbody"><div class="top"><span class="n">LAB ${String(i + 1).padStart(2, '0')} · ${catOf(l)}</span><div class="ic">${l.icon || ''}</div></div>
         <h3>${l.title}</h3><p>${l.subtitle}</p>
         <div class="tags">${(l.tags || []).map((t) => `<span class="tag">${t}</span>`).join('')}</div>
-        <div class="enter">Enter lab <span>&#8594;</span></div></div>`;
+        <div class="enter">Enter lab <span>&#8594;</span><b class="stars" data-id="${l.id}"></b></div></div>`;
       grid.appendChild(a);
       const tc = a.querySelector('.thumb');
       const rec = { a, lab: l, cv: tc, g: tc.getContext('2d'), vis: !io, hover: false, drawn: false, w: 0, h: 0 };
@@ -521,6 +631,7 @@
       chips.appendChild(b);
     });
     $('#lab-count').textContent = Labs.length;
+    updateStars();
     sizeThumbs();
   }
   function applyFilter() {
@@ -581,6 +692,8 @@
     const sw = $('#lab-switch');
     Labs.forEach((l, i) => { const o = el('option', '', String(i + 1).padStart(2, '0') + ' · ' + l.title); o.value = l.id; sw.appendChild(o); });
     sw.onchange = () => { location.hash = '#/lab/' + sw.value; sw.blur(); };
+    $('#btn-csv').onclick = (e) => { e.currentTarget.blur(); exportCSV(); };
+    $('#readouts').addEventListener('click', (e) => { const t = e.target.closest('.ro'); if (t && data.last[+t.dataset.i]) togglePin(data.last[+t.dataset.i][0]); });
     $('#btn-shot').onclick = (e) => {
       e.currentTarget.blur();
       if (!app.def) return;
@@ -601,19 +714,25 @@
       try { cv.setPointerCapture(e.pointerId); } catch (_) {}
       const p = ptr(e);
       Object.assign(env.pointer, { x: p.x, y: p.y, down: true, button: e.button, inside: true });
-      if (app.lab && app.lab.pointerdown) app.lab.pointerdown(p, e);
+      const X = app.lab && app.lab.ext;
+      if (X && X.pointerdown && X.pointerdown(p, e) === true) app.extCap = true;
+      else if (app.lab && app.lab.pointerdown) app.lab.pointerdown(p, e);
       e.preventDefault();
     });
     cv.addEventListener('pointermove', (e) => {
       const p = ptr(e);
       env.pointer.x = p.x; env.pointer.y = p.y; env.pointer.inside = true;
-      if (app.lab && app.lab.pointermove) app.lab.pointermove(p, e);
+      const X = app.lab && app.lab.ext;
+      if (X && X.pointermove) X.pointermove(p, e);
+      if (!app.extCap && app.lab && app.lab.pointermove) app.lab.pointermove(p, e);
     });
     const up = (e) => {
       if (!env.pointer.down) return;
       env.pointer.down = false;
       const p = ptr(e);
-      if (app.lab && app.lab.pointerup) app.lab.pointerup(p, e);
+      const X = app.lab && app.lab.ext;
+      if (app.extCap) { app.extCap = false; if (X && X.pointerup) X.pointerup(p, e); }
+      else if (app.lab && app.lab.pointerup) app.lab.pointerup(p, e);
     };
     cv.addEventListener('pointerup', up);
     cv.addEventListener('pointercancel', up);
@@ -631,6 +750,7 @@
       e.currentTarget.blur();
       if (!app.paused) { app.paused = true; updatePause(); }
       if (app.lab && app.lab.step) app.lab.step((1 / 60) * app.speed, 1 / 60);
+      if (app.lab && app.lab.ext && app.lab.ext.step) app.lab.ext.step((1 / 60) * app.speed, 1 / 60);
     };
     $('#btn-reset').onclick = (e) => { e.currentTarget.blur(); resetLab(); };
     $('#speed').onchange = (e) => { app.speed = +e.target.value; e.target.blur(); };
@@ -649,8 +769,7 @@
     document.querySelectorAll('.ptab').forEach((t) => {
       t.onclick = () => {
         document.querySelectorAll('.ptab').forEach((x) => x.classList.toggle('active', x === t));
-        $('#tab-controls').classList.toggle('hidden', t.dataset.tab !== 'controls');
-        $('#tab-theory').classList.toggle('hidden', t.dataset.tab !== 'theory');
+        for (const n of ['controls', 'missions', 'theory']) $('#tab-' + n).classList.toggle('hidden', t.dataset.tab !== n);
       };
     });
 
@@ -665,6 +784,7 @@
       if (e.key === '[') { go(-1); return; }
       if (e.key === ']') { go(1); return; }
       if (app.lab && app.lab.key) app.lab.key(e);
+      if (app.lab && app.lab.ext && app.lab.ext.key) app.lab.ext.key(e);
     });
 
     window.addEventListener('hashchange', route);

@@ -57,6 +57,10 @@ PhysLab.define({
       const rx = vx - S.wind, ry = vy, vr = Math.hypot(rx, ry);
       const k = (0.5 * S.rho * S.cd * area()) / S.m;
       o[0] = -k * vr * rx; o[1] = -S.g - k * vr * ry;
+      if (S.spin && vr > 0.01) { // Magnus force from spin (backspin lifts the ball)
+        const cl = Math.max(-0.45, Math.min(0.45, (S.spin * 6.2832 * S.d * 0.5) / vr)), km = (0.5 * S.rho * area() * cl * vr) / S.m;
+        o[0] -= km * ry; o[1] += km * rx;
+      }
     }
     const a1 = [0, 0], a2 = [0, 0], a3 = [0, 0], a4 = [0, 0];
     function rk4(s, h) {
@@ -142,7 +146,51 @@ PhysLab.define({
 
     const origin = () => ({ x: 70, y: env.H - 56 });
 
+    /* ===== v3 extras ===== */
+    S.spin = 0;
+    const TG = { x: 0, w: 0, hits: 0, spinHits: 0, flash: 0, on: true, key: '' };
+    function newTarget() {
+      const R = Math.max(5, simulateRange(40));
+      TG.x = U.rand(0.35, 0.92) * R; TG.w = Math.max(1.2, R * 0.07);
+      TG.key = [S.v0, S.planet, S.proj, S.h0].join('|');
+    }
+    ui.section('Spin & target practice');
+    ui.slider('Spin (+ backspin / − topspin)', { min: -60, max: 60, step: 1, value: 0, fmt: (v) => v + ' rev/s', onInput: (v) => (S.spin = v) });
+    ui.toggle('Target on the range', TG.on, (v) => (TG.on = v));
+    ui.buttons([{ label: 'New target', onClick: newTarget }]);
+    ui.note('Backspin creates lift (the <b>Magnus effect</b>) — it is why golf balls fly so far and how footballers bend free kicks. It needs air: try it on the Moon.');
+    const ext = {
+      step(dt) {
+        if (!TG.x || TG.key !== [S.v0, S.planet, S.proj, S.h0].join('|')) newTarget();
+        TG.flash = Math.max(0, TG.flash - dt);
+        for (const s of shots) {
+          if (s.live || s.judged) continue;
+          s.judged = true;
+          if (TG.on && Math.abs(s.x - TG.x) <= TG.w / 2) {
+            TG.hits++; if (Math.abs(S.spin) >= 15) TG.spinHits++;
+            TG.flash = 1.2;
+            env.toast('🎯 Hit! ' + TG.hits + ' target' + (TG.hits > 1 ? 's' : '') + ' down');
+            newTarget();
+          }
+        }
+      },
+      draw(ctx) {
+        if (!TG.on || !TG.x) return;
+        const O = origin(), s = view.s, x = O.x + TG.x * s, w = Math.max(16, TG.w * s);
+        for (let k = 0; k < 5; k++) { ctx.fillStyle = k % 2 ? '#f8fafc' : '#ef4444'; ctx.fillRect(x - w / 2 + (k * w) / 5, O.y - 5, w / 5 + 0.5, 9); }
+        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, O.y - 5); ctx.lineTo(x, O.y - 46); ctx.stroke();
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(x, O.y - 46); ctx.lineTo(x + 20, O.y - 39); ctx.lineTo(x, O.y - 32); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = '600 11px Segoe UI, sans-serif'; ctx.textBaseline = 'bottom'; ctx.textAlign = 'center';
+        ctx.fillText('target ' + TG.x.toFixed(1) + ' m', x, O.y - 50); ctx.textAlign = 'left';
+        ctx.fillStyle = '#fde047'; ctx.font = '600 13px Segoe UI, sans-serif'; ctx.textBaseline = 'top';
+        ctx.fillText('🎯 ' + TG.hits + ' hit' + (TG.hits === 1 ? '' : 's'), 14, 12);
+        if (TG.flash > 0) { ctx.strokeStyle = `rgba(253,224,71,${TG.flash})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, O.y, (1.3 - TG.flash) * 80, Math.PI, 0); ctx.stroke(); }
+      },
+    };
+
     return {
+      ext,
+      probe() { return { hits: TG.hits, spinHits: TG.spinHits, planet: S.planet }; },
       step(dt) {
         const h = 1 / 400;
         for (const s of shots) {

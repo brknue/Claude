@@ -108,7 +108,7 @@ PhysLab.define({
       { label: 'Silence', onClick: () => setShape(() => 0) },
     ]);
     ui.section('The string (sets the pitch)');
-    ui.slider('Length L', { min: 0.2, max: 1.5, step: 0.005, value: S.L, fmt: (v) => (v * 100).toFixed(1) + ' cm', onInput: (v) => (S.L = v) });
+    const lSl = ui.slider('Length L', { min: 0.2, max: 1.5, step: 0.005, value: S.L, fmt: (v) => (v * 100).toFixed(1) + ' cm', onInput: (v) => (S.L = v) });
     ui.slider('Tension T', { min: 10, max: 300, step: 1, value: S.T, fmt: (v) => v + ' N', onInput: (v) => (S.T = v) });
     ui.slider('Mass per metre μ', { min: 0.3, max: 12, value: S.mu, log: true, fmt: (v) => v.toFixed(2) + ' g/m', onInput: (v) => (S.mu = v) });
     ui.select('Right end', [['fixed', 'Fixed (guitar string)'], ['free', 'Free (odd harmonics)']], S.bc, (v) => { S.bc = v; setShape(() => 0); });
@@ -125,7 +125,45 @@ PhysLab.define({
 
     const geo = () => { const W = env.W, H = env.H; return { x0: 50, x1: W - 50, cy: H * 0.36, A: Math.min(H * 0.27, 220), sy: H * 0.68, sh: H * 0.24 }; };
 
+    /* ===== v3 extras ===== */
+    const NOTES = [['C4', 261.63, 'A'], ['D4', 293.66, 'S'], ['E4', 329.63, 'D'], ['F4', 349.23, 'F'], ['G4', 392.0, 'G'], ['A4', 440.0, 'J'], ['B4', 493.88, 'K'], ['C5', 523.25, 'L']];
+    const X3 = { notes: 0, lit: -1, litT: 0, scope: new U.Ring(260), warned: false };
+    function play(i) {
+      const f = NOTES[i][1], c = Math.sqrt(S.T / (S.mu / 1000));
+      S.L = U.clamp(c / ((S.bc === 'fixed' ? 2 : 4) * f), 0.2, 1.5); lSl.set(S.L);
+      pluckShape(0.18, 0.5);
+      X3.notes++; X3.lit = i; X3.litT = 0.35;
+      if (!S.sound && !X3.warned) { X3.warned = true; env.toast('Turn on “Sound” in the panel to hear the notes'); }
+    }
+    const keyRect = (i) => [env.W - 8 * 40 - 14 + i * 40, 12, 36, 62];
+    ui.section('Keyboard');
+    ui.note('Press <b>A S D F G J K L</b> (or click the keys on screen) to play a C-major scale. Each key "frets" the string — it shortens L so the fundamental lands on that note — and plucks it.');
+    const ext = {
+      step(dt) { X3.litT -= dt; X3.scope.push(y[Math.round(N * 0.2)]); },
+      draw(ctx) {
+        ctx.font = '600 12px Segoe UI, sans-serif'; ctx.textAlign = 'center';
+        NOTES.forEach((n, i) => {
+          const [x, yy, w, h] = keyRect(i), on = X3.lit === i && X3.litT > 0;
+          U.rrect(ctx, x, yy, w, h, 6); ctx.fillStyle = on ? '#e879f9' : '#f1f5f9'; ctx.fill();
+          ctx.fillStyle = on ? '#fff' : '#334155'; ctx.textBaseline = 'bottom'; ctx.fillText(n[0], x + w / 2, yy + h - 6);
+          ctx.fillStyle = on ? '#fff' : '#94a3b8'; ctx.textBaseline = 'top'; ctx.fillText(n[2], x + w / 2, yy + 6);
+        });
+        ctx.textAlign = 'left';
+        const [x0, y0] = keyRect(0), pw = 8 * 40 - 4;
+        U.panel(ctx, x0, y0 + 72, pw, 78, 'Pickup signal (at 20 % of the string)');
+        ctx.strokeStyle = '#67e8f9'; ctx.lineWidth = 1.5;
+        X3.scope.draw(ctx, x0 + 8, y0 + 96, pw - 16, 46, -0.9, 0.9);
+      },
+      pointerdown(p) {
+        for (let i = 0; i < 8; i++) { const [x, yy, w, h] = keyRect(i); if (p.x >= x && p.x <= x + w && p.y >= yy && p.y <= yy + h) { play(i); return true; } }
+        return false;
+      },
+      key(e) { if (e.repeat || e.ctrlKey || e.metaKey) return; const i = 'asdfgjkl'.indexOf(e.key.toLowerCase()); if (i >= 0) play(i); },
+    };
+
     return {
+      ext,
+      probe() { let dom = 0; for (let n = 1; n < NM; n++) if (amp[n] > amp[dom]) dom = n; return { dom: ratio(dom + 1), drive: S.drive, peak: Math.max(...peak), notes: X3.notes }; },
       step(dt) {
         accum += (Math.min(dt, 0.05) * N * cVis()) / CO;
         let n = 0;

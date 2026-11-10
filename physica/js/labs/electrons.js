@@ -325,7 +325,78 @@ PhysLab.define({
       return path;
     }
 
+    /* ===== v3 extras ===== */
+    const X3 = { fired: 0, gunT: 0, probe: false, energy: true, KE: new U.Ring(240), PE: new U.Ring(240), eT: 0 };
+    function rutherford() {
+      preset('empty');
+      S.walls = 'open'; wallsSel.set('open'); S.damp = 0; dampSl.set(0); S.trails = true;
+      const n = add(env.W * 0.62, env.H / 2, 'F+');
+      n.q = 14; n.nuc = true;
+      env.toast('Alpha particles are fired at a heavy nucleus — most pass, a few bounce straight back');
+    }
+    ui.section('New experiments & instruments');
+    ui.buttons([{ label: '⚛ Rutherford scattering', primary: true, onClick: rutherford }]);
+    ui.toggle('Field probe at cursor (E and V)', X3.probe, (v) => (X3.probe = v));
+    ui.toggle('Energy monitor', X3.energy, (v) => (X3.energy = v));
+    const ext = {
+      step(dt) {
+        const nuc = P.find((p) => p.nuc);
+        if (nuc) {
+          X3.gunT -= dt;
+          while (X3.gunT <= 0) {
+            X3.gunT += 0.1;
+            const a = add(-10, nuc.y + U.rand(-1, 1) * Math.min(190, env.H * 0.42), 'p', 430, 0);
+            if (a) { a.q = 2; a.m = 2; X3.fired++; }
+          }
+        }
+        X3.eT += dt;
+        if (X3.energy && X3.eT > 0.1 && P.length <= 320) {
+          X3.eT = 0;
+          let ke = 0, pe = 0;
+          for (let i = 0; i < P.length; i++) {
+            const a = P[i];
+            if (!a.fixed) ke += 0.5 * a.m * (a.vx * a.vx + a.vy * a.vy);
+            for (let j = i + 1; j < P.length; j++) { const b = P[j], dx = a.x - b.x, dy = a.y - b.y; pe += (S.k * a.q * b.q) / Math.sqrt(dx * dx + dy * dy + SOFT2); }
+          }
+          X3.KE.push(ke / 1e6); X3.PE.push(pe / 1e6);
+        }
+      },
+      draw(ctx) {
+        const W = env.W, H = env.H;
+        if (P.some((p) => p.nuc)) {
+          ctx.fillStyle = '#fbbf24'; ctx.fillRect(0, H / 2 - Math.min(190, H * 0.42), 5, 2 * Math.min(190, H * 0.42));
+          ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.font = '12px Segoe UI, sans-serif'; ctx.textBaseline = 'top';
+          ctx.fillText('α source →   ' + X3.fired + ' fired', 12, 12);
+        }
+        if (X3.probe && env.pointer.inside) {
+          const px = env.pointer.x, py = env.pointer.y, [ex, ey, V] = fieldAt(px, py), m = Math.hypot(ex, ey);
+          if (m > 0) { const L = Math.min(90, 14 + Math.log(1 + m / 10) * 12); ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2.5; ctx.beginPath(); U.arrow(ctx, px, py, px + (ex / m) * L, py + (ey / m) * L, 9); ctx.stroke(); }
+          const bx = Math.min(px + 14, W - 170), by = Math.min(py + 14, H - 60);
+          U.panel(ctx, bx, by, 156, 46);
+          ctx.fillStyle = '#fde047'; ctx.font = '11px Consolas, monospace'; ctx.textBaseline = 'top';
+          ctx.fillText('|E| = ' + U.fmt(m, 1), bx + 9, by + 8); ctx.fillText('V   = ' + U.fmt(V, 0), bx + 9, by + 24);
+        }
+        if (X3.energy && X3.KE.n > 2 && P.length <= 320) {
+          const pw = 230, ph = 112, x = W - pw - 12, y = H - ph - 26;
+          U.panel(ctx, x, y, pw, ph, 'Energy (×10⁶)');
+          const tot = new U.Ring(240);
+          for (let k = 0; k < X3.KE.n; k++) tot.push(X3.KE.a[(X3.KE.start + k) % 240] + X3.PE.a[(X3.PE.start + k) % 240]);
+          let lo = Infinity, hi = -Infinity;
+          for (const r of [X3.KE, X3.PE, tot]) { const [a, b] = r.range(); lo = Math.min(lo, a); hi = Math.max(hi, b); }
+          const pad = (hi - lo) * 0.08 + 1e-6;
+          ctx.lineWidth = 1.5;
+          [[X3.KE, '#fb923c'], [X3.PE, '#60a5fa'], [tot, '#ffffff']].forEach(([r, c]) => { ctx.strokeStyle = c; r.draw(ctx, x + 10, y + 26, pw - 20, ph - 48, lo - pad, hi + pad); });
+          ctx.font = '10px Segoe UI, sans-serif'; ctx.textBaseline = 'bottom';
+          ctx.fillStyle = '#fb923c'; ctx.fillText('kinetic', x + 10, y + ph - 5);
+          ctx.fillStyle = '#60a5fa'; ctx.fillText('potential', x + 60, y + ph - 5);
+          ctx.fillStyle = '#fff'; ctx.fillText('total', x + 122, y + ph - 5);
+        }
+      },
+    };
+
     return {
+      ext,
+      probe() { let ne = 0, np = 0; for (const p of P) { if (p.t === 'e') ne++; else if (p.t === 'p') np++; } return { ne, np, B: S.B, fired: X3.fired }; },
       step(dt) {
         if (spray && (S.tool === 'electron' || S.tool === 'proton')) {
           sprayT -= dt;

@@ -48,8 +48,10 @@ PhysLab.define({
       mirror: { h: 90 },
       cmirror: { R: 300, h: 100 },
       screen: { h: 120 },
+      grating: { h: 100, d: 1.6 },
+      splitter: { h: 80 },
     };
-    const NAMES = { laser: 'Laser', white: 'White beam', point: 'Point source', convex: 'Convex lens', concave: 'Concave lens', block: 'Glass block', prism: 'Prism', drop: 'Water drop', mirror: 'Flat mirror', cmirror: 'Concave mirror', screen: 'Screen' };
+    const NAMES = { laser: 'Laser', white: 'White beam', point: 'Point source', convex: 'Convex lens', concave: 'Concave lens', block: 'Glass block', prism: 'Prism', drop: 'Water drop', mirror: 'Flat mirror', cmirror: 'Concave mirror', screen: 'Screen', grating: 'Diffraction grating', splitter: 'Beam splitter' };
     const isSrc = (e) => e.type === 'laser' || e.type === 'white' || e.type === 'point';
     let els = [], sel = null, dirty = true, dragMode = null, dragOff = [0, 0];
     let layer = document.createElement('canvas'), lctx = layer.getContext('2d');
@@ -97,6 +99,8 @@ PhysLab.define({
         case 'mirror': pts = [[0, -e.h], [0, e.h]]; arcs = [null]; kind = 1; closed = false; break;
         case 'cmirror': { const R = Math.max(e.R, e.h + 2); pts = []; arcs = []; arcPts(R, R, -e.h, e.h, 48, -1); kind = 1; closed = false; break; }
         case 'screen': pts = [[0, -e.h], [0, e.h]]; arcs = [null]; kind = 2; closed = false; break;
+        case 'grating': pts = [[0, -e.h], [0, e.h]]; arcs = [null]; kind = 3; closed = false; break;
+        case 'splitter': pts = [[0, -e.h], [0, e.h]]; arcs = [null]; kind = 4; closed = false; break;
       }
       const wp = pts.map((p) => Wd(p[0], p[1]));
       e.wpts = wp; e.closed = closed;
@@ -151,6 +155,16 @@ PhysLab.define({
         let nx = seg.nx, ny = seg.ny;
         if (seg.arc) { nx = (hx - seg.cx) * seg.sg; ny = (hy - seg.cy) * seg.sg; const l = Math.hypot(nx, ny) || 1; nx /= l; ny /= l; }
         if (seg.kind === 2) { hitPts.push(hx, hy, wl, I * aScale); break; }
+        if (seg.kind === 3) { // diffraction grating: sin(theta_m) = sin(theta_i) + m*lambda/d, orders m = -1, 0, +1
+          const sgn = dx * nx + dy * ny < 0 ? -1 : 1, tx = -ny, ty = nx, st = dx * tx + dy * ty;
+          if (depth < 3) for (const m of [-1, 1]) { const s2 = st + (m * wl) / (seg.el.d * 1000); if (Math.abs(s2) < 0.999) { const c2 = Math.sqrt(1 - s2 * s2) * sgn; trace(hx, hy, tx * s2 + nx * c2, ty * s2 + ny * c2, wl, I * 0.32, depth + 1, aScale); } }
+          I *= 0.36; ox = hx; oy = hy; continue;
+        }
+        if (seg.kind === 4) { // 50/50 beam splitter
+          const dn = dx * nx + dy * ny;
+          if (depth < 4) trace(hx, hy, dx - 2 * dn * nx, dy - 2 * dn * ny, wl, I * 0.5, depth + 1, aScale);
+          I *= 0.5; ox = hx; oy = hy; continue;
+        }
         if (seg.kind === 1) {
           const dn = dx * nx + dy * ny;
           dx -= 2 * dn * nx; dy -= 2 * dn * ny; I *= 0.96;
@@ -298,7 +312,8 @@ PhysLab.define({
       }
       if (e.type === 'prism') propsUI.slider('Side length', { min: 40, max: 400, step: 1, value: e.s, fmt: (v) => v + ' px', onInput: set('s') });
       if (e.type === 'drop') propsUI.slider('Radius', { min: 20, max: 300, step: 1, value: e.R, fmt: (v) => v + ' px', onInput: set('R') });
-      if (e.type === 'mirror' || e.type === 'screen') propsUI.slider('Half-length', { min: 10, max: 400, step: 1, value: e.h, fmt: (v) => v + ' px', onInput: set('h') });
+      if (e.type === 'grating') propsUI.slider('Line spacing d', { min: 0.8, max: 6, step: 0.05, value: e.d, fmt: (v) => v.toFixed(2) + ' µm  (' + Math.round(1000 / v) + ' lines/mm)', onInput: set('d') });
+      if (e.type === 'mirror' || e.type === 'screen' || e.type === 'grating' || e.type === 'splitter') propsUI.slider('Half-length', { min: 10, max: 400, step: 1, value: e.h, fmt: (v) => v + ' px', onInput: set('h') });
       if (e.type === 'cmirror') {
         propsUI.slider('Radius of curvature R', { min: 80, max: 1400, step: 1, value: e.R, fmt: (v) => v + ' px', onInput: (v) => { e.R = Math.max(v, e.h + 2); build(e); } });
         propsUI.slider('Half-aperture', { min: 20, max: 300, step: 1, value: e.h, fmt: (v) => v + ' px', onInput: (v) => { e.h = Math.min(v, e.R - 2); build(e); } });
@@ -381,7 +396,53 @@ PhysLab.define({
 
     preset('lens');
 
+    /* ===== v3 extras ===== */
+    function gratingSetup() {
+      els = []; sel = null;
+      const W = env.W, H = env.H;
+      S.gain = 1.8; gainSl.set(1.8);
+      mk('white', W * 0.08, H / 2, 0, { width: 0, count: 1 });
+      mk('grating', W * 0.38, H / 2, 0, { h: 110, d: 1.6 });
+      mk('screen', W * 0.88, H / 2, 0, { h: Math.min(360, H * 0.47) });
+      dirty = true; select(null);
+    }
+    function interferometer() {
+      els = []; sel = null;
+      const W = env.W, H = env.H, cy = H / 2, arm = Math.min(220, H * 0.34);
+      S.gain = 1.5; gainSl.set(1.5);
+      mk('laser', W * 0.1, cy, 0, { wl: 532, width: 0 });
+      mk('splitter', W * 0.5, cy, Math.PI / 4, { h: 60 });
+      mk('mirror', W * 0.5 + arm * 1.3, cy, 0, { h: 60 });
+      mk('mirror', W * 0.5, cy - arm, Math.PI / 2, { h: 60 });
+      mk('screen', W * 0.5, cy + arm, Math.PI / 2, { h: 70 });
+      dirty = true; select(null);
+    }
+    function periscope() {
+      els = []; sel = null;
+      const W = env.W, H = env.H;
+      mk('white', W * 0.08, H * 0.28, 0, { width: 60, count: 7 });
+      mk('mirror', W * 0.45, H * 0.28, -Math.PI / 4, { h: 70 });
+      mk('mirror', W * 0.45, H * 0.72, -Math.PI / 4, { h: 70 });
+      mk('convex', W * 0.66, H * 0.72, 0, { R: 240, h: 70 });
+      mk('screen', W * 0.9, H * 0.72, 0, { h: 90 });
+      dirty = true; select(null);
+    }
+    ui.section('More setups');
+    ui.buttons([
+      { label: '🌈 Grating spectrometer', primary: true, onClick: gratingSetup },
+      { label: 'Michelson layout', onClick: interferometer },
+      { label: 'Periscope', onClick: periscope },
+    ]);
+    ui.note('New parts in “Add to bench”: a <b>diffraction grating</b> (splits each colour into orders by sin θ = mλ/d) and a 50/50 <b>beam splitter</b>.');
+    const ext = {};
+
     return {
+      ext,
+      probe() {
+        let bx = 0, by = 0, bn = 0, rx = 0, ry = 0, rn = 0;
+        for (let i = 0; i < hitPts.length; i += 4) { const wl = hitPts[i + 2]; if (wl < 460) { bx += hitPts[i]; by += hitPts[i + 1]; bn++; } else if (wl > 630) { rx += hitPts[i]; ry += hitPts[i + 1]; rn++; } }
+        return { n: els.length, types: [...new Set(els.map((e) => e.type))], spread: bn && rn ? Math.hypot(bx / bn - rx / rn, by / bn - ry / rn) : 0 };
+      },
       step() {},
       draw(ctx) {
         const W = env.W, H = env.H;
@@ -401,6 +462,9 @@ PhysLab.define({
             g.addColorStop(0, `rgba(170,215,255,${a * 0.6})`); g.addColorStop(1, `rgba(150,200,255,${a * 1.4})`);
             ctx.fillStyle = g; ctx.fill();
             ctx.strokeStyle = 'rgba(180,220,255,0.6)'; ctx.lineWidth = 1.2; ctx.stroke();
+          } else if (e.type === 'grating' || e.type === 'splitter') {
+            ctx.strokeStyle = e.type === 'grating' ? 'rgba(250,204,21,0.95)' : 'rgba(125,211,252,0.95)'; ctx.lineWidth = 3.5;
+            ctx.setLineDash(e.type === 'grating' ? [2, 3] : [9, 4]); ctx.stroke(); ctx.setLineDash([]);
           } else if (e.type === 'screen') {
             ctx.strokeStyle = '#2b3447'; ctx.lineWidth = 7; ctx.stroke();
             ctx.strokeStyle = '#4b5873'; ctx.lineWidth = 2; ctx.stroke();

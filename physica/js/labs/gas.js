@@ -149,7 +149,7 @@ PhysLab.define({
         }
         if (Y[i] - r < t) { Y[i] = t + r; if (VY[i] < 0) { impulse += -2 * M[i] * VY[i]; VY[i] = -VY[i]; } }
         if (Y[i] + r > b) { Y[i] = b - r; if (VY[i] > 0) { impulse += 2 * M[i] * VY[i]; VY[i] = -VY[i]; } }
-        if (divider) {
+        if (divider && !demonPass(i)) {
           if (X[i] < dividerX && X[i] + r > dividerX) { X[i] = dividerX - r; VX[i] = -Math.abs(VX[i]); }
           else if (X[i] >= dividerX && X[i] - r < dividerX) { X[i] = dividerX + r; VX[i] = Math.abs(VX[i]); }
         }
@@ -192,7 +192,78 @@ PhysLab.define({
     const pal = [];
     for (let k = 0; k < 12; k++) { const [r, g, b] = U.hsl2rgb(225 - k * 20, 0.9, 0.58); pal.push(`rgb(${r},${g},${b})`); }
 
+    /* ===== v3 extras ===== */
+    const DM = { on: false, h: 46, TL: 0, TR: 0, passed: 0 };
+    const PV = { pts: [], t: 0, A0: 0, P0: 0, T0: 0 };
+    function demonPass(i) {
+      if (!DM.on) return false;
+      if (Math.abs(Y[i] - (box.t + box.b) / 2) > DM.h) return false;
+      const fast = 0.5 * M[i] * (VX[i] * VX[i] + VY[i] * VY[i]) > measT;
+      return VX[i] > 0 ? fast : !fast;
+    }
+    ui.section('New experiments');
+    ui.buttons([
+      { label: '😈 Maxwell\'s demon', primary: true, onClick: () => { S.mode = 'ideal'; init(); divider = true; DM.on = true; env.toast('The demon opens the door only for fast molecules going right and slow ones going left'); } },
+      { label: 'Clear P–V diagram', onClick: () => { PV.pts = []; PV.A0 = 0; } },
+    ]);
+    ui.note('The <b>P–V diagram</b> (bottom left) traces pressure against volume as you move the piston: compare with the isothermal (PV = const) and adiabatic (PV² = const in 2D) curves.');
+    const ext = {
+      step(dt) {
+        if (!divider) DM.on = false;
+        if (DM.on) {
+          let kl = 0, nl = 0, kr = 0, nr = 0;
+          for (let i = 0; i < N; i++) { const k = 0.5 * M[i] * (VX[i] * VX[i] + VY[i] * VY[i]); if (X[i] < dividerX) { kl += k; nl++; } else { kr += k; nr++; } }
+          DM.TL = nl ? kl / nl : 0; DM.TR = nr ? kr / nr : 0;
+        }
+        PV.t += dt;
+        if (PV.t > 0.2 && pressure > 0) {
+          PV.t = 0;
+          const A = (pistonX - box.l) * (box.b - box.t);
+          if (!PV.A0) { PV.A0 = A; PV.P0 = pressure; PV.T0 = measT; }
+          PV.pts.push(A, pressure);
+          if (PV.pts.length > 900) PV.pts.splice(0, 2);
+        }
+      },
+      draw(ctx) {
+        if (DM.on) {
+          const cy = (box.t + box.b) / 2;
+          ctx.strokeStyle = '#34d399'; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(dividerX, cy - DM.h); ctx.lineTo(dividerX, cy + DM.h); ctx.stroke();
+          ctx.font = '22px Segoe UI Emoji, sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText('😈', dividerX - 13, cy);
+          ctx.font = '600 13px Segoe UI, sans-serif'; ctx.textBaseline = 'top';
+          ctx.fillStyle = '#60a5fa'; ctx.fillText('cold side  k_BT = ' + (DM.TL / 1000).toFixed(1) + ' k', box.l + 12, box.t + 10);
+          ctx.fillStyle = '#f87171'; ctx.fillText('hot side  k_BT = ' + (DM.TR / 1000).toFixed(1) + ' k', dividerX + 14, box.t + 10);
+        }
+        if (PV.pts.length > 4 && PV.A0) {
+          const pw = 210, ph = 138, x = box.l + 10, y = box.b - ph - 10;
+          U.panel(ctx, x, y, pw, ph, 'P–V diagram');
+          let a0 = Infinity, a1 = 0, p0 = Infinity, p1 = 0;
+          for (let k = 0; k < PV.pts.length; k += 2) { a0 = Math.min(a0, PV.pts[k]); a1 = Math.max(a1, PV.pts[k]); p0 = Math.min(p0, PV.pts[k + 1]); p1 = Math.max(p1, PV.pts[k + 1]); }
+          a0 *= 0.92; a1 *= 1.04; p0 *= 0.8; p1 *= 1.15;
+          const X = (a) => x + 12 + ((a - a0) / (a1 - a0)) * (pw - 24), Yp = (p) => y + ph - 14 - U.clamp((p - p0) / (p1 - p0), 0, 1) * (ph - 44);
+          ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+          for (const [g, c] of [[1, 'rgba(96,165,250,0.8)'], [2, 'rgba(248,113,113,0.8)']]) {
+            ctx.strokeStyle = c; ctx.beginPath();
+            for (let k = 0; k <= 40; k++) { const a = a0 + ((a1 - a0) * k) / 40, p = PV.P0 * Math.pow(PV.A0 / a, g); k ? ctx.lineTo(X(a), Yp(p)) : ctx.moveTo(X(a), Yp(p)); }
+            ctx.stroke();
+          }
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#34d399'; ctx.lineWidth = 1.6; ctx.beginPath();
+          for (let k = 0; k < PV.pts.length; k += 2) k ? ctx.lineTo(X(PV.pts[k]), Yp(PV.pts[k + 1])) : ctx.moveTo(X(PV.pts[0]), Yp(PV.pts[1]));
+          ctx.stroke();
+          const L = PV.pts.length;
+          ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(X(PV.pts[L - 2]), Yp(PV.pts[L - 1]), 3.5, 0, U.TAU); ctx.fill();
+          ctx.font = '10px Segoe UI, sans-serif'; ctx.textBaseline = 'bottom';
+          ctx.fillStyle = '#60a5fa'; ctx.fillText('isotherm', x + 12, y + ph - 2);
+          ctx.fillStyle = '#f87171'; ctx.fillText('adiabat', x + 66, y + ph - 2);
+          ctx.fillStyle = '#9fb3e0'; ctx.fillText('V →', x + pw - 30, y + ph - 2);
+        }
+      },
+    };
+
     return {
+      ext,
+      probe() { return { vol: (pistonX - box.l) / (box.r - box.l), demon: DM.on, ratio: DM.TL > 0 ? DM.TR / DM.TL : 1, kT: measT }; },
       step(dt) {
         if (pistonTarget !== null) {
           pistonV = U.clamp((pistonTarget - pistonX) / Math.max(dt, 1e-3), -1500, 1500);

@@ -299,7 +299,54 @@ PhysLab.define({
 
     const toCell = (pp) => [(pp.x / env.W) * gw, (pp.y / env.H) * gh];
 
+    /* ===== v3 extras ===== */
+    const FM = { lift: new U.Ring(320), drag: 0, St: 0, cross: [], sign: 0, mean: 0, base: -1, pn: '', painted: false, D: 0, on: true };
+    ui.section('Force balance');
+    ui.toggle('Lift / drag meter on the obstacle', FM.on, (v) => (FM.on = v));
+    ui.note('The meter integrates pressure around the obstacle. Vortex shedding makes the lift swing up and down; its frequency gives the <b>Strouhal number</b> St = f·D/U (≈ 0.2 for a cylinder).');
+    const ext = {
+      step() {
+        if (!tunnel()) return;
+        let fx = 0, fy = 0, y0 = gh, y1 = 0, cnt = 0;
+        for (let y = 2; y < gh - 2; y++) for (let x = 2; x < gw - 2; x++) {
+          const i = x + y * gw;
+          if (flag[i] !== 1) continue;
+          cnt++;
+          if (y < y0) y0 = y; if (y > y1) y1 = y;
+          if (flag[i - 1] === 0) fx += p[i - 1]; if (flag[i + 1] === 0) fx -= p[i + 1];
+          if (flag[i - gw] === 0) fy += p[i - gw]; if (flag[i + gw] === 0) fy -= p[i + gw];
+        }
+        if (S.preset !== FM.pn) { FM.pn = S.preset; FM.base = cnt; FM.cross = []; FM.St = 0; FM.lift.clear(); FM.mean = fy; }
+        else if (cnt !== FM.base) { FM.painted = true; FM.base = cnt; }
+        FM.D = Math.max(1, y1 - y0 + 1);
+        FM.drag += (fx - FM.drag) * 0.05;
+        FM.mean += (fy - FM.mean) * 0.004;
+        const v = fy - FM.mean;
+        FM.lift.push(v);
+        const [lo, hi] = FM.lift.range(), amp = (hi - lo) / 2;
+        const sg = v > amp * 0.15 ? 1 : v < -amp * 0.15 ? -1 : FM.sign;
+        if (sg === 1 && FM.sign === -1) { FM.cross.push(stepsRun); if (FM.cross.length > 6) FM.cross.shift(); }
+        FM.sign = sg;
+        if (FM.cross.length >= 3 && amp > 1e-4) { const per = (FM.cross[FM.cross.length - 1] - FM.cross[0]) / (FM.cross.length - 1); FM.St = (FM.D / per) / Math.max(0.05, S.U); }
+        if (FM.cross.length && stepsRun - FM.cross[FM.cross.length - 1] > 900) { FM.cross = []; FM.St = 0; }
+      },
+      draw(ctx) {
+        if (!FM.on || !tunnel()) return;
+        const pw = 236, ph = 118, x = env.W - pw - 12, y = 12;
+        U.panel(ctx, x, y, pw, ph, 'Force on obstacle');
+        const [lo, hi] = FM.lift.range(), m = Math.max(Math.abs(lo), Math.abs(hi), 1e-6);
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + 10, y + 56); ctx.lineTo(x + pw - 10, y + 56); ctx.stroke();
+        ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 1.6; FM.lift.draw(ctx, x + 10, y + 26, pw - 20, 60, -m * 1.1, m * 1.1);
+        ctx.font = '11px Consolas, monospace'; ctx.textBaseline = 'top';
+        ctx.fillStyle = '#60a5fa'; ctx.fillText('lift (oscillating)', x + 10, y + 90);
+        ctx.fillStyle = '#fb923c'; ctx.fillText('drag ' + U.fmt(FM.drag, 2), x + 132, y + 90);
+        ctx.fillStyle = FM.St ? '#fde047' : '#6b7aa5'; ctx.fillText(FM.St ? 'Strouhal number St = ' + FM.St.toFixed(3) : 'waiting for steady vortex shedding…', x + 10, y + 103);
+      },
+    };
+
     return {
+      ext,
+      probe() { return { St: FM.St, view: S.view, tunnel: tunnel(), painted: FM.painted }; },
       step(dt) {
         accum += Math.min(dt, 0.1) * 60;
         let n = 0;

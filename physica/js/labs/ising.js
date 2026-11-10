@@ -113,7 +113,50 @@ PhysLab.define({
       }
     }
 
+    /* ===== v3 extras ===== */
+    const FL = { n: 0, m: 0, m2: 0, e: 0, e2: 0, key: '', f: 0 };
+    const WALLC = (255 << 24) | (120 << 16) | (230 << 8) | 255, DARKC = (255 << 24) | (34 << 16) | (16 << 8) | 10;
+    function renderView() {
+      const Lm = L - 1;
+      if (S.view === 'walls') {
+        for (let y = 0; y < L; y++) for (let x = 0; x < L; x++) { const i = y * L + x; u32[i] = s[i] !== s[y * L + (x === Lm ? 0 : x + 1)] || s[i] !== s[(y === Lm ? 0 : y + 1) * L + x] ? WALLC : DARKC; }
+        return;
+      }
+      const b = S.view === 'b3' ? 3 : 9;
+      for (let by = 0; by < L; by += b) for (let bx = 0; bx < L; bx += b) {
+        let sum = 0;
+        const y1 = Math.min(L, by + b), x1 = Math.min(L, bx + b);
+        for (let y = by; y < y1; y++) for (let x = bx; x < x1; x++) sum += s[y * L + x];
+        const c = sum >= 0 ? UPC : DNC;
+        for (let y = by; y < y1; y++) for (let x = bx; x < x1; x++) u32[y * L + x] = c;
+      }
+    }
+    ui.section('Analysis');
+    ui.select('View', [['spins', 'Individual spins'], ['b3', 'Block spins 3×3 (zoomed out)'], ['b9', 'Block spins 9×9 (zoomed out more)'], ['walls', 'Domain walls only']], 'spins', (v) => (S.view = v));
+    ui.note('<b>Block spins</b> replace each block by its majority vote — the "renormalisation" step. Away from T_c the picture simplifies to all-one-colour or grey noise; exactly at T_c it looks the same at every zoom level. The panel on the lattice measures the <b>susceptibility χ</b> and <b>heat capacity C</b> from fluctuations; both peak sharply at T_c.');
+    const ext = {
+      step() {
+        const key = S.T + '|' + S.h + '|' + S.J + '|' + S.sweepH;
+        if (key !== FL.key) { FL.key = key; FL.n = 0; FL.m = FL.m2 = FL.e = FL.e2 = 0; }
+        if (S.sweepH || FL.f++ % 2) return;
+        const m = Math.abs(M / N), e = energy();
+        FL.n++; FL.m += m; FL.m2 += m * m; FL.e += e; FL.e2 += e * e;
+      },
+      draw(ctx) {
+        if (FL.n < 5) return;
+        const am = FL.m / FL.n, chi = (N * (FL.m2 / FL.n - am * am)) / S.T, ae = FL.e / FL.n, cv = (N * (FL.e2 / FL.n - ae * ae)) / (S.T * S.T);
+        const x = area.x + 10, y = area.y + 10;
+        U.panel(ctx, x, y, 214, 76, 'Fluctuations at this T');
+        ctx.font = '11.5px Consolas, monospace'; ctx.textBaseline = 'top';
+        ctx.fillStyle = '#fde047'; ctx.fillText('susceptibility χ = ' + U.fmt(chi, 2), x + 10, y + 26);
+        ctx.fillStyle = '#7dd3fc'; ctx.fillText('heat capacity C = ' + U.fmt(cv, 3), x + 10, y + 42);
+        ctx.fillStyle = '#9fb3e0'; ctx.fillText('samples ' + FL.n, x + 10, y + 58);
+      },
+    };
+
     return {
+      ext,
+      probe() { return { absM: Math.abs(M / N), h: S.h, T: S.T, samples: FL.n, loop: loop.length }; },
       step(dt) {
         const f = Math.min(3, dt * 60);
         if (S.sweepH) {
@@ -133,7 +176,7 @@ PhysLab.define({
       draw(ctx) {
         const W = env.W, H = env.H;
         ctx.fillStyle = '#070912'; ctx.fillRect(0, 0, W, H);
-        for (let i = 0; i < N; i++) u32[i] = s[i] > 0 ? UPC : DNC;
+        if (S.view && S.view !== 'spins') renderView(); else for (let i = 0; i < N; i++) u32[i] = s[i] > 0 ? UPC : DNC;
         octx.putImageData(img, 0, 0);
         const side = W >= 860 ? 300 : 0;
         const size = Math.max(64, Math.min(W - side - 24, H - 24));

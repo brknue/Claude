@@ -133,12 +133,12 @@ PhysLab.define({
         let u = Math.random() * tot, jx = 0;
         for (let j = 0; j < N; j++) { u -= re[j] * re[j] + im[j] * im[j]; if (u <= 0) { jx = j; break; } }
         packet(jx, 5 * (N / 1024), 0);
-        flash = { j: jx, t: 1 };
+        flash = { j: jx, t: 1 }; S.meas = (S.meas || 0) + 1;
         env.toast('Measured! The wavefunction collapsed to x = ' + ((jx / N) * 100).toFixed(1) + ' %');
       } },
     ]);
     ui.section('Simulation');
-    ui.slider('Steps per frame', { min: 1, max: 30, step: 1, value: S.spf, fmt: (v) => v + '', onInput: (v) => (S.spf = v) });
+    const spfSl = ui.slider('Steps per frame', { min: 1, max: 30, step: 1, value: S.spf, fmt: (v) => v + '', onInput: (v) => (S.spf = v) });
     ui.toggle('Absorbing edges (open space)', S.absorb, (v) => { S.absorb = v; dirty = true; });
     ui.toggle('Show Re ψ (white line)', S.showRe, (v) => (S.showRe = v));
 
@@ -163,7 +163,70 @@ PhysLab.define({
       return { n, x: x / (n || 1), p: p / (n || 1), E: E / (n || 1), PL, PR };
     }
 
+    /* ===== v3 extras ===== */
+    const KB = 96, KMAX = 1.4, phik = new Float32Array(KB), X3 = { mom: true, f: 0 };
+    function momentum() {
+      for (let b = 0; b < KB; b++) {
+        const k = -KMAX + (2 * KMAX * b) / (KB - 1);
+        let ar = 0, ai = 0;
+        for (let j = 0; j < N; j += 2) { const c = Math.cos(k * j), sn = Math.sin(k * j); ar += re[j] * c + im[j] * sn; ai += im[j] * c - re[j] * sn; }
+        phik[b] = ar * ar + ai * ai;
+      }
+    }
+    function normalise() {
+      let n = 0;
+      for (let j = 0; j < N; j++) n += re[j] * re[j] + im[j] * im[j];
+      n = Math.sqrt(n) || 1;
+      for (let j = 0; j < N; j++) { re[j] /= n; im[j] /= n; }
+      absL = absR = 0; time = 0; dirty = true;
+    }
+    function boxState(n1, n2) {
+      S.preset = 'box';
+      const Lb = 110, a = Math.round(N / 2 - Lb / 2);
+      V.fill(0.78); re.fill(0); im.fill(0);
+      for (let j = a; j <= a + Lb; j++) { V[j] = 0; const x = (j - a) / Lb; re[j] = Math.sin(n1 * Math.PI * x) + (n2 ? Math.sin(n2 * Math.PI * x) : 0); }
+      normalise();
+      peak0 = 3.2 / Lb; split = N / 2; S.spf = 24; spfSl.set(24);
+    }
+    function doubleWell() {
+      S.preset = 'box';
+      const w = 44, bw = 5, a = Math.round(N / 2 - w - bw / 2);
+      V.fill(0.78); re.fill(0); im.fill(0);
+      for (let j = a; j <= a + 2 * w + bw; j++) V[j] = j > a + w && j < a + w + bw ? 0.012 : 0;
+      for (let j = a; j <= a + w; j++) re[j] = Math.sin((Math.PI * (j - a)) / w);
+      normalise();
+      peak0 = 3.2 / w; split = a + w + bw / 2; S.spf = 24; spfSl.set(24);
+    }
+    ui.section('Bound states');
+    ui.buttons([
+      { label: 'Box: ground state ψ₁', onClick: () => boxState(1, 0) },
+      { label: 'Box: ψ₁ + ψ₂ (sloshing)', primary: true, onClick: () => boxState(1, 2) },
+      { label: 'Box: ψ₁ + ψ₃', onClick: () => boxState(1, 3) },
+      { label: 'Double well tunnelling', onClick: doubleWell },
+    ]);
+    ui.toggle('Momentum-space panel |φ(k)|²', X3.mom, (v) => (X3.mom = v));
+    ui.note('A single energy eigenstate is <b>stationary</b>: only its phase (colour) rotates. Add two together and the probability sloshes at the beat frequency (E₂−E₁)/ħ. In the double well the particle tunnels back and forth through the thin wall.');
+    const ext = {
+      draw(ctx) {
+        if (!X3.mom) return;
+        if (X3.f++ % 4 === 0) momentum();
+        const pw = 250, ph = 104, x = 12, y = 12;
+        U.panel(ctx, x, y, pw, ph, 'Momentum distribution |φ(k)|²');
+        let mx = 1e-9;
+        for (let b = 0; b < KB; b++) mx = Math.max(mx, phik[b]);
+        const gx = x + 10, gw2 = pw - 20, gy = y + 24, gh2 = ph - 44;
+        ctx.fillStyle = 'rgba(192,132,252,0.75)';
+        for (let b = 0; b < KB; b++) { const h = (phik[b] / mx) * gh2; ctx.fillRect(gx + (b / KB) * gw2, gy + gh2 - h, gw2 / KB + 0.5, h); }
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(gx + gw2 / 2, gy); ctx.lineTo(gx + gw2 / 2, gy + gh2); ctx.stroke();
+        ctx.fillStyle = '#9fb3e0'; ctx.font = '10px Consolas, monospace'; ctx.textBaseline = 'top';
+        ctx.fillText('−k', gx, gy + gh2 + 4); ctx.fillText('0', gx + gw2 / 2 - 3, gy + gh2 + 4); ctx.fillText('+k', gx + gw2 - 14, gy + gh2 + 4);
+        ctx.fillText('← moving left   moving right →', gx + 28, gy + gh2 + 4);
+      },
+    };
+
     return {
+      ext,
+      probe() { const st = stats(), L = st.PL + absL, R = st.PR + absR; return { preset: S.preset, E: (S.k0 * S.k0) / 2, V0: S.V0, T: R / (L + R || 1), time, meas: S.meas || 0, box: S.preset === 'box' && V[0] > 0.5 }; },
       step(dt) {
         if (dirty) prep();
         const n = Math.max(1, Math.round(S.spf * Math.min(3, dt * 60)));

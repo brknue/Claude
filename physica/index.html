@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Physica — Virtual Physics Laboratory</title>
-<link rel="stylesheet" href="css/style.css?v=3">
+<link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 
@@ -66,13 +66,16 @@
     <aside id="panel">
       <div class="ptabs">
         <button class="ptab active" data-tab="controls">Controls</button>
+        <button class="ptab" data-tab="missions">Missions</button>
         <button class="ptab" data-tab="theory">Theory &amp; Guide</button>
       </div>
       <div id="tab-controls" class="tabbody">
-        <div class="sec">Live data</div>
+        <div class="sec">Live data <button id="btn-csv" class="mini" title="Download everything logged so far as a spreadsheet (CSV)">&#11015; CSV</button></div>
         <div id="readouts"></div>
+        <div id="charts"></div>
         <div id="controls"></div>
       </div>
+      <div id="tab-missions" class="tabbody hidden"></div>
       <div id="tab-theory" class="tabbody hidden">
         <div id="howto"></div>
         <div id="theory"></div>
@@ -83,23 +86,24 @@
 
 <div id="toast"></div>
 
-<script src="js/core.js?v=3"></script>
-<script src="js/thumbs.js?v=3"></script>
-<script src="js/labs/electrons.js?v=3"></script>
-<script src="js/labs/gravity.js?v=3"></script>
-<script src="js/labs/ripple.js?v=3"></script>
-<script src="js/labs/pendulum.js?v=3"></script>
-<script src="js/labs/gas.js?v=3"></script>
-<script src="js/labs/lorentz.js?v=3"></script>
-<script src="js/labs/optics.js?v=3"></script>
-<script src="js/labs/fluid.js?v=3"></script>
-<script src="js/labs/projectile.js?v=3"></script>
-<script src="js/labs/cloth.js?v=3"></script>
-<script src="js/labs/quantum.js?v=3"></script>
-<script src="js/labs/blackhole.js?v=3"></script>
-<script src="js/labs/matter.js?v=3"></script>
-<script src="js/labs/ising.js?v=3"></script>
-<script src="js/labs/string.js?v=3"></script>
+<script src="js/core.js?v=4"></script>
+<script src="js/thumbs.js?v=4"></script>
+<script src="js/missions.js?v=4"></script>
+<script src="js/labs/electrons.js?v=4"></script>
+<script src="js/labs/gravity.js?v=4"></script>
+<script src="js/labs/ripple.js?v=4"></script>
+<script src="js/labs/pendulum.js?v=4"></script>
+<script src="js/labs/gas.js?v=4"></script>
+<script src="js/labs/lorentz.js?v=4"></script>
+<script src="js/labs/optics.js?v=4"></script>
+<script src="js/labs/fluid.js?v=4"></script>
+<script src="js/labs/projectile.js?v=4"></script>
+<script src="js/labs/cloth.js?v=4"></script>
+<script src="js/labs/quantum.js?v=4"></script>
+<script src="js/labs/blackhole.js?v=4"></script>
+<script src="js/labs/matter.js?v=4"></script>
+<script src="js/labs/ising.js?v=4"></script>
+<script src="js/labs/string.js?v=4"></script>
 <script>PhysLab.start();</script>
 </body>
 </html>

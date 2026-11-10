@@ -150,7 +150,7 @@ PhysLab.define({
       { label: 'Net & sphere', onClick: () => build('net') },
     ]);
     ui.section('Tool (left mouse)');
-    ui.tools([{ id: 'grab', label: '✋ Grab' }, { id: 'cut', label: '✂ Cut' }, { id: 'pin', label: '📌 Pin / unpin' }, { id: 'poke', label: '◎ Poke' }, { id: 'sphere', label: '● Move sphere' }], S.tool, (v) => (S.tool = v));
+    ui.tools([{ id: 'grab', label: '✋ Grab' }, { id: 'cut', label: '✂ Cut' }, { id: 'pin', label: '📌 Pin / unpin' }, { id: 'poke', label: '◎ Poke' }, { id: 'sphere', label: '● Move sphere' }, { id: 'burn', label: '🔥 Burn' }, { id: 'ball', label: '⚾ Throw ball (drag)' }], S.tool, (v) => (S.tool = v));
     ui.section('Material');
     ui.slider('Stiffness (iterations)', { min: 1, max: 30, step: 1, value: S.iters, fmt: (v) => v + '', onInput: (v) => (S.iters = v) });
     ui.toggle('Shear springs (diagonals)', S.shear, (v) => (S.shear = v));
@@ -184,7 +184,92 @@ PhysLab.define({
     }
     const strainCols = Array.from({ length: LV }, (_, l) => { const [r, g, b] = U.hsl2rgb(220 - (l / (LV - 1)) * 220, 0.9, 0.5); return `rgb(${r},${g},${b})`; });
 
+    /* ===== v3 extras ===== */
+    const FIRE = new Float32Array(NP), BURNT = new Uint8Array(NP);
+    const X3 = { burned: 0, lastTorn: 0, balls: [], thrown: 0, aim: null, sparks: [] };
+    function killLinks(k) {
+      const i = k % COLS, j = (k / COLS) | 0;
+      const kill = (c) => { if (ALIVE[c]) { ALIVE[c] = 0; torn++; } };
+      if (i > 0) kill(HC(i - 1, j)); if (i < COLS - 1) kill(HC(i, j));
+      if (j > 0) kill(VC(i, j - 1)); if (j < ROWS - 1) kill(VC(i, j));
+      for (let cj = j - 1; cj <= j; cj++) for (let ci = i - 1; ci <= i; ci++) {
+        if (ci < 0 || cj < 0 || ci >= COLS - 1 || cj >= ROWS - 1) continue;
+        const b = NH + NV + 2 * (cj * (COLS - 1) + ci);
+        kill(b); kill(b + 1);
+      }
+    }
+    function ignite(k) { if (k >= 0 && !BURNT[k] && FIRE[k] <= 0) FIRE[k] = 0.45 + Math.random() * 0.35; }
+    ui.section('Fire & projectiles');
+    ui.note('Pick <b>🔥 Burn</b> in the tool list and touch the cloth — the fire spreads along the threads. Pick <b>⚾ Throw ball</b> and drag to throw a ball into the fabric.');
+    ui.buttons([{ label: 'Remove balls', onClick: () => (X3.balls = []) }]);
+    const ext = {
+      step(dt) {
+        if (torn < X3.lastTorn) { FIRE.fill(0); BURNT.fill(0); X3.burned = 0; X3.sparks = []; }
+        // fire spread
+        for (let k = 0; k < NP; k++) {
+          if (FIRE[k] <= 0) continue;
+          FIRE[k] -= dt;
+          const i = k % COLS, j = (k / COLS) | 0, pr = dt * 5.5;
+          if (i > 0 && ALIVE[HC(i - 1, j)] && Math.random() < pr) ignite(k - 1);
+          if (i < COLS - 1 && ALIVE[HC(i, j)] && Math.random() < pr) ignite(k + 1);
+          if (j > 0 && ALIVE[VC(i, j - 1)] && Math.random() < pr * 1.6) ignite(k - COLS);
+          if (j < ROWS - 1 && ALIVE[VC(i, j)] && Math.random() < pr * 0.7) ignite(k + COLS);
+          if (Math.random() < dt * 6 && X3.sparks.length < 160) X3.sparks.push({ x: X[k], y: Y[k], vx: U.rand(-20, 20), vy: U.rand(-90, -30), l: 0.8 });
+          if (FIRE[k] <= 0) { FIRE[k] = 0; BURNT[k] = 1; PIN[k] = 0; X3.burned++; killLinks(k); }
+        }
+        X3.lastTorn = torn;
+        for (const s of X3.sparks) { s.x += s.vx * dt; s.y += s.vy * dt; s.l -= dt; }
+        X3.sparks = X3.sparks.filter((s) => s.l > 0);
+        // balls
+        for (const b of X3.balls) {
+          b.vy += S.gravity * dt; b.x += b.vx * dt; b.y += b.vy * dt;
+          const r2 = b.r * b.r;
+          for (let k = 0; k < NP; k++) {
+            const dx = X[k] - b.x, dy = Y[k] - b.y, d2 = dx * dx + dy * dy;
+            if (d2 >= r2 || d2 === 0 || BURNT[k]) continue;
+            const d = Math.sqrt(d2), push = b.r - d, nx = dx / d, ny = dy / d;
+            if (!PIN[k]) { X[k] += nx * push; Y[k] += ny * push; }
+            b.vx -= nx * push * 0.9; b.vy -= ny * push * 0.9;
+          }
+          if (b.y > env.H - b.r - 4) { b.y = env.H - b.r - 4; b.vy = -Math.abs(b.vy) * 0.45; b.vx *= 0.9; }
+          if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * 0.6; } else if (b.x > env.W - b.r) { b.x = env.W - b.r; b.vx = -Math.abs(b.vx) * 0.6; }
+        }
+      },
+      draw(ctx) {
+        ctx.globalCompositeOperation = 'lighter';
+        for (let k = 0; k < NP; k++) {
+          if (FIRE[k] <= 0) continue;
+          const r = 7 + Math.random() * 6;
+          ctx.fillStyle = `rgba(255,${(120 + Math.random() * 90) | 0},30,0.5)`;
+          ctx.beginPath(); ctx.arc(X[k], Y[k] - Math.random() * 5, r, 0, TAU); ctx.fill();
+        }
+        for (const s of X3.sparks) { ctx.fillStyle = `rgba(255,190,80,${s.l})`; ctx.fillRect(s.x, s.y, 2, 2); }
+        ctx.globalCompositeOperation = 'source-over';
+        for (const b of X3.balls) {
+          const g = ctx.createRadialGradient(b.x - b.r * 0.35, b.y - b.r * 0.35, 2, b.x, b.y, b.r);
+          g.addColorStop(0, '#fff7ed'); g.addColorStop(1, '#c2410c');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, TAU); ctx.fill();
+        }
+        if (X3.aim) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); U.arrow(ctx, X3.aim.x, X3.aim.y, env.pointer.x, env.pointer.y, 9); ctx.stroke(); }
+      },
+      pointerdown(p, e) {
+        if (e.button === 2) return false;
+        if (S.tool === 'burn') { ignite(nearest(p.x, p.y, 34)); return true; }
+        if (S.tool === 'ball') { X3.aim = { x: p.x, y: p.y }; return true; }
+        return false;
+      },
+      pointermove(p) { if (env.pointer.down && S.tool === 'burn') ignite(nearest(p.x, p.y, 34)); },
+      pointerup(p) {
+        if (!X3.aim) return;
+        X3.balls.push({ x: X3.aim.x, y: X3.aim.y, vx: (p.x - X3.aim.x) * 5, vy: (p.y - X3.aim.y) * 5, r: 20 });
+        if (X3.balls.length > 6) X3.balls.shift();
+        X3.thrown++; X3.aim = null;
+      },
+    };
+
     return {
+      ext,
+      probe() { return { torn, burned: X3.burned, balls: X3.thrown }; },
       step(dt) {
         acc += Math.min(dt, 0.1);
         const h = 1 / 60;

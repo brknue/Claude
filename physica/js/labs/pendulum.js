@@ -134,7 +134,60 @@ PhysLab.define({
     reset();
     makeTrail();
 
+    /* ===== v3 extras ===== */
+    const MAPN = env.q >= 0.75 ? 56 : 36, mapC = document.createElement('canvas');
+    mapC.width = mapC.height = MAPN;
+    const mctx = mapC.getContext('2d'), mimg = mctx.createImageData(MAPN, MAPN), m32 = new Uint32Array(mimg.data.buffer);
+    const X3 = { on: true, next: 0, key: '', clicks: 0, rect: null };
+    function flipTime(a1, a2) {
+      const p = { t1: a1, t2: a2, w1: 0, w2: 0 }, h = 1 / 110, TM = 11;
+      // energy test: if the start energy is below every flip configuration, it can never flip
+      const E = -(S.m1 + S.m2) * S.g * S.L1 * Math.cos(a1) - S.m2 * S.g * S.L2 * Math.cos(a2);
+      const Eflip = Math.min((S.m1 + S.m2) * S.g * S.L1 - S.m2 * S.g * S.L2, -(S.m1 + S.m2) * S.g * S.L1 + S.m2 * S.g * S.L2);
+      if (E < Eflip && S.b === 0) return -1;
+      for (let t = 0; t < TM; t += h) { rk4(p, h); if (p.t1 > Math.PI || p.t1 < -Math.PI || p.t2 > Math.PI || p.t2 < -Math.PI) return t; }
+      return -1;
+    }
+    function mapWork() {
+      const key = [S.m1, S.m2, S.L1, S.L2, S.g, S.b].join(',');
+      if (key !== X3.key) { X3.key = key; X3.next = 0; m32.fill((255 << 24) | (40 << 16) | (20 << 8) | 14); }
+      const t0 = performance.now(), tot = MAPN * MAPN;
+      while (X3.next < tot && performance.now() - t0 < 3.5) {
+        const i = X3.next++, ix = i % MAPN, iy = (i / MAPN) | 0;
+        const ft = flipTime(((ix + 0.5) / MAPN) * U.TAU - Math.PI, Math.PI - ((iy + 0.5) / MAPN) * U.TAU);
+        if (ft < 0) m32[i] = (255 << 24) | (70 << 16) | (26 << 8) | 16;
+        else { const [r, g, b] = U.hsl2rgb(55 - Math.min(1, Math.log(1 + ft * 4) / Math.log(45)) * 300, 0.95, 0.62 - Math.min(0.3, ft / 30)); m32[i] = (255 << 24) | (b << 16) | (g << 8) | r; }
+      }
+      mctx.putImageData(mimg, 0, 0);
+    }
+    ui.section('Chaos map');
+    ui.toggle('Show the flip-time fractal', X3.on, (v) => (X3.on = v));
+    ui.note('Each pixel is a starting pose (θ₁ across, θ₂ up). Colour = how soon a bob flips over; dark = never. The ragged, fractal borders are chaos made visible. <b>Click the map</b> to launch from that pose.');
+    const ext = {
+      draw(ctx) {
+        if (!X3.on) { X3.rect = null; return; }
+        mapWork();
+        const size = Math.min(210, env.H * 0.34), x = 14, y = 40;
+        U.panel(ctx, x - 6, y - 26, size + 12, size + 50, 'Chaos map — click to launch');
+        ctx.imageSmoothingEnabled = false; ctx.drawImage(mapC, x, y, size, size); ctx.imageSmoothingEnabled = true;
+        X3.rect = [x, y, size];
+        const mx = x + ((wrap(S.th1 * DEG) + Math.PI) / U.TAU) * size, my = y + ((Math.PI - wrap(S.th2 * DEG)) / U.TAU) * size;
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(mx, my, 6, 0, U.TAU); ctx.stroke();
+        ctx.fillStyle = '#9fb3e0'; ctx.font = '10px Segoe UI, sans-serif'; ctx.textBaseline = 'top';
+        ctx.fillText(X3.next < MAPN * MAPN ? 'computing… ' + Math.round((X3.next / (MAPN * MAPN)) * 100) + '%' : 'θ₁ →   θ₂ ↑   bright = flips fast', x, y + size + 6);
+      },
+      pointerdown(p) {
+        const r = X3.rect;
+        if (!r || p.x < r[0] || p.y < r[1] || p.x > r[0] + r[2] || p.y > r[1] + r[2]) return false;
+        S.th1 = Math.round((((p.x - r[0]) / r[2]) * 360 - 180)); S.th2 = Math.round(180 - ((p.y - r[1]) / r[2]) * 360);
+        s1.set(S.th1); s2.set(S.th2); reset(); X3.clicks++;
+        return true;
+      },
+    };
+
     return {
+      ext,
+      probe() { return { mode: S.mode, div: divergence(), clicks: X3.clicks, n: pends.length, time }; },
       step(dt) {
         if (drag) return;
         const n = Math.min(60, Math.max(1, Math.ceil(dt * 400))), h = dt / n;

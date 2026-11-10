@@ -167,7 +167,60 @@ PhysLab.define({
     const CCOL = ['#e5e7eb', '#fca5a5', '#fb923c', '#fbbf24', '#fde047', '#a3e635', '#22d3ee', '#818cf8', '#c084fc'];
     const SCOL = Array.from({ length: 12 }, (_, k) => { const [r, g, b] = U.hsl2rgb(225 - k * 20, 0.9, 0.6); return `rgb(${r},${g},${b})`; });
 
+    /* ===== v3 extras ===== */
+    const X3 = { tool: 'heat', aim: null, shots: 0, sawGas: false, froze: false, melted: false };
+    function shoot(x, y, vx, vy) {
+      const a = 1.12, offs = [[0, 0], [a, 0], [-a, 0], [a / 2, a * 0.87], [-a / 2, a * 0.87], [a / 2, -a * 0.87], [-a / 2, -a * 0.87]];
+      for (const [ox, oy] of offs) { if (N >= NMAX) break; X[N] = U.clamp(x + ox, 0.6, bw - 0.6); Y[N] = U.clamp(y + oy, 0.6, bh - 0.6); VX[N] = vx; VY[N] = vy; N++; }
+      X3.shots++; forces();
+    }
+    function collideDrops() {
+      layout();
+      const n = Math.min(NMAX, Math.round(S.n)), half = n >> 1, a = 1.122, R = Math.sqrt((half * a * a * 0.866) / Math.PI) + 0.4;
+      N = 0;
+      for (const [cx, vx] of [[bw * 0.27, 2.4], [bw * 0.73, -2.4]]) {
+        let c = 0;
+        const m = Math.ceil(R / (a * 0.866));
+        for (let j = -m; j <= m; j++) for (let i = -m - 1; i <= m + 1; i++) {
+          const x = cx + (i + (j & 1) * 0.5) * a, y = bh / 2 + j * a * 0.866 + (cx < bw / 2 ? 0.6 : -0.6);
+          if ((x - cx) ** 2 + (y - bh / 2) ** 2 < R * R && c < half && N < NMAX) { X[N] = x; Y[N] = y; VX[N] = vx + U.randn() * 0.12; VY[N] = U.randn() * 0.12; N++; c++; }
+        }
+      }
+      S.preset = 'liquid'; S.thermo = false; thT.set(false); S.g = 0; gSl.set(0);
+      forces(); Th.clear(); Eh.clear();
+      env.toast('Two cold nano-crystals collide — the impact energy melts them');
+    }
+    ui.section('Impacts');
+    ui.tools([{ id: 'heat', label: '🔥 Heat / cool (mouse)' }, { id: 'shoot', label: '☄ Shoot projectile (drag)' }], X3.tool, (v) => (X3.tool = v));
+    ui.buttons([{ label: '💥 Colliding nano-crystals', primary: true, onClick: collideDrops }]);
+    ui.note('With <b>Shoot</b>, drag to fire a fast 7-atom cluster: watch craters, shock waves and sputtered atoms.');
+    const ext = {
+      step() {
+        const ph = phase()[0];
+        if (ph === 'Gas') X3.sawGas = true;
+        if (X3.sawGas && ph.startsWith('Solid')) X3.froze = true;
+        if (S.preset === 'crystal' && ph === 'Liquid' && Tm > 0.3) X3.melted = true;
+      },
+      draw(ctx) {
+        if (!X3.aim) return;
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); U.arrow(ctx, X3.aim.x, X3.aim.y, env.pointer.x, env.pointer.y, 9); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '12px Segoe UI, sans-serif'; ctx.textBaseline = 'bottom';
+        ctx.fillText('speed ' + Math.min(16, Math.hypot(env.pointer.x - X3.aim.x, env.pointer.y - X3.aim.y) / SIG * 0.8).toFixed(1), env.pointer.x + 10, env.pointer.y - 6);
+      },
+      pointerdown(p, e) { if (X3.tool !== 'shoot' || e.button === 2) return false; X3.aim = { x: p.x, y: p.y }; return true; },
+      pointerup(p) {
+        if (!X3.aim) return;
+        let dx = (p.x - X3.aim.x) / SIG, dy = (p.y - X3.aim.y) / SIG, l = Math.hypot(dx, dy);
+        if (l < 0.3) { dx = 0; dy = 1; l = 1; }
+        const sp = U.clamp(l * 0.8, 3, 16);
+        shoot(X3.aim.x / SIG, X3.aim.y / SIG, (dx / l) * sp, (dy / l) * sp);
+        X3.aim = null;
+      },
+    };
+
     return {
+      ext,
+      probe() { return { melted: X3.melted, frozeAfterGas: X3.froze, shots: X3.shots, phase: phase()[0], T: Tm }; },
       step(dt) {
         const n = U.clamp(Math.round(S.spf * dt * 60), 1, 40);
         for (let k = 0; k < n; k++) mdStep(HSTEP);
