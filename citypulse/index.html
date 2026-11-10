@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CityPulse — Small Cities Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{font-family:system-ui,sans-serif}.gradient-text{background:linear-gradient(135deg,#34d399,#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <nav class="border-b border-slate-800 px-4 h-14 flex items-center justify-between max-w-7xl mx-auto">
+    <a href="index.html" class="font-bold flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-sm">CP</span>City<span class="gradient-text">Pulse</span></a>
+    <div class="flex gap-4 text-sm"><a href="catalog.html" class="hover:text-emerald-400">Catalog</a><a href="../gamepulse/index.html" class="text-sky-400">GamePulse →</a></div>
+  </nav>
+  <header class="pt-16 pb-12 px-4 max-w-7xl mx-auto">
+    <h1 class="text-4xl font-extrabold mb-4">Every small city.<br><span class="gradient-text">One place to track it.</span></h1>
+    <p class="text-slate-400 mb-6 max-w-xl">Notable small cities & towns worldwide. Open any city in its own tab.</p>
+    <p class="text-slate-500 text-sm mb-8">Reality: millions of places exist. This is a curated practical catalog.</p>
+    <a href="catalog.html" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm">Browse Catalog →</a>
+  </header>
+  <section class="max-w-7xl mx-auto px-4 mb-16">
+    <h2 class="text-xl font-bold mb-4">Featured</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <a href="track.html?city=hallstatt" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇦🇹 Hallstatt · Austria</a>
+      <a href="track.html?city=chefchaouen" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇲🇦 Chefchaouen · Morocco</a>
+      <a href="track.html?city=giethoorn" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇳🇱 Giethoorn · Netherlands</a>
+      <a href="track.html?city=shirakawa-go" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇯🇵 Shirakawa-go · Japan</a>
+      <a href="track.html?city=bled" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇸🇮 Bled · Slovenia</a>
+      <a href="track.html?city=reine" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇳🇴 Reine · Norway</a>
+    </div>
+  </section>
+</body>
+</html>

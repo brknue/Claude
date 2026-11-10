@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CityPulse — City Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
+  <a href="index.html" class="text-emerald-400 text-sm">← CityPulse</a>
+  <div id="out" class="mt-8 max-w-2xl"></div>
+  <script>
+    const CITIES = {
+      "hallstatt": { name: "Hallstatt", flag: "🇦🇹", country: "Austria", note: "UNESCO alpine lake village." },
+      "chefchaouen": { name: "Chefchaouen", flag: "🇲🇦", country: "Morocco", note: "The blue medina in the Rif Mountains." },
+      "giethoorn": { name: "Giethoorn", flag: "🇳🇱", country: "Netherlands", note: "Canal village — Dutch Venice." },
+      "shirakawa-go": { name: "Shirakawa-go", flag: "🇯🇵", country: "Japan", note: "Thatched-roof UNESCO mountain village." },
+      "bled": { name: "Bled", flag: "🇸🇮", country: "Slovenia", note: "Alpine lake with island church and castle." },
+      "reine": { name: "Reine", flag: "🇳🇴", country: "Norway", note: "Dramatic Lofoten fishing village." }
+    };
+    const slug = new URLSearchParams(location.search).get('city') || '';
+    const c = CITIES[slug];
+    const el = document.getElementById('out');
+    if (!c) el.innerHTML = '<h1 class="text-2xl font-bold">City not found</h1><a href="catalog.html" class="text-emerald-400">Catalog →</a>';
+    else {
+      document.title = c.name + ' — CityPulse';
+      el.innerHTML = `<div class="text-4xl mb-2">${c.flag}</div><h1 class="text-3xl font-bold">${c.name}</h1><p class="text-slate-400 text-sm">${c.country}</p><p class="mt-4 text-slate-300">${c.note}</p>`;
+    }
+  </script>
+</body>
+</html>

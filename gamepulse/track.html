@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GamePulse — Track Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{font-family:system-ui,sans-serif}</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
+  <a href="index.html" class="text-sky-400 text-sm">← GamePulse</a>
+  <div id="out" class="mt-8 max-w-2xl"></div>
+  <script>
+    const GAMES = {
+      "steal-an-egg": { title: "Steal An Egg", icon: "🥚", platform: "Roblox", players: "500k+", note: "Alien Biome incoming. Top experience." },
+      "murder-mystery-2": { title: "Murder Mystery 2", icon: "🔪", platform: "Roblox", players: "460k+", note: "Seasonal content continuing." },
+      "brookhaven": { title: "Brookhaven RP", icon: "🏡", platform: "Roblox", players: "325k+", note: "New downtown + vehicle overhaul." },
+      "blox-fruits": { title: "Blox Fruits", icon: "🍎", platform: "Roblox", players: "200k+", note: "Halloween extended, fruit reworks." },
+      "adopt-me": { title: "Adopt Me!", icon: "🐣", platform: "Roblox", players: "140k+", note: "Fall pets + autumn eggs." },
+      "gta-6": { title: "Grand Theft Auto VI", icon: "🚗", platform: "AAA", players: "Pre-order record", note: "Launch Nov 19, 2026. Most pre-ordered ever." }
+    };
+    const slug = new URLSearchParams(location.search).get('game') || '';
+    const g = GAMES[slug];
+    const el = document.getElementById('out');
+    if (!g) { el.innerHTML = '<h1 class="text-2xl font-bold">Game not found</h1><a href="catalog.html" class="text-sky-400">Catalog →</a>'; }
+    else {
+      document.title = g.title + ' — GamePulse';
+      el.innerHTML = `<div class="text-4xl mb-2">${g.icon}</div><h1 class="text-3xl font-bold">${g.title}</h1><p class="text-slate-400 text-sm mt-1">${g.platform} · ${g.players}</p><p class="mt-4 text-slate-300">${g.note}</p><p class="mt-6 text-xs text-slate-500">Open more games in new tabs from the catalog or home page.</p>`;
+    }
+  </script>
+</body>
+</html>
