@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physica — Virtual Physics Laboratory</title>
+<link rel="stylesheet" href="css/style.css?v=3">
+</head>
+<body>
+
+<section id="menu" class="view">
+  <canvas id="menu-bg"></canvas>
+  <header class="hero">
+    <div class="badge"><span class="dot"></span> <b id="lab-count">15</b>&nbsp;interactive laboratories · real equations · adaptive quality for any PC</div>
+    <h1>PHYSICA</h1>
+    <p class="lead">A virtual physics laboratory. Choose a lab, step inside and experiment with real equations running live in your browser — electrons, orbits, waves, chaos, gases, light, fluids and more.</p>
+  </header>
+  <div class="menubar">
+    <input id="search" type="search" placeholder="Search labs — try “waves”, “chaos”, “quantum”…" autocomplete="off">
+    <div id="chips"></div>
+  </div>
+  <div id="lab-grid"></div>
+  <div id="no-results" class="hidden">No labs match that search.</div>
+  <footer class="foot">Inside a lab: <kbd>Space</kbd> pause · <kbd>R</kbd> reset · <kbd>H</kbd> hide panel · <kbd>[</kbd> <kbd>]</kbd> switch lab · <kbd>Esc</kbd> back to this menu</footer>
+</section>
+
+<section id="lab" class="view hidden">
+  <div class="topbar">
+    <button id="btn-back" class="tb" title="Back to lab menu (Esc)">&#8592;<span class="hide-sm">&nbsp;Labs</span></button>
+    <div class="titleblock">
+      <span id="lab-num" class="num">01</span>
+      <div class="tt"><div id="lab-title" class="t">Lab</div><div id="lab-sub" class="s"></div></div>
+    </div>
+    <div class="spacer"></div>
+    <select id="lab-switch" class="hide-sm" title="Jump to another lab"></select>
+    <div class="tgroup">
+      <button id="btn-prev" class="tb icon" title="Previous lab ([)">&#8249;</button>
+      <button id="btn-next" class="tb icon" title="Next lab (])">&#8250;</button>
+    </div>
+    <div class="tgroup">
+      <button id="btn-pause" class="tb icon" title="Pause / resume (Space)">&#10074;&#10074;</button>
+      <button id="btn-step" class="tb icon" title="Advance one frame (while paused)">&#8677;</button>
+      <button id="btn-reset" class="tb icon" title="Reset lab (R)">&#8634;</button>
+    </div>
+    <label class="tsel" title="Simulation speed"><span class="hide-sm">Speed</span>
+      <select id="speed">
+        <option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option>
+      </select>
+    </label>
+    <label class="tsel" title="Quality — lower it on slow computers"><span class="hide-sm">Quality</span>
+      <select id="quality">
+        <option value="auto">Auto</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low (fast)</option>
+      </select>
+    </label>
+    <button id="btn-shot" class="tb icon" title="Save a screenshot (PNG)">&#128247;</button>
+    <button id="btn-full" class="tb icon" title="Fullscreen">&#9974;</button>
+    <button id="btn-panel" class="tb icon" title="Toggle side panel (H)">&#9776;</button>
+  </div>
+  <div class="workspace">
+    <div id="stage">
+      <canvas id="cv"></canvas>
+      <div id="hint"></div>
+      <div id="pausedTag">PAUSED</div>
+      <div id="fps"></div>
+    </div>
+    <aside id="panel">
+      <div class="ptabs">
+        <button class="ptab active" data-tab="controls">Controls</button>
+        <button class="ptab" data-tab="theory">Theory &amp; Guide</button>
+      </div>
+      <div id="tab-controls" class="tabbody">
+        <div class="sec">Live data</div>
+        <div id="readouts"></div>
+        <div id="controls"></div>
+      </div>
+      <div id="tab-theory" class="tabbody hidden">
+        <div id="howto"></div>
+        <div id="theory"></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<div id="toast"></div>
+
+<script src="js/core.js?v=3"></script>
+<script src="js/thumbs.js?v=3"></script>
+<script src="js/labs/electrons.js?v=3"></script>
+<script src="js/labs/gravity.js?v=3"></script>
+<script src="js/labs/ripple.js?v=3"></script>
+<script src="js/labs/pendulum.js?v=3"></script>
+<script src="js/labs/gas.js?v=3"></script>
+<script src="js/labs/lorentz.js?v=3"></script>
+<script src="js/labs/optics.js?v=3"></script>
+<script src="js/labs/fluid.js?v=3"></script>
+<script src="js/labs/projectile.js?v=3"></script>
+<script src="js/labs/cloth.js?v=3"></script>
+<script src="js/labs/quantum.js?v=3"></script>
+<script src="js/labs/blackhole.js?v=3"></script>
+<script src="js/labs/matter.js?v=3"></script>
+<script src="js/labs/ising.js?v=3"></script>
+<script src="js/labs/string.js?v=3"></script>
+<script>PhysLab.start();</script>
+</body>
+</html>
