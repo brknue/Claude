@@ -3,39 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GamePulse — Game News Tracker</title>
+  <title>GamePulse — All Games Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>body{font-family:Inter,system-ui,sans-serif}.glass{background:rgba(15,23,42,.7);backdrop-filter:blur(12px)}.gradient-text{background:linear-gradient(135deg,#0ea5e9,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}</style>
+  <style>body{font-family:Inter,system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}.gradient-text{background:linear-gradient(135deg,#0ea5e9,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}</style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
   <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-      <a href="index.html" class="flex items-center gap-2 font-bold"><div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-violet-600 flex items-center justify-center text-sm">GP</div>Game<span class="gradient-text">Pulse</span></a>
-      <div class="flex gap-4 text-sm"><a href="catalog.html" class="hover:text-sky-400">Catalog</a><a href="../citypulse/index.html" class="text-emerald-400">CityPulse →</a></div>
-    </div>
-  </nav>
-  <header class="pt-24 pb-12 px-4">
-    <div class="max-w-7xl mx-auto">
-      <h1 class="text-4xl font-extrabold mb-4">Every Game.<br><span class="gradient-text">Every Update.</span></h1>
-      <p class="text-slate-400 mb-6 max-w-xl">AAA, Indie, Mobile, Esports + full Roblox daily tracking. Open games in multiple tabs.</p>
-      <div class="flex flex-wrap gap-3">
-        <a href="catalog.html" class="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-sm">Full Catalog →</a>
-        <a href="track.html?game=steal-an-egg" target="_blank" class="px-5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm">Example: Steal An Egg</a>
+      <a href="index.html" class="flex items-center gap-2 font-bold">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-violet-600 flex items-center justify-center text-sm">GP</div>
+        Game<span class="gradient-text">Pulse</span>
+      </a>
+      <div class="flex gap-4 text-sm">
+        <a href="catalog.html" class="hover:text-sky-400">Catalog</a>
+        <a href="../citypulse/index.html" class="text-emerald-400">CityPulse →</a>
       </div>
     </div>
+  </nav>
+
+  <header class="pt-24 pb-12 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-medium mb-4">AAA · Indie · Mobile · Esports · Roblox</div>
+      <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-4">Every Game.<br><span class="gradient-text">Every Update.</span></h1>
+      <p class="text-slate-400 text-lg max-w-2xl mb-6">Track news across all platforms — not Roblox-only. Open any game in its own tab. Search the world via RAWG / Steam when a title is not in the local list.</p>
+      <div class="flex flex-wrap gap-3 mb-8">
+        <a href="catalog.html" class="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-sm">Full Catalog →</a>
+        <a href="track.html?game=gta-6" target="_blank" class="px-5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm">GTA 6</a>
+        <a href="track.html?game=blox-fruits" target="_blank" class="px-5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm">Blox Fruits</a>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2 max-w-xl">
+        <input id="worldQ" type="text" placeholder="Search any game in the world…" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+        <button onclick="searchWorld()" class="px-4 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-sm font-semibold">Search world</button>
+      </div>
+      <p class="text-xs text-slate-500 mt-2">Opens RAWG (500k+ games) + Steam + Google. Free API: rawg.io/apidocs</p>
+    </div>
   </header>
-  <section class="max-w-7xl mx-auto px-4 mb-16">
-    <h2 class="text-xl font-bold mb-4">Quick Roblox links (open in new tabs)</h2>
-    <div class="flex flex-wrap gap-2">
-      <a href="track.html?game=steal-an-egg" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 text-sm">🥚 Steal An Egg</a>
-      <a href="track.html?game=murder-mystery-2" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 text-sm">🔪 Murder Mystery 2</a>
-      <a href="track.html?game=brookhaven" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 text-sm">🏡 Brookhaven</a>
-      <a href="track.html?game=blox-fruits" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 text-sm">🍎 Blox Fruits</a>
-      <a href="track.html?game=adopt-me" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 text-sm">🐣 Adopt Me!</a>
-      <a href="track.html?game=gta-6" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 text-sm">🚗 GTA 6</a>
+
+  <section class="max-w-7xl mx-auto px-4 mb-12">
+    <h2 class="text-xl font-bold mb-4">Platforms</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">🎮 AAA / Console</a>
+      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">🕹️ Indie / PC</a>
+      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">📱 Mobile</a>
+      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">🧱 Roblox</a>
     </div>
   </section>
-  <footer class="border-t border-slate-800 py-8 text-center text-sm text-slate-500">GamePulse inside Claude repo</footer>
+
+  <section class="max-w-7xl mx-auto px-4 mb-16">
+    <h2 class="text-xl font-bold mb-4">Featured (open in new tabs)</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <a href="track.html?game=gta-6" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🚗 <strong>GTA 6</strong><br><span class="text-xs text-slate-500">AAA · Launch Nov 2026</span></a>
+      <a href="track.html?game=blox-fruits" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🍎 <strong>Blox Fruits</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
+      <a href="track.html?game=steal-an-egg" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🥚 <strong>Steal An Egg</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
+      <a href="track.html?game=murder-mystery-2" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🔪 <strong>Murder Mystery 2</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
+      <a href="track.html?game=brookhaven" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🏡 <strong>Brookhaven</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
+      <a href="track.html?game=adopt-me" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🐣 <strong>Adopt Me!</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
+    </div>
+  </section>
+
+  <footer class="border-t border-slate-800 py-8 text-center text-sm text-slate-500">
+    GamePulse · Claude repo · Not every game hardcoded — use Search world + RAWG for full coverage
+  </footer>
+  <script>
+    function searchWorld(){
+      const q=document.getElementById('worldQ').value.trim();
+      if(!q)return;
+      const e=encodeURIComponent(q);
+      window.open('https://rawg.io/search?query='+e,'_blank');
+      window.open('https://store.steampowered.com/search/?term='+e,'_blank');
+      window.open('https://www.google.com/search?q='+e+'+game','_blank');
+    }
+    document.getElementById('worldQ').addEventListener('keydown',e=>{if(e.key==='Enter')searchWorld()});
+  </script>
 </body>
 </html>

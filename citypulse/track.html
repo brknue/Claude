@@ -5,27 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CityPulse — City Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{font-family:system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
-  <a href="index.html" class="text-emerald-400 text-sm">← CityPulse</a>
-  <div id="out" class="mt-8 max-w-2xl"></div>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="index.html" class="font-bold text-emerald-400">← CityPulse</a>
+      <button onclick="addTrack()" id="btn" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-xs font-semibold">+ Track This</button>
+    </div>
+  </nav>
+  <main class="pt-20 pb-16 max-w-3xl mx-auto px-4">
+    <div id="out"></div>
+  </main>
+  <div id="bar" class="fixed bottom-0 left-0 right-0 glass border-t border-slate-800 p-3 hidden">
+    <div class="max-w-7xl mx-auto flex gap-2 items-center overflow-x-auto text-xs">
+      <span class="text-slate-500 shrink-0">Tracked:</span>
+      <div id="list" class="flex gap-2"></div>
+      <button onclick="localStorage.removeItem('cp_tracked');renderBar()" class="ml-auto text-slate-500 hover:text-rose-400">Clear</button>
+    </div>
+  </div>
   <script>
     const CITIES = {
-      "hallstatt": { name: "Hallstatt", flag: "🇦🇹", country: "Austria", note: "UNESCO alpine lake village." },
-      "chefchaouen": { name: "Chefchaouen", flag: "🇲🇦", country: "Morocco", note: "The blue medina in the Rif Mountains." },
-      "giethoorn": { name: "Giethoorn", flag: "🇳🇱", country: "Netherlands", note: "Canal village — Dutch Venice." },
-      "shirakawa-go": { name: "Shirakawa-go", flag: "🇯🇵", country: "Japan", note: "Thatched-roof UNESCO mountain village." },
-      "bled": { name: "Bled", flag: "🇸🇮", country: "Slovenia", note: "Alpine lake with island church and castle." },
-      "reine": { name: "Reine", flag: "🇳🇴", country: "Norway", note: "Dramatic Lofoten fishing village." }
+      "hallstatt": { name: "Hallstatt", flag: "🇦🇹", country: "Austria", region: "Europe", note: "UNESCO alpine lake village, salt mining history." },
+      "chefchaouen": { name: "Chefchaouen", flag: "🇲🇦", country: "Morocco", region: "Africa", note: "Blue medina in the Rif Mountains." },
+      "giethoorn": { name: "Giethoorn", flag: "🇳🇱", country: "Netherlands", region: "Europe", note: "Canal village — Dutch Venice, car-free core." },
+      "shirakawa-go": { name: "Shirakawa-go", flag: "🇯🇵", country: "Japan", region: "Asia", note: "UNESCO thatched-roof mountain village." },
+      "bled": { name: "Bled", flag: "🇸🇮", country: "Slovenia", region: "Europe", note: "Alpine lake with island church and cliff castle." },
+      "reine": { name: "Reine", flag: "🇳🇴", country: "Norway", region: "Europe", note: "Dramatic Lofoten fishing village." }
     };
     const slug = new URLSearchParams(location.search).get('city') || '';
     const c = CITIES[slug];
     const el = document.getElementById('out');
-    if (!c) el.innerHTML = '<h1 class="text-2xl font-bold">City not found</h1><a href="catalog.html" class="text-emerald-400">Catalog →</a>';
-    else {
+    if (!c) {
+      el.innerHTML = '<h1 class="text-2xl font-bold mb-2">City not found</h1><p class="text-slate-400 mb-4">Use catalog or world search.</p><a href="catalog.html" class="text-emerald-400">Catalog →</a>';
+    } else {
       document.title = c.name + ' — CityPulse';
-      el.innerHTML = `<div class="text-4xl mb-2">${c.flag}</div><h1 class="text-3xl font-bold">${c.name}</h1><p class="text-slate-400 text-sm">${c.country}</p><p class="mt-4 text-slate-300">${c.note}</p>`;
+      el.innerHTML = `<div class="text-5xl mb-3">${c.flag}</div><h1 class="text-3xl font-bold">${c.name}</h1><p class="text-slate-400 text-sm mt-1">${c.country} · ${c.region}</p><p class="mt-4 text-slate-300">${c.note}</p>`;
     }
+    function getT(){try{return JSON.parse(localStorage.getItem('cp_tracked')||'[]')}catch{return[]}}
+    function addTrack(){if(!slug||!CITIES[slug])return;let t=getT();if(!t.includes(slug)){t.push(slug);localStorage.setItem('cp_tracked',JSON.stringify(t))}document.getElementById('btn').textContent='✓ Tracked';renderBar()}
+    function renderBar(){const t=getT();const bar=document.getElementById('bar');if(!t.length){bar.classList.add('hidden');return}bar.classList.remove('hidden');document.getElementById('list').innerHTML=t.map(s=>{const x=CITIES[s];return x?`<a href="track.html?city=${s}" target="_blank" class="px-2 py-1 rounded bg-slate-800">${x.flag} ${x.name}</a>`:''}).join('')}
+    renderBar(); if(getT().includes(slug)) document.getElementById('btn').textContent='✓ Tracked';
   </script>
 </body>
 </html>

@@ -5,28 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GamePulse — Track Game</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>body{font-family:system-ui,sans-serif}</style>
+  <style>body{font-family:system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
-  <a href="index.html" class="text-sky-400 text-sm">← GamePulse</a>
-  <div id="out" class="mt-8 max-w-2xl"></div>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="index.html" class="font-bold text-sky-400">← GamePulse</a>
+      <button onclick="addTrack()" id="btn" class="px-3 py-1.5 rounded-lg bg-sky-500 text-xs font-semibold">+ Track This</button>
+    </div>
+  </nav>
+  <main class="pt-20 pb-16 max-w-3xl mx-auto px-4">
+    <div id="out"></div>
+  </main>
+  <div id="bar" class="fixed bottom-0 left-0 right-0 glass border-t border-slate-800 p-3 hidden">
+    <div class="max-w-7xl mx-auto flex gap-2 items-center overflow-x-auto text-xs">
+      <span class="text-slate-500 shrink-0">Tracked:</span>
+      <div id="list" class="flex gap-2"></div>
+      <button onclick="localStorage.removeItem('gp_tracked');renderBar()" class="ml-auto text-slate-500 hover:text-rose-400">Clear</button>
+    </div>
+  </div>
   <script>
     const GAMES = {
-      "steal-an-egg": { title: "Steal An Egg", icon: "🥚", platform: "Roblox", players: "500k+", note: "Alien Biome incoming. Top experience." },
-      "murder-mystery-2": { title: "Murder Mystery 2", icon: "🔪", platform: "Roblox", players: "460k+", note: "Seasonal content continuing." },
-      "brookhaven": { title: "Brookhaven RP", icon: "🏡", platform: "Roblox", players: "325k+", note: "New downtown + vehicle overhaul." },
-      "blox-fruits": { title: "Blox Fruits", icon: "🍎", platform: "Roblox", players: "200k+", note: "Halloween extended, fruit reworks." },
-      "adopt-me": { title: "Adopt Me!", icon: "🐣", platform: "Roblox", players: "140k+", note: "Fall pets + autumn eggs." },
-      "gta-6": { title: "Grand Theft Auto VI", icon: "🚗", platform: "AAA", players: "Pre-order record", note: "Launch Nov 19, 2026. Most pre-ordered ever." }
+      "gta-6": { title: "Grand Theft Auto VI", icon: "🚗", platform: "AAA / Console", players: "Pre-order record", note: "Launch targeted for Nov 19, 2026. Most pre-ordered Rockstar title." },
+      "steal-an-egg": { title: "Steal An Egg", icon: "🥚", platform: "Roblox", players: "500k+", note: "Alien Biome and ongoing updates. Top concurrent experience." },
+      "murder-mystery-2": { title: "Murder Mystery 2", icon: "🔪", platform: "Roblox", players: "460k+", note: "Seasonal content and rounds continue." },
+      "brookhaven": { title: "Brookhaven RP", icon: "🏡", platform: "Roblox", players: "325k+", note: "Downtown and vehicle updates." },
+      "blox-fruits": { title: "Blox Fruits", icon: "🍎", platform: "Roblox", players: "200k+", note: "Fruit reworks and seasonal events." },
+      "adopt-me": { title: "Adopt Me!", icon: "🐣", platform: "Roblox", players: "140k+", note: "Pets, eggs, and seasonal drops." }
     };
     const slug = new URLSearchParams(location.search).get('game') || '';
     const g = GAMES[slug];
     const el = document.getElementById('out');
-    if (!g) { el.innerHTML = '<h1 class="text-2xl font-bold">Game not found</h1><a href="catalog.html" class="text-sky-400">Catalog →</a>'; }
-    else {
+    if (!g) {
+      el.innerHTML = '<h1 class="text-2xl font-bold mb-2">Game not found</h1><p class="text-slate-400 mb-4">Use catalog or world search for any title.</p><a href="catalog.html" class="text-sky-400">Catalog →</a>';
+    } else {
       document.title = g.title + ' — GamePulse';
-      el.innerHTML = `<div class="text-4xl mb-2">${g.icon}</div><h1 class="text-3xl font-bold">${g.title}</h1><p class="text-slate-400 text-sm mt-1">${g.platform} · ${g.players}</p><p class="mt-4 text-slate-300">${g.note}</p><p class="mt-6 text-xs text-slate-500">Open more games in new tabs from the catalog or home page.</p>`;
+      el.innerHTML = `<div class="text-5xl mb-3">${g.icon}</div><h1 class="text-3xl font-bold">${g.title}</h1><p class="text-slate-400 text-sm mt-1">${g.platform} · ${g.players}</p><p class="mt-4 text-slate-300">${g.note}</p><p class="mt-6 text-xs text-slate-500">Open more games from the catalog in additional tabs.</p>`;
     }
+    function getT(){try{return JSON.parse(localStorage.getItem('gp_tracked')||'[]')}catch{return[]}}
+    function addTrack(){if(!slug||!GAMES[slug])return;let t=getT();if(!t.includes(slug)){t.push(slug);localStorage.setItem('gp_tracked',JSON.stringify(t))}document.getElementById('btn').textContent='✓ Tracked';renderBar()}
+    function renderBar(){const t=getT();const bar=document.getElementById('bar');if(!t.length){bar.classList.add('hidden');return}bar.classList.remove('hidden');document.getElementById('list').innerHTML=t.map(s=>{const x=GAMES[s];return x?`<a href="track.html?game=${s}" target="_blank" class="px-2 py-1 rounded bg-slate-800">${x.icon} ${x.title}</a>`:''}).join('')}
+    renderBar(); if(getT().includes(slug)) document.getElementById('btn').textContent='✓ Tracked';
   </script>
 </body>
 </html>

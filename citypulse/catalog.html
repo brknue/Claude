@@ -3,22 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CityPulse Catalog — All Cities Path</title>
+  <title>CityPulse Catalog</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-6">
   <a href="index.html" class="text-emerald-400 text-sm">← CityPulse</a>
   <h1 class="text-2xl font-bold mt-4 mb-2">Catalog</h1>
-  <p class="text-slate-400 text-sm mb-4 max-w-2xl">Local featured small towns. For <strong>any</strong> city or town on Earth, use the search below — it opens GeoNames-style search, OpenStreetMap, and Wikipedia so you are not limited to this list.</p>
-
+  <p class="text-slate-400 text-sm mb-4 max-w-2xl">Local featured towns. For <strong>any</strong> city on Earth use Search world (GeoNames / OSM / Wikipedia). Full dumps: GeoNames or joelacus/world-cities.</p>
   <div class="flex flex-col sm:flex-row gap-2 mb-8 max-w-2xl">
-    <input id="q" type="text" placeholder="Search any city or town in the world…" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+    <input id="q" type="text" placeholder="Search any city or town…" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
     <button onclick="searchAny()" class="px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold">Search everywhere</button>
   </div>
-  <p class="text-xs text-slate-500 mb-6">To host millions of places yourself: download GeoNames dumps or joelacus/world-cities JSON, then filter by population. See README.md.</p>
-
-  <h2 class="font-bold mb-3">Featured / local</h2>
-  <div class="grid gap-3 sm:grid-cols-2 max-w-3xl mb-10">
+  <h2 class="font-bold mb-3">Featured</h2>
+  <div class="grid gap-3 sm:grid-cols-2 max-w-3xl">
     <a href="track.html?city=hallstatt" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇦🇹 Hallstatt</a>
     <a href="track.html?city=chefchaouen" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇲🇦 Chefchaouen</a>
     <a href="track.html?city=giethoorn" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇳🇱 Giethoorn</a>
@@ -26,17 +23,9 @@
     <a href="track.html?city=bled" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇸🇮 Bled</a>
     <a href="track.html?city=reine" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇳🇴 Reine</a>
   </div>
-
   <script>
-    function searchAny() {
-      const q = document.getElementById('q').value.trim();
-      if (!q) return;
-      const enc = encodeURIComponent(q);
-      window.open('https://www.geonames.org/search.html?q=' + enc, '_blank');
-      window.open('https://www.openstreetmap.org/search?query=' + enc, '_blank');
-      window.open('https://en.wikipedia.org/w/index.php?search=' + enc, '_blank');
-    }
-    document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') searchAny(); });
+    function searchAny(){const q=document.getElementById('q').value.trim();if(!q)return;const e=encodeURIComponent(q);window.open('https://www.geonames.org/search.html?q='+e,'_blank');window.open('https://www.openstreetmap.org/search?query='+e,'_blank');window.open('https://en.wikipedia.org/w/index.php?search='+e,'_blank')}
+    document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')searchAny()});
   </script>
 </body>
 </html>

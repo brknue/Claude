@@ -9,15 +9,12 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen p-6">
   <a href="index.html" class="text-sky-400 text-sm">← GamePulse</a>
   <h1 class="text-2xl font-bold mt-4 mb-2">Catalog — All Platforms</h1>
-  <p class="text-slate-400 text-sm mb-4 max-w-2xl">Local featured list (AAA, Indie, Mobile, Roblox, Esports). For <strong>any</strong> game in the world, use the search below — it opens RAWG / Steam / Google so you are not limited to this list.</p>
-
+  <p class="text-slate-400 text-sm mb-4 max-w-2xl">Local featured list (AAA, Indie, Mobile, Roblox). For <strong>any</strong> game, use Search world → RAWG / Steam / Google.</p>
   <div class="flex flex-col sm:flex-row gap-2 mb-8 max-w-2xl">
     <input id="q" type="text" placeholder="Search any game in the world…" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
     <button onclick="searchAny()" class="px-4 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold">Search everywhere</button>
   </div>
-  <p class="text-xs text-slate-500 mb-6">Search opens RAWG (500k+ games) + Steam + Google in new tabs. Free RAWG key: rawg.io/apidocs</p>
-
-  <h2 class="font-bold mb-3">Featured / local</h2>
+  <h2 class="font-bold mb-3">Featured</h2>
   <div class="grid gap-3 sm:grid-cols-2 max-w-3xl mb-10">
     <a href="track.html?game=gta-6" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-sky-500/50">🚗 GTA 6 <span class="text-xs text-slate-500">AAA</span></a>
     <a href="track.html?game=blox-fruits" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-sky-500/50">🍎 Blox Fruits <span class="text-xs text-slate-500">Roblox</span></a>
@@ -26,19 +23,10 @@
     <a href="track.html?game=brookhaven" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-sky-500/50">🏡 Brookhaven <span class="text-xs text-slate-500">Roblox</span></a>
     <a href="track.html?game=adopt-me" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-sky-500/50">🐣 Adopt Me! <span class="text-xs text-slate-500">Roblox</span></a>
   </div>
-
-  <p class="text-sm text-slate-500">To power true in-site search of 500k+ games, wire the search box to the <a href="https://rawg.io/apidocs" class="text-sky-400" target="_blank">RAWG API</a> (free tier available). See README.md for the full plan.</p>
-
+  <p class="text-sm text-slate-500">Wire RAWG API for in-page 500k+ search: <a href="https://rawg.io/apidocs" class="text-sky-400" target="_blank">rawg.io/apidocs</a></p>
   <script>
-    function searchAny() {
-      const q = document.getElementById('q').value.trim();
-      if (!q) return;
-      const enc = encodeURIComponent(q);
-      window.open('https://rawg.io/search?query=' + enc, '_blank');
-      window.open('https://store.steampowered.com/search/?term=' + enc, '_blank');
-      window.open('https://www.google.com/search?q=' + enc + '+game', '_blank');
-    }
-    document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') searchAny(); });
+    function searchAny(){const q=document.getElementById('q').value.trim();if(!q)return;const e=encodeURIComponent(q);window.open('https://rawg.io/search?query='+e,'_blank');window.open('https://store.steampowered.com/search/?term='+e,'_blank');window.open('https://www.google.com/search?q='+e+'+game','_blank')}
+    document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')searchAny()});
   </script>
 </body>
 </html>

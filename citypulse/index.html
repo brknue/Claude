@@ -3,31 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CityPulse — Small Cities Tracker</title>
+  <title>CityPulse — Small Cities & Towns Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>body{font-family:system-ui,sans-serif}.gradient-text{background:linear-gradient(135deg,#34d399,#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}</style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:Inter,system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}.gradient-text{background:linear-gradient(135deg,#34d399,#0ea5e9,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}</style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
-  <nav class="border-b border-slate-800 px-4 h-14 flex items-center justify-between max-w-7xl mx-auto">
-    <a href="index.html" class="font-bold flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-sm">CP</span>City<span class="gradient-text">Pulse</span></a>
-    <div class="flex gap-4 text-sm"><a href="catalog.html" class="hover:text-emerald-400">Catalog</a><a href="../gamepulse/index.html" class="text-sky-400">GamePulse →</a></div>
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 font-bold">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-sm">CP</div>
+        City<span class="gradient-text">Pulse</span>
+      </a>
+      <div class="flex gap-4 text-sm">
+        <a href="catalog.html" class="hover:text-emerald-400">Catalog</a>
+        <a href="../gamepulse/index.html" class="text-sky-400">GamePulse →</a>
+      </div>
+    </div>
   </nav>
-  <header class="pt-16 pb-12 px-4 max-w-7xl mx-auto">
-    <h1 class="text-4xl font-extrabold mb-4">Every small city.<br><span class="gradient-text">One place to track it.</span></h1>
-    <p class="text-slate-400 mb-6 max-w-xl">Notable small cities & towns worldwide. Open any city in its own tab.</p>
-    <p class="text-slate-500 text-sm mb-8">Reality: millions of places exist. This is a curated practical catalog.</p>
-    <a href="catalog.html" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm">Browse Catalog →</a>
+  <header class="pt-24 pb-12 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium mb-4">Worldwide · Small cities & towns</div>
+      <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-4">Every small city.<br><span class="gradient-text">One place to track it.</span></h1>
+      <p class="text-slate-400 text-lg max-w-2xl mb-4">Notable towns across every continent. Open any city in its own tab. Search the world via GeoNames / OSM / Wikipedia for places not in the local list.</p>
+      <p class="text-slate-500 text-sm max-w-2xl mb-6"><strong class="text-slate-400">Reality:</strong> Millions of places exist. Local catalog = featured; world search + GeoNames dumps = path to full coverage.</p>
+      <div class="flex flex-wrap gap-3 mb-8">
+        <a href="catalog.html" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm">Full Catalog →</a>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2 max-w-xl">
+        <input id="worldQ" type="text" placeholder="Search any city or town in the world…" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <button onclick="searchWorld()" class="px-4 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-sm font-semibold">Search world</button>
+      </div>
+    </div>
   </header>
-  <section class="max-w-7xl mx-auto px-4 mb-16">
+  <section class="max-w-7xl mx-auto px-4 mb-12">
     <h2 class="text-xl font-bold mb-4">Featured</h2>
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <a href="track.html?city=hallstatt" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇦🇹 Hallstatt · Austria</a>
-      <a href="track.html?city=chefchaouen" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇲🇦 Chefchaouen · Morocco</a>
-      <a href="track.html?city=giethoorn" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇳🇱 Giethoorn · Netherlands</a>
-      <a href="track.html?city=shirakawa-go" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇯🇵 Shirakawa-go · Japan</a>
-      <a href="track.html?city=bled" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇸🇮 Bled · Slovenia</a>
-      <a href="track.html?city=reine" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇳🇴 Reine · Norway</a>
+      <a href="track.html?city=hallstatt" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇦🇹 <strong>Hallstatt</strong><br><span class="text-xs text-slate-500">Austria · Alpine lake</span></a>
+      <a href="track.html?city=chefchaouen" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇲🇦 <strong>Chefchaouen</strong><br><span class="text-xs text-slate-500">Morocco · Blue medina</span></a>
+      <a href="track.html?city=giethoorn" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇳🇱 <strong>Giethoorn</strong><br><span class="text-xs text-slate-500">Netherlands · Canals</span></a>
+      <a href="track.html?city=shirakawa-go" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇯🇵 <strong>Shirakawa-go</strong><br><span class="text-xs text-slate-500">Japan · Thatched houses</span></a>
+      <a href="track.html?city=bled" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇸🇮 <strong>Bled</strong><br><span class="text-xs text-slate-500">Slovenia · Lake island</span></a>
+      <a href="track.html?city=reine" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇳🇴 <strong>Reine</strong><br><span class="text-xs text-slate-500">Norway · Lofoten</span></a>
     </div>
   </section>
+  <section class="max-w-7xl mx-auto px-4 mb-16">
+    <h2 class="text-xl font-bold mb-4">Regions</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+      <a href="catalog.html?region=europe" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-emerald-500/50">🇪🇺 Europe</a>
+      <a href="catalog.html?region=asia" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-emerald-500/50">🌏 Asia</a>
+      <a href="catalog.html?region=americas" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-emerald-500/50">🌎 Americas</a>
+      <a href="catalog.html?region=africa" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-emerald-500/50">🌍 Africa</a>
+      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">🗺️ All</a>
+    </div>
+  </section>
+  <footer class="border-t border-slate-800 py-8 text-center text-sm text-slate-500">CityPulse · Claude repo · GeoNames / world-cities JSON for full coverage</footer>
+  <script>
+    function searchWorld(){const q=document.getElementById('worldQ').value.trim();if(!q)return;const e=encodeURIComponent(q);window.open('https://www.geonames.org/search.html?q='+e,'_blank');window.open('https://www.openstreetmap.org/search?query='+e,'_blank');window.open('https://en.wikipedia.org/w/index.php?search='+e,'_blank')}
+    document.getElementById('worldQ').addEventListener('keydown',e=>{if(e.key==='Enter')searchWorld()});
+  </script>
 </body>
 </html>
