@@ -439,9 +439,12 @@ PhysLab.define({
     return {
       ext,
       probe() {
-        let bx = 0, by = 0, bn = 0, rx = 0, ry = 0, rn = 0;
-        for (let i = 0; i < hitPts.length; i += 4) { const wl = hitPts[i + 2]; if (wl < 460) { bx += hitPts[i]; by += hitPts[i + 1]; bn++; } else if (wl > 630) { rx += hitPts[i]; ry += hitPts[i + 1]; rn++; } }
-        return { n: els.length, types: [...new Set(els.map((e) => e.type))], spread: bn && rn ? Math.hypot(bx / bn - rx / rn, by / bn - ry / rn) : 0 };
+        // colour separation on screens: farthest any blue hit lands from its nearest red hit
+        const blue = [], red = [];
+        for (let i = 0; i < hitPts.length; i += 4) { const wl = hitPts[i + 2]; if (wl < 460) blue.push(hitPts[i], hitPts[i + 1]); else if (wl > 630) red.push(hitPts[i], hitPts[i + 1]); }
+        let spread = 0;
+        for (let i = 0; i < blue.length && red.length; i += 2) { let m = Infinity; for (let j = 0; j < red.length; j += 2) m = Math.min(m, Math.hypot(blue[i] - red[j], blue[i + 1] - red[j + 1])); spread = Math.max(spread, m); }
+        return { n: els.length, types: [...new Set(els.map((e) => e.type))], spread };
       },
       step() {},
       draw(ctx) {

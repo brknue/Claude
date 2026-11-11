@@ -178,7 +178,7 @@ PhysLab.define({
       layout();
       const n = Math.min(NMAX, Math.round(S.n)), half = n >> 1, a = 1.122, R = Math.sqrt((half * a * a * 0.866) / Math.PI) + 0.4;
       N = 0;
-      for (const [cx, vx] of [[bw * 0.27, 2.4], [bw * 0.73, -2.4]]) {
+      for (const [cx, vx] of [[bw * 0.27, 1.0], [bw * 0.73, -1.0]]) {
         let c = 0;
         const m = Math.ceil(R / (a * 0.866));
         for (let j = -m; j <= m; j++) for (let i = -m - 1; i <= m + 1; i++) {

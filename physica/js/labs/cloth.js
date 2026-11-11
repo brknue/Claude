@@ -198,7 +198,7 @@ PhysLab.define({
         kill(b); kill(b + 1);
       }
     }
-    function ignite(k) { if (k >= 0 && !BURNT[k] && FIRE[k] <= 0) FIRE[k] = 0.45 + Math.random() * 0.35; }
+    function ignite(k) { if (k >= 0 && !BURNT[k] && FIRE[k] <= 0) FIRE[k] = 0.7 + Math.random() * 0.6; }
     ui.section('Fire & projectiles');
     ui.note('Pick <b>🔥 Burn</b> in the tool list and touch the cloth — the fire spreads along the threads. Pick <b>⚾ Throw ball</b> and drag to throw a ball into the fabric.');
     ui.buttons([{ label: 'Remove balls', onClick: () => (X3.balls = []) }]);
@@ -209,7 +209,7 @@ PhysLab.define({
         for (let k = 0; k < NP; k++) {
           if (FIRE[k] <= 0) continue;
           FIRE[k] -= dt;
-          const i = k % COLS, j = (k / COLS) | 0, pr = dt * 5.5;
+          const i = k % COLS, j = (k / COLS) | 0, pr = dt * 1.5;
           if (i > 0 && ALIVE[HC(i - 1, j)] && Math.random() < pr) ignite(k - 1);
           if (i < COLS - 1 && ALIVE[HC(i, j)] && Math.random() < pr) ignite(k + 1);
           if (j > 0 && ALIVE[VC(i, j - 1)] && Math.random() < pr * 1.6) ignite(k - COLS);
@@ -239,8 +239,8 @@ PhysLab.define({
         ctx.globalCompositeOperation = 'lighter';
         for (let k = 0; k < NP; k++) {
           if (FIRE[k] <= 0) continue;
-          const r = 7 + Math.random() * 6;
-          ctx.fillStyle = `rgba(255,${(120 + Math.random() * 90) | 0},30,0.5)`;
+          const r = 3.5 + Math.random() * 3.5;
+          ctx.fillStyle = `rgba(255,${(120 + Math.random() * 90) | 0},30,0.42)`;
           ctx.beginPath(); ctx.arc(X[k], Y[k] - Math.random() * 5, r, 0, TAU); ctx.fill();
         }
         for (const s of X3.sparks) { ctx.fillStyle = `rgba(255,190,80,${s.l})`; ctx.fillRect(s.x, s.y, 2, 2); }
