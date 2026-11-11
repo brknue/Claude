@@ -1,6 +1,6 @@
 # Deep Dig: project handoff
 
-Last updated: 2026-11-11 (second update) by Claude.
+Last updated: 2026-11-11 (third update) by Claude.
 
 ## 0. Roles (changed by the owner on 2026-11-11)
 
@@ -28,7 +28,7 @@ Slow channel, this repository: this file, plus `deep-dig/reviews/codex/` and `de
 ## 3. Branches
 
 - `main`: integrated record. For `deep-dig/`, only Claude merges into `main`.
-- Claude: `claude/deep-dig-*`. Baseline `8375396` (`claude/deep-dig-baseline`); current snapshot on `claude/deep-dig-feel`, merged to `main`.
+- Claude: `claude/deep-dig-*`. Baseline `8375396` (`claude/deep-dig-baseline`); snapshots on `claude/deep-dig-feel` and `claude/deep-dig-review-fixes`, merged to `main`.
 - Codex: `codex/deep-dig-*` in its own checkout. Seen so far: `codex/deep-dig-review-1` (review delivered), `codex/deep-dig-visuals-1` (no commits yet).
 - No force-push, no rewriting history, never overwrite or reset another worker's changes, stage only your own paths.
 
@@ -62,8 +62,10 @@ Tested in Studio Play mode (single client, PC) on 2026-11-11, no errors in Outpu
 
 Not tested: real phone, shop window by hand, two clients, respawn, failed DataStore load, the hint text for a brand-new player, session lock on live servers (Studio has no JobId so the lock is skipped there), sounds (none added yet).
 
-**Claude's next task:** the open review items in section 7, then whatever Codex asks for on the board.
-**Codex's next task:** see `Claude_to_Codex` message #1 (hub, mine entrance, block templates, sounds, lighting, meteorite template) and answer questions a, b, c there.
+**Codex has built** (in Studio, not in git): an outpost hub (about 98 parts), 13 BlockTemplates (4 layers, 8 ores, Meteorite) and the UI mockup `StarterGui.DeepDigMockup`. The functional UI now follows that mockup.
+
+**Claude's next task:** depth ambience script once Codex specifies it; two-client and phone testing.
+**Codex's next task:** see `Claude_to_Codex` message #4 (remove Claude's old placeholder signs, add the 9 sounds, specify depth ambience).
 
 ## 6. How to test
 
@@ -79,19 +81,19 @@ Not tested: real phone, shop window by hand, two clients, respawn, failed DataSt
 
 Review file: `deep-dig/reviews/codex/2026-11-11-review-1.md` on `codex/deep-dig-review-1` (static inspection of baseline `8375396`). Thank you, Codex; it is accurate and useful.
 
-| ID | Severity | Status in current snapshot |
+| ID | Severity | Status after the fixes of 2026-11-11 (third snapshot) |
 |---|---|---|
-| DD-01 | high | Mostly addressed: UpdateAsync, session lock with lease, version field, one in-flight save per profile, stale owner write rejected. Not yet tested with two servers (T1/T2). |
-| DD-02 | high | Open. Failed final save still only warns. Must be fixed before public release. |
-| DD-03 | medium | Open. Failed load still allows unsaved play without telling the player. |
-| DD-04 | medium | Open. No server line-of-sight check. |
-| DD-05 | medium | Open. Server still accepts hits at 0.8x the cooldown. |
-| DD-06 | medium | Partly: generate() no longer mutates the table while yielding; entrance is still not blocked during refill. |
-| DD-07 | medium | Open. UI scale ignores viewport width (portrait phones). |
-| DD-08 | medium | Disputed pending a Studio check: `GetMouseLocation` returns viewport coordinates, which is what `ViewportPointToRay` expects. |
-| DD-09 | medium | Open. Touch ownership and shop-open cancel. |
-| DD-10 | low | Open. Toast tween not cancelled. |
-| DD-11 | low | Partly: infinity rejected for coins and inventory counts. |
+| DD-01 | high | Fixed in code: UpdateAsync, session lock with lease, version field, one in-flight save per profile, stale owner write rejected. Still not tested with two live servers (T1/T2); Studio has no JobId. |
+| DD-02 | high | Fixed in code: a failed final save keeps the profile in memory and retries every 20 s (15 tries), a rejoin to the same server resumes from it, shutdown flushes it, and giving up logs "DATA LOSS". Not fault-injected (T3). A server crash still loses it. |
+| DD-03 | medium | Fixed: `SaveFailed` attribute and a red on-screen banner. Play is still allowed. Not tested with a real failed load. |
+| DD-04 | medium | Fixed and tested: server line-of-sight (centre + six faces). 6 hidden blocks rejected, visible block accepted, 43 of 43 normal digs accepted. |
+| DD-05 | medium | Fixed and tested: token bucket. 85 requests in 5 s gave 21 accepted hits. |
+| DD-06 | medium | Fixed and tested once: players on or in the mine are moved out, a collidable lid closes the mine during rebuild, occupants are rescanned before it reopens, generate() errors are caught. Mine.generate leaving `locked` set after an error is still open. |
+| DD-07 | medium | Fixed: scale-based sizes with UISizeConstraint caps. Checked at desktop size only (HUD 620 wide, shop 520x380); not on a phone. |
+| DD-08 | medium | Not changed. GetMouseLocation is documented as ignoring the GUI inset, which matches ViewportPointToRay. Hover box lined up with the pointer in Studio; no inset configurations tested. |
+| DD-09 | medium | Fixed in code: first finger only, drag over 30 px cancels, shop open and focus loss cancel. Not tested on a touch device. |
+| DD-10 | low | Fixed: active toast tween is cancelled. |
+| DD-11 | low | Fixed: finite checks on every numeric field, inventory count cap. |
 
 ## 8. Log
 
@@ -101,3 +103,5 @@ Review file: `deep-dig/reviews/codex/2026-11-11-review-1.md` on `codex/deep-dig-
 | 2026-11-11 | Codex | CODEX-1 review delivered on `codex/deep-dig-review-1` (11 findings, 2 high). |
 | 2026-11-11 | Owner | Roles changed: Claude scripts, Codex builds; Codex added to Studio. |
 | 2026-11-11 | Claude | Team board created in Studio. Added safer saving, dig feedback, sound hooks, hints, meteor shower, funnel analytics, builder hooks. Snapshot on `claude/deep-dig-feel`. |
+| 2026-11-11 | Codex | Built outpost, block templates and UI mockup in Studio; asked for UI restyle and spawn facing the mine. |
+| 2026-11-11 | Claude | Review fixes DD-02 to DD-11 (see section 7), UI restyled to the mockup, spawn and SURFACE face the mine. Snapshot on `claude/deep-dig-review-fixes`. |

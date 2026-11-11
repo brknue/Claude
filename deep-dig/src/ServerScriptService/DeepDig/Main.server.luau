@@ -14,6 +14,10 @@ local world = workspace:WaitForChild("DeepDig")
 local sellPad = world:WaitForChild("SellPad") :: BasePart
 local shop = world:WaitForChild("Shop") :: BasePart
 local meteorsFolder = world:WaitForChild("Meteors")
+local blocksFolder = world:WaitForChild("Blocks")
+
+local MINE_SIZE = Config.MINE_WIDTH * Config.BLOCK_SIZE
+local MINE_CENTER = Config.MINE_ORIGIN + Vector3.new(MINE_SIZE / 2, 0, MINE_SIZE / 2)
 
 local DigBlock = Remotes:WaitForChild("DigBlock") :: RemoteEvent
 local BuyUpgrade = Remotes:WaitForChild("BuyUpgrade") :: RemoteEvent
@@ -57,8 +61,54 @@ end
 local function toSurface(player: Player)
 	local character = player.Character
 	if character and getRoot(player) then
-		character:PivotTo(CFrame.new(Config.SURFACE_POINT))
+		-- Arrive facing the mine.
+		local point = Config.SURFACE_POINT
+		character:PivotTo(CFrame.lookAt(point, Vector3.new(MINE_CENTER.X, point.Y, MINE_CENTER.Z)))
 	end
+end
+
+-- Dig rate: a small token bucket. Sustained rate is exactly one hit per DIG_COOLDOWN; the 2-token cap only absorbs jitter.
+local digBuckets: { [Player]: { tokens: number, t: number } } = {}
+
+local function takeDigToken(player: Player): boolean
+	local now = os.clock()
+	local bucket = digBuckets[player]
+	if not bucket then
+		bucket = { tokens = 2, t = now }
+		digBuckets[player] = bucket
+	end
+	bucket.tokens = math.min(2, bucket.tokens + (now - bucket.t) / Config.DIG_COOLDOWN)
+	bucket.t = now
+	if bucket.tokens < 1 then
+		return false
+	end
+	bucket.tokens -= 1
+	return true
+end
+
+-- Line of sight: the block must be the first diggable thing hit from the player's head
+-- towards its centre or one of its six faces. Stops digging ores through other blocks.
+local sightParams = RaycastParams.new()
+sightParams.FilterType = Enum.RaycastFilterType.Include
+sightParams.FilterDescendantsInstances = { blocksFolder, meteorsFolder }
+local SIGHT_OFFSETS = {
+	Vector3.zero, Vector3.yAxis, -Vector3.yAxis, Vector3.xAxis, -Vector3.xAxis, Vector3.zAxis, -Vector3.zAxis,
+}
+
+local function canSee(root: BasePart, part: BasePart): boolean
+	local origin = root.Position + Vector3.new(0, 1.5, 0)
+	local half = part.Size * 0.48
+	for _, offset in SIGHT_OFFSETS do
+		local direction = part.Position + offset * half - origin
+		if direction.Magnitude < 0.05 then
+			return true
+		end
+		local result = workspace:Raycast(origin, direction.Unit * (direction.Magnitude + 0.5), sightParams)
+		if result and (result.Instance == part or result.Instance:IsDescendantOf(part)) then
+			return true
+		end
+	end
+	return false
 end
 
 ---------------------------------------------------------------- Digging
@@ -76,7 +126,10 @@ DigBlock.OnServerEvent:Connect(function(player: Player, part: any)
 	if (root.Position - position).Magnitude > Config.REACH then
 		return
 	end
-	if not allow(player, "dig", Config.DIG_COOLDOWN * 0.8) then
+	if not takeDigToken(player) then
+		return
+	end
+	if not canSee(root, part :: BasePart) then
 		return
 	end
 	local oreName = block.ore
@@ -199,6 +252,7 @@ end
 Players.PlayerAdded:Connect(onPlayer)
 Players.PlayerRemoving:Connect(function(player: Player)
 	lastAction[player] = nil
+	digBuckets[player] = nil
 	PlayerData.release(player)
 end)
 for _, player in Players:GetPlayers() do
@@ -207,12 +261,36 @@ end
 PlayerData.start()
 
 ---------------------------------------------------------------- Mine refill
+-- True for anyone in the shaft or standing on top of the mine.
 local function insideMine(position: Vector3): boolean
 	local o = Config.MINE_ORIGIN
-	local size = Config.MINE_WIDTH * Config.BLOCK_SIZE
-	return position.Y < o.Y - 1
+	local size = MINE_SIZE
+	return position.Y < o.Y + 10
 		and position.X > o.X - 4 and position.X < o.X + size + 4
 		and position.Z > o.Z - 4 and position.Z < o.Z + size + 4
+end
+
+-- A see-through lid that closes the mine while it rebuilds, so nobody falls in or gets buried.
+local cover = Instance.new("Part")
+cover.Name = "RefillCover"
+cover.Anchored = true
+cover.Size = Vector3.new(MINE_SIZE, 3, MINE_SIZE)
+cover.Position = MINE_CENTER + Vector3.new(0, 1.5, 0)
+cover.Material = Enum.Material.ForceField
+cover.Color = Color3.fromRGB(65, 211, 187)
+cover.Transparency = 1
+cover.CanCollide = false
+cover.CanQuery = false
+cover.CanTouch = false
+cover.Parent = world
+
+local function clearMine()
+	for _, player in Players:GetPlayers() do
+		local root = getRoot(player)
+		if root and insideMine(root.Position) then
+			toSurface(player)
+		end
+	end
 end
 
 local refilling = false
@@ -225,13 +303,16 @@ local function refill(warningSeconds: number)
 		Notify:FireAllClients(`The mine refills in {warningSeconds} seconds!`, true)
 		task.wait(warningSeconds)
 	end
-	for _, player in Players:GetPlayers() do
-		local root = getRoot(player)
-		if root and insideMine(root.Position) then
-			toSurface(player)
-		end
+	clearMine()
+	cover.CanCollide = true
+	cover.Transparency = 0.4
+	local ok, err = pcall(Mine.generate)
+	if not ok then
+		warn(`[DeepDig] Mine refill failed: {err}`)
 	end
-	Mine.generate()
+	clearMine() -- anyone who respawned or slipped in while it rebuilt
+	cover.CanCollide = false
+	cover.Transparency = 1
 	Notify:FireAllClients("The mine has been refilled!", false)
 	refilling = false
 end

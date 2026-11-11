@@ -21,8 +21,17 @@ pcall(function()
 	store = DataStoreService:GetDataStore(STORE_NAME)
 end)
 
-type Profile = { data: any, loaded: boolean, saving: boolean }
+type Profile = { data: any, loaded: boolean, saving: boolean, failures: number }
 local profiles: { [Player]: Profile } = {}
+-- Profiles whose final save failed. Kept in memory and retried so the progress is not silently dropped.
+-- (Memory only: a server crash still loses them.)
+local pending: { [number]: Profile } = {}
+local PENDING_RETRY_SECONDS = 20
+local PENDING_MAX_FAILURES = 15
+
+local function finite(n: any): boolean
+	return typeof(n) == "number" and n == n and n > -math.huge and n < math.huge
+end
 
 local function defaults()
 	return { coins = 0, drill = 1, backpack = 1, inventory = {}, funnel = 0 }
@@ -33,22 +42,22 @@ local function sanitize(raw: any)
 	if typeof(raw) ~= "table" then
 		return data
 	end
-	if typeof(raw.coins) == "number" and raw.coins == raw.coins and raw.coins < math.huge then
+	if finite(raw.coins) then
 		data.coins = math.max(0, math.floor(raw.coins))
 	end
-	if typeof(raw.drill) == "number" then
+	if finite(raw.drill) then
 		data.drill = math.clamp(math.floor(raw.drill), 1, #Config.DRILLS)
 	end
-	if typeof(raw.backpack) == "number" then
+	if finite(raw.backpack) then
 		data.backpack = math.clamp(math.floor(raw.backpack), 1, #Config.BACKPACKS)
 	end
-	if typeof(raw.funnel) == "number" then
+	if finite(raw.funnel) then
 		data.funnel = math.clamp(math.floor(raw.funnel), 0, #Config.FUNNEL)
 	end
 	if typeof(raw.inventory) == "table" then
 		for name, count in raw.inventory do
-			if Config.ORES[name] and typeof(count) == "number" and count > 0 and count < math.huge then
-				data.inventory[name] = math.floor(count)
+			if Config.ORES[name] and finite(count) and count > 0 then
+				data.inventory[name] = math.min(math.floor(count), 100000)
 			end
 		end
 	end
@@ -109,11 +118,13 @@ local function tryLoad(userId: number): (string, any)
 	return "ok", if typeof(result) == "table" then result.data else nil
 end
 
-local function saveProfile(userId: number, profile: Profile, releasing: boolean)
+-- Returns true when the record is safely stored (or there is nothing that may be stored).
+local function saveProfile(userId: number, profile: Profile, releasing: boolean): boolean
 	local s = store
 	if not profile.loaded or not s then
-		return
+		return true
 	end
+	local saved = false
 	while profile.saving do
 		task.wait(0.1)
 	end
@@ -130,6 +141,7 @@ local function saveProfile(userId: number, profile: Profile, releasing: boolean)
 			end)
 		end)
 		if ok then
+			saved = true
 			break
 		end
 		warn(`[DeepDig] Save attempt {attempt} failed for {userId}: {err}`)
@@ -138,6 +150,20 @@ local function saveProfile(userId: number, profile: Profile, releasing: boolean)
 		end
 	end
 	profile.saving = false
+	return saved
+end
+
+local function install(player: Player, profile: Profile)
+	profiles[player] = profile
+	local stats = Instance.new("Folder")
+	stats.Name = "leaderstats"
+	local coins = Instance.new("IntValue")
+	coins.Name = "Coins"
+	coins.Parent = stats
+	stats.Parent = player
+	PlayerData.sync(player)
+	player:SetAttribute("SaveFailed", not profile.loaded)
+	player:SetAttribute("DataReady", true)
 end
 
 function PlayerData.get(player: Player)
@@ -186,6 +212,20 @@ function PlayerData.funnel(player: Player, step: number)
 end
 
 function PlayerData.load(player: Player)
+	-- Rejoined this same server while their last save was still stuck: carry on from the in-memory copy.
+	local kept = pending[player.UserId]
+	if kept then
+		pending[player.UserId] = nil
+		while kept.saving do
+			task.wait(0.1)
+		end
+		if player:IsDescendantOf(Players) then
+			install(player, kept)
+		else
+			pending[player.UserId] = kept
+		end
+		return
+	end
 	local status, result = "error", nil
 	local maxTries = if RunService:IsStudio() then 1 else 5
 	for attempt = 1, maxTries do
@@ -207,23 +247,17 @@ function PlayerData.load(player: Player)
 	if status ~= "ok" then
 		warn(`[DeepDig] Could not load data for {player.Name}; progress will not be saved this session. {result}`)
 	end
-	profiles[player] = { data = sanitize(if status == "ok" then result else nil), loaded = status == "ok", saving = false }
-
-	local stats = Instance.new("Folder")
-	stats.Name = "leaderstats"
-	local coins = Instance.new("IntValue")
-	coins.Name = "Coins"
-	coins.Parent = stats
-	stats.Parent = player
-	PlayerData.sync(player)
-	player:SetAttribute("DataReady", true)
+	install(player, { data = sanitize(if status == "ok" then result else nil), loaded = status == "ok", saving = false, failures = 0 })
 end
 
 function PlayerData.release(player: Player)
 	local profile = profiles[player]
 	if profile then
 		profiles[player] = nil
-		saveProfile(player.UserId, profile, true)
+		if not saveProfile(player.UserId, profile, true) then
+			pending[player.UserId] = profile
+			warn(`[DeepDig] Final save failed for {player.UserId}; keeping it in memory and retrying.`)
+		end
 	end
 end
 
@@ -237,19 +271,57 @@ function PlayerData.start()
 			end
 		end
 	end)
+	-- Keep retrying final saves that failed, for a bounded number of tries.
+	task.spawn(function()
+		while true do
+			task.wait(PENDING_RETRY_SECONDS)
+			local ids = {}
+			for userId in pending do
+				table.insert(ids, userId)
+			end
+			for _, userId in ids do
+				local profile = pending[userId]
+				if profile then
+					if saveProfile(userId, profile, true) then
+						if pending[userId] == profile then
+							pending[userId] = nil
+						end
+					else
+						profile.failures += 1
+						if profile.failures >= PENDING_MAX_FAILURES and pending[userId] == profile then
+							pending[userId] = nil
+							warn(`[DeepDig] DATA LOSS: gave up saving {userId} after {profile.failures} retries.`)
+						end
+					end
+				end
+			end
+		end
+	end)
 	game:BindToClose(function()
-		local pending = 0
-		for player, profile in profiles do
-			pending += 1
-			profiles[player] = nil
+		local waiting = 0
+		local function flush(userId: number, profile: Profile)
+			waiting += 1
 			task.spawn(function()
-				saveProfile(player.UserId, profile, true)
-				pending -= 1
+				if not saveProfile(userId, profile, true) then
+					warn(`[DeepDig] DATA LOSS: shutdown save failed for {userId}.`)
+				end
+				waiting -= 1
 			end)
 		end
-		local deadline = os.clock() + 20
-		while pending > 0 and os.clock() < deadline do
+		for player, profile in profiles do
+			profiles[player] = nil
+			flush(player.UserId, profile)
+		end
+		for userId, profile in pending do
+			pending[userId] = nil
+			flush(userId, profile)
+		end
+		local deadline = os.clock() + 25
+		while waiting > 0 and os.clock() < deadline do
 			task.wait(0.1)
+		end
+		if waiting > 0 then
+			warn(`[DeepDig] Shutdown deadline reached with {waiting} saves still running.`)
 		end
 	end)
 end
