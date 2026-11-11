@@ -1,127 +1,103 @@
 # Deep Dig: project handoff
 
-Last updated: 2026-11-11 by Claude (lead builder and integration owner).
+Last updated: 2026-11-11 (second update) by Claude.
 
-This file is how Claude and Codex coordinate on Deep Dig. There is no direct channel between the two assistants: everything goes through files in this repository, and the user relays anything urgent.
+## 0. Roles (changed by the owner on 2026-11-11)
 
-## 1. Where the game lives
+- **Claude = scripter and integration owner.** Owns every Script, LocalScript and ModuleScript, the RemoteEvents, and the on-screen UI code.
+- **Codex = builder.** Owns how the game looks and sounds: map, hub, models, lighting, sky, terrain, block looks, sounds. Codex now has access to the same Studio place.
+
+## 1. How we communicate
+
+Fast channel, inside the Studio place: `ServerStorage.TeamBoard`
+- `README`: roles, the contract (names the scripts depend on), builder hooks, rules.
+- `Claude_to_Codex`: only Claude writes. `Codex_to_Claude`: only Codex writes. Append at the bottom.
+- Attribute `Playtest` on the folder is a lock: set it to "<name> testing" before pressing Play, clear it after. Do not start or stop Play, or edit, while the other's lock is set.
+
+Slow channel, this repository: this file, plus `deep-dig/reviews/codex/` and `deep-dig/proposals/codex/` for longer write-ups. `deep-dig/team-board/` is a read-only copy of the Studio board taken at each snapshot.
+
+## 2. Where the game lives
 
 | Thing | Location |
 |---|---|
-| Live game (source of truth) | Roblox Studio place "test drive vuun vuun", placeId `137068607166792`, universeId `10774573147`. Not published. |
-| Game folder in this repo | `deep-dig/` |
-| Source snapshot | `deep-dig/src/` (exported from Studio; read-only mirror) |
+| Live game (source of truth) | Studio place "test drive vuun vuun", placeId `137068607166792`, universeId `10774573147`. Not published. |
+| Source snapshot | `deep-dig/src/` (exported by Claude after each tested change; read-only mirror) |
 | Design | `deep-dig/docs/DESIGN.md` |
 | Research | `roblox-knowledge/claude/2026-11-11/`, `roblox-knowledge/codex/2026-11-11-brkn/` |
 
-**Studio is the source of truth.** `deep-dig/src/` is a snapshot Claude exports after each tested change. Editing files under `src/` does not change the game. Only Claude writes to the Studio place.
+## 3. Branches
 
-## 2. Branch and commit
+- `main`: integrated record. For `deep-dig/`, only Claude merges into `main`.
+- Claude: `claude/deep-dig-*`. Baseline `8375396` (`claude/deep-dig-baseline`); current snapshot on `claude/deep-dig-feel`, merged to `main`.
+- Codex: `codex/deep-dig-*` in its own checkout. Seen so far: `codex/deep-dig-review-1` (review delivered), `codex/deep-dig-visuals-1` (no commits yet).
+- No force-push, no rewriting history, never overwrite or reset another worker's changes, stage only your own paths.
 
-- Baseline snapshot commit: `8375396` on branch `claude/deep-dig-baseline`, also merged to `main`.
-- `main` holds the integrated baseline. For `deep-dig/`, only Claude merges into `main`.
-- Claude works on branches named `claude/deep-dig-*`.
-- Codex works on branches named `codex/deep-dig-*`, cut from the baseline commit, in its own checkout.
-
-## 3. Architecture
+## 4. Architecture
 
 ```text
 ReplicatedStorage/DeepDig/
-  Config            ModuleScript  all tuning: layers, ores, drills, backpacks, mine size
-  Remotes/          DigBlock, BuyUpgrade, ToSurface (client -> server), Notify (server -> client)
+  Config            all tuning: layers, ores, drills, backpacks, mine size, meteor event, funnel steps
+  Remotes/          DigBlock, BuyUpgrade, ToSurface (client -> server); Notify, DigResult (server -> client)
+  BlockTemplates/   builder hook: BasePart per block name, cloned by Mine
 ServerScriptService/DeepDig/
-  Main              Script        remote handlers, sell pad, rate limits, refill loop
-  Mine              ModuleScript  16x16x40 grid, lazy block reveal, damage, regenerate
-  PlayerData        ModuleScript  DataStore "DeepDig_v1" load/save, attributes, leaderstats
+  Main              remote handlers, sell pad, rate limits, refill, meteor shower, Studio debug switches
+  Mine              16x16x40 grid, lazy reveal, damage, regenerate, loose diggables (meteorites)
+  PlayerData        DataStore "DeepDig_v1": UpdateAsync, session lock, version 1 record, funnel, attributes
 StarterPlayer/StarterPlayerScripts/
-  DeepDigClient     LocalScript   input (mouse + touch), HUD, shop window, popups
-Workspace/DeepDig/
-  Ground, Shaft, Blocks (server-created), SellPad, Shop (with ShopPrompt), MineSign
+  DeepDigClient     input, HUD, shop window, popups, hint text, debris bursts, sound hooks
+Workspace/DeepDig/  Ground, Shaft, Blocks, Meteors, SellPad, Shop (+ShopPrompt), MineSign
+SoundService/DeepDig/   builder hook: Sounds named Dig, Break, OreGet, RareFind, Sell, Buy, Error, MeteorWarning, MeteorLand
+ServerStorage/TeamBoard/ coordination notes (never required by game code)
 ```
 
-Data flow: the client sends intent only (`DigBlock(part)`, `BuyUpgrade("Drill"|"Backpack")`, `ToSurface()`). The server validates type, block existence, player alive, distance, cooldown, bag space and price, then mutates the in-memory profile and mirrors it to player attributes (`Coins`, `Drill`, `Backpack`, `BagCount`) that the HUD reads. Selling is a server-side `Touched` on the SellPad. Saving uses `SetAsync` on leave, every 120 s and in `BindToClose`, and is skipped when the load failed.
+The client sends intent only. The server validates and owns blocks, ores, inventory, coins and upgrades, and mirrors numbers to player attributes for the HUD.
 
-## 4. Current state and current task
+## 5. Current state
 
-Done and tested in Studio Play mode (single client, PC) on 2026-11-11:
-- Mine generates 256 top blocks; neighbours appear as blocks are dug.
-- Digging collects ores; selling 5 Coal paid 25 coins.
-- Iron Drill purchase (150 coins) succeeded; purchase refused when out of shop range or short of coins.
-- Malformed remote arguments (`"Hack"`, a string, a non-mine part) were ignored without errors.
-- Coins and drill level persisted across a stop/start.
+Tested in Studio Play mode (single client, PC) on 2026-11-11, no errors in Output:
+- Dig, collect, sell, buy an upgrade, save and reload (old-format save migrated to the version 1 record).
+- Dig feedback events reach the client (31 results for 31 accepted hits).
+- Meteor shower via debug switch: 10 meteorites landed; digging one gave a Star Shard and the rare popup.
+- Refill via debug switch: mine reset to 256 blocks, player in the shaft moved to the surface, meteorites untouched.
 
-Not tested: real phone, shop window opened by hand, the 5-minute refill, two clients, respawn, failed DataStore load.
+Not tested: real phone, shop window by hand, two clients, respawn, failed DataStore load, the hint text for a brand-new player, session lock on live servers (Studio has no JobId so the lock is skipped there), sounds (none added yet).
 
-Known gaps (not yet decided how to fix):
-- No session locking; `SetAsync` rather than `UpdateAsync`; no data version field.
-- `DigBlock` checks distance but not line of sight.
-- No sounds, dig effects, onboarding hint or analytics funnel events.
-- No Robux purchases yet (so no `ProcessReceipt`).
-
-**Claude's current task:** game feel (sounds, dig effects) and a first-session hint, on `claude/deep-dig-feel`. Claude will touch `DeepDigClient` and `Main` in Studio.
-
-## 5. File ownership
-
-| Path | Owner | Others may |
-|---|---|---|
-| Studio place (all instances and scripts) | Claude | read only |
-| `deep-dig/HANDOFF.md`, `deep-dig/docs/`, `deep-dig/src/` on `main` | Claude | read; propose changes on own branch |
-| `deep-dig/reviews/codex/**`, `deep-dig/proposals/codex/**` | Codex | Claude reads, never edits |
-| `roblox-knowledge/codex/**` | Codex | read only |
-| `roblox-knowledge/claude/**` | Claude | read only |
-
-Rules, consistent with `roblox-knowledge/codex/2026-11-11-brkn/COLLABORATION.md`:
-1. Separate branches and separate checkouts. Never work in the other worker's checkout.
-2. Never overwrite, stash, reset or delete another worker's uncommitted or committed changes.
-3. Stage only your own paths by name (no `git add -A`). Inspect the diff before committing.
-4. No force-push, no history rewriting, no deleting the other worker's branches.
-5. If a path you need is owned by the other worker, write a proposal file in your own folder instead of editing it.
-6. If the remote moved, fetch and merge or rebase your own commits; keep theirs.
+**Claude's next task:** the open review items in section 7, then whatever Codex asks for on the board.
+**Codex's next task:** see `Claude_to_Codex` message #1 (hub, mine entrance, block templates, sounds, lighting, meteorite template) and answer questions a, b, c there.
 
 ## 6. How to test
 
-Claude (has Studio):
-1. Open the place and press Play.
-2. Walk onto the mine, hold click/tap on a block until it breaks; dig an ore; check `Bag` goes up.
-3. Press SURFACE, walk onto the yellow SellPad; check `Coins` goes up and `Bag` resets.
-4. Open the shop at the blue cube; buy an upgrade; check coins drop and the row updates.
-5. Stop and Play again; coins and upgrades must be restored.
-6. Output window must show no errors or `[DeepDig]` warnings.
+1. Set the Playtest lock on `ServerStorage.TeamBoard`, press Play.
+2. Dig a block and an ore on the mine; `Bag` goes up and chips fly.
+3. SURFACE button, walk onto the SellPad; `Coins` goes up.
+4. Open the shop at the Shop part; buy an upgrade.
+5. On the server: `workspace.DeepDig:SetAttribute("DebugMeteor", os.clock())` and `("DebugRefill", os.clock())`.
+6. Stop, Play again; progress is restored. Output shows no errors or `[DeepDig]` warnings.
+7. Clear the Playtest lock.
 
-Codex (no Studio access assumed): static review of `deep-dig/src/` only. Do not claim a behaviour was run unless it was actually executed; mark findings as "by inspection".
+## 7. Review CODEX-1: disposition
 
-## 7. Task for Codex: CODEX-1, security and data-safety review
+Review file: `deep-dig/reviews/codex/2026-11-11-review-1.md` on `codex/deep-dig-review-1` (static inspection of baseline `8375396`). Thank you, Codex; it is accurate and useful.
 
-**Type:** bounded review, read-only on game code. **Branch:** `codex/deep-dig-review-1` from `8375396`.
-
-**Scope:** the five files under `deep-dig/src/` at commit `8375396`. Out of scope: art, balance numbers, new features, monetization design.
-
-**Questions to answer:**
-1. Remotes (`Main.server.luau`): can any client request grant coins, ores or upgrades it should not get, break blocks out of reach or faster than the cooldown, or cause unbounded server work? Check argument validation, rate limits, re-entrancy and the `Touched` sell path.
-2. Persistence (`PlayerData.luau`): find every path that could lose or overwrite progress: failed load, leave during load, rejoin on another server before the save lands, shutdown, autosave racing a leave. Say whether session locking or `UpdateAsync` is required before public release, and what the smallest safe change is.
-3. Mine (`Mine.luau`): correctness of the grid key, lazy reveal, and `generate()` while players are digging or standing in the shaft; memory growth over many refills.
-4. Client (`DeepDigClient.client.luau`): connection leaks, per-frame cost of the Heartbeat raycast, touch input conflicts with camera/thumbstick, and anything that would break on a small phone.
-
-**Deliverable:** one file, `deep-dig/reviews/codex/2026-11-11-review-1.md`, containing:
-- A findings table: ID, severity (critical / high / medium / low), file and line, what happens, how to reproduce or why it follows from the code, suggested fix.
-- For each of the four questions, an explicit answer, including "no issue found" where that is the result.
-- A short list of the tests from `roblox-knowledge/codex/2026-11-11-brkn/07-testing.md` that Claude should run in Studio to confirm or refute each high or critical finding.
-
-Optional: proposed code as full replacement files under `deep-dig/proposals/codex/review-1/`, mirroring the `src/` layout. Do not edit `deep-dig/src/` itself.
-
-**Acceptance criteria:**
-- [ ] Only files under `deep-dig/reviews/codex/` and `deep-dig/proposals/codex/` are added; nothing else in the repo changes.
-- [ ] Work is on `codex/deep-dig-review-1`, pushed without force; `main` is untouched.
-- [ ] Every finding cites a file and line number from commit `8375396`.
-- [ ] Every finding states whether it was verified by running code or by inspection only.
-- [ ] All four questions have an explicit answer.
-- [ ] Critical and high findings each include a concrete, minimal fix and a Studio test that would confirm it.
-- [ ] No more than about 15 findings; the most severe first.
-
-**What happens next:** Claude reads the review, reproduces high and critical findings in Studio, applies accepted fixes to the place, re-exports `deep-dig/src/`, and records the outcome of each finding in section 8.
+| ID | Severity | Status in current snapshot |
+|---|---|---|
+| DD-01 | high | Mostly addressed: UpdateAsync, session lock with lease, version field, one in-flight save per profile, stale owner write rejected. Not yet tested with two servers (T1/T2). |
+| DD-02 | high | Open. Failed final save still only warns. Must be fixed before public release. |
+| DD-03 | medium | Open. Failed load still allows unsaved play without telling the player. |
+| DD-04 | medium | Open. No server line-of-sight check. |
+| DD-05 | medium | Open. Server still accepts hits at 0.8x the cooldown. |
+| DD-06 | medium | Partly: generate() no longer mutates the table while yielding; entrance is still not blocked during refill. |
+| DD-07 | medium | Open. UI scale ignores viewport width (portrait phones). |
+| DD-08 | medium | Disputed pending a Studio check: `GetMouseLocation` returns viewport coordinates, which is what `ViewportPointToRay` expects. |
+| DD-09 | medium | Open. Touch ownership and shop-open cancel. |
+| DD-10 | low | Open. Toast tween not cancelled. |
+| DD-11 | low | Partly: infinity rejected for coins and inventory counts. |
 
 ## 8. Log
 
 | Date | Who | What |
 |---|---|---|
-| 2026-11-11 | Claude | First playable version built and tested in Studio; snapshot `8375396`; CODEX-1 opened. |
+| 2026-11-11 | Claude | First playable version; snapshot `8375396`; CODEX-1 opened. |
+| 2026-11-11 | Codex | CODEX-1 review delivered on `codex/deep-dig-review-1` (11 findings, 2 high). |
+| 2026-11-11 | Owner | Roles changed: Claude scripts, Codex builds; Codex added to Studio. |
+| 2026-11-11 | Claude | Team board created in Studio. Added safer saving, dig feedback, sound hooks, hints, meteor shower, funnel analytics, builder hooks. Snapshot on `claude/deep-dig-feel`. |

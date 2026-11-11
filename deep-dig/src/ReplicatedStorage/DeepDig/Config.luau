@@ -20,6 +20,8 @@ Config.ORES = {
 	Ruby = { value = 400, color = Color3.fromRGB(235, 30, 65), material = Enum.Material.Neon, rare = true },
 	Diamond = { value = 1200, color = Color3.fromRGB(90, 220, 255), material = Enum.Material.Neon, rare = true },
 	["Void Crystal"] = { value = 10000, color = Color3.fromRGB(165, 60, 255), material = Enum.Material.Neon, rare = true },
+	-- Only drops from meteorites during a meteor shower.
+	["Star Shard"] = { value = 250, color = Color3.fromRGB(255, 235, 140), material = Enum.Material.Neon, rare = true },
 }
 
 -- Each layer covers 10 blocks of depth.
@@ -47,6 +49,23 @@ Config.BACKPACKS = {
 	{ name = "Big Bag", size = 50, price = 400 },
 	{ name = "Huge Bag", size = 150, price = 5000 },
 }
+
+-- Meteor shower: meteorites land on the surface around the hub and can be dug for Star Shards.
+Config.METEOR = {
+	interval = 600, -- seconds between showers
+	warning = 10, -- seconds of warning before the first impact
+	count = 10,
+	lifetime = 90, -- seconds before unmined meteorites vanish
+	health = 12,
+	ore = "Star Shard",
+	area = { minX = -70, maxX = 70, minZ = -60, maxZ = 14 },
+}
+
+-- How long another server's claim on a player's save is respected.
+Config.SESSION_LOCK_SECONDS = 300
+
+-- Onboarding funnel steps, in order.
+Config.FUNNEL = { "Joined", "First block", "First ore", "First sale", "First upgrade" }
 
 function Config.layerForDepth(gy: number)
 	local index = math.clamp(math.ceil(gy / 10), 1, #Config.LAYERS)

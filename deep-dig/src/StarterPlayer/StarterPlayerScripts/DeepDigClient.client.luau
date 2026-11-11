@@ -1,7 +1,9 @@
 -- Deep Dig client: input, on-screen display, shop window and popups. Asks the server for everything.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Debris = game:GetService("Debris")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -12,10 +14,24 @@ local DigBlock = Remotes:WaitForChild("DigBlock") :: RemoteEvent
 local BuyUpgrade = Remotes:WaitForChild("BuyUpgrade") :: RemoteEvent
 local ToSurface = Remotes:WaitForChild("ToSurface") :: RemoteEvent
 local Notify = Remotes:WaitForChild("Notify") :: RemoteEvent
+local DigResult = Remotes:WaitForChild("DigResult") :: RemoteEvent
 
 local player = Players.LocalPlayer
 local world = workspace:WaitForChild("DeepDig")
 local blocksFolder = world:WaitForChild("Blocks")
+local meteorsFolder = world:WaitForChild("Meteors")
+
+-- Builder hook: plays SoundService.DeepDig/<name> if the builder has added it.
+local function playSound(name: string?)
+	if not name then
+		return
+	end
+	local folder = SoundService:FindFirstChild("DeepDig")
+	local sound = folder and folder:FindFirstChild(name)
+	if sound and sound:IsA("Sound") then
+		SoundService:PlayLocalSound(sound)
+	end
+end
 local shopPrompt = world:WaitForChild("Shop"):WaitForChild("ShopPrompt") :: ProximityPrompt
 
 local FONT = Enum.Font.FredokaOne
@@ -119,6 +135,12 @@ local toast = label(gui, "", UDim2.fromOffset(560, 54), UDim2.new(0.5, -280, 0, 
 toast.TextStrokeTransparency = 0
 toast.Visible = false
 
+-- Tells a new player the next step. Hidden for good once they own a better drill.
+local hint = label(gui, "", UDim2.fromOffset(640, 46), UDim2.new(0.5, -320, 0.74, 0))
+hint.TextStrokeTransparency = 0.2
+hint.TextColor3 = Color3.fromRGB(255, 240, 170)
+hint.Visible = false
+
 local shopFrame = Instance.new("Frame")
 shopFrame.Name = "Shop"
 shopFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -179,15 +201,34 @@ local function refresh()
 	end
 	fill("Drill", Config.DRILLS, drill, "power")
 	fill("Backpack", Config.BACKPACKS, backpack, "slots")
+
+	local touch = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+	local text: string? = nil
+	if not player:GetAttribute("DataReady") or drill > 1 then
+		text = nil
+	elseif bagCount >= bagSize then
+		text = "Bag full! Press SURFACE, then walk onto the yellow SELL pad."
+	elseif coins >= Config.DRILLS[2].price then
+		text = "You can afford a better drill! Go to the blue UPGRADES shop."
+	elseif bagCount > 0 then
+		text = "Nice! Coloured blocks are ores. Fill your bag, then sell."
+	elseif coins == 0 then
+		text = if touch then "Walk onto the mine, then tap and hold a block to dig." else "Walk onto the mine, then hold click on a block to dig."
+	else
+		text = "Dig deeper for better ores. Save up for a new drill."
+	end
+	hint.Text = text or ""
+	hint.Visible = text ~= nil
 end
-for _, name in { "Coins", "Drill", "Backpack", "BagCount" } do
+for _, name in { "Coins", "Drill", "Backpack", "BagCount", "DataReady" } do
 	player:GetAttributeChangedSignal(name):Connect(refresh)
 end
 refresh()
 
 ---------------------------------------------------------------- Popups
 local toastToken = 0
-Notify.OnClientEvent:Connect(function(text: string, big: boolean?, color: Color3?)
+Notify.OnClientEvent:Connect(function(text: string, big: boolean?, color: Color3?, soundName: string?)
+	playSound(soundName)
 	toastToken += 1
 	local token = toastToken
 	toast.Text = text
@@ -208,6 +249,42 @@ Notify.OnClientEvent:Connect(function(text: string, big: boolean?, color: Color3
 			toast.Visible = false
 		end
 	end)
+end)
+
+---------------------------------------------------------------- Dig feedback
+local debrisRng = Random.new()
+local function burst(position: Vector3, color: Color3, count: number)
+	for _ = 1, count do
+		local chip = Instance.new("Part")
+		local size = debrisRng:NextNumber(0.35, 0.8)
+		chip.Size = Vector3.new(size, size, size)
+		chip.Color = color
+		chip.Material = Enum.Material.SmoothPlastic
+		chip.CanCollide = false
+		chip.CanQuery = false
+		chip.CanTouch = false
+		chip.CastShadow = false
+		chip.Position = position + debrisRng:NextUnitVector() * 1.5
+		chip.AssemblyLinearVelocity = Vector3.new(debrisRng:NextNumber(-14, 14), debrisRng:NextNumber(12, 26), debrisRng:NextNumber(-14, 14))
+		chip.Parent = workspace
+		Debris:AddItem(chip, 0.7)
+	end
+end
+
+DigResult.OnClientEvent:Connect(function(broke: boolean, position: Vector3, color: Color3, soundName: string?)
+	if typeof(position) ~= "Vector3" or typeof(color) ~= "Color3" then
+		return
+	end
+	if soundName then
+		playSound(soundName)
+		burst(position, color, 14)
+	elseif broke then
+		playSound("Break")
+		burst(position, color, 8)
+	else
+		playSound("Dig")
+		burst(position, color, 2)
+	end
 end)
 
 ---------------------------------------------------------------- Shop and surface
@@ -256,7 +333,7 @@ local function getTarget(): BasePart?
 	params.FilterDescendantsInstances = { player.Character :: Instance }
 	local result = workspace:Raycast(ray.Origin, ray.Direction * 300, params)
 	local part = result and result.Instance
-	if part and part.Parent == blocksFolder and (root.Position - part.Position).Magnitude <= Config.REACH - 1 then
+	if part and (part.Parent == blocksFolder or part.Parent == meteorsFolder) and (root.Position - part.Position).Magnitude <= Config.REACH - 1 then
 		return part
 	end
 	return nil
