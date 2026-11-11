@@ -1,0 +1,424 @@
+{
+  "schema_version": 1,
+  "research_date": "2026-11-11",
+  "timezone": "Europe/Berlin",
+  "scope": "Broad Roblox development foundation; partial video access; no game playtests",
+  "sources": [
+    {
+      "id": "S00",
+      "title": "Tutorials",
+      "url": "https://create.roblox.com/docs/tutorials",
+      "topic": "Learning paths",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S01",
+      "title": "Luau",
+      "url": "https://create.roblox.com/docs/luau",
+      "topic": "Language/editor support",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S02",
+      "title": "Data model",
+      "url": "https://create.roblox.com/docs/projects/data-model",
+      "topic": "Instance hierarchy and containers",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S03",
+      "title": "Remote events and callbacks",
+      "url": "https://create.roblox.com/docs/scripting/events/remote",
+      "topic": "Network mechanisms and authority",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S04",
+      "title": "Securing the client-server boundary",
+      "url": "https://create.roblox.com/docs/scripting/security/client-server-boundary",
+      "topic": "Payload/context validation and server rate limits",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S05",
+      "title": "Data stores",
+      "url": "https://create.roblox.com/docs/cloud-services/data-stores",
+      "topic": "Persistence, UpdateAsync, error handling and Studio isolation",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S06",
+      "title": "Developer products",
+      "url": "https://create.roblox.com/docs/production/monetization/developer-products",
+      "topic": "Product/pass distinction and receipt processing",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S07",
+      "title": "Paid random items",
+      "url": "https://create.roblox.com/docs/production/monetization/paid-random-items",
+      "topic": "Odds and per-player restrictions",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S08",
+      "title": "Custom 3D assets",
+      "url": "https://create.roblox.com/docs/art/modeling",
+      "topic": "Meshes and import requirements",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S09",
+      "title": "Collisions",
+      "url": "https://create.roblox.com/docs/workspace/collisions",
+      "topic": "Touch, collision flags and groups",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S10",
+      "title": "Pathfinding",
+      "url": "https://create.roblox.com/docs/characters/pathfinding",
+      "topic": "Navigation and debugging visualization",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S11",
+      "title": "Animation",
+      "url": "https://create.roblox.com/docs/animation",
+      "topic": "Rigs, editor and event markers",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S12",
+      "title": "Audio",
+      "url": "https://create.roblox.com/docs/audio",
+      "topic": "Audio graph objects",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S13",
+      "title": "Sound",
+      "url": "https://create.roblox.com/docs/sound",
+      "topic": "Sound playback and placement",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S14",
+      "title": "User interface",
+      "url": "https://create.roblox.com/docs/ui",
+      "topic": "Containers, layout and prompts",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S15",
+      "title": "Input",
+      "url": "https://create.roblox.com/docs/input",
+      "topic": "Input Action System and PreferredInput",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S16",
+      "title": "Text filtering",
+      "url": "https://create.roblox.com/docs/ui/text-filtering",
+      "topic": "Server filtering for custom text",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S17",
+      "title": "Retention",
+      "url": "https://create.roblox.com/docs/production/analytics/retention",
+      "topic": "Cohorts and retention definitions",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S18",
+      "title": "Funnel events",
+      "url": "https://create.roblox.com/docs/production/analytics/funnel-events",
+      "topic": "Progress through onboarding/progression/shop",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S19",
+      "title": "Discovery FAQ",
+      "url": "https://create.roblox.com/docs/discovery-faq",
+      "topic": "Official discovery explanation",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S20",
+      "title": "Create and publish games and places",
+      "url": "https://create.roblox.com/docs/production/publishing/publish-games-and-places",
+      "topic": "Place/game model and release/access",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S21",
+      "title": "Collaboration",
+      "url": "https://create.roblox.com/docs/projects/collaboration",
+      "topic": "Studio collaboration and eligibility",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S22",
+      "title": "Studio testing modes",
+      "url": "https://create.roblox.com/docs/studio/testing-modes",
+      "topic": "Runtime and multi-client tests",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S23",
+      "title": "Improve performance",
+      "url": "https://create.roblox.com/docs/performance-optimization/improve",
+      "topic": "CPU/memory problems and diagnostics",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S24",
+      "title": "An introduction to Luau types",
+      "url": "https://luau.org/types/",
+      "topic": "Optional static type system",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S25",
+      "title": "MicroProfiler",
+      "url": "https://create.roblox.com/docs/performance-optimization/microprofiler",
+      "topic": "Frame timing and profiling on constrained devices",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S26",
+      "title": "Instance streaming",
+      "url": "https://create.roblox.com/docs/workspace/streaming",
+      "topic": "Dynamic Workspace loading/unloading",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S27",
+      "title": "Best practices for data stores",
+      "url": "https://create.roblox.com/docs/cloud-services/data-stores/best-practices",
+      "topic": "Record organization, retries, buffering and legacy DataStore2 warning",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S28",
+      "title": "MarketplaceService API",
+      "url": "https://create.roblox.com/docs/reference/engine/classes/MarketplaceService#ProcessReceipt",
+      "topic": "Receipt API and GetProductInfoAsync",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "id": "S29",
+      "title": "Script types and locations",
+      "url": "https://create.roblox.com/docs/scripting/locations",
+      "topic": "RunContext, script execution and bootstrap recommendations",
+      "type": "official_primary_documentation",
+      "access": "retrieved_page_or_indexed_official_content",
+      "checked": "2026-11-11",
+      "recheck": "Before implementation; immediately before release for APIs, policies, eligibility and limits"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "V01",
+      "title": "BrawlDev: Roblox Studio Basics",
+      "url": "https://www.youtube.com/watch?v=9MUgLaF22Yo",
+      "type": "creator_primary_video_description",
+      "published": "2024-06-16",
+      "access": "Indexed YouTube title, metadata and description; no full video/transcript",
+      "claim": "Introduces beginner/advanced/GUI learning paths"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "V02",
+      "title": "GnomeCode: Tower Defense #1 Path Navigation",
+      "url": "https://www.youtube.com/watch?v=DanjB0cTfw0",
+      "type": "creator_primary_video_description",
+      "published": "2021-12-14",
+      "access": "Indexed YouTube description and chapter labels; direct open returned 429; no full video/transcript",
+      "claim": "Enemy movement and waypoints"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "V03",
+      "title": "Roblox Learn: How to use the MicroProfiler on Roblox",
+      "url": "https://www.youtube.com/watch?v=XLCZfGEm9tU",
+      "type": "official_primary_video_description",
+      "published": "2024-09-25",
+      "access": "Indexed YouTube description/metadata; embedded link in official docs; no full video/transcript",
+      "claim": "Introduces profiler with documentation links"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "V04",
+      "title": "AlvinBlox: How To Script On Roblox, Episode 1",
+      "url": "https://www.youtube.com/watch?v=BfLUt3mfJiY",
+      "type": "video_followup_lead",
+      "access": "Title/footer only; linked by learner report C06",
+      "claim": "No technical content finding; follow-up viewing lead only"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "C01",
+      "title": "How did YOU learn to script on Roblox?",
+      "url": "https://www.reddit.com/r/robloxgamedev/comments/1hp3hzl/how_did_you_learn_to_script_on_roblox/",
+      "type": "first_person_community_reports",
+      "published": "2024-12-29",
+      "access": "Discussion and comments retrieved",
+      "claim": "Practice, decomposition, documentation and differing learning preferences",
+      "limitations": "Self-selected retrospective anecdotes; no controlled comparison"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "C02",
+      "title": "I tracked retention on my Roblox game for 3 months",
+      "url": "https://www.reddit.com/r/robloxgamedev/comments/1sakqj4/i_tracked_retention_on_my_roblox_game_for_3/",
+      "type": "first_person_community_reports",
+      "access": "Post and comments retrieved",
+      "claim": "Author and commenter report onboarding/retention improvements",
+      "limitations": "Unaudited figures; sample sizes/control absent; uncertain game identification; not causal proof"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "C03",
+      "title": "Improving Long-Term Retention for Game",
+      "url": "https://devforum.roblox.com/t/improving-long-term-retention-for-game/4628547",
+      "author": "Tech_Voyager",
+      "published": "2026-05-10",
+      "type": "first_person_developer_report",
+      "access": "Indexed dated original report; direct page bot-check blocked; screenshot and further discussion not reviewed",
+      "claim": "Seven-day daily rewards reportedly did not improve retention",
+      "limitations": "Self-report; metrics and algorithm explanation unverified"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "C04",
+      "title": "game feedback for my roblox game",
+      "url": "https://www.reddit.com/r/robloxgamedev/comments/1s5hw1m/game_feedback_for_my_roblox_game/",
+      "published": "2026-03-27",
+      "author": "Player feedback by R3DD3ST_",
+      "type": "first_person_player_report",
+      "access": "Post and comment retrieved",
+      "claim": "Second interaction needed for NPC UI; join loading lag",
+      "limitations": "One short play report; not independently reproduced"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "C05",
+      "title": "GnomeCode Tower Defense companion/support",
+      "url": "https://gnomecode.com/tutorials/tower-defense",
+      "type": "creator_primary_written_companion",
+      "access": "Written support page retrieved",
+      "claim": "Names/anchoring/timeouts and outdated collision calls are recurring support cases",
+      "limitations": "Not a frequency study; historical advice requires current API checks"
+    },
+    {
+      "checked": "2026-11-11",
+      "recheck": "Before relying on technical advice; preserve original report as dated evidence",
+      "id": "C06",
+      "title": "Are there any videos or websites I could use to start learning Roblox Studio?",
+      "url": "https://www.reddit.com/r/robloxgamedev/comments/197dzeu/",
+      "published": "2024-01-15",
+      "type": "first_person_learner_report",
+      "access": "Indexed original discussion and reply",
+      "claim": "Learner links AlvinBlox V04 and reports usefulness",
+      "limitations": "Recommendation anecdote, not lesson review"
+    }
+  ],
+  "excluded": "Third-party transcript mirrors, scraped spam PDFs and unattributed summaries were not used as technical authorities."
+}
