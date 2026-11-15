@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Plain Wiki — any Wikipedia article, explained simply</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<style>
+  :root{
+    --bg:#f7f4ee; --paper:#fffdf8; --ink:#1f1d1a; --muted:#6b665d; --line:#e4ded2; --field:#ffffff;
+    --accent:#1d5c8f; --accent-ink:#fff; --soft:#eaf2f9; --warn:#8a4b00; --warn-bg:#fff4e3;
+    --ok:#1d6b3a; --ok-bg:#e8f5ec; --bad:#a12d2d; --bad-bg:#fbe9e9; --code:#f0ece3; --shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  html[data-theme=dark]{
+    --bg:#15171b; --paper:#1d2026; --ink:#e8e6e1; --muted:#9a978f; --line:#30343c; --field:#13151a;
+    --accent:#6fb1e8; --accent-ink:#0d1b26; --soft:#1b2a38; --warn:#f0b55a; --warn-bg:#2a2214;
+    --ok:#7fd39a; --ok-bg:#15281c; --bad:#f08c8c; --bad-bg:#2d1818; --code:#262a31; --shadow:none;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Noto Sans',system-ui,sans-serif;line-height:1.5;transition:background .25s,color .25s}
+  header{padding:22px 20px 6px;max-width:900px;margin:0 auto;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  h1{font-family:'Source Serif 4',Georgia,serif;font-size:34px;margin:0 0 4px;letter-spacing:-.01em}
+  .tag{color:var(--muted);font-size:15px;margin:0;max-width:560px}
+  .hdr-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  select{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--ink)}
+  main{max-width:900px;margin:0 auto;padding:8px 20px 90px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0;box-shadow:var(--shadow)}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+  input[type=url],input[type=password],input[type=text],textarea{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--ink)}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  textarea{min-height:170px;resize:vertical;font-size:14px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .row>div{flex:1 1 240px}
+  button{font:inherit;font-weight:600;font-size:15px;border:0;border-radius:10px;padding:12px 18px;cursor:pointer;color:var(--ink);background:transparent}
+  .primary{background:var(--accent);color:var(--accent-ink)}
+  .primary:disabled{opacity:.55;cursor:default}
+  .ghost{color:var(--accent);border:1px solid var(--line);padding:8px 12px;font-size:13px;background:var(--paper)}
+  .ghost.on{background:var(--soft);border-color:var(--accent)}
+  .icon{width:40px;height:40px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--paper);font-size:18px;line-height:1}
+  .levels{display:flex;gap:8px;flex-wrap:wrap}
+  .lvl{flex:1 1 150px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--field);cursor:pointer;text-align:start;font-weight:400}
+  .lvl b{display:block;font-size:14px;font-weight:600}
+  .lvl span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .lvl.on{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .chip{font-size:12.5px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--muted);font-weight:500}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .status{font-size:14px;color:var(--muted);margin-top:10px;min-height:20px}
+  .note{border-radius:10px;padding:12px 14px;font-size:14px;margin-top:12px;line-height:1.45}
+  .note.warn{background:var(--warn-bg);color:var(--warn)}
+  .note.bad{background:var(--bad-bg);color:var(--bad)}
+  .note.ok{background:var(--ok-bg);color:var(--ok)}
+  .hidden{display:none !important}
+  .progress{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:12px}
+  .progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+  article{font-family:'Source Serif 4',Georgia,'Noto Serif',serif;font-size:var(--fs,19px);line-height:1.65}
+  article h1{font-size:2.1em;margin:10px 0 4px}
+  article h2{font-size:1.42em;margin:34px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+  article h3{font-size:1.15em;margin:24px 0 6px}
+  article h4,article h5,article h6{font-size:1.05em;margin:18px 0 6px}
+  article p{margin:0 0 14px}
+  article ul,article ol{padding-inline-start:26px}
+  article table{border-collapse:collapse;font-size:.85em;margin:8px 0 14px}
+  article td,article th{border:1px solid var(--line);padding:4px 8px}
+  article .sec{position:relative}
+  article .sec.pending{opacity:.5}
+  article .tools{position:sticky;top:6px;float:inline-end;display:flex;gap:6px;font-family:Inter,sans-serif;z-index:1}
+  article .orig{display:none;background:var(--field);border-inline-start:3px solid var(--line);padding:10px 14px;margin:6px 0 16px;color:var(--muted);font-size:.84em;white-space:pre-wrap}
+  article .sec.show-orig .orig{display:block}
+  article .sec.show-orig .simple{display:none}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:r .8s linear infinite;vertical-align:-2px;margin-inline-end:6px}
+  @keyframes r{to{transform:rotate(360deg)}}
+  .gloss{columns:2;column-gap:28px;font-size:16px}
+  .gloss div{break-inside:avoid;margin-bottom:8px}
+  .gloss b{font-family:Inter,sans-serif;font-size:14px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;background:var(--paper);padding:8px 0;z-index:2;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .topbar .grp{display:flex;gap:6px;flex-wrap:wrap}
+  .small{font-size:13px;color:var(--muted)}
+  code{background:var(--code);padding:1px 5px;border-radius:5px;font-size:.9em}
+  .toc{font-family:Inter,sans-serif;font-size:14px;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:12px 0 4px}
+  .toc a{color:var(--accent);text-decoration:none;display:inline-block;margin:2px 10px 2px 0}
+  details summary{cursor:pointer;color:var(--accent);font-size:14px;font-weight:600}
+  a{color:var(--accent)}
+  html[dir=rtl] article .tools{float:inline-end}
+  @media (max-width:640px){ .gloss{columns:1} article{--fs:18px} h1{font-size:28px} .topbar{position:static} }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 data-i18n="title">Plain Wiki</h1>
+    <p class="tag" data-i18n="tagline">Paste any Wikipedia link. Get the whole article back in words anyone can understand — same facts, zero jargon.</p>
+  </div>
+  <div class="hdr-tools">
+    <select id="uiLang" aria-label="Interface language"></select>
+    <button class="icon" id="themeBtn" title="Dark / light">🌙</button>
+  </div>
+</header>
+<main>
+  <section class="card" id="inputCard">
+    <label for="url" data-i18n="linkLabel">Wikipedia link</label>
+    <div class="row">
+      <div><input id="url" type="url" placeholder="https://en.wikipedia.org/wiki/Photosynthesis" autocomplete="off" spellcheck="false"></div>
+      <div style="flex:0 0 auto"><button class="primary" id="go" data-i18n="go">Make it understandable</button></div>
+    </div>
+    <div class="chips" id="examples"></div>
+
+    <div style="margin-top:16px">
+      <label data-i18n="levelLabel">How simple?</label>
+      <div class="levels" id="levels">
+        <button class="lvl" data-lvl="kid"><b data-i18n="lvlKid">Kids (10+)</b><span data-i18n="lvlKidD">Very short sentences, everyday words, little comparisons.</span></button>
+        <button class="lvl on" data-lvl="everyone"><b data-i18n="lvlAll">Everyone (14+)</b><span data-i18n="lvlAllD">Default. No prior knowledge needed. Every hard word explained.</span></button>
+        <button class="lvl" data-lvl="adult"><b data-i18n="lvlAdult">Curious adult</b><span data-i18n="lvlAdultD">Clear and plain; technical terms stay but are explained once.</span></button>
+        <button class="lvl" data-lvl="light"><b data-i18n="lvlLight">Light touch</b><span data-i18n="lvlLightD">Keeps the original voice, just explains hard words in brackets.</span></button>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:16px">
+      <div>
+        <label for="outLang" data-i18n="outLang">Write the result in</label>
+        <select id="outLang"></select>
+      </div>
+    </div>
+
+    <details id="keyBox" class="hidden" style="margin-top:14px">
+      <summary data-i18n="keyTitle">This copy runs outside claude.ai — enter an Anthropic API key</summary>
+      <div class="note warn" data-i18n="keyWhy" style="margin-top:8px">The key is stored only in this browser (localStorage) and sent directly to api.anthropic.com. Get one at console.anthropic.com.</div>
+      <div class="row" style="margin-top:10px">
+        <div><label data-i18n="keyLabel">API key</label><input id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off"></div>
+        <div style="flex:0 0 220px"><label data-i18n="modelLabel">Model</label><input id="model" type="text" value="claude-sonnet-5-5"></div>
+      </div>
+    </details>
+
+    <div class="status" id="status"></div>
+    <div class="progress hidden" id="prog"><i></i></div>
+
+    <div id="pasteBox" class="hidden" style="margin-top:14px">
+      <div class="note warn" id="pasteWhy"></div>
+      <label for="pasted" style="margin-top:12px" data-i18n="pasteLabel">Paste the article text here</label>
+      <textarea id="pasted" data-i18n-ph="pastePh" placeholder="Open the article, press Ctrl+A then Ctrl+C on the page, and paste it here (Ctrl+V)."></textarea>
+      <div class="row" style="margin-top:10px">
+        <div><a id="openLink" class="small" href="#" target="_blank" rel="noopener" data-i18n="openArticle">Open the article in a new tab ↗</a></div>
+        <div style="flex:0 0 auto"><button class="primary" id="goPasted" data-i18n="usePasted">Use this text</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card hidden" id="resultCard">
+    <div class="topbar">
+      <div class="small" id="meta"></div>
+      <div class="grp">
+        <button class="ghost" id="fontMinus" title="Smaller text">A−</button>
+        <button class="ghost" id="fontPlus" title="Larger text">A+</button>
+        <button class="ghost" id="toggleAllOrig" data-i18n="showOrigAll">Show originals</button>
+        <button class="ghost" id="copyBtn" data-i18n="copy">Copy simplified text</button>
+        <button class="ghost" id="stopBtn" data-i18n="stop">Stop</button>
+      </div>
+    </div>
+    <div class="toc hidden" id="toc"></div>
+    <article id="out"></article>
+    <div id="glossWrap" class="hidden">
+      <h2 style="font-family:'Source Serif 4',serif;margin-top:30px" data-i18n="glossTitle">Words explained in this article</h2>
+      <div class="gloss" id="gloss"></div>
+    </div>
+    <p class="small" style="margin-top:28px"><span data-i18n="source">Source</span>: <a id="srcLink" href="#" target="_blank" rel="noopener"></a>. <span data-i18n="license">Text from Wikipedia, CC BY-SA. Simplified by Claude — reference and external-link sections are left out because they only contain citations.</span></p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch {} } };
+
+  // ================= i18n (UI strings) =================
+  const I18N = {
+    en:{_name:'English',title:'Plain Wiki',tagline:'Paste any Wikipedia link. Get the whole article back in words anyone can understand — same facts, zero jargon.',linkLabel:'Wikipedia link',go:'Make it understandable',levelLabel:'How simple?',lvlKid:'Kids (10+)',lvlKidD:'Very short sentences, everyday words, little comparisons.',lvlAll:'Everyone (14+)',lvlAllD:'Default. No prior knowledge needed. Every hard word explained.',lvlAdult:'Curious adult',lvlAdultD:'Clear and plain; technical terms stay but are explained once.',lvlLight:'Light touch',lvlLightD:'Keeps the original voice, just explains hard words in brackets.',outLang:'Write the result in',sameLang:'Same language as the article',keyTitle:'This copy runs outside claude.ai — enter an Anthropic API key',keyWhy:'The key is stored only in this browser (localStorage) and sent directly to api.anthropic.com. Get one at console.anthropic.com.',keyLabel:'API key',modelLabel:'Model',pasteLabel:'Paste the article text here',pastePh:'Open the article, press Ctrl+A then Ctrl+C on the page, and paste it here (Ctrl+V).',openArticle:'Open the article in a new tab ↗',usePasted:'Use this text',showOrigAll:'Show originals',copy:'Copy simplified text',stop:'Stop',glossTitle:'Words explained in this article',source:'Source',license:'Text from Wikipedia, CC BY-SA. Simplified by Claude — reference and external-link sections are left out because they only contain citations.',original:'Original',waiting:'Waiting…',badLink:'That does not look like a Wikipedia article link (e.g. https://en.wikipedia.org/wiki/Moon).',pasteFirst:'Paste the article text first (at least a few sentences).',connecting:'Connecting to Claude…',noClaude:'Claude is not available here. On claude.ai: allow the page to ask Claude. Elsewhere: enter an API key above.',fetching:'Fetching the article…',fetchingConn:'Fetching the article through your TinyFish connector…',fetchFail:'Could not fetch the article automatically.',pasteWhy:'This page is not allowed to load wikipedia.org directly and no fetch connector answered. Quick fix: open the article, select all (Ctrl+A), copy (Ctrl+C) and paste it below — the result is exactly the same.',simplifying:'Simplifying… {done} of {total} sections done.',done:'Done — {total} sections rewritten, {words} words explained.',stopped:'Stopped.',rate:'Rate limit hit — pausing 20 s…',secFail:'Could not simplify this section ({err}). The original is shown instead.',cut:'(This part was cut short by the length limit.)',copied:'Copied.',copyFail:'Copy was blocked by the browser — select the text and press Ctrl+C instead.',noText:'Could not find any article text.',error:'Something went wrong: {err}',sections:'sections',level:'level',via:'via',pasted:'pasted text',wrong:'Something went wrong'},
+    de:{_name:'Deutsch',title:'Plain Wiki',tagline:'Füge einen Wikipedia-Link ein und erhalte den ganzen Artikel in Worten, die jeder versteht – gleiche Fakten, kein Fachchinesisch.',linkLabel:'Wikipedia-Link',go:'Verständlich machen',levelLabel:'Wie einfach?',lvlKid:'Kinder (ab 10)',lvlKidD:'Sehr kurze Sätze, Alltagswörter, kleine Vergleiche.',lvlAll:'Alle (ab 14)',lvlAllD:'Standard. Kein Vorwissen nötig. Jedes schwere Wort wird erklärt.',lvlAdult:'Neugierige Erwachsene',lvlAdultD:'Klar und einfach; Fachbegriffe bleiben, werden aber einmal erklärt.',lvlLight:'Nur leicht',lvlLightD:'Behält den Originalton, erklärt schwere Wörter nur in Klammern.',outLang:'Ergebnis schreiben in',sameLang:'Gleiche Sprache wie der Artikel',keyTitle:'Diese Kopie läuft außerhalb von claude.ai – Anthropic-API-Schlüssel eingeben',keyWhy:'Der Schlüssel wird nur in diesem Browser gespeichert (localStorage) und direkt an api.anthropic.com gesendet. Erhältlich auf console.anthropic.com.',keyLabel:'API-Schlüssel',modelLabel:'Modell',pasteLabel:'Artikeltext hier einfügen',pastePh:'Artikel öffnen, Strg+A und dann Strg+C drücken, hier einfügen (Strg+V).',openArticle:'Artikel in neuem Tab öffnen ↗',usePasted:'Diesen Text verwenden',showOrigAll:'Originale zeigen',copy:'Vereinfachten Text kopieren',stop:'Stopp',glossTitle:'In diesem Artikel erklärte Wörter',source:'Quelle',license:'Text aus Wikipedia, CC BY-SA. Vereinfacht von Claude – Einzelnachweise und Weblinks werden weggelassen, da sie nur Quellenangaben enthalten.',original:'Original',waiting:'Warten…',badLink:'Das sieht nicht wie ein Wikipedia-Artikel-Link aus (z. B. https://de.wikipedia.org/wiki/Mond).',pasteFirst:'Bitte zuerst den Artikeltext einfügen (mindestens ein paar Sätze).',connecting:'Verbinde mit Claude…',noClaude:'Claude ist hier nicht verfügbar. Auf claude.ai: der Seite erlauben, Claude zu fragen. Sonst: oben einen API-Schlüssel eingeben.',fetching:'Artikel wird geladen…',fetchingConn:'Artikel wird über deinen TinyFish-Connector geladen…',fetchFail:'Artikel konnte nicht automatisch geladen werden.',pasteWhy:'Diese Seite darf wikipedia.org nicht direkt laden, und kein Connector hat geantwortet. Lösung: Artikel öffnen, alles markieren (Strg+A), kopieren (Strg+C) und unten einfügen – das Ergebnis ist genau dasselbe.',simplifying:'Vereinfache… {done} von {total} Abschnitten fertig.',done:'Fertig – {total} Abschnitte umgeschrieben, {words} Wörter erklärt.',stopped:'Gestoppt.',rate:'Limit erreicht – 20 s Pause…',secFail:'Dieser Abschnitt konnte nicht vereinfacht werden ({err}). Das Original wird gezeigt.',cut:'(Dieser Teil wurde durch das Längenlimit abgeschnitten.)',copied:'Kopiert.',copyFail:'Kopieren wurde vom Browser blockiert – Text markieren und Strg+C drücken.',noText:'Kein Artikeltext gefunden.',error:'Etwas ist schiefgelaufen: {err}',sections:'Abschnitte',level:'Stufe',via:'über',pasted:'eingefügter Text',wrong:'Etwas ist schiefgelaufen'},
+    tr:{_name:'Türkçe',title:'Plain Wiki',tagline:'Herhangi bir Vikipedi bağlantısını yapıştır. Makalenin tamamını herkesin anlayacağı sözcüklerle al – aynı bilgiler, sıfır jargon.',linkLabel:'Vikipedi bağlantısı',go:'Anlaşılır yap',levelLabel:'Ne kadar basit?',lvlKid:'Çocuklar (10+)',lvlKidD:'Çok kısa cümleler, günlük sözcükler, küçük benzetmeler.',lvlAll:'Herkes (14+)',lvlAllD:'Varsayılan. Ön bilgi gerekmez. Her zor sözcük açıklanır.',lvlAdult:'Meraklı yetişkin',lvlAdultD:'Açık ve sade; teknik terimler kalır ama bir kez açıklanır.',lvlLight:'Hafif dokunuş',lvlLightD:'Özgün anlatımı korur, zor sözcükleri yalnızca parantez içinde açıklar.',outLang:'Sonucu şu dilde yaz',sameLang:'Makaleyle aynı dil',keyTitle:'Bu kopya claude.ai dışında çalışıyor – Anthropic API anahtarı gir',keyWhy:'Anahtar yalnızca bu tarayıcıda saklanır (localStorage) ve doğrudan api.anthropic.com adresine gönderilir. console.anthropic.com adresinden alınabilir.',keyLabel:'API anahtarı',modelLabel:'Model',pasteLabel:'Makale metnini buraya yapıştır',pastePh:'Makaleyi aç, Ctrl+A ve Ctrl+C yap, buraya yapıştır (Ctrl+V).',openArticle:'Makaleyi yeni sekmede aç ↗',usePasted:'Bu metni kullan',showOrigAll:'Özgünleri göster',copy:'Sade metni kopyala',stop:'Durdur',glossTitle:'Bu makalede açıklanan sözcükler',source:'Kaynak',license:'Metin Vikipedi’den, CC BY-SA. Claude tarafından sadeleştirildi – kaynakça ve dış bağlantılar yalnızca atıf içerdiği için çıkarıldı.',original:'Özgün',waiting:'Bekliyor…',badLink:'Bu bir Vikipedi makale bağlantısına benzemiyor (örn. https://tr.wikipedia.org/wiki/Ay).',pasteFirst:'Önce makale metnini yapıştır (en az birkaç cümle).',connecting:'Claude’a bağlanıyor…',noClaude:'Claude burada kullanılamıyor. claude.ai’de: sayfanın Claude’a sormasına izin ver. Başka yerde: yukarıya bir API anahtarı gir.',fetching:'Makale alınıyor…',fetchingConn:'Makale TinyFish bağlayıcın üzerinden alınıyor…',fetchFail:'Makale otomatik alınamadı.',pasteWhy:'Bu sayfa wikipedia.org’u doğrudan yükleyemiyor ve hiçbir bağlayıcı yanıt vermedi. Çözüm: makaleyi aç, tümünü seç (Ctrl+A), kopyala (Ctrl+C) ve aşağıya yapıştır – sonuç tamamen aynı.',simplifying:'Sadeleştiriliyor… {total} bölümden {done} tamam.',done:'Bitti – {total} bölüm yeniden yazıldı, {words} sözcük açıklandı.',stopped:'Durduruldu.',rate:'Hız sınırı – 20 sn bekleniyor…',secFail:'Bu bölüm sadeleştirilemedi ({err}). Özgün metin gösteriliyor.',cut:'(Bu kısım uzunluk sınırı nedeniyle kesildi.)',copied:'Kopyalandı.',copyFail:'Tarayıcı kopyalamayı engelledi – metni seçip Ctrl+C yap.',noText:'Makale metni bulunamadı.',error:'Bir şeyler ters gitti: {err}',sections:'bölüm',level:'seviye',via:'kaynak',pasted:'yapıştırılan metin',wrong:'Bir şeyler ters gitti'},
+    es:{_name:'Español',title:'Plain Wiki',tagline:'Pega cualquier enlace de Wikipedia y recibe el artículo completo en palabras que cualquiera entiende: los mismos datos, cero jerga.',linkLabel:'Enlace de Wikipedia',go:'Hacerlo comprensible',levelLabel:'¿Qué tan simple?',lvlKid:'Niños (10+)',lvlKidD:'Frases muy cortas, palabras cotidianas, pequeñas comparaciones.',lvlAll:'Todos (14+)',lvlAllD:'Por defecto. Sin conocimientos previos. Cada palabra difícil se explica.',lvlAdult:'Adulto curioso',lvlAdultD:'Claro y sencillo; los términos técnicos se mantienen pero se explican una vez.',lvlLight:'Toque ligero',lvlLightD:'Conserva la voz original, solo explica palabras difíciles entre paréntesis.',outLang:'Escribir el resultado en',sameLang:'El mismo idioma que el artículo',keyTitle:'Esta copia funciona fuera de claude.ai: introduce una clave API de Anthropic',keyWhy:'La clave solo se guarda en este navegador (localStorage) y se envía directamente a api.anthropic.com. Consíguela en console.anthropic.com.',keyLabel:'Clave API',modelLabel:'Modelo',pasteLabel:'Pega aquí el texto del artículo',pastePh:'Abre el artículo, pulsa Ctrl+A y Ctrl+C, y pégalo aquí (Ctrl+V).',openArticle:'Abrir el artículo en una pestaña nueva ↗',usePasted:'Usar este texto',showOrigAll:'Mostrar originales',copy:'Copiar texto simplificado',stop:'Detener',glossTitle:'Palabras explicadas en este artículo',source:'Fuente',license:'Texto de Wikipedia, CC BY-SA. Simplificado por Claude; las secciones de referencias y enlaces externos se omiten porque solo contienen citas.',original:'Original',waiting:'Esperando…',badLink:'Eso no parece un enlace a un artículo de Wikipedia (p. ej. https://es.wikipedia.org/wiki/Luna).',pasteFirst:'Pega primero el texto del artículo (al menos unas frases).',connecting:'Conectando con Claude…',noClaude:'Claude no está disponible aquí. En claude.ai: permite que la página consulte a Claude. En otro sitio: introduce una clave API arriba.',fetching:'Obteniendo el artículo…',fetchingConn:'Obteniendo el artículo mediante tu conector TinyFish…',fetchFail:'No se pudo obtener el artículo automáticamente.',pasteWhy:'Esta página no puede cargar wikipedia.org directamente y ningún conector respondió. Solución: abre el artículo, selecciona todo (Ctrl+A), copia (Ctrl+C) y pégalo abajo; el resultado es exactamente el mismo.',simplifying:'Simplificando… {done} de {total} secciones listas.',done:'Listo: {total} secciones reescritas, {words} palabras explicadas.',stopped:'Detenido.',rate:'Límite alcanzado: pausa de 20 s…',secFail:'No se pudo simplificar esta sección ({err}). Se muestra el original.',cut:'(Esta parte se cortó por el límite de longitud.)',copied:'Copiado.',copyFail:'El navegador bloqueó la copia: selecciona el texto y pulsa Ctrl+C.',noText:'No se encontró texto del artículo.',error:'Algo salió mal: {err}',sections:'secciones',level:'nivel',via:'vía',pasted:'texto pegado',wrong:'Algo salió mal'},
+    fr:{_name:'Français',title:'Plain Wiki',tagline:'Collez n’importe quel lien Wikipédia et obtenez l’article entier dans des mots que tout le monde comprend : mêmes faits, zéro jargon.',linkLabel:'Lien Wikipédia',go:'Rendre compréhensible',levelLabel:'Quel niveau de simplicité ?',lvlKid:'Enfants (10+)',lvlKidD:'Phrases très courtes, mots du quotidien, petites comparaisons.',lvlAll:'Tout le monde (14+)',lvlAllD:'Par défaut. Aucune connaissance préalable. Chaque mot difficile est expliqué.',lvlAdult:'Adulte curieux',lvlAdultD:'Clair et simple ; les termes techniques restent mais sont expliqués une fois.',lvlLight:'Touche légère',lvlLightD:'Garde la voix d’origine, explique seulement les mots difficiles entre parenthèses.',outLang:'Écrire le résultat en',sameLang:'Même langue que l’article',keyTitle:'Cette copie fonctionne hors de claude.ai : saisissez une clé API Anthropic',keyWhy:'La clé est stockée uniquement dans ce navigateur (localStorage) et envoyée directement à api.anthropic.com. Obtenez-en une sur console.anthropic.com.',keyLabel:'Clé API',modelLabel:'Modèle',pasteLabel:'Collez ici le texte de l’article',pastePh:'Ouvrez l’article, faites Ctrl+A puis Ctrl+C, et collez ici (Ctrl+V).',openArticle:'Ouvrir l’article dans un nouvel onglet ↗',usePasted:'Utiliser ce texte',showOrigAll:'Afficher les originaux',copy:'Copier le texte simplifié',stop:'Arrêter',glossTitle:'Mots expliqués dans cet article',source:'Source',license:'Texte de Wikipédia, CC BY-SA. Simplifié par Claude ; les sections de références et de liens externes sont omises car elles ne contiennent que des citations.',original:'Original',waiting:'En attente…',badLink:'Cela ne ressemble pas à un lien d’article Wikipédia (ex. https://fr.wikipedia.org/wiki/Lune).',pasteFirst:'Collez d’abord le texte de l’article (au moins quelques phrases).',connecting:'Connexion à Claude…',noClaude:'Claude n’est pas disponible ici. Sur claude.ai : autorisez la page à interroger Claude. Ailleurs : saisissez une clé API ci-dessus.',fetching:'Récupération de l’article…',fetchingConn:'Récupération via votre connecteur TinyFish…',fetchFail:'Impossible de récupérer l’article automatiquement.',pasteWhy:'Cette page ne peut pas charger wikipedia.org directement et aucun connecteur n’a répondu. Solution : ouvrez l’article, tout sélectionner (Ctrl+A), copier (Ctrl+C) et coller ci-dessous ; le résultat est identique.',simplifying:'Simplification… {done} sur {total} sections terminées.',done:'Terminé : {total} sections réécrites, {words} mots expliqués.',stopped:'Arrêté.',rate:'Limite atteinte : pause de 20 s…',secFail:'Impossible de simplifier cette section ({err}). L’original est affiché.',cut:'(Cette partie a été coupée par la limite de longueur.)',copied:'Copié.',copyFail:'Le navigateur a bloqué la copie : sélectionnez le texte et faites Ctrl+C.',noText:'Aucun texte d’article trouvé.',error:'Un problème est survenu : {err}',sections:'sections',level:'niveau',via:'via',pasted:'texte collé',wrong:'Un problème est survenu'},
+    it:{_name:'Italiano',title:'Plain Wiki',tagline:'Incolla un link di Wikipedia e ricevi l’intero articolo con parole che tutti capiscono: stessi fatti, zero gergo.',linkLabel:'Link Wikipedia',go:'Rendilo comprensibile',levelLabel:'Quanto semplice?',lvlKid:'Bambini (10+)',lvlKidD:'Frasi brevissime, parole di tutti i giorni, piccoli paragoni.',lvlAll:'Tutti (14+)',lvlAllD:'Predefinito. Nessuna conoscenza richiesta. Ogni parola difficile viene spiegata.',lvlAdult:'Adulto curioso',lvlAdultD:'Chiaro e semplice; i termini tecnici restano ma vengono spiegati una volta.',lvlLight:'Tocco leggero',lvlLightD:'Mantiene lo stile originale, spiega solo le parole difficili tra parentesi.',outLang:'Scrivi il risultato in',sameLang:'Stessa lingua dell’articolo',keyTitle:'Questa copia funziona fuori da claude.ai: inserisci una chiave API Anthropic',keyWhy:'La chiave è salvata solo in questo browser (localStorage) e inviata direttamente ad api.anthropic.com. Ottienila su console.anthropic.com.',keyLabel:'Chiave API',modelLabel:'Modello',pasteLabel:'Incolla qui il testo dell’articolo',pastePh:'Apri l’articolo, premi Ctrl+A e Ctrl+C, incolla qui (Ctrl+V).',openArticle:'Apri l’articolo in una nuova scheda ↗',usePasted:'Usa questo testo',showOrigAll:'Mostra originali',copy:'Copia testo semplificato',stop:'Ferma',glossTitle:'Parole spiegate in questo articolo',source:'Fonte',license:'Testo da Wikipedia, CC BY-SA. Semplificato da Claude; le sezioni di note e collegamenti esterni sono omesse perché contengono solo citazioni.',original:'Originale',waiting:'In attesa…',badLink:'Non sembra un link a un articolo di Wikipedia (es. https://it.wikipedia.org/wiki/Luna).',pasteFirst:'Incolla prima il testo dell’articolo (almeno qualche frase).',connecting:'Connessione a Claude…',noClaude:'Claude non è disponibile qui. Su claude.ai: consenti alla pagina di interrogare Claude. Altrove: inserisci una chiave API sopra.',fetching:'Recupero dell’articolo…',fetchingConn:'Recupero tramite il tuo connettore TinyFish…',fetchFail:'Impossibile recuperare l’articolo automaticamente.',pasteWhy:'Questa pagina non può caricare wikipedia.org direttamente e nessun connettore ha risposto. Soluzione: apri l’articolo, seleziona tutto (Ctrl+A), copia (Ctrl+C) e incolla sotto; il risultato è identico.',simplifying:'Semplificazione… {done} di {total} sezioni pronte.',done:'Fatto: {total} sezioni riscritte, {words} parole spiegate.',stopped:'Fermato.',rate:'Limite raggiunto: pausa di 20 s…',secFail:'Impossibile semplificare questa sezione ({err}). Viene mostrato l’originale.',cut:'(Questa parte è stata tagliata dal limite di lunghezza.)',copied:'Copiato.',copyFail:'Il browser ha bloccato la copia: seleziona il testo e premi Ctrl+C.',noText:'Nessun testo trovato.',error:'Qualcosa è andato storto: {err}',sections:'sezioni',level:'livello',via:'via',pasted:'testo incollato',wrong:'Qualcosa è andato storto'},
+    pt:{_name:'Português',title:'Plain Wiki',tagline:'Cole qualquer link da Wikipédia e receba o artigo inteiro em palavras que todos entendem: os mesmos fatos, zero jargão.',linkLabel:'Link da Wikipédia',go:'Tornar compreensível',levelLabel:'Quão simples?',lvlKid:'Crianças (10+)',lvlKidD:'Frases muito curtas, palavras do dia a dia, pequenas comparações.',lvlAll:'Todos (14+)',lvlAllD:'Padrão. Sem conhecimento prévio. Toda palavra difícil é explicada.',lvlAdult:'Adulto curioso',lvlAdultD:'Claro e simples; termos técnicos ficam, mas são explicados uma vez.',lvlLight:'Toque leve',lvlLightD:'Mantém a voz original, só explica palavras difíceis entre parênteses.',outLang:'Escrever o resultado em',sameLang:'Mesmo idioma do artigo',keyTitle:'Esta cópia roda fora do claude.ai: insira uma chave de API da Anthropic',keyWhy:'A chave fica salva só neste navegador (localStorage) e é enviada diretamente a api.anthropic.com. Obtenha em console.anthropic.com.',keyLabel:'Chave de API',modelLabel:'Modelo',pasteLabel:'Cole aqui o texto do artigo',pastePh:'Abra o artigo, pressione Ctrl+A e Ctrl+C, e cole aqui (Ctrl+V).',openArticle:'Abrir o artigo em nova aba ↗',usePasted:'Usar este texto',showOrigAll:'Mostrar originais',copy:'Copiar texto simplificado',stop:'Parar',glossTitle:'Palavras explicadas neste artigo',source:'Fonte',license:'Texto da Wikipédia, CC BY-SA. Simplificado pelo Claude; seções de referências e links externos são omitidas porque contêm apenas citações.',original:'Original',waiting:'Aguardando…',badLink:'Isso não parece um link de artigo da Wikipédia (ex.: https://pt.wikipedia.org/wiki/Lua).',pasteFirst:'Cole primeiro o texto do artigo (pelo menos algumas frases).',connecting:'Conectando ao Claude…',noClaude:'Claude não está disponível aqui. No claude.ai: permita que a página consulte o Claude. Em outro lugar: insira uma chave de API acima.',fetching:'Buscando o artigo…',fetchingConn:'Buscando pelo seu conector TinyFish…',fetchFail:'Não foi possível buscar o artigo automaticamente.',pasteWhy:'Esta página não pode carregar wikipedia.org diretamente e nenhum conector respondeu. Solução: abra o artigo, selecione tudo (Ctrl+A), copie (Ctrl+C) e cole abaixo; o resultado é idêntico.',simplifying:'Simplificando… {done} de {total} seções prontas.',done:'Pronto: {total} seções reescritas, {words} palavras explicadas.',stopped:'Parado.',rate:'Limite atingido: pausa de 20 s…',secFail:'Não foi possível simplificar esta seção ({err}). O original é mostrado.',cut:'(Esta parte foi cortada pelo limite de tamanho.)',copied:'Copiado.',copyFail:'O navegador bloqueou a cópia: selecione o texto e pressione Ctrl+C.',noText:'Nenhum texto encontrado.',error:'Algo deu errado: {err}',sections:'seções',level:'nível',via:'via',pasted:'texto colado',wrong:'Algo deu errado'},
+    nl:{_name:'Nederlands',title:'Plain Wiki',tagline:'Plak een Wikipedia-link en krijg het hele artikel terug in woorden die iedereen begrijpt – dezelfde feiten, geen jargon.',linkLabel:'Wikipedia-link',go:'Begrijpelijk maken',levelLabel:'Hoe simpel?',lvlKid:'Kinderen (10+)',lvlKidD:'Heel korte zinnen, alledaagse woorden, kleine vergelijkingen.',lvlAll:'Iedereen (14+)',lvlAllD:'Standaard. Geen voorkennis nodig. Elk moeilijk woord wordt uitgelegd.',lvlAdult:'Nieuwsgierige volwassene',lvlAdultD:'Helder en eenvoudig; vaktermen blijven maar worden één keer uitgelegd.',lvlLight:'Lichte aanpak',lvlLightD:'Behoudt de originele toon, legt alleen moeilijke woorden tussen haakjes uit.',outLang:'Schrijf het resultaat in',sameLang:'Dezelfde taal als het artikel',keyTitle:'Deze kopie draait buiten claude.ai – voer een Anthropic API-sleutel in',keyWhy:'De sleutel wordt alleen in deze browser opgeslagen (localStorage) en direct naar api.anthropic.com gestuurd. Te krijgen op console.anthropic.com.',keyLabel:'API-sleutel',modelLabel:'Model',pasteLabel:'Plak hier de artikeltekst',pastePh:'Open het artikel, druk Ctrl+A en Ctrl+C, en plak hier (Ctrl+V).',openArticle:'Artikel openen in nieuw tabblad ↗',usePasted:'Deze tekst gebruiken',showOrigAll:'Originelen tonen',copy:'Vereenvoudigde tekst kopiëren',stop:'Stop',glossTitle:'Uitgelegde woorden in dit artikel',source:'Bron',license:'Tekst van Wikipedia, CC BY-SA. Vereenvoudigd door Claude – bronnen en externe links zijn weggelaten omdat ze alleen verwijzingen bevatten.',original:'Origineel',waiting:'Wachten…',badLink:'Dit lijkt geen link naar een Wikipedia-artikel (bv. https://nl.wikipedia.org/wiki/Maan).',pasteFirst:'Plak eerst de artikeltekst (minstens een paar zinnen).',connecting:'Verbinden met Claude…',noClaude:'Claude is hier niet beschikbaar. Op claude.ai: sta de pagina toe Claude te vragen. Elders: voer hierboven een API-sleutel in.',fetching:'Artikel ophalen…',fetchingConn:'Artikel ophalen via je TinyFish-connector…',fetchFail:'Artikel kon niet automatisch worden opgehaald.',pasteWhy:'Deze pagina mag wikipedia.org niet direct laden en geen connector antwoordde. Oplossing: open het artikel, selecteer alles (Ctrl+A), kopieer (Ctrl+C) en plak hieronder – het resultaat is identiek.',simplifying:'Vereenvoudigen… {done} van {total} secties klaar.',done:'Klaar – {total} secties herschreven, {words} woorden uitgelegd.',stopped:'Gestopt.',rate:'Limiet bereikt – 20 s pauze…',secFail:'Deze sectie kon niet worden vereenvoudigd ({err}). Het origineel wordt getoond.',cut:'(Dit deel is afgekapt door de lengtelimiet.)',copied:'Gekopieerd.',copyFail:'Kopiëren is geblokkeerd – selecteer de tekst en druk Ctrl+C.',noText:'Geen artikeltekst gevonden.',error:'Er ging iets mis: {err}',sections:'secties',level:'niveau',via:'via',pasted:'geplakte tekst',wrong:'Er ging iets mis'},
+    pl:{_name:'Polski',title:'Plain Wiki',tagline:'Wklej dowolny link z Wikipedii i otrzymaj cały artykuł słowami, które każdy zrozumie – te same fakty, zero żargonu.',linkLabel:'Link do Wikipedii',go:'Uczyń zrozumiałym',levelLabel:'Jak prosto?',lvlKid:'Dzieci (10+)',lvlKidD:'Bardzo krótkie zdania, codzienne słowa, małe porównania.',lvlAll:'Wszyscy (14+)',lvlAllD:'Domyślnie. Bez wiedzy wstępnej. Każde trudne słowo wyjaśnione.',lvlAdult:'Ciekawy dorosły',lvlAdultD:'Jasno i prosto; terminy techniczne zostają, ale są raz wyjaśnione.',lvlLight:'Lekki dotyk',lvlLightD:'Zachowuje oryginalny styl, wyjaśnia trudne słowa tylko w nawiasach.',outLang:'Napisz wynik w języku',sameLang:'Ten sam język co artykuł',keyTitle:'Ta kopia działa poza claude.ai – podaj klucz API Anthropic',keyWhy:'Klucz jest zapisany tylko w tej przeglądarce (localStorage) i wysyłany bezpośrednio do api.anthropic.com. Do zdobycia na console.anthropic.com.',keyLabel:'Klucz API',modelLabel:'Model',pasteLabel:'Wklej tutaj tekst artykułu',pastePh:'Otwórz artykuł, naciśnij Ctrl+A i Ctrl+C, wklej tutaj (Ctrl+V).',openArticle:'Otwórz artykuł w nowej karcie ↗',usePasted:'Użyj tego tekstu',showOrigAll:'Pokaż oryginały',copy:'Kopiuj uproszczony tekst',stop:'Zatrzymaj',glossTitle:'Słowa wyjaśnione w tym artykule',source:'Źródło',license:'Tekst z Wikipedii, CC BY-SA. Uproszczony przez Claude – sekcje przypisów i linków zewnętrznych pominięto, bo zawierają tylko odnośniki.',original:'Oryginał',waiting:'Czekam…',badLink:'To nie wygląda na link do artykułu Wikipedii (np. https://pl.wikipedia.org/wiki/Księżyc).',pasteFirst:'Najpierw wklej tekst artykułu (co najmniej kilka zdań).',connecting:'Łączenie z Claude…',noClaude:'Claude nie jest tu dostępny. Na claude.ai: pozwól stronie pytać Claude. Gdzie indziej: podaj klucz API powyżej.',fetching:'Pobieranie artykułu…',fetchingConn:'Pobieranie przez konektor TinyFish…',fetchFail:'Nie udało się pobrać artykułu automatycznie.',pasteWhy:'Ta strona nie może bezpośrednio wczytać wikipedia.org i żaden konektor nie odpowiedział. Rozwiązanie: otwórz artykuł, zaznacz wszystko (Ctrl+A), skopiuj (Ctrl+C) i wklej poniżej – wynik jest identyczny.',simplifying:'Upraszczanie… {done} z {total} sekcji gotowe.',done:'Gotowe – {total} sekcji przepisanych, {words} słów wyjaśnionych.',stopped:'Zatrzymano.',rate:'Limit osiągnięty – pauza 20 s…',secFail:'Nie udało się uprościć tej sekcji ({err}). Pokazano oryginał.',cut:'(Ta część została ucięta przez limit długości.)',copied:'Skopiowano.',copyFail:'Przeglądarka zablokowała kopiowanie – zaznacz tekst i naciśnij Ctrl+C.',noText:'Nie znaleziono tekstu artykułu.',error:'Coś poszło nie tak: {err}',sections:'sekcji',level:'poziom',via:'przez',pasted:'wklejony tekst',wrong:'Coś poszło nie tak'},
+    ru:{_name:'Русский',title:'Plain Wiki',tagline:'Вставьте любую ссылку на Википедию и получите всю статью словами, понятными каждому — те же факты, никакого жаргона.',linkLabel:'Ссылка на Википедию',go:'Сделать понятным',levelLabel:'Насколько просто?',lvlKid:'Дети (10+)',lvlKidD:'Очень короткие предложения, простые слова, небольшие сравнения.',lvlAll:'Для всех (14+)',lvlAllD:'По умолчанию. Без предварительных знаний. Каждое сложное слово объясняется.',lvlAdult:'Любопытный взрослый',lvlAdultD:'Ясно и просто; термины остаются, но объясняются один раз.',lvlLight:'Лёгкая правка',lvlLightD:'Сохраняет стиль оригинала, только объясняет сложные слова в скобках.',outLang:'Написать результат на',sameLang:'Тот же язык, что и статья',keyTitle:'Эта копия работает вне claude.ai — введите API-ключ Anthropic',keyWhy:'Ключ хранится только в этом браузере (localStorage) и отправляется напрямую на api.anthropic.com. Получить: console.anthropic.com.',keyLabel:'API-ключ',modelLabel:'Модель',pasteLabel:'Вставьте текст статьи сюда',pastePh:'Откройте статью, нажмите Ctrl+A и Ctrl+C, вставьте сюда (Ctrl+V).',openArticle:'Открыть статью в новой вкладке ↗',usePasted:'Использовать этот текст',showOrigAll:'Показать оригиналы',copy:'Копировать упрощённый текст',stop:'Стоп',glossTitle:'Слова, объяснённые в этой статье',source:'Источник',license:'Текст из Википедии, CC BY-SA. Упрощено Claude — разделы примечаний и ссылок опущены, так как содержат только источники.',original:'Оригинал',waiting:'Ожидание…',badLink:'Это не похоже на ссылку на статью Википедии (напр. https://ru.wikipedia.org/wiki/Луна).',pasteFirst:'Сначала вставьте текст статьи (хотя бы несколько предложений).',connecting:'Подключение к Claude…',noClaude:'Claude здесь недоступен. На claude.ai: разрешите странице обращаться к Claude. В другом месте: введите API-ключ выше.',fetching:'Загрузка статьи…',fetchingConn:'Загрузка через ваш коннектор TinyFish…',fetchFail:'Не удалось загрузить статью автоматически.',pasteWhy:'Эта страница не может напрямую загрузить wikipedia.org, и ни один коннектор не ответил. Решение: откройте статью, выделите всё (Ctrl+A), скопируйте (Ctrl+C) и вставьте ниже — результат будет тем же.',simplifying:'Упрощение… {done} из {total} разделов готово.',done:'Готово — {total} разделов переписано, {words} слов объяснено.',stopped:'Остановлено.',rate:'Достигнут лимит — пауза 20 с…',secFail:'Не удалось упростить этот раздел ({err}). Показан оригинал.',cut:'(Эта часть обрезана из-за лимита длины.)',copied:'Скопировано.',copyFail:'Браузер заблокировал копирование — выделите текст и нажмите Ctrl+C.',noText:'Текст статьи не найден.',error:'Что-то пошло не так: {err}',sections:'разделов',level:'уровень',via:'через',pasted:'вставленный текст',wrong:'Что-то пошло не так'},
+    uk:{_name:'Українська',title:'Plain Wiki',tagline:'Вставте будь-яке посилання на Вікіпедію й отримайте всю статтю словами, зрозумілими кожному — ті самі факти, жодного жаргону.',linkLabel:'Посилання на Вікіпедію',go:'Зробити зрозумілим',levelLabel:'Наскільки просто?',lvlKid:'Діти (10+)',lvlKidD:'Дуже короткі речення, прості слова, невеликі порівняння.',lvlAll:'Для всіх (14+)',lvlAllD:'За замовчуванням. Без попередніх знань. Кожне складне слово пояснено.',lvlAdult:'Допитливий дорослий',lvlAdultD:'Ясно й просто; терміни лишаються, але пояснюються один раз.',lvlLight:'Легка правка',lvlLightD:'Зберігає стиль оригіналу, лише пояснює складні слова в дужках.',outLang:'Написати результат',sameLang:'Тією ж мовою, що й стаття',keyTitle:'Ця копія працює поза claude.ai — введіть API-ключ Anthropic',keyWhy:'Ключ зберігається лише в цьому браузері (localStorage) і надсилається напряму на api.anthropic.com. Отримати: console.anthropic.com.',keyLabel:'API-ключ',modelLabel:'Модель',pasteLabel:'Вставте текст статті сюди',pastePh:'Відкрийте статтю, натисніть Ctrl+A та Ctrl+C, вставте сюди (Ctrl+V).',openArticle:'Відкрити статтю в новій вкладці ↗',usePasted:'Використати цей текст',showOrigAll:'Показати оригінали',copy:'Копіювати спрощений текст',stop:'Стоп',glossTitle:'Слова, пояснені в цій статті',source:'Джерело',license:'Текст із Вікіпедії, CC BY-SA. Спрощено Claude — розділи приміток і посилань пропущено, бо вони містять лише джерела.',original:'Оригінал',waiting:'Очікування…',badLink:'Це не схоже на посилання на статтю Вікіпедії (напр. https://uk.wikipedia.org/wiki/Місяць).',pasteFirst:'Спочатку вставте текст статті (хоча б кілька речень).',connecting:'Підключення до Claude…',noClaude:'Claude тут недоступний. На claude.ai: дозвольте сторінці звертатися до Claude. В іншому місці: введіть API-ключ вище.',fetching:'Завантаження статті…',fetchingConn:'Завантаження через ваш конектор TinyFish…',fetchFail:'Не вдалося завантажити статтю автоматично.',pasteWhy:'Ця сторінка не може напряму завантажити wikipedia.org, і жоден конектор не відповів. Рішення: відкрийте статтю, виділіть усе (Ctrl+A), скопіюйте (Ctrl+C) і вставте нижче — результат буде той самий.',simplifying:'Спрощення… {done} з {total} розділів готово.',done:'Готово — {total} розділів переписано, {words} слів пояснено.',stopped:'Зупинено.',rate:'Досягнуто ліміт — пауза 20 с…',secFail:'Не вдалося спростити цей розділ ({err}). Показано оригінал.',cut:'(Цю частину обрізано через ліміт довжини.)',copied:'Скопійовано.',copyFail:'Браузер заблокував копіювання — виділіть текст і натисніть Ctrl+C.',noText:'Текст статті не знайдено.',error:'Щось пішло не так: {err}',sections:'розділів',level:'рівень',via:'через',pasted:'вставлений текст',wrong:'Щось пішло не так'},
+    ar:{_name:'العربية',_rtl:true,title:'Plain Wiki',tagline:'الصق أي رابط من ويكيبيديا واحصل على المقالة كاملة بكلمات يفهمها الجميع — نفس الحقائق، بلا مصطلحات معقدة.',linkLabel:'رابط ويكيبيديا',go:'اجعلها مفهومة',levelLabel:'ما مدى البساطة؟',lvlKid:'للأطفال (10+)',lvlKidD:'جمل قصيرة جدًا، كلمات يومية، تشبيهات بسيطة.',lvlAll:'للجميع (14+)',lvlAllD:'الافتراضي. لا يحتاج معرفة سابقة. كل كلمة صعبة تُشرح.',lvlAdult:'بالغ فضولي',lvlAdultD:'واضح وبسيط؛ تبقى المصطلحات التقنية لكنها تُشرح مرة واحدة.',lvlLight:'لمسة خفيفة',lvlLightD:'يحافظ على الأسلوب الأصلي ويشرح الكلمات الصعبة بين قوسين فقط.',outLang:'اكتب النتيجة بـ',sameLang:'نفس لغة المقالة',keyTitle:'هذه النسخة تعمل خارج claude.ai — أدخل مفتاح API من Anthropic',keyWhy:'يُحفظ المفتاح في هذا المتصفح فقط (localStorage) ويُرسل مباشرة إلى api.anthropic.com. احصل عليه من console.anthropic.com.',keyLabel:'مفتاح API',modelLabel:'النموذج',pasteLabel:'الصق نص المقالة هنا',pastePh:'افتح المقالة، اضغط Ctrl+A ثم Ctrl+C، والصق هنا (Ctrl+V).',openArticle:'افتح المقالة في علامة تبويب جديدة ↗',usePasted:'استخدم هذا النص',showOrigAll:'عرض النصوص الأصلية',copy:'نسخ النص المبسّط',stop:'إيقاف',glossTitle:'كلمات شُرحت في هذه المقالة',source:'المصدر',license:'النص من ويكيبيديا، CC BY-SA. بسّطه Claude — حُذفت أقسام المراجع والروابط الخارجية لأنها تحتوي على استشهادات فقط.',original:'الأصل',waiting:'انتظار…',badLink:'هذا لا يبدو رابط مقالة في ويكيبيديا (مثل https://ar.wikipedia.org/wiki/القمر).',pasteFirst:'الصق نص المقالة أولًا (بضع جمل على الأقل).',connecting:'جارٍ الاتصال بـ Claude…',noClaude:'Claude غير متاح هنا. على claude.ai: اسمح للصفحة بسؤال Claude. في مكان آخر: أدخل مفتاح API أعلاه.',fetching:'جارٍ جلب المقالة…',fetchingConn:'جارٍ الجلب عبر موصّل TinyFish…',fetchFail:'تعذّر جلب المقالة تلقائيًا.',pasteWhy:'لا يُسمح لهذه الصفحة بتحميل wikipedia.org مباشرة ولم يستجب أي موصّل. الحل: افتح المقالة، حدّد الكل (Ctrl+A)، انسخ (Ctrl+C) والصق أدناه — النتيجة متطابقة.',simplifying:'جارٍ التبسيط… {done} من {total} أقسام.',done:'تم — أُعيدت كتابة {total} قسمًا وشُرحت {words} كلمة.',stopped:'تم الإيقاف.',rate:'تم الوصول إلى الحد — توقف 20 ثانية…',secFail:'تعذّر تبسيط هذا القسم ({err}). يُعرض الأصل.',cut:'(قُطع هذا الجزء بسبب حد الطول.)',copied:'تم النسخ.',copyFail:'منع المتصفح النسخ — حدّد النص واضغط Ctrl+C.',noText:'لم يُعثر على نص المقالة.',error:'حدث خطأ: {err}',sections:'أقسام',level:'المستوى',via:'عبر',pasted:'نص ملصوق',wrong:'حدث خطأ'},
+    hi:{_name:'हिन्दी',title:'Plain Wiki',tagline:'कोई भी विकिपीडिया लिंक चिपकाएँ और पूरा लेख ऐसे शब्दों में पाएँ जो हर कोई समझ सके — वही तथ्य, कोई कठिन शब्दावली नहीं।',linkLabel:'विकिपीडिया लिंक',go:'समझने योग्य बनाएँ',levelLabel:'कितना सरल?',lvlKid:'बच्चे (10+)',lvlKidD:'बहुत छोटे वाक्य, रोज़मर्रा के शब्द, छोटी तुलनाएँ।',lvlAll:'सभी के लिए (14+)',lvlAllD:'डिफ़ॉल्ट। पूर्व ज्ञान ज़रूरी नहीं। हर कठिन शब्द समझाया गया।',lvlAdult:'जिज्ञासु वयस्क',lvlAdultD:'स्पष्ट और सरल; तकनीकी शब्द रहते हैं पर एक बार समझाए जाते हैं।',lvlLight:'हल्का बदलाव',lvlLightD:'मूल शैली रखता है, कठिन शब्दों को केवल कोष्ठक में समझाता है।',outLang:'परिणाम इस भाषा में लिखें',sameLang:'लेख की ही भाषा',keyTitle:'यह प्रति claude.ai के बाहर चल रही है — Anthropic API कुंजी दर्ज करें',keyWhy:'कुंजी केवल इस ब्राउज़र में सहेजी जाती है (localStorage) और सीधे api.anthropic.com को भेजी जाती है। console.anthropic.com से प्राप्त करें।',keyLabel:'API कुंजी',modelLabel:'मॉडल',pasteLabel:'लेख का पाठ यहाँ चिपकाएँ',pastePh:'लेख खोलें, Ctrl+A फिर Ctrl+C दबाएँ, और यहाँ चिपकाएँ (Ctrl+V)।',openArticle:'लेख नए टैब में खोलें ↗',usePasted:'यह पाठ उपयोग करें',showOrigAll:'मूल दिखाएँ',copy:'सरल पाठ कॉपी करें',stop:'रोकें',glossTitle:'इस लेख में समझाए गए शब्द',source:'स्रोत',license:'पाठ विकिपीडिया से, CC BY-SA। Claude द्वारा सरलीकृत — संदर्भ और बाहरी कड़ियाँ हटाई गईं क्योंकि उनमें केवल उद्धरण होते हैं।',original:'मूल',waiting:'प्रतीक्षा…',badLink:'यह विकिपीडिया लेख का लिंक नहीं लगता (जैसे https://hi.wikipedia.org/wiki/चन्द्रमा)।',pasteFirst:'पहले लेख का पाठ चिपकाएँ (कम से कम कुछ वाक्य)।',connecting:'Claude से जुड़ रहे हैं…',noClaude:'Claude यहाँ उपलब्ध नहीं है। claude.ai पर: पेज को Claude से पूछने की अनुमति दें। अन्यत्र: ऊपर API कुंजी दर्ज करें।',fetching:'लेख लाया जा रहा है…',fetchingConn:'आपके TinyFish कनेक्टर से लेख लाया जा रहा है…',fetchFail:'लेख स्वतः नहीं लाया जा सका।',pasteWhy:'यह पेज wikipedia.org को सीधे लोड नहीं कर सकता और किसी कनेक्टर ने जवाब नहीं दिया। समाधान: लेख खोलें, सब चुनें (Ctrl+A), कॉपी करें (Ctrl+C) और नीचे चिपकाएँ — परिणाम बिल्कुल वही होगा।',simplifying:'सरल बना रहे हैं… {total} में से {done} खंड पूरे।',done:'पूरा — {total} खंड फिर से लिखे गए, {words} शब्द समझाए गए।',stopped:'रोका गया।',rate:'सीमा पहुँची — 20 सेकंड रुकें…',secFail:'यह खंड सरल नहीं हो सका ({err})। मूल दिखाया गया है।',cut:'(यह भाग लंबाई सीमा के कारण कट गया।)',copied:'कॉपी हो गया।',copyFail:'ब्राउज़र ने कॉपी रोक दी — पाठ चुनें और Ctrl+C दबाएँ।',noText:'लेख का पाठ नहीं मिला।',error:'कुछ गलत हुआ: {err}',sections:'खंड',level:'स्तर',via:'द्वारा',pasted:'चिपकाया पाठ',wrong:'कुछ गलत हुआ'},
+    ja:{_name:'日本語',title:'Plain Wiki',tagline:'Wikipediaのリンクを貼るだけで、記事全体を誰でも分かる言葉に書き直します。事実はそのまま、専門用語はゼロ。',linkLabel:'Wikipediaのリンク',go:'分かりやすくする',levelLabel:'どのくらい簡単に？',lvlKid:'子ども（10歳以上）',lvlKidD:'とても短い文、日常の言葉、身近な例え。',lvlAll:'みんな（14歳以上）',lvlAllD:'標準。前提知識は不要。難しい言葉はすべて説明。',lvlAdult:'好奇心のある大人',lvlAdultD:'明快で平易。専門用語は残すが初出時に説明。',lvlLight:'軽めの調整',lvlLightD:'元の文体を保ち、難しい言葉だけ括弧で説明。',outLang:'結果を書く言語',sameLang:'記事と同じ言語',keyTitle:'このコピーはclaude.aiの外で動いています — Anthropic APIキーを入力',keyWhy:'キーはこのブラウザ内（localStorage）にのみ保存され、api.anthropic.comへ直接送信されます。console.anthropic.comで取得できます。',keyLabel:'APIキー',modelLabel:'モデル',pasteLabel:'記事の本文をここに貼り付け',pastePh:'記事を開き、Ctrl+A → Ctrl+C でコピーしてここに貼り付け（Ctrl+V）。',openArticle:'記事を新しいタブで開く ↗',usePasted:'このテキストを使う',showOrigAll:'原文を表示',copy:'簡単な文をコピー',stop:'停止',glossTitle:'この記事で説明した言葉',source:'出典',license:'本文はWikipedia（CC BY-SA）。Claudeが平易化。脚注・外部リンクの節は出典のみのため省略。',original:'原文',waiting:'待機中…',badLink:'Wikipediaの記事リンクではないようです（例: https://ja.wikipedia.org/wiki/月）。',pasteFirst:'先に記事の本文を貼り付けてください（数文以上）。',connecting:'Claudeに接続中…',noClaude:'ここではClaudeを使えません。claude.ai上では、ページがClaudeに質問することを許可してください。それ以外では上にAPIキーを入力してください。',fetching:'記事を取得中…',fetchingConn:'TinyFishコネクタ経由で取得中…',fetchFail:'記事を自動取得できませんでした。',pasteWhy:'このページはwikipedia.orgを直接読み込めず、コネクタも応答しませんでした。対処: 記事を開いて全選択（Ctrl+A）、コピー（Ctrl+C）し、下に貼り付けてください。結果は同じです。',simplifying:'書き直し中… {total}節中{done}節完了。',done:'完了 — {total}節を書き直し、{words}語を説明。',stopped:'停止しました。',rate:'制限に達しました — 20秒待機…',secFail:'この節を書き直せませんでした（{err}）。原文を表示します。',cut:'（この部分は長さの上限で途切れました。）',copied:'コピーしました。',copyFail:'ブラウザがコピーをブロックしました。テキストを選択してCtrl+Cを押してください。',noText:'記事の本文が見つかりません。',error:'問題が発生しました: {err}',sections:'節',level:'レベル',via:'経由',pasted:'貼り付けたテキスト',wrong:'問題が発生しました'},
+    zh:{_name:'中文',title:'Plain Wiki',tagline:'粘贴任意维基百科链接，整篇文章将用人人都懂的语言重写——事实不变，零术语。',linkLabel:'维基百科链接',go:'让它变得易懂',levelLabel:'多简单？',lvlKid:'儿童（10岁以上）',lvlKidD:'非常短的句子、日常词汇、小小的比喻。',lvlAll:'所有人（14岁以上）',lvlAllD:'默认。无需任何背景知识。每个难词都有解释。',lvlAdult:'好奇的成年人',lvlAdultD:'清晰平实；保留术语，但首次出现时解释一次。',lvlLight:'轻度调整',lvlLightD:'保留原文语气，仅在括号中解释难词。',outLang:'用以下语言输出',sameLang:'与文章相同的语言',keyTitle:'此副本运行在 claude.ai 之外——请输入 Anthropic API 密钥',keyWhy:'密钥仅保存在此浏览器（localStorage）中，并直接发送至 api.anthropic.com。可在 console.anthropic.com 获取。',keyLabel:'API 密钥',modelLabel:'模型',pasteLabel:'在此粘贴文章正文',pastePh:'打开文章，按 Ctrl+A 再按 Ctrl+C，然后粘贴到这里（Ctrl+V）。',openArticle:'在新标签页打开文章 ↗',usePasted:'使用此文本',showOrigAll:'显示原文',copy:'复制简化文本',stop:'停止',glossTitle:'本文中解释过的词',source:'来源',license:'文本来自维基百科，CC BY-SA。由 Claude 简化——参考文献和外部链接部分因只含引用而省略。',original:'原文',waiting:'等待中…',badLink:'这看起来不像维基百科文章链接（例如 https://zh.wikipedia.org/wiki/月球）。',pasteFirst:'请先粘贴文章正文（至少几句话）。',connecting:'正在连接 Claude…',noClaude:'此处无法使用 Claude。在 claude.ai 上：允许页面向 Claude 提问。其他地方：在上方输入 API 密钥。',fetching:'正在获取文章…',fetchingConn:'正在通过 TinyFish 连接器获取…',fetchFail:'无法自动获取文章。',pasteWhy:'此页面不能直接加载 wikipedia.org，且没有连接器响应。解决办法：打开文章，全选（Ctrl+A），复制（Ctrl+C），粘贴到下方——结果完全相同。',simplifying:'正在简化… {total} 节中已完成 {done} 节。',done:'完成——重写 {total} 节，解释 {words} 个词。',stopped:'已停止。',rate:'达到速率限制——暂停 20 秒…',secFail:'无法简化此节（{err}）。显示原文。',cut:'（此部分因长度限制被截断。）',copied:'已复制。',copyFail:'浏览器阻止了复制——请选中文本并按 Ctrl+C。',noText:'未找到文章正文。',error:'出错了：{err}',sections:'节',level:'级别',via:'通过',pasted:'粘贴的文本',wrong:'出错了'},
+    ko:{_name:'한국어',title:'Plain Wiki',tagline:'위키백과 링크를 붙여 넣으면 전체 글을 누구나 이해할 수 있는 말로 다시 써 드립니다 — 같은 사실, 전문용어 없음.',linkLabel:'위키백과 링크',go:'이해하기 쉽게 만들기',levelLabel:'얼마나 쉽게?',lvlKid:'어린이 (10세 이상)',lvlKidD:'아주 짧은 문장, 일상 단어, 작은 비유.',lvlAll:'모두 (14세 이상)',lvlAllD:'기본값. 배경지식 불필요. 어려운 단어는 모두 설명.',lvlAdult:'호기심 많은 성인',lvlAdultD:'명확하고 쉽게; 전문용어는 남기되 처음 한 번 설명.',lvlLight:'가볍게',lvlLightD:'원문의 어조를 유지하고 어려운 단어만 괄호로 설명.',outLang:'결과 언어',sameLang:'글과 같은 언어',keyTitle:'이 사본은 claude.ai 외부에서 실행됩니다 — Anthropic API 키 입력',keyWhy:'키는 이 브라우저(localStorage)에만 저장되며 api.anthropic.com으로 직접 전송됩니다. console.anthropic.com에서 발급.',keyLabel:'API 키',modelLabel:'모델',pasteLabel:'글 본문을 여기에 붙여 넣기',pastePh:'글을 열고 Ctrl+A, Ctrl+C 후 여기에 붙여 넣으세요 (Ctrl+V).',openArticle:'새 탭에서 글 열기 ↗',usePasted:'이 텍스트 사용',showOrigAll:'원문 보기',copy:'쉬운 글 복사',stop:'중지',glossTitle:'이 글에서 설명한 단어',source:'출처',license:'본문은 위키백과(CC BY-SA). Claude가 쉽게 다시 씀 — 각주와 외부 링크 절은 출처만 담고 있어 생략.',original:'원문',waiting:'대기 중…',badLink:'위키백과 글 링크가 아닌 것 같습니다 (예: https://ko.wikipedia.org/wiki/달).',pasteFirst:'먼저 글 본문을 붙여 넣으세요 (몇 문장 이상).',connecting:'Claude에 연결 중…',noClaude:'여기서는 Claude를 사용할 수 없습니다. claude.ai에서는 페이지가 Claude에 질문하도록 허용하세요. 다른 곳에서는 위에 API 키를 입력하세요.',fetching:'글을 가져오는 중…',fetchingConn:'TinyFish 커넥터로 가져오는 중…',fetchFail:'글을 자동으로 가져올 수 없습니다.',pasteWhy:'이 페이지는 wikipedia.org를 직접 불러올 수 없고 커넥터도 응답하지 않았습니다. 해결: 글을 열어 전체 선택(Ctrl+A), 복사(Ctrl+C) 후 아래에 붙여 넣으세요 — 결과는 같습니다.',simplifying:'쉽게 쓰는 중… {total}개 절 중 {done}개 완료.',done:'완료 — {total}개 절 다시 씀, {words}개 단어 설명.',stopped:'중지됨.',rate:'한도 도달 — 20초 대기…',secFail:'이 절을 쉽게 쓸 수 없었습니다 ({err}). 원문을 표시합니다.',cut:'(이 부분은 길이 제한으로 잘렸습니다.)',copied:'복사됨.',copyFail:'브라우저가 복사를 차단했습니다 — 텍스트를 선택하고 Ctrl+C를 누르세요.',noText:'글 본문을 찾을 수 없습니다.',error:'문제가 발생했습니다: {err}',sections:'절',level:'수준',via:'경로',pasted:'붙여 넣은 텍스트',wrong:'문제가 발생했습니다'}
+  };
+  // Languages the result can be written in (name shown in its own language; English name goes to the model)
+  const OUT_LANGS = [['en','English'],['de','Deutsch'],['tr','Türkçe'],['es','Español'],['fr','Français'],['it','Italiano'],['pt','Português'],['nl','Nederlands'],['pl','Polski'],['sv','Svenska'],['da','Dansk'],['no','Norsk'],['fi','Suomi'],['cs','Čeština'],['hu','Magyar'],['ro','Română'],['el','Ελληνικά'],['ru','Русский'],['uk','Українська'],['ar','العربية'],['fa','فارسی'],['he','עברית'],['hi','हिन्दी'],['bn','বাংলা'],['ur','اردو'],['id','Bahasa Indonesia'],['ms','Bahasa Melayu'],['vi','Tiếng Việt'],['th','ไทย'],['ja','日本語'],['zh','中文（简体）'],['zh-TW','中文（繁體）'],['ko','한국어'],['sw','Kiswahili']];
+  const EN_NAME = {en:'English',de:'German',tr:'Turkish',es:'Spanish',fr:'French',it:'Italian',pt:'Portuguese',nl:'Dutch',pl:'Polish',sv:'Swedish',da:'Danish',no:'Norwegian',fi:'Finnish',cs:'Czech',hu:'Hungarian',ro:'Romanian',el:'Greek',ru:'Russian',uk:'Ukrainian',ar:'Arabic',fa:'Persian',he:'Hebrew',hi:'Hindi',bn:'Bengali',ur:'Urdu',id:'Indonesian',ms:'Malay',vi:'Vietnamese',th:'Thai',ja:'Japanese',zh:'Simplified Chinese','zh-TW':'Traditional Chinese',ko:'Korean',sw:'Swahili'};
+  const EXAMPLES = {en:['https://en.wikipedia.org/wiki/Photosynthesis','https://en.wikipedia.org/wiki/Black_hole','https://en.wikipedia.org/wiki/Inflation'],de:['https://de.wikipedia.org/wiki/Photosynthese','https://de.wikipedia.org/wiki/Schwarzes_Loch','https://de.wikipedia.org/wiki/Inflation'],tr:['https://tr.wikipedia.org/wiki/Fotosentez','https://tr.wikipedia.org/wiki/Kara_delik','https://tr.wikipedia.org/wiki/Enflasyon'],es:['https://es.wikipedia.org/wiki/Fotosíntesis','https://es.wikipedia.org/wiki/Agujero_negro'],fr:['https://fr.wikipedia.org/wiki/Photosynthèse','https://fr.wikipedia.org/wiki/Trou_noir']};
+
+  let uiLang = 'en';
+  const t = (k, vars) => { let s = (I18N[uiLang] && I18N[uiLang][k]) || I18N.en[k] || k; if (vars) for (const v in vars) s = s.replace('{' + v + '}', vars[v]); return s; };
+  function applyLang(code) {
+    uiLang = I18N[code] ? code : 'en'; store.set('pw.lang', uiLang);
+    document.documentElement.lang = uiLang; document.documentElement.dir = I18N[uiLang]._rtl ? 'rtl' : 'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.dataset.i18nPh));
+    $('outLang').options[0].textContent = t('sameLang');
+    const ex = $('examples'); ex.innerHTML = '';
+    (EXAMPLES[uiLang] || EXAMPLES.en).forEach(u => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = decodeURIComponent(u.split('/wiki/')[1]).replace(/_/g,' '); b.onclick = () => { $('url').value = u; start(false); }; ex.appendChild(b); });
+    document.querySelectorAll('#out .tools .ghost').forEach(b => b.textContent = t('original'));
+  }
+  // UI language select
+  for (const code of Object.keys(I18N)) { const o = document.createElement('option'); o.value = code; o.textContent = I18N[code]._name; $('uiLang').appendChild(o); }
+  // output language select
+  { const o = document.createElement('option'); o.value = ''; o.textContent = t('sameLang'); $('outLang').appendChild(o);
+    for (const [c, n] of OUT_LANGS) { const op = document.createElement('option'); op.value = c; op.textContent = n; $('outLang').appendChild(op); } }
+  const nav = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  const initLang = store.get('pw.lang') || (I18N[nav] ? nav : 'en');
+  $('uiLang').value = initLang; applyLang(initLang);
+  $('uiLang').addEventListener('change', e => applyLang(e.target.value));
+  $('outLang').value = store.get('pw.out') || ''; $('outLang').addEventListener('change', e => store.set('pw.out', e.target.value));
+
+  // ================= theme =================
+  function setTheme(th) { document.documentElement.dataset.theme = th; $('themeBtn').textContent = th === 'dark' ? '☀️' : '🌙'; store.set('pw.theme', th); }
+  setTheme(store.get('pw.theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  $('themeBtn').addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+
+  // font size
+  let fs = parseInt(store.get('pw.fs') || '19', 10); const applyFs = () => { $('out').style.setProperty('--fs', fs + 'px'); store.set('pw.fs', fs); }; applyFs();
+  $('fontMinus').onclick = () => { fs = Math.max(14, fs - 1); applyFs(); }; $('fontPlus').onclick = () => { fs = Math.min(28, fs + 1); applyFs(); };
+
+  // ================= backends =================
+  let sampleNS = null, mcpNS = null, capsResolved = false;
+  const useCap = n => (window.claude && typeof claude.use === 'function') ? claude.use(n).catch(() => null) : Promise.resolve(null);
+  useCap('sample').then(ns => { sampleNS = ns; if (!ns && capsResolved) $('keyBox').classList.remove('hidden'); });
+  useCap('mcp').then(ns => { mcpNS = ns; });
+  setTimeout(() => { capsResolved = true; if (!sampleNS) $('keyBox').classList.remove('hidden'); }, window.claude ? 10500 : 300);
+  $('apiKey').value = store.get('pw.key') || ''; $('apiKey').addEventListener('change', e => store.set('pw.key', e.target.value.trim()));
+  $('model').value = store.get('pw.model') || 'claude-sonnet-5-5'; $('model').addEventListener('change', e => store.set('pw.model', e.target.value.trim()));
+
+  // Unified "ask" : returns {text, truncated}; supports onText streaming + abort signal
+  async function ask(prompt, { signal, onText }) {
+    if (sampleNS) return sampleNS(prompt, { signal, modelTier: 'default', cache: true, onText });
+    const key = $('apiKey').value.trim(); if (!key) { const e = new Error(t('noClaude')); e.code = 'no_key'; throw e; }
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST', signal,
+      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: $('model').value.trim() || 'claude-sonnet-5-5', max_tokens: 8000, stream: true, messages: [{ role: 'user', content: prompt }] })
+    });
+    if (!r.ok) { const e = new Error('API ' + r.status + ' ' + (await r.text()).slice(0, 200)); e.code = r.status === 429 ? 'rate_limited' : 'api_error'; throw e; }
+    const reader = r.body.getReader(); const dec = new TextDecoder(); let buf = '', text = '', stop = null;
+    while (true) {
+      const { value, done } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream: true }); const lines = buf.split('\n'); buf = lines.pop();
+      for (const ln of lines) {
+        if (!ln.startsWith('data:')) continue;
+        try { const ev = JSON.parse(ln.slice(5)); if (ev.type === 'content_block_delta' && ev.delta && ev.delta.text) { text += ev.delta.text; onText && onText({ text }); } if (ev.type === 'message_delta' && ev.delta) stop = ev.delta.stop_reason; } catch {}
+      }
+    }
+    return { text, truncated: stop === 'max_tokens' };
+  }
+
+  // ================= state & UI =================
+  let level = 'everyone', aborter = null; const glossary = new Map(); let simplifiedAll = [];
+  $('levels').addEventListener('click', e => { const b = e.target.closest('.lvl'); if (!b) return; document.querySelectorAll('.lvl').forEach(x => x.classList.remove('on')); b.classList.add('on'); level = b.dataset.lvl; });
+  $('go').addEventListener('click', () => start(false));
+  $('url').addEventListener('keydown', e => { if (e.key === 'Enter') start(false); });
+  $('goPasted').addEventListener('click', () => start(true));
+  $('stopBtn').addEventListener('click', () => { if (aborter) aborter.abort(); });
+  $('toggleAllOrig').addEventListener('click', () => { const secs = document.querySelectorAll('#out .sec'); const anyHidden = [...secs].some(s => !s.classList.contains('show-orig')); secs.forEach(s => s.classList.toggle('show-orig', anyHidden)); });
+  $('copyBtn').addEventListener('click', async () => { try { await navigator.clipboard.writeText(simplifiedAll.join('\n\n')); setStatus(t('copied'), 'ok'); } catch { setStatus(t('copyFail'), 'warn'); } });
+
+  function setStatus(msg, kind) { const s = $('status'); s.textContent = msg || ''; s.style.color = kind === 'bad' ? 'var(--bad)' : kind === 'ok' ? 'var(--ok)' : kind === 'warn' ? 'var(--warn)' : 'var(--muted)'; }
+  function progress(p) { const el = $('prog'); el.classList.toggle('hidden', p == null); if (p != null) el.firstElementChild.style.width = Math.round(p * 100) + '%'; }
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const setBusy = b => { $('go').disabled = b; $('goPasted').disabled = b; $('stopBtn').classList.toggle('hidden', !b); };
+
+  // ================= URL parsing =================
+  function parseWiki(u) {
+    try {
+      const url = new URL(u.trim());
+      const m = url.hostname.match(/^([a-z\-]+)\.(m\.)?wikipedia\.org$/i); if (!m) return null;
+      let title = null;
+      if (url.pathname.startsWith('/wiki/')) title = decodeURIComponent(url.pathname.slice(6));
+      else if (url.searchParams.get('title')) title = url.searchParams.get('title');
+      if (!title) return null; title = title.replace(/_/g, ' ');
+      return { lang: m[1].toLowerCase(), title, canonical: `https://${m[1]}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}` };
+    } catch { return null; }
+  }
+
+  // ================= fetching =================
+  async function fetchDirect(info, signal) {
+    const api = `https://${info.lang}.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&format=json&origin=*&titles=${encodeURIComponent(info.title)}`;
+    const r = await fetch(api, { signal }); if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json(); const page = Object.values(j.query.pages)[0];
+    if (!page || page.missing !== undefined || !page.extract) throw new Error('Article not found');
+    return { title: page.title, text: page.extract, via: 'Wikipedia API' };
+  }
+  function extractPayloadText(payload) {
+    const seen = new Set(); let best = '';
+    const walk = (v, d) => {
+      if (v == null || d > 8) return;
+      if (typeof v === 'string') { const s = v.trim(); if ((s.startsWith('{') || s.startsWith('[')) && s.length > 2) { try { walk(JSON.parse(s), d + 1); return; } catch {} } if (s.length > best.length) best = s; return; }
+      if (typeof v !== 'object' || seen.has(v)) return; seen.add(v);
+      if (Array.isArray(v)) { v.forEach(x => walk(x, d + 1)); return; }
+      for (const k of Object.keys(v)) walk(v[k], d + 1);
+    };
+    walk(payload, 0); return best;
+  }
+  async function fetchViaConnector(info) {
+    if (!mcpNS) throw new Error('no mcp');
+    const res = await mcpNS.callTool('TinyFish', 'fetch_content', {
+      urls: [info.canonical], format: 'markdown', links: false, image_links: false, iframe_links: false, page_metadata: false,
+      include_selectors: ['#mw-content-text'],
+      exclude_selectors: ['.navbox', '.reflist', '.mw-editsection', '#toc', '.sidebar', 'sup.reference', '.hatnote', '.mw-references-wrap', '.ambox', '.metadata', 'style'],
+      purpose: 'Rewrite this Wikipedia article in simpler language without losing information'
+    });
+    const text = extractPayloadText(res && res.payload !== undefined ? res.payload : res);
+    if (!text || text.length < 200) throw new Error('empty result');
+    return { title: info.title, text, via: 'TinyFish' };
+  }
+
+  // ================= splitting =================
+  const SKIP = /^(references|external links|further reading|bibliography|notes|footnotes|sources|citations|einzelnachweise|literatur|weblinks|anmerkungen|quellen|références|liens externes|bibliographie|referencias|enlaces externos|bibliografía|notas|kaynakça|dış bağlantılar|notlar|note|collegamenti esterni|referências|ligações externas|примечания|ссылки|литература|примітки|посилання|джерела|przypisy|linki zewnętrzne|bibliografia|referenties|externe links|literatuur|مراجع|وصلات خارجية|参考文献|外部リンク|脚注|参考资料|外部链接|注释|각주|외부 링크|참고 문헌|सन्दर्भ|बाहरी कड़ियाँ)$/i;
+  function splitSections(raw) {
+    const lines = raw.replace(/\r/g, '').split('\n'); const secs = []; let cur = { level: 2, heading: null, body: [] };
+    for (const ln of lines) {
+      const m = ln.match(/^(={2,6})\s*(.+?)\s*\1\s*$/) || ln.match(/^(#{1,6})\s+(.+?)\s*#*\s*$/);
+      if (m) { if (cur.body.join('').trim() || cur.heading) secs.push(cur); cur = { level: Math.min(6, Math.max(2, m[1].length)), heading: m[2].replace(/\[\[|\]\]/g, '').trim(), body: [] }; }
+      else cur.body.push(ln);
+    }
+    if (cur.body.join('').trim() || cur.heading) secs.push(cur);
+    const out = []; let skipDepth = null;
+    for (const s of secs) {
+      if (skipDepth != null && s.level > skipDepth) continue; else skipDepth = null;
+      if (s.heading && SKIP.test(s.heading)) { skipDepth = s.level; continue; }
+      const text = s.body.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+      if (!text && !s.heading) continue;
+      const MAX = 5500;
+      if (text.length <= MAX) { out.push({ ...s, text }); continue; }
+      const paras = text.split(/\n\s*\n/); let buf = '', first = true;
+      for (const p of paras) {
+        if ((buf + '\n\n' + p).length > MAX && buf) { out.push({ level: s.level, heading: first ? s.heading : null, text: buf }); buf = p; first = false; }
+        else buf = buf ? buf + '\n\n' + p : p;
+      }
+      if (buf) out.push({ level: s.level, heading: first ? s.heading : null, text: buf });
+    }
+    return out;
+  }
+
+  // ================= prompt =================
+  const AUDIENCE = {
+    kid: 'a curious 10-year-old child. Use very short sentences, everyday words, and a small everyday comparison when something is abstract. Explain every word a child would not know.',
+    everyone: 'anyone aged 14 or older with no prior knowledge of the subject. Use plain, clear sentences and everyday words. Every technical or rare word must be explained in plain words the first time it appears.',
+    adult: 'a curious adult with no background in this subject. Plain and clear; technical terms may stay, but each one is explained in simple words the first time it appears.',
+    light: 'the general reader, keeping the original tone and sentence rhythm as much as possible. Change as little as possible: keep the wording, but add a short plain-words explanation in brackets after every hard word, technical term, or unexplained abbreviation.'
+  };
+  function buildPrompt(sec, articleTitle) {
+    const out = $('outLang').value;
+    const langRule = out ? `Write the result in ${EN_NAME[out] || out}. Translate everything (headings inside the text included); keep proper names, and put the original term in brackets after a translated technical term the first time.` : 'Write in the same language as the original text.';
+    return `You are rewriting one section of the Wikipedia article "${articleTitle}" so that it is fully understandable to ${AUDIENCE[level]}
+
+STRICT RULES
+1. Keep EVERY piece of information: all facts, numbers, dates, names, places, causes, exceptions, and qualifications. Nothing may be dropped, merged away, or made vaguer. If the original says "approximately 3.2 million", you say "about 3.2 million", never "millions".
+2. Keep the original order of ideas and the paragraph structure. Do not add facts that are not in the original.
+3. Hard words: replace them with simple words. If a technical term has to stay (a name of a thing, process, or concept), write it, then explain it in plain words in brackets the first time, e.g. "photosynthesis (the way plants make food from sunlight)".
+4. Short sentences. Active voice. One idea per sentence.
+5. Lists in the original stay lists. Tables become short bullet points that keep all values.
+6. ${langRule}
+7. Output Markdown ONLY. No preamble, no heading (the heading is added separately), no comments about what you did.
+8. At the very end add a line exactly "---GLOSSARY---" and then one line per word you explained, in the form "word :: short plain explanation" (in the output language). If you explained none, still write the "---GLOSSARY---" line and nothing after it.
+
+ORIGINAL SECTION${sec.heading ? ` (heading: "${sec.heading}")` : ''}:
+<<<
+${sec.text}
+>>>`;
+  }
+  function parseResult(txt) {
+    const i = txt.indexOf('---GLOSSARY---'); const body = (i >= 0 ? txt.slice(0, i) : txt).trim(); const gl = i >= 0 ? txt.slice(i + 14).trim() : '';
+    for (const ln of gl.split('\n')) { const m = ln.match(/^\s*[-*]?\s*\**(.+?)\**\s*::\s*(.+)$/); if (m && !glossary.has(m[1].toLowerCase())) glossary.set(m[1].toLowerCase(), { term: m[1], def: m[2] }); }
+    return body;
+  }
+  const parseResultLive = s => { const i = s.indexOf('---GLOSSARY'); return i >= 0 ? s.slice(0, i) : s; };
+  function renderGlossary() {
+    const g = $('gloss'); g.innerHTML = ''; const items = [...glossary.values()].sort((a, b) => a.term.localeCompare(b.term));
+    $('glossWrap').classList.toggle('hidden', !items.length);
+    for (const it of items) { const d = document.createElement('div'); d.innerHTML = `<b>${esc(it.term)}</b> — ${esc(it.def)}`; g.appendChild(d); }
+  }
+
+  // ================= simplify all =================
+  async function simplifyAll(article, info) {
+    const secs = splitSections(article.text); if (!secs.length) throw new Error(t('noText'));
+    const out = $('out'); out.innerHTML = ''; glossary.clear(); simplifiedAll = [];
+    $('resultCard').classList.remove('hidden');
+    $('meta').textContent = `${article.title} · ${secs.length} ${t('sections')} · ${t('level')}: ${document.querySelector('.lvl.on b').textContent} · ${t('via')} ${article.via}`;
+    $('srcLink').href = info ? info.canonical : '#'; $('srcLink').textContent = info ? info.canonical : t('pasted');
+    const h = document.createElement('h1'); h.textContent = article.title; out.appendChild(h);
+    const toc = $('toc'); toc.innerHTML = ''; let tocCount = 0;
+    const nodes = secs.map((s, idx) => {
+      const sec = document.createElement('div'); sec.className = 'sec pending'; sec.id = 'sec-' + idx;
+      if (s.heading) { const hh = document.createElement('h' + s.level); hh.textContent = s.heading; sec.appendChild(hh); if (s.level === 2) { const a = document.createElement('a'); a.href = '#sec-' + idx; a.textContent = s.heading; toc.appendChild(a); tocCount++; } }
+      const tools = document.createElement('div'); tools.className = 'tools'; const tb = document.createElement('button'); tb.className = 'ghost'; tb.textContent = t('original'); tb.onclick = () => sec.classList.toggle('show-orig'); tools.appendChild(tb); sec.appendChild(tools);
+      const simple = document.createElement('div'); simple.className = 'simple'; simple.innerHTML = `<p><span class="spin"></span>${esc(t('waiting'))}</p>`;
+      const orig = document.createElement('div'); orig.className = 'orig'; orig.textContent = s.text;
+      sec.appendChild(simple); sec.appendChild(orig); out.appendChild(sec); return { sec, simple };
+    });
+    toc.classList.toggle('hidden', tocCount < 3);
+    aborter = new AbortController(); const signal = aborter.signal;
+    let done = 0; progress(0); const results = new Array(secs.length).fill(''); const queue = secs.map((_, i) => i);
+    const worker = async () => {
+      while (queue.length && !signal.aborted) {
+        const i = queue.shift(); const s = secs[i]; const { sec, simple } = nodes[i]; sec.classList.remove('pending');
+        if (!s.text.trim()) { simple.innerHTML = ''; results[i] = s.heading ? '#'.repeat(s.level) + ' ' + s.heading : ''; done++; progress(done / secs.length); continue; }
+        try {
+          const r = await ask(buildPrompt(s, article.title), { signal, onText: ({ text }) => { simple.innerHTML = marked.parse(parseResultLive(text)); } });
+          let body = parseResult(r.text); if (r.truncated) body += `\n\n*${t('cut')}*`;
+          simple.innerHTML = marked.parse(body); results[i] = (s.heading ? '#'.repeat(s.level) + ' ' + s.heading + '\n\n' : '') + body;
+        } catch (e) {
+          if (signal.aborted) { simple.innerHTML = ''; sec.classList.add('show-orig'); results[i] = s.text; return; }
+          if (e && e.code === 'rate_limited') { queue.unshift(i); setStatus(t('rate'), 'warn'); await new Promise(r => setTimeout(r, 20000)); continue; }
+          simple.innerHTML = `<p style="color:var(--bad)">${esc(t('secFail', { err: (e && (e.message || e.code)) || 'error' }))}</p>`; sec.classList.add('show-orig'); results[i] = s.text;
+          if (e && e.code === 'no_key') { aborter.abort(); $('keyBox').classList.remove('hidden'); $('keyBox').open = true; }
+        }
+        done++; progress(done / secs.length); renderGlossary(); setStatus(t('simplifying', { done, total: secs.length }));
+      }
+    };
+    await Promise.all([worker(), worker()]);
+    simplifiedAll = [`# ${article.title}`, ...results.filter(Boolean)]; renderGlossary(); progress(null);
+    setStatus(signal.aborted ? t('stopped') : t('done', { total: secs.length, words: glossary.size }), signal.aborted ? 'warn' : 'ok');
+    setBusy(false);
+  }
+
+  // ================= main flow =================
+  async function start(fromPaste) {
+    if (aborter) aborter.abort();
+    const info = parseWiki($('url').value); $('pasteBox').classList.add('hidden');
+    if (!fromPaste && !info) { setStatus(t('badLink'), 'bad'); return; }
+    if (fromPaste && $('pasted').value.trim().length < 100) { setStatus(t('pasteFirst'), 'bad'); return; }
+    if (!sampleNS && window.claude) {
+      setStatus(t('connecting')); const t0 = Date.now();
+      while (!sampleNS && !capsResolved && Date.now() - t0 < 11000) await new Promise(r => setTimeout(r, 200));
+    }
+    if (!sampleNS && !$('apiKey').value.trim()) { setStatus(t('noClaude'), 'bad'); $('keyBox').classList.remove('hidden'); $('keyBox').open = true; return; }
+    setBusy(true);
+    try {
+      let article;
+      if (fromPaste) article = { title: info ? info.title : (($('pasted').value.trim().split('\n')[0] || 'Article').slice(0, 120)), text: $('pasted').value, via: t('pasted') };
+      else {
+        setStatus(t('fetching')); progress(0.02);
+        try { article = await fetchDirect(info); }
+        catch (e1) {
+          try { setStatus(t('fetchingConn')); article = await fetchViaConnector(info); }
+          catch (e2) {
+            progress(null); setBusy(false); $('pasteBox').classList.remove('hidden'); $('openLink').href = info.canonical;
+            $('pasteWhy').textContent = t('pasteWhy') + (e2 && e2.code ? ` (${e2.code})` : ''); setStatus(t('fetchFail'), 'warn'); return;
+          }
+        }
+      }
+      await simplifyAll(article, info);
+    } catch (e) { progress(null); setStatus(t('error', { err: (e && (e.message || e.code)) || e }), 'bad'); setBusy(false); }
+  }
+})();
+</script>
+</body>
+</html>
