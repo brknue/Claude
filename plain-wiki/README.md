@@ -12,9 +12,12 @@ Paste any Wikipedia link → get the whole article rewritten so anyone can under
 - Per-section **Original** toggle, table of contents, font-size control, copy button, stop button
 - Section-by-section streaming, so long articles appear progressively
 
+**100 % local.** The rewriting is done by an open-weight language model that runs inside your browser on your GPU (via [WebLLM](https://github.com/mlc-ai/web-llm) / WebGPU). Nothing you read or write is sent to any server; the only network traffic is downloading the article from Wikipedia and the model weights once (then cached by the browser).
+
 **Running it**
 
-1. **On claude.ai** (published artifact): Claude is built in; the page may ask once for permission to use Claude. Because claude.ai pages can't load wikipedia.org directly, the article is fetched through a TinyFish connector if you have one, otherwise you paste the article text (Ctrl+A, Ctrl+C on the Wikipedia page).
-2. **Anywhere else** (GitHub Pages, local file): the article is fetched straight from the Wikipedia API. Open the "API key" box and enter an Anthropic API key — it is stored only in your browser's localStorage and sent directly to `api.anthropic.com`.
+1. Open the page: <https://brknue.github.io/claude/plain-wiki/> — or download `index.html` and open it in Chrome/Edge (WebGPU needed; Firefox: enable `dom.webgpu.enabled`).
+2. Pick a model and click **Download & load model** (Small ≈ 1 GB, Medium ≈ 2 GB, Large ≈ 5 GB / needs 8 GB+ VRAM). This happens once.
+3. Paste a Wikipedia link, choose the level, go. If the article can't be loaded (offline), paste its text instead.
 
-Reference / external-link sections are skipped on purpose (they contain only citations). Text from Wikipedia is CC BY-SA.
+Note: the copy embedded on claude.ai cannot download the model or Wikipedia articles (sandbox); use the link above. Reference / external-link sections are skipped on purpose (they contain only citations). Text from Wikipedia is CC BY-SA.
