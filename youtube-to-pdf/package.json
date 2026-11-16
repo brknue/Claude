@@ -1,0 +1,14 @@
+{
+  "name": "youtube-transcript-pdf",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Paste a YouTube link, get the video's captions as a PDF.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

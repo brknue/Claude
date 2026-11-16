@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouTube to PDF</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --card: #fff; --ink: #1d1c1a; --muted: #6b6860; --line: #e2ded4;
+    --accent: #c0392b; --accent-ink: #fff; --error-bg: #fdecea; --error-ink: #8a1f14;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171614; --card: #211f1c; --ink: #f1eee8; --muted: #a39f95; --line: #36332e;
+      --accent: #e25546; --accent-ink: #fff; --error-bg: #3a1b17; --error-ink: #ffb4a9;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+  h1 { font-size: 2rem; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .lede { color: var(--muted); margin: 0 0 28px; }
+  form { display: flex; gap: 10px; flex-wrap: wrap; }
+  input[type=text] {
+    flex: 1 1 320px; min-width: 0; padding: 13px 14px; font: inherit; color: inherit;
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  }
+  button, select {
+    font: inherit; border-radius: 10px; padding: 12px 18px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card); color: inherit;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button:disabled { opacity: 0.6; cursor: progress; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  #message { margin-top: 16px; padding: 12px 14px; border-radius: 10px; }
+  #message.error { background: var(--error-bg); color: var(--error-ink); }
+  #message.info { color: var(--muted); padding-left: 0; }
+  #result { margin-top: 28px; }
+  .bar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 14px 0; }
+  .bar label { display: flex; gap: 7px; align-items: center; color: var(--muted); }
+  .bar .spacer { flex: 1; }
+  h2 { font-size: 1.3rem; margin: 0; line-height: 1.3; overflow-wrap: anywhere; }
+  .by { color: var(--muted); margin: 2px 0 0; }
+  #doc {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 24px; max-height: 60vh; overflow: auto; overflow-wrap: anywhere;
+  }
+  #doc p { margin: 0 0 12px; }
+  #doc .ts { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 10px; font-size: 0.9em; }
+  footer { margin-top: 36px; color: var(--muted); font-size: 0.9rem; }
+  [hidden] { display: none !important; }
+  @media print {
+    body { background: #fff; color: #000; }
+    form, .lede, h1, .bar, #message, footer { display: none !important; }
+    main { max-width: none; padding: 0; }
+    #doc { border: 0; padding: 0; max-height: none; overflow: visible; background: none; }
+    #doc .ts { color: #555; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>YouTube to PDF</h1>
+  <p class="lede">Paste a YouTube link to pull out everything said in the video and save it as a PDF.</p>
+
+  <form id="form">
+    <input type="text" id="url" aria-label="YouTube link" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" required>
+    <button class="primary" id="go" type="submit">Get text</button>
+  </form>
+  <div id="message" role="status" hidden></div>
+
+  <section id="result" hidden>
+    <h2 id="title"></h2>
+    <p class="by" id="by"></p>
+    <div class="bar">
+      <label><input type="checkbox" id="stamps"> Show timestamps</label>
+      <label id="langWrap">Language <select id="lang"></select></label>
+      <span class="spacer"></span>
+      <button id="copy" type="button">Copy text</button>
+      <button class="primary" id="pdf" type="button">Download PDF</button>
+    </div>
+    <div id="doc"></div>
+  </section>
+
+  <footer>Works on videos that have captions (including auto-generated ones). Only save text you have the right to use.</footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+let data = null;
+
+function say(text, kind) {
+  const el = $('message');
+  el.hidden = !text;
+  el.textContent = text || '';
+  el.className = kind || 'info';
+}
+
+function clock(seconds) {
+  const s = Math.floor(seconds), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  const two = (n) => String(n).padStart(2, '0');
+  return h ? `${h}:${two(m)}:${two(s % 60)}` : `${m}:${two(s % 60)}`;
+}
+
+// Without timestamps, caption fragments are joined into readable paragraphs.
+function paragraphs(lines) {
+  const out = [];
+  let cur = '';
+  for (const line of lines) {
+    cur += (cur ? ' ' : '') + line.text;
+    if (cur.length > 500 && /[.!?…"”)\]]$/.test(cur) || cur.length > 900) { out.push(cur); cur = ''; }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+function blocks() {
+  return $('stamps').checked
+    ? data.lines.map((l) => ({ stamp: clock(l.start), text: l.text }))
+    : paragraphs(data.lines).map((text) => ({ text }));
+}
+
+function render() {
+  $('title').textContent = data.title;
+  $('by').textContent = data.author;
+  const doc = $('doc');
+  doc.replaceChildren(...blocks().map((b) => {
+    const p = document.createElement('p');
+    if (b.stamp) {
+      const s = document.createElement('span');
+      s.className = 'ts';
+      s.textContent = b.stamp;
+      p.append(s);
+    }
+    p.append(b.text);
+    return p;
+  }));
+  doc.scrollTop = 0;
+}
+
+async function load(lang) {
+  const link = $('url').value.trim();
+  if (!link) return;
+  $('go').disabled = true;
+  say('Reading the video…');
+  try {
+    const q = new URLSearchParams({ url: link });
+    if (lang) q.set('lang', lang);
+    const res = await fetch('/api/transcript?' + q);
+    const body = await res.json().catch(() => ({ error: 'The server sent back something unexpected.' }));
+    if (!res.ok) throw new Error(body.error || 'Something went wrong.');
+    data = body;
+    const sel = $('lang');
+    sel.replaceChildren(...data.languages.map((l) => new Option(l.label, l.code, false, l.code === data.language)));
+    $('langWrap').hidden = data.languages.length < 2;
+    render();
+    $('result').hidden = false;
+    say('');
+  } catch (err) {
+    if (!lang) $('result').hidden = true;
+    say(err instanceof TypeError ? "Couldn't reach the server. Check your connection and try again." : err.message, 'error');
+  } finally {
+    $('go').disabled = false;
+  }
+}
+
+function fileName() {
+  return (data.title.replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'transcript') + '.pdf';
+}
+
+// The PDF's built-in fonts only cover Western European letters.
+const plain = (s) => s.replace(/[‘’‚′]/g, "'").replace(/[“”„″]/g, '"').replace(/[–—−]/g, '-').replace(/…/g, '...').replace(/[   ]/g, ' ').replace(/[​-‏﻿️]/g, '')
+  .replace(/[←-⯿\u{1f000}-\u{1faff}]/gu, '').replace(/ {2,}/g, ' ').trim(); // music notes, arrows, emoji
+const fitsBuiltInFont = (s) => !/[^\x09\x0a\x0d\x20-\x7e\xa1-\xff]/.test(s);
+
+function downloadPdf() {
+  const items = blocks().map((b) => ({ stamp: b.stamp, text: plain(b.text) }));
+  const title = plain(data.title), author = plain(data.author);
+  if (!window.jspdf || !fitsBuiltInFont(title + author + items.map((i) => i.text).join(''))) {
+    // Other alphabets: the browser's own "Save as PDF" handles every script.
+    say('This text uses letters the quick PDF maker cannot draw. Choose "Save as PDF" in the print window that opens.');
+    const old = document.title;
+    document.title = fileName().replace(/\.pdf$/, '');
+    window.print();
+    document.title = old;
+    return;
+  }
+  const pdf = new window.jspdf.jsPDF({ unit: 'pt', format: 'a4' });
+  const W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
+  const M = 56, width = W - M * 2;
+  let y = M;
+  const room = (h) => { if (y + h > H - M) { pdf.addPage(); y = M; } };
+
+  pdf.setFont('helvetica', 'bold').setFontSize(18);
+  for (const line of pdf.splitTextToSize(title, width)) { room(24); pdf.text(line, M, y + 14); y += 24; }
+  pdf.setFont('helvetica', 'normal').setFontSize(10).setTextColor(110);
+  const link = 'https://www.youtube.com/watch?v=' + data.videoId;
+  if (author) { pdf.text(author, M, y + 10); y += 15; }
+  pdf.textWithLink(link, M, y + 10, { url: link }); y += 30;
+
+  pdf.setFontSize(11);
+  const gutter = items.some((i) => i.stamp) ? 52 : 0, lead = 16;
+  for (const item of items) {
+    const lines = pdf.splitTextToSize(item.text, width - gutter);
+    lines.forEach((line, i) => {
+      room(lead);
+      if (i === 0 && item.stamp) { pdf.setTextColor(120); pdf.text(item.stamp, M, y + 11); }
+      pdf.setTextColor(20);
+      pdf.text(line, M + gutter, y + 11);
+      y += lead;
+    });
+    y += gutter ? 3 : 9;
+  }
+  const pages = pdf.getNumberOfPages();
+  pdf.setFontSize(9).setTextColor(140);
+  for (let p = 1; p <= pages; p++) { pdf.setPage(p); pdf.text(`${p} / ${pages}`, W - M, H - 28, { align: 'right' }); }
+  pdf.save(fileName());
+}
+
+$('form').addEventListener('submit', (e) => { e.preventDefault(); load(); });
+$('lang').addEventListener('change', (e) => load(e.target.value));
+$('stamps').addEventListener('change', render);
+$('pdf').addEventListener('click', downloadPdf);
+$('copy').addEventListener('click', async () => {
+  const text = blocks().map((b) => (b.stamp ? b.stamp + '  ' : '') + b.text).join($('stamps').checked ? '\n' : '\n\n');
+  try { await navigator.clipboard.writeText(text); $('copy').textContent = 'Copied'; }
+  catch { $('copy').textContent = "Couldn't copy"; }
+  setTimeout(() => ($('copy').textContent = 'Copy text'), 1500);
+});
+</script>
+</body>
+</html>
