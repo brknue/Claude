@@ -7,22 +7,25 @@ import assert from 'node:assert/strict';
 const ctx = { console, Math, JSON, Date, Object, Array, String };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-for (const f of ['data/en.js', 'data/es.js', 'data/fr.js', 'data/de.js', 'data/it.js', 'data/pt.js', 'data/notes.js', 'js/engine.js'])
+for (const f of ['data/en.js', 'data/es.js', 'data/fr.js', 'data/de.js', 'data/it.js', 'data/pt.js', 'data/notes.js', 'data/tatoeba/units.js', 'data/tatoeba/en.js', 'data/tatoeba/es.js', 'data/tatoeba/fr.js', 'data/tatoeba/de.js', 'data/tatoeba/it.js', 'data/tatoeba/pt.js', 'js/engine.js'])
   vm.runInContext(readFileSync(new URL(f, import.meta.url), 'utf8'), ctx, { filename: f });
 const { FP, FP_DATA: D } = ctx;
 let passed = 0;
 const test = (name, fn) => { fn(); passed++; console.log('ok  ' + name); };
 
-test('every language has 20 units of 14 words and 9 sentences', () => {
-  assert.equal(D.units.length, 20);
+test('every language has the 20 core units, then the same sentence units', () => {
+  assert.ok(D.units.length > 100, 'sentence library loaded');
+  const en = D.langs.en.units;
   for (const [code, lang] of Object.entries(D.langs)) {
-    assert.equal(lang.units.length, 20, code);
+    assert.equal(lang.units.length, D.units.length, code);
     lang.units.forEach((u, i) => {
-      assert.equal(u.w.length, 14, `${code} unit ${i} words`);
-      assert.equal(u.s.length, 9, `${code} unit ${i} sentences`);
+      if (i < 20) { assert.equal(u.w.length, 14, `${code} unit ${i} words`); assert.equal(u.s.length, 9, `${code} unit ${i} sentences`); }
+      else { assert.equal(u.w.length, 0); assert.ok(u.s.length >= 10 && u.s.length <= 30, `${code} unit ${i} size ${u.s.length}`); }
+      assert.equal(u.s.length, en[i].s.length, `${code} unit ${i} aligned with English`);
       [...u.w, ...u.s].forEach(x => assert.ok(x && x.trim() === x && !/\|\||^\||\|$/.test(x), `${code} unit ${i}: "${x}"`));
     });
   }
+  D.units.forEach((u, i) => assert.ok(u.title && u.icon && u.goal, `unit ${i} meta`));
 });
 
 test('no two items in a language share the same text (would make answers ambiguous)', () => {
@@ -40,8 +43,10 @@ test('no two items in a language share the same text (would make answers ambiguo
 
 test('course order covers every item exactly once', () => {
   const o = FP.order();
-  assert.equal(o.length, 460);
-  assert.equal(new Set(o).size, 460);
+  assert.equal(o.length, FP.totalItems());
+  assert.equal(new Set(o).size, o.length);
+  assert.ok(o.length > 3000);
+  assert.equal(o.slice(0, 460).filter(id => +id.slice(1).split('_')[0] < 20).length, 460, 'core units first');
   for (const id of o) assert.ok(FP.item('es', id).text);
 });
 
@@ -198,8 +203,8 @@ test('simulated learners: daily workload stays near the chosen time and the cour
     const avg = active.reduce((a, l) => a + l.steps, 0) / active.length;
     const max = Math.max(...active.map(l => l.steps));
     const estMin = avg * 12 / 60;
-    console.log(`    ${minutes} min/day, skill ${skill}: learned ${st.learned}/460 in ${days} days, avg ${avg.toFixed(0)} steps (~${estMin.toFixed(1)} min), max ${max} steps`);
-    if (skill >= 0.8) assert.equal(st.learned, 460, `${minutes} min plan should finish the course`);
+    console.log(`    ${minutes} min/day, skill ${skill}: learned ${st.learned} (core 460) in ${days} days, avg ${avg.toFixed(0)} steps (~${estMin.toFixed(1)} min), max ${max} steps`);
+    if (skill >= 0.8) assert.ok(FP.order().slice(0, 460).every(id => s.courses.es.cards[id]), `${minutes} min plan should finish the core units`);
     else assert.ok(st.learned >= 200, 'a struggling learner is slowed down, not stopped');
     assert.ok(estMin <= minutes * 1.5, `avg session ${estMin.toFixed(1)} min is too long for a ${minutes} min plan`);
     assert.ok(max * 12 / 60 <= minutes * 2.2, `longest session ${(max * 12 / 60).toFixed(1)} min is too long for ${minutes} min plan`);
@@ -220,8 +225,28 @@ test('placement and plan', () => {
   assert.equal(FP.currentUnit(s.courses.es), 8);
   const p = FP.plan(s, 'es', 1000);
   assert.equal(p.phases[0].done, true);
-  assert.equal(p.daysLeft, Math.ceil((460 - n) / 12));
+  assert.equal(p.daysLeft, Math.ceil((FP.totalItems() - n) / 12));
   assert.ok(p.fluencyHours > 300 && p.fluencyYears > 1);
+});
+
+test('sentence library: phases cover every unit, placement reaches it, words get examples', () => {
+  const covered = new Set();
+  FP.PHASES.forEach(p => { for (let u = p.units[0]; u <= p.units[1]; u++) covered.add(u); });
+  assert.equal(covered.size, D.units.length);
+  assert.equal(FP.PHASES.length, 7);
+  const lvl = l => FP.placementUnit('es', [{ lang: 'es', level: l }]);
+  assert.ok(lvl('a2') < lvl('b2') && lvl('b2') === 20 && lvl('c1') > 20 && lvl('native') > lvl('c1') && lvl('native') < D.units.length);
+  for (const lang of FP.courseLangs()) {
+    const words = FP.order().filter(i => i[0] === 'w'), withEx = words.filter(i => FP.example(lang, i));
+    console.log(`    ${lang}: ${withEx.length}/${words.length} core words have an example sentence`);
+    assert.ok(withEx.length >= 200, lang);
+  }
+  // a session deep in the sentence library still builds every step type correctly
+  const s = FP.blank(); s.profile = { known: [{ lang: 'en', level: 'native' }], support: 'en' };
+  s.courses.de = FP.newCourse(20, 'both', 1000); FP.skipUnits(s.courses.de, 100, 1000);
+  const ses = FP.buildSession(s, 'de', 1000, { audio: true });
+  assert.ok(ses.fresh.length > 0 && ses.fresh.every(id => +id.slice(1).split('_')[0] === 100));
+  ses.steps.filter(x => x.opts).forEach(x => assert.equal(x.opts.length, 4));
 });
 
 console.log(`\n${passed} test groups passed`);

@@ -34,10 +34,25 @@ counts exercise types over simulated months, and using the site in a browser.
 | 21 | Content accuracy | Re-read the sentences; automated checks for duplicates and ambiguous options | No duplicate or ambiguous items in any language pair. The translations were written by the builder and have not been checked by native speakers. | 76% |
 | 22 | Overall, with and without a voice | Compared the audio and no-audio paths | With a voice on the device: about 78%. Without one, reading and writing still work but speaking and listening goals are at about 60%. Made the voice setup help prominent, with steps per system and a re-check button. | 78% with a voice |
 
+## Update: larger library and every device
+
+After the 22 reviews, the library grew from 460 to 3,460 items per language by adding 3,000 sentences from Tatoeba
+(see the README). What changed for learners:
+
+- **Beyond beginner level.** Three new phases (everyday sentences, fuller conversations, confident expression) follow
+  the core units, so the course no longer ends after a few months. Placement for upper-intermediate and advanced
+  learners now starts inside these phases.
+- **Words in context.** New-word cards show an example sentence for about 250 of the 280 core words (before: 152–182).
+- **Writing sentences.** Learners who chose speaking and writing now also type whole sentences, not only words.
+- **Comfort on every device.** Checked with no sideways scrolling at 320 px, 375 px, tablet, sideways phone (844×390)
+  and 1440 px wide; hover effects only on mouse devices; no double-tap zoom on buttons; notch-safe edges; compact
+  lessons when a phone is held sideways; readable in Windows high-contrast mode. The Library builds a unit's list only
+  when it is opened, so 169 units stay quick on phones.
+
 ## What still limits learning
 
 - **No voice, no sound.** The site never uses online voices, so audio depends on a voice being installed on the device.
 - **Speaking is self-graded.** Nothing on the site listens to the learner; speech recognition in browsers needs a server.
-- **The course is a foundation.** 460 words and sentences per language is beginner level. The plan page says so.
+- **Vocabulary lists stop at unit 20.** The later units teach through sentences only; there is no open, aligned word list for all six languages that could be added the same way.
 - **The interface is English.** Translations can be shown in any of the six languages, but menus and instructions are in English.
 - **Translations are unverified.** They were written carefully and checked mechanically, not reviewed by native speakers.

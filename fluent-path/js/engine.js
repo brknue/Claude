@@ -54,10 +54,18 @@
   FP.dayDate = function (n) { return new Date(n * 864e5 + new Date(n * 864e5).getTimezoneOffset() * 60000); };
 
   /* ---------- content ---------- */
-  var W = 14, S = 9;
-  FP.UNIT_SIZE = W + S;
+  /* Units differ in size: the core units have 14 words and 9 sentences, the
+     Tatoeba sentence units have only sentences. Sizes come from the English
+     file, which every language matches item for item. */
+  function sizes(u) { var x = D.langs.en.units[u]; return { w: x.w.length, s: x.s.length }; }
+  FP.unitSize = function (u) { var z = sizes(u); return z.w + z.s; };
   FP.unitCount = function () { return D.units.length; };
-  FP.totalItems = function () { return D.units.length * (W + S); };
+  var totalCache = null;
+  FP.totalItems = function () {
+    if (totalCache === null) { totalCache = 0; for (var u = 0; u < D.units.length; u++) totalCache += FP.unitSize(u); }
+    return totalCache;
+  };
+  FP.itemsFrom = function (u0, u1) { var n = 0; for (var u = u0; u <= u1 && u < D.units.length; u++) n += FP.unitSize(u); return n; };
 
   FP.strip = function (s) { return s.replace(/\s*\([^)]*\)/g, '').trim(); };
   FP.item = function (lang, id) {
@@ -68,11 +76,13 @@
   };
   FP.unitIds = function (u) {
     // words and sentences interleaved so sentences reuse fresh words
-    var ids = [], w = 0, s = 0, chunks = [[5, 3], [5, 3], [4, 3]];
-    chunks.forEach(function (c) {
-      for (var a = 0; a < c[0]; a++) ids.push('w' + u + '_' + (w++));
-      for (var b = 0; b < c[1]; b++) ids.push('s' + u + '_' + (s++));
-    });
+    var z = sizes(u), ids = [], w = 0, s = 0, k;
+    if (!z.w) { for (k = 0; k < z.s; k++) ids.push('s' + u + '_' + k); return ids; }
+    var parts = 3, wPer = Math.ceil(z.w / parts), sPer = Math.ceil(z.s / parts);
+    for (var p = 0; p < parts; p++) {
+      for (k = 0; k < wPer && w < z.w; k++) ids.push('w' + u + '_' + (w++));
+      for (k = 0; k < sPer && s < z.s; k++) ids.push('s' + u + '_' + (s++));
+    }
     return ids;
   };
   var orderCache = null;
@@ -131,17 +141,32 @@
     }
     return { ok: false, note: '' };
   };
-  /* A sentence from the same unit that uses this word, if there is one. */
-  FP.example = function (lang, id) {
-    var it = FP.item(lang, id);
-    if (it.kind !== 'w') return null;
-    var bare = ' ' + FP.fold(dropArticle(lang, FP.norm(it.say))) + ' ';
-    if (bare.length < 5) return null;
-    for (var i = 0; i < S; i++) {
-      var sid = 's' + it.unit + '_' + i;
-      if ((' ' + FP.fold(FP.item(lang, sid).say) + ' ').indexOf(bare) >= 0) return sid;
+  /* A sentence that uses this word: from the same unit if possible, otherwise
+     the shortest one anywhere in the library. */
+  var exCache = {}, sentIndex = {};
+  function sentences(lang) {
+    if (!sentIndex[lang]) {
+      sentIndex[lang] = [];
+      for (var u = 0; u < D.units.length; u++) for (var i = 0; i < sizes(u).s; i++) {
+        var sid = 's' + u + '_' + i, t = FP.item(lang, sid).say;
+        sentIndex[lang].push([sid, ' ' + FP.fold(t) + ' ', t.length, u]);
+      }
     }
-    return null;
+    return sentIndex[lang];
+  }
+  FP.example = function (lang, id) {
+    var key = lang + id;
+    if (key in exCache) return exCache[key];
+    var it = FP.item(lang, id), best = null;
+    if (it.kind === 'w') {
+      var bare = ' ' + FP.fold(dropArticle(lang, FP.norm(it.say))) + ' ';
+      if (bare.length >= 5) sentences(lang).forEach(function (x) {
+        if (x[1].indexOf(bare) < 0) return;
+        var score = (x[3] === it.unit ? 0 : 1000) + x[2];
+        if (!best || score < best[1]) best = [x[0], score];
+      });
+    }
+    return (exCache[key] = best ? best[0] : null);
   };
   FP.tiles = function (text) {
     return text.replace(/[.,!?¿¡;:…]/g, ' ').split(/\s+/).filter(Boolean);
@@ -184,10 +209,14 @@
     }
     return Math.round(h / 10) * 10;
   };
+  function levelStart(level) {
+    for (var u = 0; u < D.units.length; u++) if ((D.units[u].level || 0) >= level) return u;
+    return D.units.length;
+  }
   FP.placementUnit = function (target, known) {
     var u = 0;
     (known || []).forEach(function (k) {
-      if (k.lang === target) u = { a1: 3, a2: 8, b1: 14, b2: 18, c1: 20, native: 20 }[k.level] || 0;
+      if (k.lang === target) u = { a1: 3, a2: 8, b1: 14, b2: levelStart(1), c1: levelStart(2), native: levelStart(3) }[k.level] || 0;
     });
     return Math.min(u, FP.unitCount());
   };
@@ -207,6 +236,18 @@
     { name: 'Describing & asking', units: [10, 14], can: 'Describe things, shop, ask real questions and say how you feel.' },
     { name: 'Real conversation', units: [15, 19], can: 'Talk about work, routines, the past and your opinions.' }
   ];
+  // Phases for the larger sentence library, built from whatever units the data files provide.
+  [['Everyday sentences', 'Understand and say hundreds of short, common sentences about food, family, time, travel and more.'],
+   ['Fuller conversations', 'Handle longer sentences: the past, plans, questions, opinions and feelings.'],
+   ['Confident expression', 'Use rich, varied sentences comfortably and pick up new ones from context.']].forEach(function (p, i) {
+    var a = -1, b = -1;
+    D.units.forEach(function (u, k) { if (u.level === i + 1) { if (a < 0) a = k; b = k; } });
+    if (a >= 0) FP.PHASES.push({ name: p[0], units: [a, b], can: p[1] });
+  });
+  FP.phaseOf = function (u) {
+    for (var i = 0; i < FP.PHASES.length; i++) if (u >= FP.PHASES[i].units[0] && u <= FP.PHASES[i].units[1]) return i;
+    return FP.PHASES.length - 1;
+  };
 
   FP.stats = function (course, today) {
     var learned = 0, mature = 0, due = 0, young = 0, ids = Object.keys(course.cards);
@@ -258,9 +299,10 @@
 
   /* Three wrong options of the same kind, distinct in both languages. */
   FP.distractors = function (lang, support, id) {
-    var it = FP.item(lang, id), me = FP.item(support, id), kind = it.kind, n = kind === 'w' ? W : S;
-    var pool = [], far = [], u, i;
-    for (u = 0; u < D.units.length; u++) for (i = 0; i < n; i++) {
+    var it = FP.item(lang, id), me = FP.item(support, id), kind = it.kind;
+    var pool = [], far = [], u, i, n;
+    var lo = Math.max(0, it.unit - 12);   // nearby units only: keeps it fast and the options at a similar level
+    for (u = lo; u < D.units.length && u <= it.unit + 2; u++) for (i = 0, n = sizes(u)[kind]; i < n; i++) {
       var oid = kind + u + '_' + i;
       if (oid === id) continue;
       if (u === it.unit) pool.push(oid); else if (Math.abs(u - it.unit) <= 2 || u < it.unit) far.push(oid);
@@ -288,7 +330,8 @@
     if (r === 1) return audio && Math.random() < 0.3 ? 'listen' : kind === 'w' ? 'pick' : 'build';
     if (!write) return 'speak';
     if (r % 2 === 1) return 'speak';
-    return kind === 'w' ? 'type' : (audio ? 'dictate' : 'build');
+    if (kind === 'w') return 'type';
+    return audio && Math.random() < 0.5 ? 'dictate' : (r % 4 === 2 ? 'type' : 'build');
   }
   function withOpts(lang, support, step) {
     if (step.t === 'choose' || step.t === 'listen' || step.t === 'pick') step.opts = shuffle(FP.distractors(lang, support, step.id).concat([step.id]));
@@ -334,7 +377,7 @@
         var k = id.charAt(0), n = nRecall++, t;
         if (!write) t = 'speak';
         else if (k === 'w') t = n % 4 === 3 ? 'speak' : 'type';
-        else t = audio && n % 2 ? 'dictate' : 'speak';
+        else t = n % 2 ? 'speak' : audio && n % 4 === 0 ? 'dictate' : 'type';   // writers also write whole sentences
         steps.push({ t: t, id: id });
       });
     }

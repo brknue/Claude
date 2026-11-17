@@ -111,9 +111,10 @@
     var pages = { today: pageToday, plan: pagePlan, library: pageLibrary, progress: pageProgress, settings: pageSettings };
     if (!pages[r]) r = 'today';
     shell(r, pages[r]());
+    if (r === 'library' && ui.q) applySearch();
     if (r === 'library' && routeArg()) {
       var d = document.getElementById('unit-' + routeArg());
-      if (d) { d.open = true; d.scrollIntoView(); }
+      if (d) { fillUnit(d); d.open = true; d.scrollIntoView(); }
     }
   }
 
@@ -206,13 +207,13 @@
     var o = ui.ob, html = '<h1>Your plan</h1>';
     o.targets.forEach(function (t) {
       var bst = FP.boost(t, o.known), npd = FP.newPerDay(o.minutes, bst), skip = FP.placementUnit(t, o.known);
-      var left = FP.totalItems() - skip * FP.UNIT_SIZE, days = Math.ceil(left / npd), cur = 0;
+      var left = FP.totalItems() - FP.itemsFrom(0, skip - 1), days = Math.ceil(left / npd), cur = 0;
       html += '<section class="card plan-card"><h2>' + badge(t) + ' ' + L(t).name + '</h2>' +
         '<p><strong>' + o.minutes + ' minutes every day</strong> · ' + npd + ' new items a day · ' + (o.mode === 'both' ? 'speaking and writing' : 'speaking only') + ' · explained in ' + L(o.support).name + '</p>' +
-        (skip ? '<p class="note">You already know some ' + L(t).name + ', so you start at unit ' + (skip + 1) + ' (' + D.units[Math.min(skip, 19)].title + '). Earlier material returns as quick reviews to confirm it.</p>' : '') +
+        (skip ? '<p class="note">You already know some ' + L(t).name + ', so you start at unit ' + (skip + 1) + ' (' + D.units[Math.min(skip, D.units.length - 1)].title + '). Earlier material returns as quick reviews to confirm it.</p>' : '') +
         '<ol class="phases">' + FP.PHASES.map(function (p) {
           var l = 0;
-          for (var u = p.units[0]; u <= p.units[1]; u++) if (u >= skip) l += FP.UNIT_SIZE;
+          for (var u = p.units[0]; u <= p.units[1]; u++) if (u >= skip) l += FP.unitSize(u);
           var len = Math.ceil(l / npd); cur += len;
           return '<li class="' + (l ? '' : 'done') + '"><strong>' + p.name + '</strong><span class="when">' + (l ? 'by ' + dateIn(cur) : 'already known') + '</span><p>' + p.can + '</p></li>';
         }).join('') +
@@ -221,7 +222,7 @@
         (Speech.has(t) ? '' : voiceHelp(t)) + '</section>';
     });
     html += '<section class="card"><h2>What a daily session looks like</h2><ol class="routine"><li><strong>Review</strong> what is about to fade — the most valuable minutes of the day.</li><li><strong>Meet</strong> a few new words and sentences, with sound.</li><li><strong>Practise</strong> them: recognise, choose, build' + (o.mode === 'both' ? ', type' : '') + ' and say them out loud.</li><li><strong>Recall</strong> everything new from memory before you finish.</li></ol>' +
-      '<p class="muted">Being honest about fluency: this course gives you a solid foundation of ' + FP.totalItems() + ' essential words and sentences and the habit to keep going. Full fluency takes hundreds of hours — the plan page always shows how far you are.</p></section>';
+      '<p class="muted">Being honest about fluency: this course takes you through ' + FP.totalItems() + ' words and sentences, from first greetings to varied everyday conversation, and builds the habit to keep going. Full fluency takes hundreds of hours — the plan page always shows how far you are.</p></section>';
     return html;
   }
   function voiceHelp(t) {
@@ -279,12 +280,15 @@
 
     html += '<section class="tiles"><div class="tile"><strong>' + st.learned + '</strong><span>of ' + st.total + ' learned</span></div><div class="tile"><strong>' + st.mature + '</strong><span>in long-term memory</span></div><div class="tile"><strong>' + st.due + '</strong><span>due for review</span></div></section>';
 
-    var cur = FP.currentUnit(c);
-    html += '<h2 class="section-title">Your path</h2><ol class="path">' + D.units.map(function (u, i) {
-      var p = FP.unitProgress(c, i), pct = Math.round(p.learned / p.total * 100);
+    var cur = FP.currentUnit(c), n = D.units.length, from = Math.max(0, Math.min(cur - 1, n - 6)), to = Math.min(n - 1, from + 5);
+    var ph = FP.PHASES[FP.phaseOf(Math.min(cur, n - 1))];
+    html += '<h2 class="section-title">Your path <small class="muted">' + (cur < n ? 'unit ' + (cur + 1) + ' of ' + n + ' · ' + ph.name : 'all ' + n + ' units met') + '</small></h2><ol class="path">';
+    for (var i = from; i <= to; i++) {
+      var u = D.units[i], p = FP.unitProgress(c, i), pct = Math.round(p.learned / p.total * 100);
       var cls = p.learned === p.total ? 'done' : i === cur ? 'current' : p.learned ? 'started' : 'ahead';
-      return '<li class="' + cls + '"><a href="#/library/' + i + '"><span class="u-ico" aria-hidden="true">' + u.icon + '</span><span class="u-main"><strong>' + (i + 1) + '. ' + u.title + '</strong><small>' + u.goal + '</small><span class="bar thin"><i style="width:' + pct + '%"></i></span></span><span class="u-state">' + (cls === 'done' ? '✓' : cls === 'current' ? 'Now' : pct ? pct + '%' : '') + '</span></a></li>';
-    }).join('') + '</ol>';
+      html += '<li class="' + cls + '"><a href="#/library/' + i + '"><span class="u-ico" aria-hidden="true">' + u.icon + '</span><span class="u-main"><strong>' + (i + 1) + '. ' + esc(u.title) + '</strong><small>' + esc(u.goal) + '</small><span class="bar thin"><i style="width:' + pct + '%"></i></span></span><span class="u-state">' + (cls === 'done' ? '✓' : cls === 'current' ? 'Now' : pct ? pct + '%' : '') + '</span></a></li>';
+    }
+    html += '</ol><p><a class="btn ghost wide" href="#/library">See all ' + n + ' units in the Library</a></p>';
     return html;
   }
 
@@ -304,7 +308,7 @@
     }).join('') + '</div></section>';
 
     html += '<section class="card"><h2>How far is fluency?</h2><p>Reaching confident conversation in ' + L(lang).name + ' takes roughly <strong>' + p.fluencyHours + ' hours</strong> of practice for someone with your language background. At ' + c.minutes + ' minutes a day that is <strong>' + years(p.fluencyYears) + '</strong>; at 60 minutes a day, ' + years(p.fluencyHours / 365) + '.</p>' +
-      '<p>This course covers the first stretch: ' + FP.totalItems() + ' core words and sentences (about ' + p.libraryHours + ' hours of practice including reviews), enough for everyday situations. After that, keep the daily reviews going and use extra practice to push speed and confidence.</p>' +
+      '<p>This course holds ' + FP.totalItems() + ' words and sentences (about ' + p.libraryHours + ' hours of practice including reviews): a core of essential vocabulary, then thousands of real sentences written and translated by the Tatoeba community. After that, keep the daily reviews going and use extra practice to push speed and confidence.</p>' +
       '<p class="muted">These are estimates, not promises. Studying every day matters more than any number here.</p></section>';
 
     html += '<section class="card"><h2>Why this works</h2><ul class="ticks"><li><strong>Spaced repetition:</strong> each item returns after 1, 3, 7, 16, 37 … days — just before you would forget it.</li><li><strong>Recall, not re-reading:</strong> you produce answers from memory, which builds much stronger memories than recognising them.</li><li><strong>Mistakes come back:</strong> anything you miss returns in the same session and again the next day.</li><li><strong>Small steps:</strong> three new items at a time, used immediately in sentences.</li></ul></section>';
@@ -334,30 +338,55 @@
       '<label class="search"><span class="sr">Search the library</span><input type="search" placeholder="Search words and sentences…" data-on="search" value="' + esc(ui.q) + '" autocomplete="off"></label>' +
       '<p class="legend"><span class="dot s0"></span>not started <span class="dot s1"></span>learning <span class="dot s2"></span>familiar <span class="dot s3"></span>long-term</p>';
     if (D.sounds[lang]) html += '<details class="unit"><summary><span class="u-ico" aria-hidden="true">👂</span><span class="u-main"><strong>How ' + L(lang).name + ' sounds</strong><small>Pronunciation rules worth knowing early</small></span></summary><div class="gnote">' + D.sounds[lang].map(function (r) { return '<p class="pair"><b>' + esc(r[0]) + '</b><span>' + esc(r[1]) + '</span></p>'; }).join('') + '</div></details>';
-    D.units.forEach(function (u, i) {
-      var p = FP.unitProgress(c, i), rows = function (kind) {
-        return FP.unitIds(i).filter(function (id) { return id.charAt(0) === kind; }).map(function (id) {
-          var it = FP.item(lang, id), me = FP.item(sup, id);
-          return '<li data-row="' + esc(FP.fold(it.text + ' ' + me.text)) + '"><button class="row" data-act="say-item" data-id="' + id + '"' + (audio ? '' : ' disabled') + '><span class="t" lang="' + lang + '">' + esc(it.text) + '</span><span class="m">' + esc(me.text) + '</span>' + strength(c.cards[id]) + '</button></li>';
-        }).join('');
-      };
-      html += '<details class="unit" id="unit-' + i + '"><summary><span class="u-ico" aria-hidden="true">' + u.icon + '</span><span class="u-main"><strong>' + (i + 1) + '. ' + u.title + '</strong><small>' + u.goal + ' · ' + p.learned + '/' + p.total + '</small></span></summary>' +
-        (D.notes[lang] && D.notes[lang][i] ? noteHtml(D.notes[lang][i]) : '') +
-        '<h4 class="list-h">Words</h4><ul class="items">' + rows('w') + '</ul><h4 class="list-h">Sentences</h4>' +
-        (audio ? '<button class="btn" data-act="shadow" data-u="' + i + '">▶ Listen and repeat</button><p class="muted">Plays each sentence and leaves a pause for you to say it back.</p>' : '') + '<ul class="items">' + rows('s') + '</ul>' +
-        (p.learned < p.total ? '<button class="btn ghost" data-act="skip-unit" data-u="' + i + '">I already know this unit</button>' : '') + '</details>';
+    FP.PHASES.forEach(function (ph) {
+      html += '<h2 class="section-title lib-phase">' + esc(ph.name) + ' <small class="muted">units ' + (ph.units[0] + 1) + '–' + (ph.units[1] + 1) + '</small></h2>';
+      for (var i = ph.units[0]; i <= ph.units[1]; i++) {
+        var u = D.units[i], p = FP.unitProgress(c, i);
+        html += '<details class="unit" id="unit-' + i + '" data-u="' + i + '"><summary><span class="u-ico" aria-hidden="true">' + u.icon + '</span><span class="u-main"><strong>' + (i + 1) + '. ' + esc(u.title) + '</strong><small>' + esc(u.goal) + ' · ' + p.learned + '/' + p.total + '</small></span></summary><div class="unit-body"></div></details>';
+      }
     });
-    return html + '<p class="muted empty" hidden>No matches.</p>';
+    html += '<p class="muted empty" hidden>No matches.</p>';
+    if (D.credits && D.credits.length) html += '<section class="card credits"><h2>Where the material comes from</h2><p>Units 1–20 were written for Fluent Path. ' + D.credits.map(function (cr) {
+      return 'The ' + cr.items + ' sentences in the later units come from <a href="' + cr.url + '" rel="noopener">' + cr.name + '</a>, a collection of sentences and translations written by volunteers, used under the <a href="' + cr.licenseUrl + '" rel="noopener">' + cr.license + '</a> licence. Each sentence’s Tatoeba number is listed in data/tatoeba/SOURCES.tsv.';
+    }).join(' ') + ' Everything is stored on this device; nothing is fetched while you learn.</p></section>';
+    return html;
   }
+  function libRow(lang, sup, c, audio, id) {
+    var it = FP.item(lang, id), me = FP.item(sup, id);
+    return '<li><button class="row" data-act="say-item" data-id="' + id + '"' + (audio ? '' : ' disabled') + '><span class="t" lang="' + lang + '">' + esc(it.text) + '</span><span class="m">' + esc(me.text) + '</span>' + strength(c.cards[id]) + '</button></li>';
+  }
+  /* Unit contents are built only when a unit is opened (or matches a search), so the page stays light with 170 units. */
+  function fillUnit(d, only) {
+    var i = +d.getAttribute('data-u'), lang = state.active, sup = state.profile.support, c = course(), audio = Speech.has(lang), p = FP.unitProgress(c, i);
+    var ids = only || FP.unitIds(i), body = d.querySelector('.unit-body');
+    var w = ids.filter(function (id) { return id.charAt(0) === 'w'; }), s = ids.filter(function (id) { return id.charAt(0) === 's'; });
+    var row = function (id) { return libRow(lang, sup, c, audio, id); };
+    body.innerHTML = (!only && D.notes[lang] && D.notes[lang][i] ? noteHtml(D.notes[lang][i]) : '') +
+      (w.length ? '<h4 class="list-h">Words</h4><ul class="items">' + w.map(row).join('') + '</ul>' : '') +
+      (s.length ? '<h4 class="list-h">Sentences</h4>' + (audio && !only ? '<button class="btn" data-act="shadow" data-u="' + i + '">▶ Listen and repeat</button><p class="muted">Plays each sentence and leaves a pause for you to say it back.</p>' : '') + '<ul class="items">' + s.map(row).join('') + '</ul>' : '') +
+      (!only && p.learned < p.total ? '<button class="btn ghost" data-act="skip-unit" data-u="' + i + '">I already know this unit</button>' : '');
+    d.setAttribute('data-filled', only ? 'search' : 'all');
+  }
+  var searchIndex = null;
   function applySearch() {
-    var q = FP.fold(ui.q), any = false;
-    document.querySelectorAll('details.unit[id]').forEach(function (d) {
-      var hit = 0;
-      d.querySelectorAll('[data-row]').forEach(function (li) { var m = !q || li.getAttribute('data-row').indexOf(q) >= 0; li.hidden = !m; if (m) hit++; });
-      d.hidden = !!q && !hit; if (q) d.open = hit > 0;
-      if (hit) any = true;
+    var q = FP.fold(ui.q), lang = state.active, sup = state.profile.support, any = false;
+    if (q && (!searchIndex || searchIndex.key !== lang + sup)) {
+      searchIndex = { key: lang + sup, rows: FP.order().map(function (id) { return [id, FP.fold(FP.item(lang, id).text + ' ' + FP.item(sup, id).text)]; }) };
+    }
+    var hits = {};
+    if (q.length >= 2) searchIndex.rows.forEach(function (r) { if (r[1].indexOf(q) >= 0) { var u = +r[0].slice(1).split('_')[0]; (hits[u] = hits[u] || []).push(r[0]); } });
+    document.querySelectorAll('details.unit[data-u]').forEach(function (d) {
+      var u = +d.getAttribute('data-u'), h = hits[u];
+      if (q.length < 2) {
+        d.hidden = false;
+        if (d.getAttribute('data-filled') === 'search') { d.open = false; d.querySelector('.unit-body').innerHTML = ''; d.removeAttribute('data-filled'); }
+        return;
+      }
+      d.hidden = !h;
+      if (h) { any = true; fillUnit(d, h); d.open = true; }
     });
-    var e = document.querySelector('.empty'); if (e) e.hidden = any;
+    document.querySelectorAll('.lib-phase').forEach(function (hd) { hd.hidden = q.length >= 2; });
+    var e = document.querySelector('.empty'); if (e) e.hidden = any || q.length < 2;
   }
 
   /* ================= PROGRESS ================= */
@@ -376,7 +405,11 @@
     }
     html += '</div><p class="legend"><span class="sq full"></span>session finished <span class="sq part"></span>some practice</p></section>';
     html += '<section class="card"><h2>' + L(lang).name + ' memory</h2><div class="stack" role="img" aria-label="' + st.mature + ' long-term, ' + st.young + ' learning, ' + st.remaining + ' not started"><i class="s3" style="flex:' + st.mature + '"></i><i class="s1" style="flex:' + st.young + '"></i><i class="s0" style="flex:' + st.remaining + '"></i></div><p class="legend"><span class="dot s3"></span>' + st.mature + ' long-term <span class="dot s1"></span>' + st.young + ' learning <span class="dot s0"></span>' + st.remaining + ' not started</p>' +
-      '<ul class="unit-bars">' + D.units.map(function (u, i) { var p = FP.unitProgress(c, i); return '<li><span>' + u.icon + ' ' + u.title + '</span><span class="bar thin"><i style="width:' + Math.round(p.learned / p.total * 100) + '%"></i></span><small>' + p.learned + '/' + p.total + '</small></li>'; }).join('') + '</ul></section>';
+      '<ul class="unit-bars">' + FP.PHASES.map(function (ph) {
+        var n = 0, tot = 0;
+        for (var i = ph.units[0]; i <= ph.units[1]; i++) { var p = FP.unitProgress(c, i); n += p.learned; tot += p.total; }
+        return '<li><span>' + esc(ph.name) + '</span><span class="bar thin"><i style="width:' + Math.round(n / tot * 100) + '%"></i></span><small>' + n + '/' + tot + '</small></li>';
+      }).join('') + '</ul></section>';
     return html;
   }
 
@@ -731,6 +764,10 @@
     var el = e.target.closest('[data-on]'); if (!el) return;
     var fn = onChange[el.dataset.on]; if (fn) fn(el);
   });
+  document.addEventListener('toggle', function (e) {
+    var d = e.target;
+    if (d.matches && d.matches('details.unit[data-u]') && d.open && d.getAttribute('data-filled') !== 'all' && !(ui.q && FP.fold(ui.q).length >= 2)) fillUnit(d);
+  }, true);
   document.addEventListener('input', function (e) {
     if (e.target.matches('[data-on="search"]')) { ui.q = e.target.value; applySearch(); }
   });

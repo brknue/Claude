@@ -1,8 +1,9 @@
 /* Fluent Path service worker: caches the whole site so it runs with no connection.
    It only ever serves files from this site; nothing is fetched from anywhere else. */
-var CACHE = 'fluent-path-v1';
+var CACHE = 'fluent-path-v2';
 var FILES = ['./', 'index.html', 'styles.css', 'icon.svg', 'manifest.webmanifest',
   'data/en.js', 'data/es.js', 'data/fr.js', 'data/de.js', 'data/it.js', 'data/pt.js', 'data/notes.js',
+  'data/tatoeba/units.js', 'data/tatoeba/en.js', 'data/tatoeba/es.js', 'data/tatoeba/fr.js', 'data/tatoeba/de.js', 'data/tatoeba/it.js', 'data/tatoeba/pt.js',
   'js/engine.js', 'js/app.js'];
 
 self.addEventListener('install', function (e) {
