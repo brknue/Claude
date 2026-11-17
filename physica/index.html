@@ -2,16 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070f">
+<meta name="description" content="Physica — 15 interactive physics labs that run in any browser, on phones, tablets and computers.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Physica">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
 <title>Physica — Virtual Physics Laboratory</title>
-<link rel="stylesheet" href="css/style.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
 <section id="menu" class="view">
   <canvas id="menu-bg"></canvas>
   <header class="hero">
-    <div class="badge"><span class="dot"></span> <b id="lab-count">15</b>&nbsp;interactive laboratories · real equations · adaptive quality for any PC</div>
+    <div class="badge"><span class="dot"></span> <b id="lab-count">15</b>&nbsp;interactive laboratories · real equations · runs on phones, tablets &amp; computers</div>
     <h1>PHYSICA</h1>
     <p class="lead">A virtual physics laboratory. Choose a lab, step inside and experiment with real equations running live in your browser — electrons, orbits, waves, chaos, gases, light, fluids and more.</p>
   </header>
@@ -21,49 +30,54 @@
   </div>
   <div id="lab-grid"></div>
   <div id="no-results" class="hidden">No labs match that search.</div>
-  <footer class="foot">Inside a lab: <kbd>Space</kbd> pause · <kbd>R</kbd> reset · <kbd>H</kbd> hide panel · <kbd>[</kbd> <kbd>]</kbd> switch lab · <kbd>Esc</kbd> back to this menu</footer>
+  <footer class="foot"><span class="kbd-only">Inside a lab: <kbd>Space</kbd> pause · <kbd>R</kbd> reset · <kbd>H</kbd> hide panel · <kbd>[</kbd> <kbd>]</kbd> switch lab · <kbd>Esc</kbd> back to this menu</span><span class="touch-only">Inside a lab: drag the handle at the bottom to open the controls · tap <b>⋯</b> for speed, quality and more · tip: add Physica to your home screen to use it like an app</span></footer>
 </section>
 
 <section id="lab" class="view hidden">
   <div class="topbar">
-    <button id="btn-back" class="tb" title="Back to lab menu (Esc)">&#8592;<span class="hide-sm">&nbsp;Labs</span></button>
+    <button id="btn-back" class="tb" title="Back to lab menu (Esc)" aria-label="Back to lab menu">&#8592;<span class="hide-sm">&nbsp;Labs</span></button>
     <div class="titleblock">
       <span id="lab-num" class="num">01</span>
       <div class="tt"><div id="lab-title" class="t">Lab</div><div id="lab-sub" class="s"></div></div>
     </div>
     <div class="spacer"></div>
-    <select id="lab-switch" class="hide-sm" title="Jump to another lab"></select>
     <div class="tgroup">
-      <button id="btn-prev" class="tb icon" title="Previous lab ([)">&#8249;</button>
-      <button id="btn-next" class="tb icon" title="Next lab (])">&#8250;</button>
+      <button id="btn-pause" class="tb icon" title="Pause / resume (Space)" aria-label="Pause or resume">&#10074;&#10074;</button>
+      <button id="btn-reset" class="tb icon" title="Reset lab (R)" aria-label="Reset lab">&#8634;</button>
     </div>
-    <div class="tgroup">
-      <button id="btn-pause" class="tb icon" title="Pause / resume (Space)">&#10074;&#10074;</button>
-      <button id="btn-step" class="tb icon" title="Advance one frame (while paused)">&#8677;</button>
-      <button id="btn-reset" class="tb icon" title="Reset lab (R)">&#8634;</button>
+    <div id="tb-more" class="tb-more">
+      <select id="lab-switch" title="Jump to another lab" aria-label="Jump to another lab"></select>
+      <div class="tgroup">
+        <button id="btn-prev" class="tb icon" title="Previous lab ([)" aria-label="Previous lab">&#8249;</button>
+        <button id="btn-next" class="tb icon" title="Next lab (])" aria-label="Next lab">&#8250;</button>
+        <button id="btn-step" class="tb icon" title="Advance one frame (while paused)" aria-label="Advance one frame">&#8677;</button>
+      </div>
+      <label class="tsel" title="Simulation speed"><span>Speed</span>
+        <select id="speed">
+          <option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option>
+        </select>
+      </label>
+      <label class="tsel" title="Quality — lower it on slow devices"><span>Quality</span>
+        <select id="quality">
+          <option value="auto">Auto</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low (fast)</option>
+        </select>
+      </label>
+      <button id="btn-shot" class="tb icon" title="Save a screenshot (PNG)" aria-label="Save a screenshot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+      <button id="btn-full" class="tb icon" title="Fullscreen" aria-label="Fullscreen">&#9974;</button>
     </div>
-    <label class="tsel" title="Simulation speed"><span class="hide-sm">Speed</span>
-      <select id="speed">
-        <option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option>
-      </select>
-    </label>
-    <label class="tsel" title="Quality — lower it on slow computers"><span class="hide-sm">Quality</span>
-      <select id="quality">
-        <option value="auto">Auto</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low (fast)</option>
-      </select>
-    </label>
-    <button id="btn-shot" class="tb icon" title="Save a screenshot (PNG)">&#128247;</button>
-    <button id="btn-full" class="tb icon" title="Fullscreen">&#9974;</button>
-    <button id="btn-panel" class="tb icon" title="Toggle side panel (H)">&#9776;</button>
+    <button id="btn-more" class="tb icon more-btn" title="More controls" aria-label="More controls" aria-expanded="false">&#8943;</button>
+    <button id="btn-panel" class="tb icon" title="Toggle panel (H)" aria-label="Show or hide the controls panel">&#9776;</button>
   </div>
   <div class="workspace">
     <div id="stage">
       <canvas id="cv"></canvas>
-      <div id="hint"></div>
+      <div id="hint" role="status"></div>
+      <button id="alt-btn" class="alt-btn hidden" aria-pressed="false"></button>
       <div id="pausedTag">PAUSED</div>
       <div id="fps"></div>
     </div>
     <aside id="panel">
+      <div id="sheet-handle" title="Drag or tap to open the controls"><span></span></div>
       <div class="ptabs">
         <button class="ptab active" data-tab="controls">Controls</button>
         <button class="ptab" data-tab="missions">Missions</button>
@@ -86,24 +100,24 @@
 
 <div id="toast"></div>
 
-<script src="js/core.js?v=5"></script>
-<script src="js/thumbs.js?v=5"></script>
-<script src="js/missions.js?v=5"></script>
-<script src="js/labs/electrons.js?v=5"></script>
-<script src="js/labs/gravity.js?v=5"></script>
-<script src="js/labs/ripple.js?v=5"></script>
-<script src="js/labs/pendulum.js?v=5"></script>
-<script src="js/labs/gas.js?v=5"></script>
-<script src="js/labs/lorentz.js?v=5"></script>
-<script src="js/labs/optics.js?v=5"></script>
-<script src="js/labs/fluid.js?v=5"></script>
-<script src="js/labs/projectile.js?v=5"></script>
-<script src="js/labs/cloth.js?v=5"></script>
-<script src="js/labs/quantum.js?v=5"></script>
-<script src="js/labs/blackhole.js?v=5"></script>
-<script src="js/labs/matter.js?v=5"></script>
-<script src="js/labs/ising.js?v=5"></script>
-<script src="js/labs/string.js?v=5"></script>
+<script src="js/core.js?v=6"></script>
+<script src="js/thumbs.js?v=6"></script>
+<script src="js/missions.js?v=6"></script>
+<script src="js/labs/electrons.js?v=6"></script>
+<script src="js/labs/gravity.js?v=6"></script>
+<script src="js/labs/ripple.js?v=6"></script>
+<script src="js/labs/pendulum.js?v=6"></script>
+<script src="js/labs/gas.js?v=6"></script>
+<script src="js/labs/lorentz.js?v=6"></script>
+<script src="js/labs/optics.js?v=6"></script>
+<script src="js/labs/fluid.js?v=6"></script>
+<script src="js/labs/projectile.js?v=6"></script>
+<script src="js/labs/cloth.js?v=6"></script>
+<script src="js/labs/quantum.js?v=6"></script>
+<script src="js/labs/blackhole.js?v=6"></script>
+<script src="js/labs/matter.js?v=6"></script>
+<script src="js/labs/ising.js?v=6"></script>
+<script src="js/labs/string.js?v=6"></script>
 <script>PhysLab.start();</script>
 </body>
 </html>

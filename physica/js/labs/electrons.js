@@ -377,7 +377,7 @@ PhysLab.define({
           ctx.fillText('|E| = ' + U.fmt(m, 1), bx + 9, by + 8); ctx.fillText('V   = ' + U.fmt(V, 0), bx + 9, by + 24);
         }
         if (X3.energy && X3.KE.n > 2 && P.length <= 320) {
-          const pw = 230, ph = 112, x = W - pw - 12, y = H - ph - 26;
+          const pw = Math.min(230, W - 24), ph = 112, x = W - pw - 12, y = H - ph - 26 - env.insetBottom;
           U.panel(ctx, x, y, pw, ph, 'Energy (×10⁶)');
           const tot = new U.Ring(240);
           for (let k = 0; k < X3.KE.n; k++) tot.push(X3.KE.a[(X3.KE.start + k) % 240] + X3.PE.a[(X3.PE.start + k) % 240]);

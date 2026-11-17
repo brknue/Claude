@@ -181,7 +181,7 @@ PhysLab.define({
         ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, O.y - 5); ctx.lineTo(x, O.y - 46); ctx.stroke();
         ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(x, O.y - 46); ctx.lineTo(x + 20, O.y - 39); ctx.lineTo(x, O.y - 32); ctx.fill();
         ctx.fillStyle = '#fff'; ctx.font = '600 11px Segoe UI, sans-serif'; ctx.textBaseline = 'bottom'; ctx.textAlign = 'center';
-        ctx.fillText('target ' + TG.x.toFixed(1) + ' m', x, O.y - 50); ctx.textAlign = 'left';
+        ctx.fillText('target ' + TG.x.toFixed(1) + ' m', U.clamp(x, 52, env.W - 52), O.y - 50); ctx.textAlign = 'left';
         ctx.fillStyle = '#fde047'; ctx.font = '600 13px Segoe UI, sans-serif'; ctx.textBaseline = 'top';
         ctx.fillText('🎯 ' + TG.hits + ' hit' + (TG.hits === 1 ? '' : 's'), 14, 12);
         if (TG.flash > 0) { ctx.strokeStyle = `rgba(253,224,71,${TG.flash})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, O.y, (1.3 - TG.flash) * 80, Math.PI, 0); ctx.stroke(); }

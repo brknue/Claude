@@ -167,14 +167,14 @@ PhysLab.define({
       draw(ctx) {
         if (!X3.on) { X3.rect = null; return; }
         mapWork();
-        const size = Math.min(210, env.H * 0.34), x = 14, y = 40;
-        U.panel(ctx, x - 6, y - 26, size + 12, size + 50, 'Chaos map — click to launch');
+        const size = Math.min(210, env.H * 0.34, env.W * 0.34), x = 14, y = 40;
+        U.panel(ctx, x - 6, y - 26, size + 12, size + 50, size < 170 ? 'Chaos map' : 'Chaos map — click to launch');
         ctx.imageSmoothingEnabled = false; ctx.drawImage(mapC, x, y, size, size); ctx.imageSmoothingEnabled = true;
         X3.rect = [x, y, size];
         const mx = x + ((wrap(S.th1 * DEG) + Math.PI) / U.TAU) * size, my = y + ((Math.PI - wrap(S.th2 * DEG)) / U.TAU) * size;
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(mx, my, 6, 0, U.TAU); ctx.stroke();
         ctx.fillStyle = '#9fb3e0'; ctx.font = '10px Segoe UI, sans-serif'; ctx.textBaseline = 'top';
-        ctx.fillText(X3.next < MAPN * MAPN ? 'computing… ' + Math.round((X3.next / (MAPN * MAPN)) * 100) + '%' : 'θ₁ →   θ₂ ↑   bright = flips fast', x, y + size + 6);
+        ctx.fillText(X3.next < MAPN * MAPN ? 'computing… ' + Math.round((X3.next / (MAPN * MAPN)) * 100) + '%' : size < 170 ? 'tap to launch' : 'θ₁ →   θ₂ ↑   bright = flips fast', x, y + size + 6);
       },
       pointerdown(p) {
         const r = X3.rect;

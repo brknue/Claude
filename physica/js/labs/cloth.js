@@ -46,7 +46,7 @@ PhysLab.define({
     function build(name) {
       S.preset = name;
       const W = env.W, H = env.H;
-      sp = Math.min((W * 0.62) / (COLS - 1), (H * 0.66) / (ROWS - 1));
+      sp = Math.min((W * (W < 600 ? 0.9 : 0.62)) / (COLS - 1), (H * 0.66) / (ROWS - 1));
       restArea = sp * sp;
       const x0 = (W - sp * (COLS - 1)) / 2, y0 = H * 0.08;
       for (let j = 0; j < ROWS; j++) for (let i = 0; i < COLS; i++) {

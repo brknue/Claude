@@ -420,7 +420,7 @@ PhysLab.define({
       pointerdown(p, e) {
         if (e.button === 2 || e.button === 1 || p.shift) { pan = { x: p.x, y: p.y, cx: cam.x, cy: cam.y }; return; }
         const [wx, wy] = toWorld(p.x, p.y);
-        launch = { x: wx, y: wy };
+        launch = { x: wx, y: wy, sx: p.x, sy: p.y };
         pred = null;
       },
       pointermove(p) {
@@ -430,6 +430,8 @@ PhysLab.define({
         }
       },
       pointerup(p) {
+        // on touch screens a tap (no drag) just inspects; a cancelled gesture (second finger) never launches
+        if (launch && (p.cancel || (p.touch && Math.hypot(p.x - launch.sx, p.y - launch.sy) < 10))) launch = null;
         if (launch) {
           const [cx, cy] = toWorld(p.x, p.y);
           body(launch.x, launch.y, (cx - launch.x) * 1.4, (cy - launch.y) * 1.4, S.newMass).user = simT;

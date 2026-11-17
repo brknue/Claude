@@ -270,6 +270,8 @@
     get H() { return app.H; },
     get dpr() { return app.dpr; },
     get paused() { return app.paused; },
+    get insetBottom() { const b = document.getElementById('alt-btn'); return b && !b.classList.contains('hidden') ? 64 : 0; },
+    get narrow() { return app.W < 560; },
     toast,
     hint: showHint,
   };
@@ -284,6 +286,7 @@
   function showHint(text) {
     const h = $('#hint');
     if (!text) { h.style.opacity = 0; return; }
+    if (IS_TOUCH && app.def && TOUCH_HINTS[app.def.id]) text = TOUCH_HINTS[app.def.id];
     h.textContent = text;
     h.style.opacity = 1;
     clearTimeout(app.hintTimer);
@@ -314,7 +317,9 @@
     const r = stage.getBoundingClientRect();
     const W = Math.max(50, Math.floor(r.width)), H = Math.max(50, Math.floor(r.height));
     const dpr = dprCap();
-    const changed = W !== app.W || H !== app.H;
+    // A width change, or a large height change, means a new layout. Small height-only changes are the
+    // mobile address bar sliding in/out: resize the canvas but don't make grid-based labs start over.
+    const changed = W !== app.W || Math.abs(H - app.H) > Math.max(140, app.H * 0.22);
     app.W = W; app.H = H; app.dpr = dpr;
     cv.width = Math.round(W * dpr);
     cv.height = Math.round(H * dpr);
@@ -353,6 +358,8 @@
     $('#lab-title').textContent = def.title;
     $('#lab-sub').textContent = def.subtitle;
     $('#lab-switch').value = def.id;
+    setupTouchExtras(def);
+    closeMore();
     document.title = def.title + ' — Physica';
     $('#theory').innerHTML = def.theory || '';
     $('#howto').innerHTML = def.howto ? '<h3>How to use</h3><ul>' + def.howto.map((h) => `<li>${h}</li>`).join('') + '</ul>' : '';
@@ -671,6 +678,128 @@
   }
 
   /* ---------------- Wiring ---------------- */
+
+  /* ---------------- Every device: touch, bottom sheet, compact top bar ---------------- */
+  const IS_TOUCH = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+  if (IS_TOUCH) document.documentElement.classList.add('touch');
+  // What a right-click does in each lab, offered as a toggle button on touch screens
+  const ALT_ACTIONS = { electrons: '✥ Move charges', gravity: '✋ Pan view', gas: '❄ Cool instead', matter: '❄ Cool instead', ising: '↓ Paint spin down', cloth: '✂ Cut' };
+  // Labs where two fingers mean pan + pinch-zoom
+  const PINCH = { gravity: true };
+  const TOUCH_HINTS = {
+    electrons: 'Touch and hold to spray particles · tap “Move charges” to drag charges around · open the panel below for tools & presets',
+    gravity: 'Drag to launch a body (dashed line = predicted path) · two fingers to pan and pinch-zoom · tap a planet to see its orbit',
+    ripple: 'Tap to add wave sources · pick Wall or Glass in the panel and drag to draw · try the Double slit preset',
+    pendulum: 'Drag a bob to pose the pendulum · tap the chaos map to launch from any pose · try Butterfly mode',
+    gas: 'Drag the piston (right wall) to compress · hold anywhere in the box to heat — tap “Cool instead” to cool',
+    lorentz: 'Drag to fire a particle (arrow = velocity) · pick the particle and scenario in the panel below',
+    optics: 'Drag parts to move them · drag the round handle to rotate · add lenses, prisms and mirrors from the panel',
+    fluid: 'Drag through the fluid to stir it and add dye · wind-tunnel presets show vortex streets',
+    projectile: 'Drag to aim, let go to fire · pick a projectile and planet in the panel · hit the target!',
+    cloth: 'Drag the cloth to pull it — pull hard and it tears · tap “Cut” to slice it · try Flag in wind',
+    quantum: 'Tap “Fire packet” in the panel · drag on the plot to draw your own potential · “Measure” collapses the wave',
+    blackhole: 'Drag to fire light or matter at the black hole · tools and experiments are in the panel below',
+    matter: 'Slide the temperature to melt, boil or freeze · hold to heat a spot — tap “Cool instead” to cool',
+    ising: 'Slide the temperature through T_c ≈ 2.27 · drag to paint spins up — tap “Paint spin down” for down',
+    string: 'Drag the string and let go to pluck · tap the piano keys to play · turn on Sound in the panel',
+  };
+
+  function setupTouchExtras(def) {
+    app.alt = false;
+    const b = $('#alt-btn');
+    const label = IS_TOUCH && ALT_ACTIONS[def.id];
+    b.classList.toggle('hidden', !label);
+    b.classList.remove('on');
+    b.setAttribute('aria-pressed', 'false');
+    if (label) b.textContent = label;
+  }
+
+  // ---- compact top bar: "more" menu
+  function closeMore() { const m = $('#tb-more'); if (m) { m.classList.remove('open'); $('#btn-more').classList.remove('on'); $('#btn-more').setAttribute('aria-expanded', 'false'); } }
+
+  // ---- bottom sheet
+  const sheet = { on: false, h: 0, peek: 62 };
+  function safeBottom() { const p = $('#safe-probe'); return p ? parseFloat(getComputedStyle(p).paddingBottom) || 0 : 0; }
+  function sheetLimits() {
+    const ws = $('.workspace').clientHeight || window.innerHeight;
+    return { min: sheet.peek, half: Math.round(ws * 0.52), max: Math.round(ws * 0.9) };
+  }
+  function setSheet(h, animate = true) {
+    const P = $('#panel'), L = sheetLimits();
+    sheet.h = U.clamp(h, L.min, L.max);
+    P.classList.toggle('dragging', !animate);
+    P.style.height = sheet.h + 'px';
+    P.classList.toggle('peek', sheet.h <= L.min + 4);
+  }
+  function sheetOpen() { return sheet.on && sheet.h > sheet.peek + 4; }
+  function toggleSheet() { const L = sheetLimits(); setSheet(sheetOpen() ? L.min : L.half); }
+  function applySheetMode() {
+    const mq = window.matchMedia('(max-width: 760px), (max-width: 1100px) and (orientation: portrait)');
+    const on = mq.matches;
+    sheet.on = on;
+    document.body.classList.toggle('sheet', on);
+    const P = $('#panel');
+    if (on) {
+      P.classList.remove('collapsed');
+      const hh = $('#sheet-handle').offsetHeight || 22, th = $('.ptabs').offsetHeight || 42;
+      sheet.peek = hh + th + safeBottom();
+      document.documentElement.style.setProperty('--peek', sheet.peek + 'px');
+      setSheet(sheet.h || sheet.peek, false);
+    } else {
+      P.style.height = '';
+      P.classList.remove('peek', 'dragging');
+    }
+  }
+  function initSheet() {
+    const probe = el('div'); probe.id = 'safe-probe'; document.body.appendChild(probe);
+    const P = $('#panel');
+    let drag = null;
+    const startDrag = (e) => {
+      if (!sheet.on) return;
+      drag = { y: e.clientY, h: sheet.h, moved: false, id: e.pointerId, t: performance.now(), target: e.target };
+      // the handle captures right away so a fast drag can't escape it (tabs capture only once a drag starts, so taps still switch tabs)
+      if (e.currentTarget.id === 'sheet-handle') try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+    };
+    const moveDrag = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const dy = drag.y - e.clientY;
+      if (!drag.moved && Math.abs(dy) < 7) return;
+      if (!drag.moved) { drag.moved = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {} }
+      setSheet(drag.h + dy, false);
+    };
+    const endDrag = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const d = drag; drag = null;
+      const L = sheetLimits();
+      if (d.moved) { P.dataset.justDragged = '1'; setTimeout(() => { delete P.dataset.justDragged; }, 80); }
+      if (!d.moved) {
+        // a plain tap on the handle toggles; a tap on a tab while closed opens to half
+        if (d.target.closest && d.target.closest('#sheet-handle')) toggleSheet();
+        else if (!sheetOpen()) setSheet(L.half);
+        return;
+      }
+      const v = (d.y - e.clientY) / Math.max(1, performance.now() - d.t); // px/ms, + = upward fling
+      const snaps = [L.min, L.half, L.max];
+      let target;
+      if (v > 0.6) target = snaps.find((x) => x > sheet.h + 4) || L.max;
+      else if (v < -0.6) target = [...snaps].reverse().find((x) => x < sheet.h - 4) || L.min;
+      else target = snaps.reduce((a, b) => (Math.abs(b - sheet.h) < Math.abs(a - sheet.h) ? b : a));
+      setSheet(target);
+    };
+    for (const n of [$('#sheet-handle'), $('.ptabs')]) {
+      n.addEventListener('pointerdown', startDrag);
+      n.addEventListener('pointermove', moveDrag);
+      n.addEventListener('pointerup', endDrag);
+      n.addEventListener('pointercancel', endDrag);
+    }
+    // a click that ended a drag must not also switch tabs
+    $('.ptabs').addEventListener('click', (e) => { if (P.dataset.justDragged) { e.stopPropagation(); e.preventDefault(); } }, true);
+    const mqs = ['(max-width: 760px)', '(max-width: 1100px) and (orientation: portrait)', '(orientation: portrait)'];
+    for (const q of mqs) { const m = window.matchMedia(q); (m.addEventListener ? m.addEventListener('change', applySheetMode) : m.addListener(applySheetMode)); }
+    window.addEventListener('resize', () => { if (sheet.on) setSheet(sheet.h, false); });
+    applySheetMode();
+  }
+
   function start() {
     cv = $('#cv');
     ctx = cv.getContext('2d', { alpha: false });
@@ -708,38 +837,99 @@
 
     const ptr = (e) => {
       const r = cv.getBoundingClientRect();
-      return { x: e.clientX - r.left, y: e.clientY - r.top, button: e.button, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey };
+      const btn = app.alt && e.pointerType !== 'mouse' ? 2 : e.button;
+      return { x: e.clientX - r.left, y: e.clientY - r.top, button: btn, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, touch: e.pointerType === 'touch' || e.pointerType === 'pen' };
     };
-    cv.addEventListener('pointerdown', (e) => {
-      try { cv.setPointerCapture(e.pointerId); } catch (_) {}
-      const p = ptr(e);
-      Object.assign(env.pointer, { x: p.x, y: p.y, down: true, button: e.button, inside: true });
+    // labs read e.button / e.shiftKey: hand them a copy where the 2nd-action toggle turns a touch into a right-click
+    const evOf = (e, button) => ({ button: button !== undefined ? button : app.alt && e.pointerType !== 'mouse' ? 2 : e.button, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey, altKey: e.altKey, pointerType: e.pointerType, preventDefault() {} });
+    const fingers = new Map();
+    let primary = null, pinch = null;
+    const labDown = (p, e) => {
       const X = app.lab && app.lab.ext;
       if (X && X.pointerdown && X.pointerdown(p, e) === true) app.extCap = true;
       else if (app.lab && app.lab.pointerdown) app.lab.pointerdown(p, e);
-      e.preventDefault();
-    });
-    cv.addEventListener('pointermove', (e) => {
-      const p = ptr(e);
-      env.pointer.x = p.x; env.pointer.y = p.y; env.pointer.inside = true;
+    };
+    const labMove = (p, e) => {
       const X = app.lab && app.lab.ext;
       if (X && X.pointermove) X.pointermove(p, e);
       if (!app.extCap && app.lab && app.lab.pointermove) app.lab.pointermove(p, e);
-    });
-    const up = (e) => {
-      if (!env.pointer.down) return;
-      env.pointer.down = false;
-      const p = ptr(e);
+    };
+    const labUp = (p, e) => {
       const X = app.lab && app.lab.ext;
       if (app.extCap) { app.extCap = false; if (X && X.pointerup) X.pointerup(p, e); }
       else if (app.lab && app.lab.pointerup) app.lab.pointerup(p, e);
     };
+    const pinchMid = () => {
+      const [a, b] = [...fingers.values()];
+      return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.hypot(a.x - b.x, a.y - b.y) || 1 };
+    };
+    cv.addEventListener('pointerdown', (e) => {
+      try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+      closeMore();
+      if (sheet.on && sheetOpen() && IS_TOUCH && e.pointerType !== 'mouse' && sheet.h > sheetLimits().half + 20) setSheet(sheetLimits().half);
+      const p = ptr(e);
+      fingers.set(e.pointerId, { x: p.x, y: p.y });
+      if (primary !== null && e.pointerId !== primary) {
+        // second finger: in pinch labs end the one-finger action and switch to pan + zoom
+        if (PINCH[app.def && app.def.id] && fingers.size === 2 && !pinch) {
+          const last = env.pointer;
+          env.pointer.down = false;
+          labUp({ x: last.x, y: last.y, button: 0, touch: true, cancel: true }, evOf(e, 0));
+          const m = pinchMid();
+          pinch = { d: m.d };
+          env.pointer.down = true;
+          labDown({ x: m.x, y: m.y, button: 2, touch: true }, evOf(e, 2));
+        }
+        return;
+      }
+      primary = e.pointerId;
+      Object.assign(env.pointer, { x: p.x, y: p.y, down: true, button: p.button, inside: true });
+      labDown(p, evOf(e));
+    });
+    cv.addEventListener('pointermove', (e) => {
+      const p = ptr(e);
+      if (fingers.has(e.pointerId)) fingers.set(e.pointerId, { x: p.x, y: p.y });
+      if (pinch) {
+        if (fingers.size < 2) return;
+        const m = pinchMid();
+        if (app.lab && app.lab.wheel) app.lab.wheel({ x: m.x, y: m.y }, -Math.log(m.d / pinch.d) / 0.0012, evOf(e, 0));
+        pinch.d = m.d;
+        env.pointer.x = m.x; env.pointer.y = m.y;
+        labMove({ x: m.x, y: m.y, button: 2, touch: true }, evOf(e, 2));
+        return;
+      }
+      if (primary !== null && e.pointerId !== primary) return;
+      env.pointer.x = p.x; env.pointer.y = p.y; env.pointer.inside = true;
+      labMove(p, evOf(e));
+    });
+    const up = (e) => {
+      fingers.delete(e.pointerId);
+      if (pinch) {
+        if (fingers.size < 2) { const m = { x: env.pointer.x, y: env.pointer.y }; env.pointer.down = false; labUp({ x: m.x, y: m.y, button: 2, touch: true }, evOf(e, 2)); pinch = null; }
+        if (fingers.size === 0) primary = null;
+        return;
+      }
+      if (e.pointerId !== primary) return;
+      primary = null;
+      if (!env.pointer.down) return;
+      env.pointer.down = false;
+      labUp(ptr(e), evOf(e));
+    };
     cv.addEventListener('pointerup', up);
     cv.addEventListener('pointercancel', up);
-    cv.addEventListener('pointerleave', () => { env.pointer.inside = false; });
+    // on touch screens there is no hover: keep the last touched spot as "the cursor" for probes and readouts
+    cv.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') env.pointer.inside = false; });
     cv.addEventListener('wheel', (e) => {
       if (app.lab && app.lab.wheel) { e.preventDefault(); app.lab.wheel(ptr(e), e.deltaY, e); }
     }, { passive: false });
+    $('#alt-btn').addEventListener('click', (e) => {
+      app.alt = !app.alt;
+      e.currentTarget.classList.toggle('on', app.alt);
+      e.currentTarget.setAttribute('aria-pressed', String(app.alt));
+      e.currentTarget.blur();
+    });
+    $('#hint').addEventListener('click', () => { $('#hint').style.opacity = 0; });
     cv.addEventListener('contextmenu', (e) => e.preventDefault());
 
     $('#btn-back').onclick = () => { location.hash = '#/'; };
@@ -753,7 +943,7 @@
       if (app.lab && app.lab.ext && app.lab.ext.step) app.lab.ext.step((1 / 60) * app.speed, 1 / 60);
     };
     $('#btn-reset').onclick = (e) => { e.currentTarget.blur(); resetLab(); };
-    $('#speed').onchange = (e) => { app.speed = +e.target.value; e.target.blur(); };
+    $('#speed').onchange = (e) => { app.speed = +e.target.value; e.target.blur(); closeMore(); };
     $('#quality').onchange = (e) => {
       localStorage.setItem('physica-quality', e.target.value);
       e.target.blur();
@@ -762,14 +952,24 @@
     };
     $('#btn-full').onclick = (e) => {
       e.currentTarget.blur();
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
-      else document.exitFullscreen && document.exitFullscreen();
+      const d = document.documentElement;
+      if (!(document.fullscreenElement || document.webkitFullscreenElement)) (d.requestFullscreen || d.webkitRequestFullscreen).call(d);
+      else (document.exitFullscreen || document.webkitExitFullscreen).call(document);
     };
-    $('#btn-panel').onclick = (e) => { e.currentTarget.blur(); $('#panel').classList.toggle('collapsed'); };
+    $('#btn-panel').onclick = (e) => { e.currentTarget.blur(); if (sheet.on) toggleSheet(); else $('#panel').classList.toggle('collapsed'); };
+    $('#btn-more').onclick = (e) => {
+      e.stopPropagation(); e.currentTarget.blur();
+      const m = $('#tb-more'), open = !m.classList.contains('open');
+      m.classList.toggle('open', open); e.currentTarget.classList.toggle('on', open); e.currentTarget.setAttribute('aria-expanded', String(open));
+    };
+    document.addEventListener('pointerdown', (e) => { if (!e.target.closest('#tb-more') && !e.target.closest('#btn-more')) closeMore(); });
+    if (!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)) $('#btn-full').classList.add('hidden');
+    initSheet();
     document.querySelectorAll('.ptab').forEach((t) => {
       t.onclick = () => {
         document.querySelectorAll('.ptab').forEach((x) => x.classList.toggle('active', x === t));
         for (const n of ['controls', 'missions', 'theory']) $('#tab-' + n).classList.toggle('hidden', t.dataset.tab !== n);
+        if (sheet.on && !sheetOpen()) setSheet(sheetLimits().half);
       };
     });
 
@@ -780,7 +980,7 @@
       if (e.key === ' ') { e.preventDefault(); app.paused = !app.paused; updatePause(); return; }
       if (e.key === 'Escape') { location.hash = '#/'; return; }
       if (e.key === 'r' || e.key === 'R') { if (!e.ctrlKey && !e.metaKey) { resetLab(); return; } }
-      if (e.key === 'h' || e.key === 'H') { $('#panel').classList.toggle('collapsed'); return; }
+      if (e.key === 'h' || e.key === 'H') { if (sheet.on) toggleSheet(); else $('#panel').classList.toggle('collapsed'); return; }
       if (e.key === '[') { go(-1); return; }
       if (e.key === ']') { go(1); return; }
       if (app.lab && app.lab.key) app.lab.key(e);

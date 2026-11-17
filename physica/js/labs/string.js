@@ -123,7 +123,11 @@ PhysLab.define({
 
     pluckShape(0.22, 0.55);
 
-    const geo = () => { const W = env.W, H = env.H; return { x0: 50, x1: W - 50, cy: H * 0.36, A: Math.min(H * 0.27, 220), sy: H * 0.68, sh: H * 0.24 }; };
+    const geo = () => {
+      const W = env.W, H = env.H;
+      if (W < 700) return { x0: 34, x1: W - 34, cy: H * 0.47, A: Math.min(H * 0.17, 160), sy: H * 0.72, sh: H * 0.19, narrow: true };
+      return { x0: 50, x1: W - 50, cy: H * 0.36, A: Math.min(H * 0.27, 220), sy: H * 0.68, sh: H * 0.24 };
+    };
 
     /* ===== v3 extras ===== */
     const NOTES = [['C4', 261.63, 'A'], ['D4', 293.66, 'S'], ['E4', 329.63, 'D'], ['F4', 349.23, 'F'], ['G4', 392.0, 'G'], ['A4', 440.0, 'J'], ['B4', 493.88, 'K'], ['C5', 523.25, 'L']];
@@ -135,7 +139,7 @@ PhysLab.define({
       X3.notes++; X3.lit = i; X3.litT = 0.35;
       if (!S.sound && !X3.warned) { X3.warned = true; env.toast('Turn on “Sound” in the panel to hear the notes'); }
     }
-    const keyRect = (i) => [env.W - 8 * 40 - 14 + i * 40, 12, 36, 62];
+    const keyRect = (i) => { const kw = Math.min(40, (env.W - 24) / 8); return [env.W - 8 * kw - 12 + i * kw, 12, kw - 4, 62]; };
     ui.section('Keyboard');
     ui.note('Press <b>A S D F G J K L</b> (or click the keys on screen) to play a C-major scale. Each key "frets" the string — it shortens L so the fundamental lands on that note — and plucks it.');
     const ext = {
@@ -149,7 +153,7 @@ PhysLab.define({
           ctx.fillStyle = on ? '#fff' : '#94a3b8'; ctx.textBaseline = 'top'; ctx.fillText(n[2], x + w / 2, yy + 6);
         });
         ctx.textAlign = 'left';
-        const [x0, y0] = keyRect(0), pw = 8 * 40 - 4;
+        const [x0, y0] = keyRect(0), pw = keyRect(7)[0] + keyRect(7)[2] - x0;
         U.panel(ctx, x0, y0 + 72, pw, 78, 'Pickup signal (at 20 % of the string)');
         ctx.strokeStyle = '#67e8f9'; ctx.lineWidth = 1.5;
         X3.scope.draw(ctx, x0 + 8, y0 + 96, pw - 16, 46, -0.9, 0.9);
@@ -198,27 +202,29 @@ PhysLab.define({
         if (S.drive) { ctx.fillStyle = '#fbbf24'; ctx.font = '11px Segoe UI, sans-serif'; ctx.textBaseline = 'bottom'; ctx.fillText('driver', G.x0 - 24, G.cy - G.A * 0.5); }
         // spectrum
         const f0 = fBase(), bw = (G.x1 - G.x0) / NM;
-        U.panel(ctx, G.x0 - 14, G.sy - 30, G.x1 - G.x0 + 28, G.sh + 62, 'Harmonic spectrum — click a bar to add that harmonic');
+        U.panel(ctx, G.x0 - 14, G.sy - 30, G.x1 - G.x0 + 28, G.sh + 62, G.narrow ? 'Spectrum — tap a bar to add it' : 'Harmonic spectrum — click a bar to add that harmonic');
         let mx = 0.05; for (let n = 0; n < NM; n++) mx = Math.max(mx, amp[n]);
         bars = [];
-        ctx.font = '10.5px Consolas, monospace'; ctx.textAlign = 'center';
+        const tight = bw < 34;
+        ctx.font = (tight ? '9.5px' : '10.5px') + ' Consolas, monospace'; ctx.textAlign = 'center';
         for (let n = 0; n < NM; n++) {
           const x = G.x0 + n * bw + 4, h = (amp[n] / mx) * (G.sh - 14);
           const [r, g, b] = U.hsl2rgb(290 - n * 16, 0.9, 0.62);
           ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fillRect(x, G.sy, bw - 8, G.sh);
           ctx.fillStyle = `rgb(${r},${g},${b})`; ctx.fillRect(x, G.sy + G.sh - h, bw - 8, h);
           ctx.fillStyle = '#c9d6f5'; ctx.textBaseline = 'top';
-          ctx.fillText('n=' + ratio(n + 1), x + (bw - 8) / 2, G.sy + G.sh + 4);
+          ctx.fillText((tight ? '' : 'n=') + ratio(n + 1), x + (bw - 8) / 2, G.sy + G.sh + 4);
           const f = f0 * ratio(n + 1);
-          ctx.fillStyle = '#8d9cc4'; ctx.fillText(f >= 1000 ? (f / 1000).toFixed(2) + 'k' : f.toFixed(0), x + (bw - 8) / 2, G.sy + G.sh + 17);
+          if (!tight || n % 3 === 0) { ctx.fillStyle = '#8d9cc4'; ctx.fillText(f >= 1000 ? (f / 1000).toFixed(1) + 'k' : f.toFixed(0), x + (bw - 8) / 2, G.sy + G.sh + 17); }
           bars.push([x, G.sy, bw - 8, G.sh, n + 1]);
         }
         ctx.textAlign = 'left';
         // headline
         ctx.fillStyle = '#f5d0fe'; ctx.font = '600 15px Segoe UI, sans-serif'; ctx.textBaseline = 'top';
-        ctx.fillText(`f₁ = ${f0.toFixed(1)} Hz  (${noteName(f0)})`, 16, 14);
+        const hy = G.narrow ? 172 : 14;
+        ctx.fillText(`f₁ = ${f0.toFixed(1)} Hz  (${noteName(f0)})`, 16, hy);
         ctx.fillStyle = '#9fb3e0'; ctx.font = '12px Segoe UI, sans-serif';
-        ctx.fillText(`shown ${(f0 / (S.fv * (S.bc === 'fixed' ? 1 : 0.5))).toFixed(0)}× slower than real life` + (S.sound ? '' : '  ·  sound is off'), 16, 36);
+        ctx.fillText(`shown ${(f0 / (S.fv * (S.bc === 'fixed' ? 1 : 0.5))).toFixed(0)}× slower than real life` + (S.sound ? '' : '  ·  sound is off'), 16, hy + 22);
       },
       pointerdown(p) {
         for (const b of bars) if (p.x >= b[0] && p.x <= b[0] + b[2] && p.y >= b[1] && p.y <= b[1] + b[3] + 30) { addMode(b[4], 0.35 / Math.sqrt(b[4])); return; }

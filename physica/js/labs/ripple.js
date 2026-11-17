@@ -279,6 +279,7 @@ PhysLab.define({
       },
       draw(ctx) {
         render();
+        ctx.fillStyle = '#060c1c'; ctx.fillRect(0, 0, env.W, env.H);
         ctx.imageSmoothingEnabled = true;
         ctx.drawImage(off, 0, 0, gw * cs, gh * cs);
         const pulse = 0.5 + 0.5 * Math.sin(omega() * steps);
@@ -327,7 +328,7 @@ PhysLab.define({
         last = [x, y];
       },
       pointerup() { dragSrc = null; },
-      resize() { alloc(); preset(S.preset); },
+      resize(changed) { if (changed) { alloc(); preset(S.preset); } },
       reset() { preset(S.preset); },
       readouts() {
         const lamPx = S.lam * cs;

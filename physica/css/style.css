@@ -117,8 +117,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 @media (max-width:860px){
   .hide-sm{display:none}
   .titleblock .s{display:none}
-  .workspace{flex-direction:column}
-  #panel{width:auto;height:42%;border-left:0;border-top:1px solid var(--line)}
   .topbar{gap:5px;padding:0 6px}
   .tb{padding:0 8px}
 }
@@ -156,3 +154,101 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 .mission small{display:block;font-size:11.5px;color:var(--mute);margin-top:2px;line-height:1.45}
 .stars{margin-left:auto;color:#facc15;letter-spacing:2px;font-size:13px;font-weight:400}
 .ptab{font-size:12.5px}
+
+/* =====================================================================
+   v4: every device — phones, tablets, touch screens, notches
+   ===================================================================== */
+html,body{overscroll-behavior:none}
+#lab{touch-action:manipulation}
+button,select,.chip,.card{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#cv{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.touch-only{display:none}
+html.touch .touch-only{display:inline}
+html.touch .kbd-only{display:none}
+
+/* safe areas (notches, rounded corners, home bar) */
+.topbar{min-height:54px;height:auto;padding-top:env(safe-area-inset-top);padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+#menu{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+.hero{padding-top:calc(64px + env(safe-area-inset-top))}
+.foot{padding-bottom:calc(50px + env(safe-area-inset-bottom))}
+#safe-probe{position:fixed;left:0;bottom:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom);padding-top:env(safe-area-inset-top);visibility:hidden;pointer-events:none}
+
+/* top bar: secondary controls live in a "more" menu when space is short */
+.tb-more{display:flex;align-items:center;gap:8px}
+.more-btn{display:none;font-size:20px}
+.topbar .tgroup{flex:none}
+@media (max-width:1180px){
+  .more-btn{display:inline-flex}
+  .tb-more{display:none;position:absolute;top:100%;right:max(8px,env(safe-area-inset-right));z-index:40;flex-wrap:wrap;gap:10px;padding:12px;width:max-content;max-width:calc(100vw - 16px);background:#0c1328;border:1px solid var(--line2);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.65)}
+  .tb-more.open{display:flex}
+  .tb-more #lab-switch{flex:1 1 100%;max-width:none}
+  .more-btn.on{background:var(--acc);color:#04101e;border-color:var(--acc)}
+}
+
+/* bottom sheet panel (phones & portrait tablets) */
+#sheet-handle{display:none}
+body.sheet .workspace{position:relative;display:block}
+body.sheet #stage{position:absolute;left:0;right:0;top:0;bottom:var(--peek,62px)}
+body.sheet #panel{position:absolute;left:0;right:0;bottom:0;width:auto;height:var(--peek,62px);border-left:0;border-top:1px solid var(--line2);border-radius:18px 18px 0 0;box-shadow:0 -14px 40px rgba(0,0,0,.55);z-index:6;transition:height .28s cubic-bezier(.2,.8,.2,1);padding-bottom:env(safe-area-inset-bottom);overflow:hidden}
+body.sheet #panel.collapsed{display:flex}
+body.sheet #panel.dragging{transition:none}
+body.sheet #sheet-handle{display:flex;justify-content:center;align-items:center;height:22px;flex:none;cursor:grab;touch-action:none}
+body.sheet #sheet-handle span{width:46px;height:5px;border-radius:3px;background:#46578a}
+body.sheet .ptabs{touch-action:none}
+body.sheet .tabbody{padding-bottom:24px}
+body.sheet #hint{top:10px;bottom:auto;left:10px;right:10px;max-width:none;font-size:12.5px;pointer-events:auto}
+body.sheet #fps{display:none}
+body.sheet #toast{bottom:auto;top:calc(66px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-16px)}
+body.sheet #toast.show{transform:translateX(-50%)}
+body.sheet #pausedTag{top:auto;bottom:12px}
+
+/* "2nd action" button: replaces right-click on touch screens */
+.alt-btn{position:absolute;right:12px;bottom:12px;z-index:4;height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line2);background:rgba(10,16,34,.88);color:#dbe5ff;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.45);cursor:pointer}
+.alt-btn.on{background:var(--acc);color:#04101e;border-color:var(--acc)}
+
+/* touch screens: bigger targets, no iOS zoom-on-focus */
+@media (pointer:coarse){
+  .tb{height:42px;min-width:42px}
+  .btn,.tool{min-height:42px;font-size:13.5px}
+  select,#search{font-size:16px}
+  select{height:40px}
+  .chip{height:40px;padding:0 16px}
+  .ctl{margin:10px 0 18px}
+  .ctl.toggle{min-height:36px}
+  .sw{width:46px;height:26px}
+  .sw::after{width:20px;height:20px}
+  .ctl.toggle.on .sw::after{transform:translateX(20px)}
+  input[type=range]{height:8px;margin:8px 0}
+  input[type=range]::-webkit-slider-thumb{width:26px;height:26px}
+  input[type=range]::-moz-range-thumb{width:20px;height:20px}
+  .ro{padding:7px 10px}
+  .ptab{height:44px}
+  .mini{height:30px;padding:0 12px;font-size:12px}
+  .card:hover{transform:none}
+}
+
+/* small phones */
+@media (max-width:420px){
+  .hero{padding:calc(36px + env(safe-area-inset-top)) 16px 16px}
+  .lead{font-size:14.5px}
+  .badge{font-size:11px;padding:5px 12px}
+  .menubar{padding:6px 14px 4px}
+  #lab-grid{padding:12px 14px 24px;gap:14px;grid-template-columns:1fr}
+  .titleblock .num{display:none}
+  .titleblock .t{font-size:14px}
+  .tgroup{gap:3px}
+  .topbar{gap:4px}
+  .tb.icon{min-width:38px}
+  .tabbody{padding:4px 12px 30px}
+}
+
+/* phones held sideways: keep a slim side panel, shrink chrome */
+@media (max-height:520px) and (orientation:landscape){
+  .topbar{min-height:44px}
+  .tb{height:36px;min-width:36px}
+  .titleblock .s{display:none}
+  #panel{width:290px}
+  .ptab{height:36px}
+  .hero{padding-top:calc(28px + env(safe-area-inset-top))}
+  .hero h1{font-size:44px;margin:10px 0 6px}
+}

@@ -210,7 +210,7 @@ PhysLab.define({
       draw(ctx) {
         if (!X3.mom) return;
         if (X3.f++ % 4 === 0) momentum();
-        const pw = 250, ph = 104, x = 12, y = 12;
+        const pw = Math.min(250, env.W - 24), ph = 104, x = env.narrow ? env.W - pw - 12 : 12, y = env.narrow ? 84 : 12;
         U.panel(ctx, x, y, pw, ph, 'Momentum distribution |φ(k)|²');
         let mx = 1e-9;
         for (let b = 0; b < KB; b++) mx = Math.max(mx, phik[b]);
