@@ -2,102 +2,283 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>YouTube to PDF</title>
+<meta name="description" content="Paste a YouTube link and download everything said in the video as a PDF.">
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="YT to PDF">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <style>
   :root {
-    --bg: #f6f4ef; --card: #fff; --ink: #1d1c1a; --muted: #6b6860; --line: #e2ded4;
-    --accent: #c0392b; --accent-ink: #fff; --error-bg: #fdecea; --error-ink: #8a1f14;
+    --bg: #f6f4ef; --card: #fff; --ink: #1d1c1a; --muted: #6b6860; --line: #e2ded4; --soft: #efece5;
+    --accent: #c0392b; --accent-hover: #a93226; --accent-ink: #fff; --error-bg: #fdecea; --error-ink: #8a1f14;
+    --radius: 14px; --pad: clamp(16px, 4vw, 32px);
+    color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #171614; --card: #211f1c; --ink: #f1eee8; --muted: #a39f95; --line: #36332e;
-      --accent: #e25546; --accent-ink: #fff; --error-bg: #3a1b17; --error-ink: #ffb4a9;
+      --bg: #171614; --card: #211f1c; --ink: #f1eee8; --muted: #a39f95; --line: #36332e; --soft: #2a2824;
+      --accent: #e25546; --accent-hover: #ec6a5c; --accent-ink: #fff; --error-bg: #3a1b17; --error-ink: #ffb4a9;
     }
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0; min-height: 100vh; min-height: 100dvh; background: var(--bg); color: var(--ink);
+    font: 17px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
   }
-  main { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
-  h1 { font-size: 2rem; margin: 0 0 6px; letter-spacing: -0.02em; }
-  .lede { color: var(--muted); margin: 0 0 28px; }
-  form { display: flex; gap: 10px; flex-wrap: wrap; }
-  input[type=text] {
-    flex: 1 1 320px; min-width: 0; padding: 13px 14px; font: inherit; color: inherit;
-    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  main {
+    max-width: 780px; margin: 0 auto;
+    padding: calc(var(--pad) + env(safe-area-inset-top)) calc(var(--pad) + env(safe-area-inset-right)) 40px calc(var(--pad) + env(safe-area-inset-left));
   }
-  button, select {
-    font: inherit; border-radius: 10px; padding: 12px 18px; cursor: pointer;
-    border: 1px solid var(--line); background: var(--card); color: inherit;
+  .brand { display: flex; align-items: center; gap: 12px; margin: 8px 0 6px; }
+  .brand img { width: 40px; height: 40px; border-radius: 10px; }
+  h1 { font-size: clamp(1.6rem, 5vw, 2.1rem); margin: 0; letter-spacing: -0.02em; line-height: 1.15; }
+  .lede { color: var(--muted); margin: 6px 0 24px; }
+
+  /* Link box */
+  form { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+  .field { position: relative; display: flex; align-items: center; min-width: 0; }
+  .field input {
+    width: 100%; min-height: 54px; padding: 12px 96px 12px 16px;
+    font: inherit; font-size: max(16px, 1rem); color: inherit;
+    background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius);
+    transition: border-color .15s;
   }
-  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
-  button:disabled { opacity: 0.6; cursor: progress; }
+  .field input:focus { border-color: var(--accent); outline: none; }
+  .field input::placeholder { color: var(--muted); opacity: .8; }
+  .field .tools { position: absolute; right: 6px; display: flex; gap: 2px; }
+  .icon-btn {
+    width: 42px; height: 42px; border: 0; border-radius: 10px; background: transparent; color: var(--muted);
+    display: grid; place-items: center; cursor: pointer; padding: 0;
+  }
+  .icon-btn svg { width: 22px; height: 22px; }
+  .chip {
+    border: 0; border-radius: 10px; background: var(--soft); color: var(--ink); font: inherit; font-size: .9rem;
+    font-weight: 600; padding: 0 12px; height: 42px; cursor: pointer;
+  }
+
+  button { font: inherit; }
+  .btn {
+    min-height: 54px; padding: 0 22px; border-radius: var(--radius); border: 1.5px solid var(--line);
+    background: var(--card); color: var(--ink); font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+    transition: background-color .15s, border-color .15s, transform .05s;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn svg { width: 20px; height: 20px; flex: none; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn:disabled { opacity: .65; cursor: progress; }
+  @media (hover: hover) {
+    .btn:hover { border-color: var(--muted); }
+    .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .icon-btn:hover, .chip:hover { background: var(--line); color: var(--ink); }
+  }
   :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  #message { margin-top: 16px; padding: 12px 14px; border-radius: 10px; }
-  #message.error { background: var(--error-bg); color: var(--error-ink); }
-  #message.info { color: var(--muted); padding-left: 0; }
-  #result { margin-top: 28px; }
-  .bar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 14px 0; }
-  .bar label { display: flex; gap: 7px; align-items: center; color: var(--muted); }
-  .bar .spacer { flex: 1; }
-  h2 { font-size: 1.3rem; margin: 0; line-height: 1.3; overflow-wrap: anywhere; }
-  .by { color: var(--muted); margin: 2px 0 0; }
-  #doc {
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-    padding: 22px 24px; max-height: 60vh; overflow: auto; overflow-wrap: anywhere;
+
+  .spinner {
+    width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid currentColor; border-right-color: transparent;
+    animation: spin .7s linear infinite; flex: none;
   }
-  #doc p { margin: 0 0 12px; }
-  #doc .ts { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 10px; font-size: 0.9em; }
-  footer { margin-top: 36px; color: var(--muted); font-size: 0.9rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #message { margin-top: 14px; padding: 14px 16px; border-radius: var(--radius); display: flex; gap: 12px; align-items: flex-start; }
+  #message.error { background: var(--error-bg); color: var(--error-ink); }
+  #message.info { color: var(--muted); padding: 4px 2px; }
+  #message .grow { flex: 1; }
+  #message .btn { min-height: 40px; padding: 0 14px; font-size: .9rem; }
+
+  /* Result */
+  #result { margin-top: 28px; }
+  .video {
+    display: grid; grid-template-columns: 168px 1fr; gap: 16px; align-items: center;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px;
+  }
+  .video img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 9px; background: var(--soft); display: block; }
+  .video h2 { font-size: 1.1rem; line-height: 1.3; margin: 0 0 4px; overflow-wrap: anywhere; }
+  .video h2 a { color: inherit; text-decoration: none; }
+  .video h2 a:hover { text-decoration: underline; }
+  .video p { margin: 0; color: var(--muted); font-size: .92rem; }
+
+  .options { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin: 18px 2px 8px; }
+  .switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; min-height: 44px; user-select: none; }
+  .switch input {
+    appearance: none; -webkit-appearance: none; margin: 0; width: 46px; height: 28px; border-radius: 99px;
+    background: var(--line); position: relative; cursor: pointer; transition: background-color .15s; flex: none;
+  }
+  .switch input::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .15s;
+  }
+  .switch input:checked { background: var(--accent); }
+  .switch input:checked::after { transform: translateX(18px); }
+  .select { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; }
+  .select select {
+    font: inherit; font-size: max(16px, .95rem); color: inherit; background: var(--card);
+    border: 1.5px solid var(--line); border-radius: 10px; min-height: 44px; padding: 0 12px; max-width: 60vw;
+  }
+
+  #doc {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: clamp(18px, 4vw, 30px); font-size: 1.02rem; line-height: 1.7; overflow-wrap: anywhere;
+  }
+  #doc p { margin: 0 0 14px; }
+  #doc p:last-child { margin-bottom: 0; }
+  #doc.stamped p { display: grid; grid-template-columns: 4.2em 1fr; gap: 10px; margin-bottom: 6px; }
+  #doc .ts { color: var(--accent); font-variant-numeric: tabular-nums; font-size: .9em; text-decoration: none; padding-top: .1em; }
+  #doc .ts:hover { text-decoration: underline; }
+
+  /* Action bar sticks to the bottom of the screen while you read */
+  .actions {
+    position: sticky; bottom: 0; z-index: 2; margin: 0 calc(-1 * var(--pad));
+    padding: 12px calc(var(--pad) + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(var(--pad) + env(safe-area-inset-left));
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+  .actions .btn.primary { min-width: 200px; }
+
+  footer { margin-top: 32px; color: var(--muted); font-size: .88rem; }
+  footer p { margin: 6px 0; }
   [hidden] { display: none !important; }
+
+  /* Phones */
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    form { grid-template-columns: 1fr; }
+    form .btn { width: 100%; }
+    .video { grid-template-columns: 112px 1fr; gap: 12px; padding: 10px; }
+    .video h2 { font-size: 1rem; }
+    .actions { display: grid; grid-template-columns: repeat(var(--cols, 2), auto) 1fr; }
+    .actions .btn { padding: 0 16px; }
+    .actions .btn.primary { min-width: 0; }
+    .actions .label-long { display: none; }
+  }
+  @media (max-width: 360px) {
+    .actions .btn:not(.primary) .label { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+    .spinner { animation-duration: 2s; }
+  }
   @media print {
-    body { background: #fff; color: #000; }
-    form, .lede, h1, .bar, #message, footer { display: none !important; }
+    body { background: #fff; color: #000; font-size: 12pt; }
+    .brand, .lede, form, #message, .options, .actions, footer, .video img { display: none !important; }
     main { max-width: none; padding: 0; }
-    #doc { border: 0; padding: 0; max-height: none; overflow: visible; background: none; }
+    #result { margin: 0; }
+    .video { display: block; border: 0; padding: 0 0 12pt; }
+    .video p { color: #444; }
+    #doc { border: 0; padding: 0; background: none; }
     #doc .ts { color: #555; }
   }
 </style>
 </head>
 <body>
 <main>
-  <h1>YouTube to PDF</h1>
-  <p class="lede">Paste a YouTube link to pull out everything said in the video and save it as a PDF.</p>
+  <div class="brand">
+    <img src="/icon.svg" alt="" width="40" height="40">
+    <h1>YouTube to PDF</h1>
+  </div>
+  <p class="lede">Paste a YouTube link to pull out everything said in the video, then save it as a PDF.</p>
 
-  <form id="form">
-    <input type="text" id="url" aria-label="YouTube link" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" required>
-    <button class="primary" id="go" type="submit">Get text</button>
-  </form>
-  <div id="message" role="status" hidden></div>
-
-  <section id="result" hidden>
-    <h2 id="title"></h2>
-    <p class="by" id="by"></p>
-    <div class="bar">
-      <label><input type="checkbox" id="stamps"> Show timestamps</label>
-      <label id="langWrap">Language <select id="lang"></select></label>
-      <span class="spacer"></span>
-      <button id="copy" type="button">Copy text</button>
-      <button class="primary" id="pdf" type="button">Download PDF</button>
+  <form id="form" autocomplete="off">
+    <div class="field">
+      <input type="text" id="url" inputmode="url" enterkeyhint="go" aria-label="YouTube link"
+             placeholder="Paste a YouTube link" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+      <div class="tools">
+        <button type="button" class="icon-btn" id="clear" aria-label="Clear" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <button type="button" class="chip" id="paste" hidden>Paste</button>
+      </div>
     </div>
-    <div id="doc"></div>
+    <button class="btn primary" id="go" type="submit"><span class="label">Get text</span></button>
+  </form>
+  <div id="message" role="status" aria-live="polite" hidden></div>
+
+  <section id="result" hidden aria-labelledby="title">
+    <div class="video">
+      <a id="thumbLink" target="_blank" rel="noopener" tabindex="-1"><img id="thumb" alt="" width="168" height="94"></a>
+      <div>
+        <h2><a id="title" target="_blank" rel="noopener"></a></h2>
+        <p id="by"></p>
+        <p id="stats"></p>
+      </div>
+    </div>
+
+    <div class="options">
+      <label class="switch"><input type="checkbox" id="stamps" role="switch"> Timestamps</label>
+      <label class="select" id="langWrap">Language <select id="lang"></select></label>
+    </div>
+
+    <article id="doc" aria-label="Transcript"></article>
+
+    <div class="actions" id="actions">
+      <button class="btn" id="copy" type="button" aria-label="Copy text">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+        <span class="label">Copy</span>
+      </button>
+      <button class="btn" id="share" type="button" aria-label="Share PDF" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+        <span class="label">Share</span>
+      </button>
+      <button class="btn primary" id="pdf" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+        <span>Download <span class="label-long">as </span>PDF</span>
+      </button>
+    </div>
   </section>
 
-  <footer>Works on videos that have captions (including auto-generated ones). Only save text you have the right to use.</footer>
+  <footer>
+    <p>Works on any video that has captions, including auto-generated ones.</p>
+    <p id="installTip" hidden>Tip: add this page to your home screen, then share videos straight from the YouTube app.</p>
+    <p>Only save text you have the right to use.</p>
+  </footer>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
 <script>
 const $ = (id) => document.getElementById(id);
 let data = null;
+let lastLink = '';
 
-function say(text, kind) {
+const looksLikeYouTube = (s) => /youtu\.?be|^[\w-]{11}$/i.test(String(s).trim());
+
+// Shared text from the YouTube app often looks like "Watch this! https://youtu.be/abc?si=..."
+function findLink(text) {
+  text = String(text || '').trim();
+  const urls = text.match(/https?:\/\/\S+/g) || [];
+  return urls.find((u) => /youtu/i.test(u)) || urls[0] || text;
+}
+
+function say(text, kind, retry) {
   const el = $('message');
   el.hidden = !text;
-  el.textContent = text || '';
   el.className = kind || 'info';
+  el.replaceChildren();
+  if (!text) return;
+  if (kind === 'loading') { el.className = 'info'; el.append(Object.assign(document.createElement('span'), { className: 'spinner' })); }
+  el.append(Object.assign(document.createElement('span'), { className: 'grow', textContent: text }));
+  if (retry) {
+    const b = Object.assign(document.createElement('button'), { type: 'button', className: 'btn', textContent: 'Try again' });
+    b.onclick = retry;
+    el.append(b);
+  }
+}
+
+function busy(on) {
+  const go = $('go');
+  go.disabled = on;
+  go.replaceChildren();
+  if (on) go.append(Object.assign(document.createElement('span'), { className: 'spinner' }));
+  go.append(Object.assign(document.createElement('span'), { className: 'label', textContent: on ? 'Reading…' : 'Get text' }));
 }
 
 function clock(seconds) {
@@ -112,7 +293,7 @@ function paragraphs(lines) {
   let cur = '';
   for (const line of lines) {
     cur += (cur ? ' ' : '') + line.text;
-    if (cur.length > 500 && /[.!?…"”)\]]$/.test(cur) || cur.length > 900) { out.push(cur); cur = ''; }
+    if ((cur.length > 500 && /[.!?…"”)\]]$/.test(cur)) || cur.length > 900) { out.push(cur); cur = ''; }
   }
   if (cur) out.push(cur);
   return out;
@@ -120,51 +301,69 @@ function paragraphs(lines) {
 
 function blocks() {
   return $('stamps').checked
-    ? data.lines.map((l) => ({ stamp: clock(l.start), text: l.text }))
+    ? data.lines.map((l) => ({ stamp: clock(l.start), seconds: Math.floor(l.start), text: l.text }))
     : paragraphs(data.lines).map((text) => ({ text }));
 }
 
+const videoUrl = (t) => `https://www.youtube.com/watch?v=${data.videoId}${t ? `&t=${t}s` : ''}`;
+
 function render() {
+  const link = videoUrl();
   $('title').textContent = data.title;
+  $('title').href = $('thumbLink').href = link;
+  $('thumb').src = `https://i.ytimg.com/vi/${data.videoId}/mqdefault.jpg`;
   $('by').textContent = data.author;
+  const words = data.lines.reduce((n, l) => n + l.text.split(/\s+/).filter(Boolean).length, 0);
+  $('stats').textContent = `${words.toLocaleString()} words · about ${Math.max(1, Math.round(words / 230))} min read`;
+
   const doc = $('doc');
+  doc.classList.toggle('stamped', $('stamps').checked);
   doc.replaceChildren(...blocks().map((b) => {
     const p = document.createElement('p');
     if (b.stamp) {
-      const s = document.createElement('span');
-      s.className = 'ts';
-      s.textContent = b.stamp;
-      p.append(s);
+      const a = Object.assign(document.createElement('a'), {
+        className: 'ts', textContent: b.stamp, href: videoUrl(b.seconds), target: '_blank', rel: 'noopener',
+      });
+      a.setAttribute('aria-label', `Watch from ${b.stamp}`);
+      p.append(a, Object.assign(document.createElement('span'), { textContent: b.text }));
+    } else {
+      p.textContent = b.text;
     }
-    p.append(b.text);
     return p;
   }));
-  doc.scrollTop = 0;
 }
 
-async function load(lang) {
-  const link = $('url').value.trim();
-  if (!link) return;
-  $('go').disabled = true;
-  say('Reading the video…');
+async function load(link, lang) {
+  link = findLink(link ?? $('url').value);
+  if (!link) { $('url').focus(); return; }
+  $('url').value = link;
+  syncClear();
+  lastLink = link;
+  busy(true);
+  say('Reading the video…', 'loading');
   try {
     const q = new URLSearchParams({ url: link });
     if (lang) q.set('lang', lang);
     const res = await fetch('/api/transcript?' + q);
     const body = await res.json().catch(() => ({ error: 'The server sent back something unexpected.' }));
-    if (!res.ok) throw new Error(body.error || 'Something went wrong.');
+    if (!res.ok) throw Object.assign(new Error(body.error || 'Something went wrong.'), { retryable: res.status >= 500 });
     data = body;
-    const sel = $('lang');
-    sel.replaceChildren(...data.languages.map((l) => new Option(l.label, l.code, false, l.code === data.language)));
+    $('lang').replaceChildren(...data.languages.map((l) => new Option(l.label, l.code, false, l.code === data.language)));
     $('langWrap').hidden = data.languages.length < 2;
     render();
     $('result').hidden = false;
     say('');
+    history.replaceState(null, '', `?v=${data.videoId}${lang ? `&lang=${encodeURIComponent(lang)}` : ''}`);
+    // On phones, bring the result into view (the keyboard has usually just closed).
+    if (matchMedia('(max-width: 600px)').matches) $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     if (!lang) $('result').hidden = true;
-    say(err instanceof TypeError ? "Couldn't reach the server. Check your connection and try again." : err.message, 'error');
+    const offline = err instanceof TypeError;
+    const retry = offline || err.retryable ? () => load(lastLink, lang) : null;
+    say(offline ? "Couldn't reach the server. Check your connection." : err.message, 'error', retry);
+    if (!retry) $('url').focus();
   } finally {
-    $('go').disabled = false;
+    busy(false);
   }
 }
 
@@ -173,40 +372,34 @@ function fileName() {
 }
 
 // The PDF's built-in fonts only cover Western European letters.
-const plain = (s) => s.replace(/[‘’‚′]/g, "'").replace(/[“”„″]/g, '"').replace(/[–—−]/g, '-').replace(/…/g, '...').replace(/[   ]/g, ' ').replace(/[​-‏﻿️]/g, '')
+const plain = (s) => s.replace(/[‘’‚′]/g, "'").replace(/[“”„″]/g, '"').replace(/[–—−]/g, '-').replace(/…/g, '...')
+  .replace(/[   ]/g, ' ').replace(/[​-‏﻿️]/g, '')
   .replace(/[←-⯿\u{1f000}-\u{1faff}]/gu, '').replace(/ {2,}/g, ' ').trim(); // music notes, arrows, emoji
 const fitsBuiltInFont = (s) => !/[^\x09\x0a\x0d\x20-\x7e\xa1-\xff]/.test(s);
 
-function downloadPdf() {
-  const items = blocks().map((b) => ({ stamp: b.stamp, text: plain(b.text) }));
+/** Returns a jsPDF document, or null when the text needs the browser's own PDF printer. */
+function buildPdf() {
+  const items = blocks().map((b) => ({ stamp: b.stamp, text: plain(b.text) })).filter((i) => i.text);
   const title = plain(data.title), author = plain(data.author);
-  if (!window.jspdf || !fitsBuiltInFont(title + author + items.map((i) => i.text).join(''))) {
-    // Other alphabets: the browser's own "Save as PDF" handles every script.
-    say('This text uses letters the quick PDF maker cannot draw. Choose "Save as PDF" in the print window that opens.');
-    const old = document.title;
-    document.title = fileName().replace(/\.pdf$/, '');
-    window.print();
-    document.title = old;
-    return;
-  }
+  if (!window.jspdf || !fitsBuiltInFont(title + author + items.map((i) => i.text).join(''))) return null;
+
   const pdf = new window.jspdf.jsPDF({ unit: 'pt', format: 'a4' });
+  pdf.setProperties({ title, author, subject: videoUrl(), creator: 'YouTube to PDF' });
   const W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
   const M = 56, width = W - M * 2;
   let y = M;
   const room = (h) => { if (y + h > H - M) { pdf.addPage(); y = M; } };
 
-  pdf.setFont('helvetica', 'bold').setFontSize(18);
+  pdf.setFont('helvetica', 'bold').setFontSize(18).setTextColor(20);
   for (const line of pdf.splitTextToSize(title, width)) { room(24); pdf.text(line, M, y + 14); y += 24; }
   pdf.setFont('helvetica', 'normal').setFontSize(10).setTextColor(110);
-  const link = 'https://www.youtube.com/watch?v=' + data.videoId;
   if (author) { pdf.text(author, M, y + 10); y += 15; }
-  pdf.textWithLink(link, M, y + 10, { url: link }); y += 30;
+  pdf.textWithLink(videoUrl(), M, y + 10, { url: videoUrl() }); y += 30;
 
   pdf.setFontSize(11);
   const gutter = items.some((i) => i.stamp) ? 52 : 0, lead = 16;
   for (const item of items) {
-    const lines = pdf.splitTextToSize(item.text, width - gutter);
-    lines.forEach((line, i) => {
+    pdf.splitTextToSize(item.text, width - gutter).forEach((line, i) => {
       room(lead);
       if (i === 0 && item.stamp) { pdf.setTextColor(120); pdf.text(item.stamp, M, y + 11); }
       pdf.setTextColor(20);
@@ -218,19 +411,98 @@ function downloadPdf() {
   const pages = pdf.getNumberOfPages();
   pdf.setFontSize(9).setTextColor(140);
   for (let p = 1; p <= pages; p++) { pdf.setPage(p); pdf.text(`${p} / ${pages}`, W - M, H - 28, { align: 'right' }); }
+  return pdf;
+}
+
+function printFallback() {
+  // Other alphabets: the browser's own "Save as PDF" handles every script.
+  say('This text uses letters the quick PDF maker can\'t draw. In the print window, choose "Save as PDF".');
+  const old = document.title;
+  document.title = fileName().replace(/\.pdf$/, '');
+  window.print();
+  document.title = old;
+}
+
+function downloadPdf() {
+  const pdf = buildPdf();
+  if (!pdf) return printFallback();
   pdf.save(fileName());
 }
 
-$('form').addEventListener('submit', (e) => { e.preventDefault(); load(); });
-$('lang').addEventListener('change', (e) => load(e.target.value));
+async function sharePdf() {
+  const pdf = buildPdf();
+  if (!pdf) return printFallback();
+  const file = new File([pdf.output('blob')], fileName(), { type: 'application/pdf' });
+  try {
+    await navigator.share({ files: [file], title: data.title });
+  } catch (err) {
+    if (err.name !== 'AbortError') pdf.save(fileName());
+  }
+}
+
+function flash(btn, text) {
+  const label = btn.querySelector('.label');
+  const old = label.textContent;
+  label.textContent = text;
+  setTimeout(() => (label.textContent = old), 1600);
+}
+
+async function copyText() {
+  const stamped = $('stamps').checked;
+  const text = blocks().map((b) => (b.stamp ? b.stamp + '  ' : '') + b.text).join(stamped ? '\n' : '\n\n');
+  try { await navigator.clipboard.writeText(text); flash($('copy'), 'Copied'); }
+  catch { flash($('copy'), "Couldn't copy"); }
+}
+
+function syncClear() { $('clear').hidden = !$('url').value; }
+
+// Wire up
+$('form').addEventListener('submit', (e) => { e.preventDefault(); $('url').blur(); load(); });
+$('url').addEventListener('input', syncClear);
+$('url').addEventListener('paste', () => setTimeout(() => { if (looksLikeYouTube($('url').value)) { $('url').blur(); load(); } }, 0));
+$('clear').addEventListener('click', () => { $('url').value = ''; syncClear(); $('url').focus(); });
+$('lang').addEventListener('change', (e) => load(lastLink, e.target.value));
 $('stamps').addEventListener('change', render);
 $('pdf').addEventListener('click', downloadPdf);
-$('copy').addEventListener('click', async () => {
-  const text = blocks().map((b) => (b.stamp ? b.stamp + '  ' : '') + b.text).join($('stamps').checked ? '\n' : '\n\n');
-  try { await navigator.clipboard.writeText(text); $('copy').textContent = 'Copied'; }
-  catch { $('copy').textContent = "Couldn't copy"; }
-  setTimeout(() => ($('copy').textContent = 'Copy text'), 1500);
-});
+$('share').addEventListener('click', sharePdf);
+$('copy').addEventListener('click', copyText);
+
+if (navigator.clipboard?.readText) {
+  $('paste').hidden = false;
+  $('paste').addEventListener('click', async () => {
+    try {
+      const text = findLink(await navigator.clipboard.readText());
+      if (!text) return say('Your clipboard is empty. Copy a YouTube link first.', 'info');
+      $('url').value = text;
+      syncClear();
+      load(text);
+    } catch {
+      $('url').focus();
+      say('Press and hold in the box, then tap Paste.', 'info');
+    }
+  });
+}
+
+// "Share" only shows where the device can share files (most phones and tablets).
+try {
+  if (navigator.canShare?.({ files: [new File(['x'], 'x.pdf', { type: 'application/pdf' })] })) {
+    $('share').hidden = false;
+    $('actions').style.setProperty('--cols', 2);
+  } else {
+    $('actions').style.setProperty('--cols', 1);
+  }
+} catch { $('actions').style.setProperty('--cols', 1); }
+
+if (matchMedia('(pointer: coarse)').matches && !matchMedia('(display-mode: standalone)').matches) $('installTip').hidden = false;
+
+// Links arrive as ?v=ID (bookmarks, refresh) or ?url= / ?text= (shared from the YouTube app).
+{
+  const p = new URLSearchParams(location.search);
+  const incoming = p.get('v') || p.get('url') || p.get('text') || p.get('title');
+  if (incoming) load(incoming, p.get('lang') || undefined);
+}
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 </script>
 </body>
 </html>

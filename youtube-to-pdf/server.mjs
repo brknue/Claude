@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { handleRequest } from './lib/youtube.mjs';
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), 'public');
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 const port = Number(process.env.PORT) || 3000;
 
 createServer(async (req, res) => {
