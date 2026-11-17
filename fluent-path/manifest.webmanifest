@@ -1,0 +1,11 @@
+{
+  "name": "Fluent Path",
+  "short_name": "Fluent Path",
+  "description": "An offline language course with a daily plan and saved progress.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f2ea",
+  "theme_color": "#1c6e62",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
