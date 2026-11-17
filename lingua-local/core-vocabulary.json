@@ -1,0 +1,4150 @@
+{
+  "title": "Lingua Local core vocabulary adaptation",
+  "license": "CC-BY-SA-4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "attribution": "Wiktionary contributors; data transcription via DCS77/swadesh-lists contributors",
+  "source_repository": "https://github.com/DCS77/swadesh-lists",
+  "source_commit": "f72486ac841221b41f8e351d75bbab08f1b3d185",
+  "retrieved": "2026-11-17",
+  "languages": [
+    "english",
+    "german",
+    "turkish",
+    "spanish",
+    "french",
+    "italian"
+  ],
+  "sources": [
+    {
+      "language": "english",
+      "url": "https://en.wiktionary.org/wiki/Appendix:English_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:English_Swadesh_list&action=history",
+      "source_blob": "28c69d2c601effb089cc1598b8d3a96fedf0ed33"
+    },
+    {
+      "language": "german",
+      "url": "https://en.wiktionary.org/wiki/Appendix:German_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:German_Swadesh_list&action=history",
+      "source_blob": "9f0f0c5aaf9ff2a0eace444d12c6959a73aef99a"
+    },
+    {
+      "language": "turkish",
+      "url": "https://en.wiktionary.org/wiki/Appendix:Turkish_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:Turkish_Swadesh_list&action=history",
+      "source_blob": "8fa688876b253527f0f745785f192a4584e48354"
+    },
+    {
+      "language": "spanish",
+      "url": "https://en.wiktionary.org/wiki/Appendix:Spanish_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:Spanish_Swadesh_list&action=history",
+      "source_blob": "5b54db282b33dabc78ce5f53a975b1b4301beaa3"
+    },
+    {
+      "language": "french",
+      "url": "https://en.wiktionary.org/wiki/Appendix:French_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:French_Swadesh_list&action=history",
+      "source_blob": "fdb667e0c3484f1aad1fd21d88a2a4c734bf16fb"
+    },
+    {
+      "language": "italian",
+      "url": "https://en.wiktionary.org/wiki/Appendix:Italian_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:Italian_Swadesh_list&action=history",
+      "source_blob": "cc4991133d4e5f5527b23920910af2543c76fb4b"
+    }
+  ],
+  "changes": [
+    {
+      "lang": "english",
+      "index": 2,
+      "from": "they (singular)",
+      "to": "he / she (third-person singular)"
+    },
+    {
+      "lang": "italian",
+      "index": 2,
+      "from": "egli, lui",
+      "to": "lui, lei"
+    },
+    {
+      "lang": "english",
+      "index": 37,
+      "from": "man (human being)",
+      "to": "person (human being)"
+    },
+    {
+      "lang": "german",
+      "index": 35,
+      "from": "Frau, Weib",
+      "to": "Frau"
+    },
+    {
+      "lang": "turkish",
+      "index": 39,
+      "from": "karı",
+      "to": "eş (kadın), karı"
+    },
+    {
+      "lang": "turkish",
+      "index": 42,
+      "from": "baba, ata",
+      "to": "baba"
+    },
+    {
+      "lang": "turkish",
+      "index": 46,
+      "from": "köpek, it",
+      "to": "köpek"
+    },
+    {
+      "lang": "turkish",
+      "index": 53,
+      "from": "meyve, meyva",
+      "to": "meyve"
+    },
+    {
+      "lang": "german",
+      "index": 51,
+      "from": "Forst, Wald",
+      "to": "Wald"
+    },
+    {
+      "lang": "german",
+      "index": 71,
+      "from": "Haupt, Kopf",
+      "to": "Kopf"
+    },
+    {
+      "lang": "german",
+      "index": 83,
+      "from": "Fittich, Flügel, Schwinge",
+      "to": "Flügel"
+    },
+    {
+      "lang": "german",
+      "index": 85,
+      "from": "Eingeweide, Gedärm, Innereien, Kaldaunen",
+      "to": "Darm, Eingeweide"
+    },
+    {
+      "lang": "turkish",
+      "index": 85,
+      "from": "bağırsak, barsak",
+      "to": "bağırsak"
+    },
+    {
+      "lang": "german",
+      "index": 95,
+      "from": "speien, spucken",
+      "to": "spucken"
+    },
+    {
+      "lang": "german",
+      "index": 96,
+      "from": "brechen, erbrechen",
+      "to": "sich erbrechen"
+    },
+    {
+      "lang": "german",
+      "index": 110,
+      "from": "fechten, kämpfen",
+      "to": "kämpfen"
+    },
+    {
+      "lang": "german",
+      "index": 138,
+      "from": "rechnen, zählen",
+      "to": "zählen"
+    },
+    {
+      "lang": "german",
+      "index": 142,
+      "from": "schweben",
+      "to": "schwimmen, treiben"
+    },
+    {
+      "lang": "german",
+      "index": 144,
+      "from": "frieren",
+      "to": "gefrieren"
+    },
+    {
+      "lang": "turkish",
+      "index": 130,
+      "from": "sürmek, sürtmek, uğmak",
+      "to": "ovmak, sürtmek"
+    },
+    {
+      "lang": "turkish",
+      "index": 131,
+      "from": "yıkamak, yunmak",
+      "to": "yıkamak"
+    },
+    {
+      "lang": "turkish",
+      "index": 166,
+      "from": "od, ateş",
+      "to": "ateş"
+    },
+    {
+      "lang": "turkish",
+      "index": 179,
+      "from": "sıcak, ılık",
+      "to": "ılık, sıcak"
+    },
+    {
+      "lang": "german",
+      "index": 194,
+      "from": "dürr, trocken",
+      "to": "trocken"
+    },
+    {
+      "lang": "german",
+      "index": 198,
+      "from": "recht",
+      "to": "rechts"
+    },
+    {
+      "lang": "german",
+      "index": 199,
+      "from": "link",
+      "to": "links"
+    }
+  ],
+  "entries": [
+    [
+      "I",
+      "ich",
+      "ben",
+      "yo",
+      "je",
+      "io"
+    ],
+    [
+      "you (singular)",
+      "du, Sie",
+      "sen, siz",
+      "tú, vos, usted (formal)",
+      "tu (informal), vous (formal)",
+      "tu"
+    ],
+    [
+      "he / she (third-person singular)",
+      "er, sie, es",
+      "o",
+      "él, ella",
+      "il (masculine), elle (feminine)",
+      "lui, lei"
+    ],
+    [
+      "we",
+      "wir",
+      "biz",
+      "nosotros, nosotras",
+      "nous",
+      "noi"
+    ],
+    [
+      "you (plural)",
+      "ihr, Sie",
+      "siz",
+      "vosotros, vosotras, ustedes",
+      "vous",
+      "voi"
+    ],
+    [
+      "they (plural)",
+      "sie",
+      "onlar",
+      "ellos, ellas",
+      "ils (masculine), elles (feminine)",
+      "loro, essi"
+    ],
+    [
+      "this",
+      "dieser, diese, dieses, dies",
+      "bu",
+      "este",
+      "ceci",
+      "questo"
+    ],
+    [
+      "that",
+      "der, die, das, jener, jene, jenes",
+      "şu, o",
+      "ese, aquel",
+      "cela",
+      "quello"
+    ],
+    [
+      "here",
+      "hier",
+      "burada",
+      "aquí, acá",
+      "ici",
+      "qui, qua"
+    ],
+    [
+      "there",
+      "da, dort",
+      "şurada, orada",
+      "ahí",
+      "là",
+      "lì, là"
+    ],
+    [
+      "who",
+      "wer",
+      "kim",
+      "quién",
+      "qui",
+      "chi"
+    ],
+    [
+      "what",
+      "was",
+      "ne",
+      "qué",
+      "quoi",
+      "che, cosa"
+    ],
+    [
+      "where",
+      "wo",
+      "nerede",
+      "dónde",
+      "où",
+      "dove"
+    ],
+    [
+      "when",
+      "wann",
+      "ne zaman",
+      "cuándo",
+      "quand",
+      "quando"
+    ],
+    [
+      "how",
+      "wie",
+      "nasıl",
+      "cómo",
+      "comment",
+      "come"
+    ],
+    [
+      "not",
+      "nicht",
+      "değil",
+      "no",
+      "ne pas",
+      "non"
+    ],
+    [
+      "all",
+      "alle",
+      "bütün, tüm",
+      "todo",
+      "tout",
+      "tutto"
+    ],
+    [
+      "many",
+      "viele",
+      "çok",
+      "mucho",
+      "beaucoup",
+      "tanto"
+    ],
+    [
+      "some",
+      "einige, manche",
+      "biraz, birkaç, bazı",
+      "alguno",
+      "quelques",
+      "alcuni"
+    ],
+    [
+      "few",
+      "wenig",
+      "az",
+      "poco",
+      "peu",
+      "poco"
+    ],
+    [
+      "other",
+      "anderer",
+      "başka, diğer, öbür, öteki",
+      "otro",
+      "autre",
+      "altro"
+    ],
+    [
+      "one",
+      "eins",
+      "bir",
+      "uno",
+      "un",
+      "un, uno, una, un'"
+    ],
+    [
+      "two",
+      "zwei, zwo",
+      "iki",
+      "dos",
+      "deux",
+      "due"
+    ],
+    [
+      "three",
+      "drei",
+      "üç",
+      "tres",
+      "trois",
+      "tre"
+    ],
+    [
+      "four",
+      "vier",
+      "dört",
+      "cuatro",
+      "quatre",
+      "quattro"
+    ],
+    [
+      "five",
+      "fünf",
+      "beş",
+      "cinco",
+      "cinq",
+      "cinque"
+    ],
+    [
+      "big",
+      "groß",
+      "büyük",
+      "grande",
+      "grand",
+      "grande"
+    ],
+    [
+      "long",
+      "lang",
+      "uzun",
+      "largo",
+      "long",
+      "lungo"
+    ],
+    [
+      "wide",
+      "breit, weit",
+      "geniş",
+      "ancho",
+      "large",
+      "largo"
+    ],
+    [
+      "thick",
+      "dick",
+      "kalın",
+      "grueso",
+      "épais",
+      "spesso"
+    ],
+    [
+      "heavy",
+      "schwer",
+      "ağır",
+      "pesado",
+      "lourd",
+      "pesante"
+    ],
+    [
+      "small",
+      "klein",
+      "küçük",
+      "pequeño",
+      "petit",
+      "piccolo"
+    ],
+    [
+      "short",
+      "kurz",
+      "kısa",
+      "corto",
+      "court",
+      "corto"
+    ],
+    [
+      "narrow",
+      "eng, schmal",
+      "dar",
+      "estrecho, angosto",
+      "étroit",
+      "stretto"
+    ],
+    [
+      "thin",
+      "dünn",
+      "ince",
+      "delgado, flaco",
+      "mince",
+      "sottile"
+    ],
+    [
+      "woman",
+      "Frau",
+      "kadın",
+      "mujer",
+      "femme",
+      "donna"
+    ],
+    [
+      "man (adult male)",
+      "Mann",
+      "adam",
+      "varón",
+      "homme",
+      "uomo"
+    ],
+    [
+      "person (human being)",
+      "Mensch",
+      "insan, kişi",
+      "hombre",
+      "homme",
+      "persona"
+    ],
+    [
+      "child",
+      "Kind",
+      "çocuk",
+      "niño",
+      "enfant",
+      "bambino"
+    ],
+    [
+      "wife",
+      "Frau, Ehefrau",
+      "eş (kadın), karı",
+      "esposa, mujer",
+      "femme, épouse",
+      "moglie"
+    ],
+    [
+      "husband",
+      "Mann, Ehemann",
+      "koca",
+      "esposo, marido",
+      "mari, époux",
+      "marito"
+    ],
+    [
+      "mother",
+      "Mutter",
+      "anne, ana",
+      "madre",
+      "mère",
+      "madre"
+    ],
+    [
+      "father",
+      "Vater",
+      "baba",
+      "padre",
+      "père",
+      "padre"
+    ],
+    [
+      "animal",
+      "Tier",
+      "hayvan",
+      "animal",
+      "animal",
+      "animale"
+    ],
+    [
+      "fish",
+      "Fisch",
+      "balık",
+      "pez, pescado",
+      "poisson",
+      "pesce"
+    ],
+    [
+      "bird",
+      "Vogel",
+      "kuş",
+      "pájaro",
+      "oiseau",
+      "uccello"
+    ],
+    [
+      "dog",
+      "Hund",
+      "köpek",
+      "perro",
+      "chien",
+      "cane"
+    ],
+    [
+      "louse",
+      "Laus",
+      "bit",
+      "piojo",
+      "pou",
+      "pidocchio"
+    ],
+    [
+      "snake",
+      "Schlange",
+      "yılan",
+      "serpiente, víbora, culebra",
+      "serpent",
+      "serpente"
+    ],
+    [
+      "worm",
+      "Wurm",
+      "solucan, kurt",
+      "gusano",
+      "ver",
+      "verme"
+    ],
+    [
+      "tree",
+      "Baum",
+      "ağaç",
+      "árbol",
+      "arbre",
+      "albero, pianta"
+    ],
+    [
+      "forest",
+      "Wald",
+      "orman",
+      "bosque",
+      "forêt",
+      "foresta, bosco"
+    ],
+    [
+      "stick",
+      "Stock",
+      "çubuk, değnek, çıta",
+      "palo",
+      "bâton",
+      "bastone"
+    ],
+    [
+      "fruit",
+      "Frucht, Obst",
+      "meyve",
+      "fruta",
+      "fruit",
+      "frutta"
+    ],
+    [
+      "seed",
+      "Samen, Saat",
+      "tohum",
+      "semilla",
+      "graine",
+      "seme"
+    ],
+    [
+      "leaf",
+      "Blatt",
+      "yaprak",
+      "hoja",
+      "feuille",
+      "foglia"
+    ],
+    [
+      "root",
+      "Wurzel",
+      "kök",
+      "raíz",
+      "racine",
+      "radice"
+    ],
+    [
+      "bark (of a tree)",
+      "Borke, Rinde",
+      "kabuk",
+      "corteza",
+      "écorce",
+      "corteccia"
+    ],
+    [
+      "flower",
+      "Blume",
+      "çiçek",
+      "flor",
+      "fleur",
+      "fiore"
+    ],
+    [
+      "grass",
+      "Gras",
+      "ot, çimen, çim",
+      "hierba, grama",
+      "herbe",
+      "erba"
+    ],
+    [
+      "rope",
+      "Leine, Seil, Strick",
+      "ip, halat",
+      "cuerda",
+      "corde",
+      "corda, fune"
+    ],
+    [
+      "skin",
+      "Haut",
+      "deri, ten",
+      "piel",
+      "peau",
+      "pelle"
+    ],
+    [
+      "meat",
+      "Fleisch",
+      "et",
+      "carne",
+      "viande",
+      "carne"
+    ],
+    [
+      "blood",
+      "Blut",
+      "kan",
+      "sangre",
+      "sang",
+      "sangue"
+    ],
+    [
+      "bone",
+      "Knochen",
+      "kemik",
+      "hueso",
+      "os",
+      "osso"
+    ],
+    [
+      "fat (noun)",
+      "Fett",
+      "yağ",
+      "grasa",
+      "graisse",
+      "grasso"
+    ],
+    [
+      "egg",
+      "Ei",
+      "yumurta",
+      "huevo",
+      "œuf",
+      "uovo"
+    ],
+    [
+      "horn",
+      "Horn",
+      "boynuz",
+      "cuerno",
+      "corne",
+      "corno"
+    ],
+    [
+      "tail",
+      "Schwanz, Schweif",
+      "kuyruk",
+      "cola",
+      "queue",
+      "coda"
+    ],
+    [
+      "feather",
+      "Feder",
+      "tüy",
+      "pluma",
+      "plume",
+      "penna"
+    ],
+    [
+      "hair",
+      "Haar",
+      "saç, kıl",
+      "pelo, cabello",
+      "cheveux",
+      "capello"
+    ],
+    [
+      "head",
+      "Kopf",
+      "baş, kafa",
+      "cabeza",
+      "tête",
+      "testa"
+    ],
+    [
+      "ear",
+      "Ohr",
+      "kulak",
+      "oreja",
+      "oreille",
+      "orecchio"
+    ],
+    [
+      "eye",
+      "Auge",
+      "göz",
+      "ojo",
+      "œil",
+      "occhio"
+    ],
+    [
+      "nose",
+      "Nase",
+      "burun",
+      "nariz",
+      "nez",
+      "naso"
+    ],
+    [
+      "mouth",
+      "Mund",
+      "ağız",
+      "boca",
+      "bouche",
+      "bocca"
+    ],
+    [
+      "tooth",
+      "Zahn",
+      "diş",
+      "diente",
+      "dent",
+      "dente"
+    ],
+    [
+      "tongue (organ)",
+      "Zunge",
+      "dil",
+      "lengua",
+      "langue",
+      "lingua"
+    ],
+    [
+      "fingernail",
+      "Fingernagel",
+      "tırnak",
+      "uña",
+      "ongle",
+      "unghia"
+    ],
+    [
+      "foot",
+      "Fuß",
+      "ayak",
+      "pie",
+      "pied",
+      "piede"
+    ],
+    [
+      "leg",
+      "Bein",
+      "bacak",
+      "pierna",
+      "jambe",
+      "gamba"
+    ],
+    [
+      "knee",
+      "Knie",
+      "diz",
+      "rodilla",
+      "genou",
+      "ginocchio"
+    ],
+    [
+      "hand",
+      "Hand",
+      "el",
+      "mano",
+      "main",
+      "mano"
+    ],
+    [
+      "wing",
+      "Flügel",
+      "kanat",
+      "ala",
+      "aile",
+      "ala"
+    ],
+    [
+      "belly",
+      "Bauch, Leib",
+      "karın, göbek",
+      "barriga, vientre",
+      "ventre",
+      "pancia"
+    ],
+    [
+      "guts",
+      "Darm, Eingeweide",
+      "bağırsak",
+      "tripas",
+      "entrailles, intestins",
+      "intestino"
+    ],
+    [
+      "neck",
+      "Hals, Nacken",
+      "boyun",
+      "cuello",
+      "cou",
+      "collo"
+    ],
+    [
+      "back",
+      "Rücken",
+      "arka, sırt",
+      "espalda",
+      "dos",
+      "schiena"
+    ],
+    [
+      "breast",
+      "Brust, Busen",
+      "göğüs",
+      "pecho",
+      "sein, poitrine",
+      "petto"
+    ],
+    [
+      "heart",
+      "Herz",
+      "yürek, kalp",
+      "corazón",
+      "cœur",
+      "cuore"
+    ],
+    [
+      "liver",
+      "Leber",
+      "karaciğer, ciğer",
+      "hígado",
+      "foie",
+      "fegato"
+    ],
+    [
+      "to drink",
+      "trinken",
+      "içmek",
+      "beber",
+      "boire",
+      "bere"
+    ],
+    [
+      "to eat",
+      "essen",
+      "yemek",
+      "comer",
+      "manger",
+      "mangiare"
+    ],
+    [
+      "to bite",
+      "beißen",
+      "ısırmak",
+      "morder",
+      "mordre",
+      "mordere"
+    ],
+    [
+      "to suck",
+      "lutschen, saugen",
+      "emmek",
+      "chupar",
+      "sucer",
+      "succhiare"
+    ],
+    [
+      "to spit",
+      "spucken",
+      "tükürmek",
+      "escupir",
+      "cracher",
+      "sputare"
+    ],
+    [
+      "to vomit",
+      "sich erbrechen",
+      "kusmak",
+      "vomitar",
+      "vomir",
+      "vomitare"
+    ],
+    [
+      "to blow",
+      "blasen, pusten, wehen",
+      "üflemek",
+      "soplar",
+      "souffler",
+      "soffiare"
+    ],
+    [
+      "to breathe",
+      "atmen",
+      "soluk almak, solumak, nefes almak",
+      "respirar",
+      "respirer",
+      "respirare"
+    ],
+    [
+      "to laugh",
+      "lachen",
+      "gülmek",
+      "reír",
+      "rire",
+      "ridere"
+    ],
+    [
+      "to see",
+      "sehen",
+      "görmek",
+      "ver",
+      "voir",
+      "vedere"
+    ],
+    [
+      "to hear",
+      "hören",
+      "işitmek, duymak",
+      "oír",
+      "entendre",
+      "sentire"
+    ],
+    [
+      "to know",
+      "kennen, wissen",
+      "bilmek",
+      "saber",
+      "savoir",
+      "sapere"
+    ],
+    [
+      "to think",
+      "denken",
+      "düşünmek",
+      "pensar",
+      "penser",
+      "pensare"
+    ],
+    [
+      "to smell",
+      "riechen",
+      "koklamak, kokmak",
+      "oler",
+      "sentir",
+      "odorare"
+    ],
+    [
+      "to fear",
+      "fürchten",
+      "korkmak",
+      "temer",
+      "craindre",
+      "temere"
+    ],
+    [
+      "to sleep",
+      "schlafen",
+      "uyumak",
+      "dormir",
+      "dormir",
+      "dormire"
+    ],
+    [
+      "to live",
+      "leben",
+      "yaşamak, oturmak",
+      "vivir",
+      "vivre",
+      "vivere"
+    ],
+    [
+      "to die",
+      "sterben",
+      "ölmek",
+      "morir",
+      "mourir",
+      "morire"
+    ],
+    [
+      "to kill",
+      "töten, umbringen",
+      "öldürmek",
+      "matar",
+      "tuer",
+      "uccidere, ammazzare"
+    ],
+    [
+      "to fight",
+      "kämpfen",
+      "dövüşmek, kavga etmek",
+      "pelear",
+      "se battre",
+      "combattere"
+    ],
+    [
+      "to hunt",
+      "jagen",
+      "avlamak",
+      "cazar",
+      "chasser",
+      "cacciare"
+    ],
+    [
+      "to hit",
+      "schlagen",
+      "vurmak",
+      "golpear",
+      "frapper",
+      "colpire"
+    ],
+    [
+      "to cut",
+      "schneiden",
+      "kesmek",
+      "cortar",
+      "couper",
+      "tagliare"
+    ],
+    [
+      "to split",
+      "spalten, spleißen",
+      "yarmak, ayırmak",
+      "partir",
+      "fendre",
+      "dividere"
+    ],
+    [
+      "to stab",
+      "stechen",
+      "bıçaklamak",
+      "apuñalar",
+      "poignarder",
+      "pugnalare"
+    ],
+    [
+      "to scratch",
+      "kratzen, ritzen, scharren",
+      "kaşımak",
+      "arañar, rascar",
+      "gratter",
+      "graffiare"
+    ],
+    [
+      "to dig",
+      "graben",
+      "kazmak",
+      "cavar, excavar",
+      "creuser",
+      "scavare"
+    ],
+    [
+      "to swim",
+      "schwimmen",
+      "yüzmek",
+      "nadar",
+      "nager",
+      "nuotare"
+    ],
+    [
+      "to fly",
+      "fliegen",
+      "uçmak",
+      "volar",
+      "voler",
+      "volare"
+    ],
+    [
+      "to walk",
+      "gehen",
+      "yürümek",
+      "caminar",
+      "marcher",
+      "camminare"
+    ],
+    [
+      "to come",
+      "kommen",
+      "gelmek",
+      "venir",
+      "venir",
+      "venire"
+    ],
+    [
+      "to lie (as in a bed)",
+      "liegen",
+      "yatmak, uzanmak",
+      "echarse (action), yacer, estar en el suelo (state)",
+      "s'étendre (action), être étendu (state)",
+      "distendersi, giacere"
+    ],
+    [
+      "to sit",
+      "sitzen",
+      "oturmak",
+      "sentarse, estar sentado (state)",
+      "s'asseoir (action), être assis (state)",
+      "sedersi"
+    ],
+    [
+      "to stand",
+      "stehen",
+      "durmak, dikilmek",
+      "levantarse, estar de pie",
+      "se lever (action), se tenir debout (state)",
+      "stare in piedi, stare eretto"
+    ],
+    [
+      "to turn (intransitive)",
+      "drehen",
+      "dönmek",
+      "girar, dar una vuelta",
+      "tourner",
+      "girare"
+    ],
+    [
+      "to fall",
+      "fallen",
+      "düşmek",
+      "caer",
+      "tomber",
+      "cadere"
+    ],
+    [
+      "to give",
+      "geben",
+      "vermek",
+      "dar",
+      "donner",
+      "dare"
+    ],
+    [
+      "to hold",
+      "halten",
+      "tutmak",
+      "tener",
+      "tenir",
+      "tenere"
+    ],
+    [
+      "to squeeze",
+      "quetschen",
+      "sıkmak",
+      "apretar",
+      "serrer",
+      "spremere"
+    ],
+    [
+      "to rub",
+      "reiben",
+      "ovmak, sürtmek",
+      "frotar",
+      "frotter",
+      "strofinare"
+    ],
+    [
+      "to wash",
+      "waschen",
+      "yıkamak",
+      "lavar",
+      "laver",
+      "lavare"
+    ],
+    [
+      "to wipe",
+      "wischen",
+      "silmek",
+      "limpiar",
+      "essuyer",
+      "asciugare"
+    ],
+    [
+      "to pull",
+      "ziehen",
+      "çekmek",
+      "tirar de, jalar, halar",
+      "tirer",
+      "tirare"
+    ],
+    [
+      "to push",
+      "drücken, schieben",
+      "itmek",
+      "empujar",
+      "pousser",
+      "spingere"
+    ],
+    [
+      "to throw",
+      "werfen",
+      "atmak",
+      "tirar, arrojar",
+      "jeter, lancer",
+      "lanciare"
+    ],
+    [
+      "to tie",
+      "binden, knüpfen",
+      "bağlamak",
+      "atar",
+      "lier",
+      "legare"
+    ],
+    [
+      "to sew",
+      "nähen",
+      "dikmek",
+      "coser",
+      "coudre",
+      "cucire"
+    ],
+    [
+      "to count",
+      "zählen",
+      "saymak",
+      "contar",
+      "compter",
+      "contare"
+    ],
+    [
+      "to say",
+      "sagen",
+      "demek, söylemek",
+      "decir",
+      "dire",
+      "dire"
+    ],
+    [
+      "to sing",
+      "singen",
+      "şarkı söylemek",
+      "cantar",
+      "chanter",
+      "cantare"
+    ],
+    [
+      "to play",
+      "spielen",
+      "oynamak",
+      "jugar",
+      "jouer",
+      "giocare"
+    ],
+    [
+      "to float",
+      "schwimmen, treiben",
+      "yüzmek",
+      "flotar",
+      "flotter",
+      "galleggiare"
+    ],
+    [
+      "to flow",
+      "fließen, strömen",
+      "akmak",
+      "fluir",
+      "couler",
+      "fluire, scorrere"
+    ],
+    [
+      "to freeze",
+      "gefrieren",
+      "donmak, dondurmak",
+      "congelarse, helar",
+      "geler",
+      "gelare"
+    ],
+    [
+      "to swell",
+      "schwellen",
+      "şişmek",
+      "hincharse",
+      "gonfler",
+      "gonfiare"
+    ],
+    [
+      "sun",
+      "Sonne",
+      "güneş",
+      "sol",
+      "soleil",
+      "sole"
+    ],
+    [
+      "moon",
+      "Mond",
+      "ay",
+      "luna",
+      "lune",
+      "luna"
+    ],
+    [
+      "star",
+      "Stern",
+      "yıldız",
+      "estrella",
+      "étoile",
+      "stella"
+    ],
+    [
+      "water",
+      "Wasser",
+      "su",
+      "agua",
+      "eau",
+      "acqua"
+    ],
+    [
+      "rain",
+      "Regen",
+      "yağmur",
+      "lluvia",
+      "pluie",
+      "pioggia"
+    ],
+    [
+      "river",
+      "Fluss",
+      "ırmak, nehir",
+      "río",
+      "rivière",
+      "fiume"
+    ],
+    [
+      "lake",
+      "See",
+      "göl",
+      "lago",
+      "lac",
+      "lago"
+    ],
+    [
+      "sea",
+      "Meer",
+      "deniz",
+      "mar",
+      "mer",
+      "mare"
+    ],
+    [
+      "salt",
+      "Salz",
+      "tuz",
+      "sal",
+      "sel",
+      "sale"
+    ],
+    [
+      "stone",
+      "Stein",
+      "taş",
+      "piedra",
+      "pierre",
+      "sasso, pietra"
+    ],
+    [
+      "sand",
+      "Sand",
+      "kum",
+      "arena",
+      "sable",
+      "sabbia"
+    ],
+    [
+      "dust",
+      "Staub",
+      "toz",
+      "polvo",
+      "poussière",
+      "polvere"
+    ],
+    [
+      "earth",
+      "Erde",
+      "yer, yeryüzü, dünya",
+      "tierra",
+      "terre",
+      "terra, mondo"
+    ],
+    [
+      "cloud",
+      "Wolke",
+      "bulut",
+      "nube",
+      "nuage",
+      "nuvola"
+    ],
+    [
+      "fog",
+      "Nebel",
+      "sis",
+      "niebla",
+      "brouillard",
+      "nebbia"
+    ],
+    [
+      "sky",
+      "Himmel",
+      "gök, gökyüzü",
+      "cielo",
+      "ciel",
+      "cielo"
+    ],
+    [
+      "wind",
+      "Wind",
+      "yel, rüzgâr",
+      "viento",
+      "vent",
+      "vento"
+    ],
+    [
+      "snow",
+      "Schnee",
+      "kar",
+      "nieve",
+      "neige",
+      "neve"
+    ],
+    [
+      "ice",
+      "Eis",
+      "buz",
+      "hielo",
+      "glace",
+      "ghiaccio"
+    ],
+    [
+      "smoke",
+      "Rauch",
+      "duman",
+      "humo",
+      "fumée",
+      "fumo"
+    ],
+    [
+      "fire",
+      "Feuer",
+      "ateş",
+      "fuego",
+      "feu",
+      "fuoco"
+    ],
+    [
+      "ash",
+      "Asche",
+      "kül",
+      "cenizas",
+      "cendre",
+      "cenere"
+    ],
+    [
+      "to burn",
+      "brennen",
+      "yakmak, yanmak",
+      "quemar",
+      "brûler",
+      "bruciare"
+    ],
+    [
+      "road",
+      "Straße",
+      "yol",
+      "camino",
+      "route",
+      "strada"
+    ],
+    [
+      "mountain",
+      "Berg",
+      "dağ",
+      "montaña",
+      "montagne",
+      "montagna"
+    ],
+    [
+      "red",
+      "rot",
+      "kızıl, kırmızı",
+      "rojo",
+      "rouge",
+      "rosso"
+    ],
+    [
+      "green",
+      "grün",
+      "yeşil",
+      "verde",
+      "vert",
+      "verde"
+    ],
+    [
+      "yellow",
+      "gelb",
+      "sarı",
+      "amarillo",
+      "jaune",
+      "giallo"
+    ],
+    [
+      "white",
+      "weiß",
+      "ak, beyaz",
+      "blanco",
+      "blanc",
+      "bianco"
+    ],
+    [
+      "black",
+      "schwarz",
+      "kara, siyah",
+      "negro",
+      "noir",
+      "nero"
+    ],
+    [
+      "night",
+      "Nacht",
+      "gece",
+      "noche",
+      "nuit",
+      "notte"
+    ],
+    [
+      "day",
+      "Tag",
+      "gün, gündüz",
+      "día",
+      "jour",
+      "giorno"
+    ],
+    [
+      "year",
+      "Jahr",
+      "yıl, sene",
+      "año",
+      "an, année",
+      "anno"
+    ],
+    [
+      "warm",
+      "warm",
+      "ılık, sıcak",
+      "caliente, cálido",
+      "chaud",
+      "caldo"
+    ],
+    [
+      "cold",
+      "kalt",
+      "soğuk, serin",
+      "frío",
+      "froid",
+      "freddo"
+    ],
+    [
+      "full",
+      "voll",
+      "dolu",
+      "lleno",
+      "plein",
+      "pieno"
+    ],
+    [
+      "new",
+      "neu",
+      "yeni",
+      "nuevo",
+      "nouveau, neuf",
+      "nuovo"
+    ],
+    [
+      "old",
+      "alt",
+      "eski, yaşlı",
+      "viejo",
+      "vieux",
+      "vecchio"
+    ],
+    [
+      "good",
+      "gut",
+      "iyi",
+      "bueno",
+      "bon",
+      "buono"
+    ],
+    [
+      "bad",
+      "schlecht, übel",
+      "kötü",
+      "malo",
+      "mauvais",
+      "cattivo"
+    ],
+    [
+      "rotten",
+      "faul, verrottet",
+      "çürük",
+      "podrido",
+      "pourri",
+      "marcio"
+    ],
+    [
+      "dirty",
+      "schmutzig, dreckig",
+      "pis, kirli",
+      "sucio",
+      "sale",
+      "sporco"
+    ],
+    [
+      "straight",
+      "gerade",
+      "düz, düzgün, doğru",
+      "recto",
+      "droit",
+      "dritto"
+    ],
+    [
+      "round",
+      "rund",
+      "yuvarlak, toparlak",
+      "redondo",
+      "rond",
+      "rotondo"
+    ],
+    [
+      "sharp (as a knife)",
+      "scharf",
+      "keskin",
+      "agudo, afilado",
+      "tranchant",
+      "affilato"
+    ],
+    [
+      "dull (as a knife)",
+      "stumpf",
+      "kör",
+      "sin filo, desafilado, embotado, romo",
+      "émoussé",
+      "smussato"
+    ],
+    [
+      "smooth",
+      "glatt",
+      "pürüzsüz, düzgün",
+      "liso",
+      "lisse",
+      "liscio"
+    ],
+    [
+      "wet",
+      "nass, feucht",
+      "ıslak, nemli",
+      "mojado",
+      "mouillé",
+      "bagnato"
+    ],
+    [
+      "dry",
+      "trocken",
+      "kuru",
+      "seco",
+      "sec",
+      "secco"
+    ],
+    [
+      "correct",
+      "richtig",
+      "doğru, gerçek",
+      "correcto",
+      "juste",
+      "giusto, corretto"
+    ],
+    [
+      "near",
+      "nah",
+      "yakın",
+      "cerca",
+      "près",
+      "vicino"
+    ],
+    [
+      "far",
+      "fern, weit",
+      "uzak",
+      "lejos",
+      "loin",
+      "lontano"
+    ],
+    [
+      "right",
+      "rechts",
+      "sağ",
+      "derecha",
+      "droite",
+      "destra"
+    ],
+    [
+      "left",
+      "links",
+      "sol",
+      "izquierda",
+      "gauche",
+      "sinistra"
+    ],
+    [
+      "at",
+      "an, bei",
+      "-da, -de, -a, -e",
+      "en, a",
+      "à",
+      "a"
+    ],
+    [
+      "in",
+      "in",
+      "-da, -de, içinde, içerisinde",
+      "en",
+      "dans",
+      "in"
+    ],
+    [
+      "with",
+      "mit",
+      "ile, -le",
+      "con",
+      "avec",
+      "con"
+    ],
+    [
+      "and",
+      "und",
+      "ve, ile",
+      "y, e",
+      "et",
+      "e"
+    ],
+    [
+      "if",
+      "ob, wenn",
+      "-sa, -se, ise, eğer",
+      "si",
+      "si",
+      "se"
+    ],
+    [
+      "because",
+      "weil",
+      "çünkü",
+      "porque",
+      "parce que",
+      "perché"
+    ],
+    [
+      "name",
+      "Name",
+      "ad, isim",
+      "nombre",
+      "nom",
+      "nome"
+    ]
+  ],
+  "metadata": [
+    {
+      "index": 0,
+      "ipa": [
+        "",
+        "/ɪç/",
+        "",
+        "",
+        "/ʒə/",
+        ""
+      ]
+    },
+    {
+      "index": 1,
+      "ipa": [
+        "",
+        "/duː/, /ziː/",
+        "",
+        "",
+        "/ty/, /vu/",
+        ""
+      ]
+    },
+    {
+      "index": 2,
+      "ipa": [
+        "",
+        "/eːɐ̯/, /ziː/, /ɛs/",
+        "",
+        "",
+        "/il/, /ɛl/",
+        ""
+      ]
+    },
+    {
+      "index": 3,
+      "ipa": [
+        "",
+        "/viːɐ̯/",
+        "",
+        "",
+        "/nu/",
+        ""
+      ]
+    },
+    {
+      "index": 4,
+      "ipa": [
+        "",
+        "/iːɐ̯/, /ziː/",
+        "",
+        "",
+        "/vu/",
+        ""
+      ]
+    },
+    {
+      "index": 5,
+      "ipa": [
+        "",
+        "/ziː/",
+        "",
+        "",
+        "/il/, /ɛl/",
+        ""
+      ]
+    },
+    {
+      "index": 6,
+      "ipa": [
+        "",
+        "/ˈdiːzɐ/, /ˈdiːzə/, /ˈdiːzəs/, /diːs/",
+        "",
+        "",
+        "/sə.si/",
+        ""
+      ]
+    },
+    {
+      "index": 7,
+      "ipa": [
+        "",
+        "/deːɐ̯/, /diː/, /das/, /ˈjeːnɐ/, /ˈjeːnə/, /ˈjeːnəs/",
+        "",
+        "",
+        "/sə.la/",
+        ""
+      ]
+    },
+    {
+      "index": 8,
+      "ipa": [
+        "",
+        "/hiːɐ̯/",
+        "",
+        "",
+        "/i.si/",
+        ""
+      ]
+    },
+    {
+      "index": 9,
+      "ipa": [
+        "",
+        "/daː/, /dɔʁt/",
+        "",
+        "",
+        "/la/",
+        ""
+      ]
+    },
+    {
+      "index": 10,
+      "ipa": [
+        "",
+        "/veːɐ̯/",
+        "",
+        "",
+        "/ki/",
+        ""
+      ]
+    },
+    {
+      "index": 11,
+      "ipa": [
+        "",
+        "/vas/",
+        "",
+        "",
+        "/kwa/",
+        ""
+      ]
+    },
+    {
+      "index": 12,
+      "ipa": [
+        "",
+        "/voː/",
+        "",
+        "",
+        "/u/",
+        ""
+      ]
+    },
+    {
+      "index": 13,
+      "ipa": [
+        "",
+        "/van/",
+        "",
+        "",
+        "/kã/",
+        ""
+      ]
+    },
+    {
+      "index": 14,
+      "ipa": [
+        "",
+        "/viː/",
+        "",
+        "",
+        "/kɔ.mã/",
+        ""
+      ]
+    },
+    {
+      "index": 15,
+      "ipa": [
+        "",
+        "/nɪçt/",
+        "",
+        "",
+        "/nə ... pɑ/",
+        ""
+      ]
+    },
+    {
+      "index": 16,
+      "ipa": [
+        "",
+        "/ˈalə/",
+        "",
+        "",
+        "/tu/",
+        ""
+      ]
+    },
+    {
+      "index": 17,
+      "ipa": [
+        "",
+        "/ˈfiːlə/",
+        "",
+        "",
+        "/bo.ku/",
+        ""
+      ]
+    },
+    {
+      "index": 18,
+      "ipa": [
+        "",
+        "/ˈaɪ̯nɪɡə/, /mançə/",
+        "",
+        "",
+        "/kelk/",
+        ""
+      ]
+    },
+    {
+      "index": 19,
+      "ipa": [
+        "",
+        "/ˈveːnɪç/",
+        "",
+        "",
+        "/pø/",
+        ""
+      ]
+    },
+    {
+      "index": 20,
+      "ipa": [
+        "",
+        "/ˈand(ə)ʁɐ/",
+        "",
+        "",
+        "/otʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 21,
+      "ipa": [
+        "",
+        "/aɪ̯ns/",
+        "",
+        "",
+        "/œ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 22,
+      "ipa": [
+        "",
+        "/tsvaɪ̯/, /t͡svoː/",
+        "",
+        "",
+        "/dø/",
+        ""
+      ]
+    },
+    {
+      "index": 23,
+      "ipa": [
+        "",
+        "/dʁaɪ̯/",
+        "",
+        "",
+        "/tʁwɑ/",
+        ""
+      ]
+    },
+    {
+      "index": 24,
+      "ipa": [
+        "",
+        "/fiːɐ̯/",
+        "",
+        "",
+        "/katʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 25,
+      "ipa": [
+        "",
+        "/fʏnf/",
+        "",
+        "",
+        "/sɛ̃k/",
+        ""
+      ]
+    },
+    {
+      "index": 26,
+      "ipa": [
+        "",
+        "/ɡʁoːs/",
+        "",
+        "",
+        "/ɡʁã/",
+        ""
+      ]
+    },
+    {
+      "index": 27,
+      "ipa": [
+        "",
+        "/laŋ/",
+        "",
+        "",
+        "/lõ/",
+        ""
+      ]
+    },
+    {
+      "index": 28,
+      "ipa": [
+        "",
+        "/bʁaɪ̯t/, /vaɪ̯t/",
+        "",
+        "",
+        "/laʁʒ/",
+        ""
+      ]
+    },
+    {
+      "index": 29,
+      "ipa": [
+        "",
+        "/dɪk/",
+        "",
+        "",
+        "/epɛ/",
+        ""
+      ]
+    },
+    {
+      "index": 30,
+      "ipa": [
+        "",
+        "/ʃveːɐ̯/",
+        "",
+        "",
+        "/luʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 31,
+      "ipa": [
+        "",
+        "/klaɪ̯n/",
+        "",
+        "",
+        "/pəti/",
+        ""
+      ]
+    },
+    {
+      "index": 32,
+      "ipa": [
+        "",
+        "/kʊʁts/",
+        "",
+        "",
+        "/kuʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 33,
+      "ipa": [
+        "",
+        "/ɛŋ/, /ʃmaːl/",
+        "",
+        "",
+        "/etʁwa/",
+        ""
+      ]
+    },
+    {
+      "index": 34,
+      "ipa": [
+        "",
+        "/dʏn/",
+        "",
+        "",
+        "/mɛ̃s/",
+        ""
+      ]
+    },
+    {
+      "index": 35,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/fam/",
+        ""
+      ]
+    },
+    {
+      "index": 36,
+      "ipa": [
+        "",
+        "/man/",
+        "",
+        "",
+        "/ɔm/",
+        ""
+      ]
+    },
+    {
+      "index": 37,
+      "ipa": [
+        "",
+        "/mɛnʃ/",
+        "",
+        "",
+        "/ɔm/",
+        ""
+      ]
+    },
+    {
+      "index": 38,
+      "ipa": [
+        "",
+        "/kɪnt/",
+        "",
+        "",
+        "/ɑ̃fɑ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 39,
+      "ipa": [
+        "",
+        "/fʁaʊ̯/, /ˈeːəfʁaʊ̯/",
+        "",
+        "",
+        "/fam/, /epuz/",
+        ""
+      ]
+    },
+    {
+      "index": 40,
+      "ipa": [
+        "",
+        "/man/, /ˈeːəman/",
+        "",
+        "",
+        "/maʁi/, /epu/",
+        ""
+      ]
+    },
+    {
+      "index": 41,
+      "ipa": [
+        "",
+        "/ˈmʊtɐ/",
+        "",
+        "",
+        "/mɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 42,
+      "ipa": [
+        "",
+        "/ˈfaːtɐ/",
+        "",
+        "",
+        "/pɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 43,
+      "ipa": [
+        "",
+        "/tiːɐ̯/",
+        "",
+        "",
+        "/animal/",
+        ""
+      ]
+    },
+    {
+      "index": 44,
+      "ipa": [
+        "",
+        "/fɪʃ/",
+        "",
+        "",
+        "/pwasõ/",
+        ""
+      ]
+    },
+    {
+      "index": 45,
+      "ipa": [
+        "",
+        "/ˈfoːɡəl/",
+        "",
+        "",
+        "/wazo/",
+        ""
+      ]
+    },
+    {
+      "index": 46,
+      "ipa": [
+        "",
+        "/hʊnt/",
+        "",
+        "",
+        "/ʃjɛ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 47,
+      "ipa": [
+        "",
+        "/laʊ̯s/",
+        "",
+        "",
+        "/pu/",
+        ""
+      ]
+    },
+    {
+      "index": 48,
+      "ipa": [
+        "",
+        "/ˈʃlaŋə/",
+        "",
+        "",
+        "/sɛʁpɑ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 49,
+      "ipa": [
+        "",
+        "/vʊʁm/",
+        "",
+        "",
+        "/vɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 50,
+      "ipa": [
+        "",
+        "/baʊ̯m/",
+        "",
+        "",
+        "/aʁbʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 51,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/fɔʁɛ/",
+        ""
+      ]
+    },
+    {
+      "index": 52,
+      "ipa": [
+        "",
+        "/ʃtɔk/",
+        "",
+        "",
+        "/bɑtɔ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 53,
+      "ipa": [
+        "",
+        "/fʁʊxt/, /oːpst/",
+        "",
+        "",
+        "/fʁɥi/",
+        ""
+      ]
+    },
+    {
+      "index": 54,
+      "ipa": [
+        "",
+        "/ˈzaːmən/, /zaːt/",
+        "",
+        "",
+        "/ɡʁɛn/",
+        ""
+      ]
+    },
+    {
+      "index": 55,
+      "ipa": [
+        "",
+        "/blat/",
+        "",
+        "",
+        "/fœj/",
+        ""
+      ]
+    },
+    {
+      "index": 56,
+      "ipa": [
+        "",
+        "/ˈvʊʁtsəl/",
+        "",
+        "",
+        "/ʁasin/",
+        ""
+      ]
+    },
+    {
+      "index": 57,
+      "ipa": [
+        "",
+        "/ˈbɔʁ.kə/, /ˈʁɪndə/",
+        "",
+        "",
+        "/ekɔʁs/",
+        ""
+      ]
+    },
+    {
+      "index": 58,
+      "ipa": [
+        "",
+        "/ˈbluːmə/",
+        "",
+        "",
+        "/flœʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 59,
+      "ipa": [
+        "",
+        "/ɡʁaːs/",
+        "",
+        "",
+        "/ɛʁb/",
+        ""
+      ]
+    },
+    {
+      "index": 60,
+      "ipa": [
+        "",
+        "/ˈlaɪ̯nə/, /zaɪ̯l/, /ʃtʁɪk/",
+        "",
+        "",
+        "/kɔʁd/",
+        ""
+      ]
+    },
+    {
+      "index": 61,
+      "ipa": [
+        "",
+        "/haʊ̯t/",
+        "",
+        "",
+        "/po/",
+        ""
+      ]
+    },
+    {
+      "index": 62,
+      "ipa": [
+        "",
+        "/flaɪ̯ʃ/",
+        "",
+        "",
+        "/vjɑ̃d/",
+        ""
+      ]
+    },
+    {
+      "index": 63,
+      "ipa": [
+        "",
+        "/bluːt/",
+        "",
+        "",
+        "/sɑ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 64,
+      "ipa": [
+        "",
+        "/ˈknɔxən/",
+        "",
+        "",
+        "/ɔs/",
+        ""
+      ]
+    },
+    {
+      "index": 65,
+      "ipa": [
+        "",
+        "/fɛt/",
+        "",
+        "",
+        "/ɡʁɛs/",
+        ""
+      ]
+    },
+    {
+      "index": 66,
+      "ipa": [
+        "",
+        "/aɪ̯/",
+        "",
+        "",
+        "/œf/",
+        ""
+      ]
+    },
+    {
+      "index": 67,
+      "ipa": [
+        "",
+        "/hɔʁn/",
+        "",
+        "",
+        "/kɔʁn/",
+        ""
+      ]
+    },
+    {
+      "index": 68,
+      "ipa": [
+        "",
+        "/ʃvants/, /ʃvaɪ̯f/",
+        "",
+        "",
+        "/kø/",
+        ""
+      ]
+    },
+    {
+      "index": 69,
+      "ipa": [
+        "",
+        "/ˈfeːdɐ/",
+        "",
+        "",
+        "/plym/",
+        ""
+      ]
+    },
+    {
+      "index": 70,
+      "ipa": [
+        "",
+        "/haːɐ̯/",
+        "",
+        "",
+        "/ʃəvø/",
+        ""
+      ]
+    },
+    {
+      "index": 71,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/tɛt/",
+        ""
+      ]
+    },
+    {
+      "index": 72,
+      "ipa": [
+        "",
+        "/oːɐ̯/",
+        "",
+        "",
+        "/ɔʁɛj/",
+        ""
+      ]
+    },
+    {
+      "index": 73,
+      "ipa": [
+        "",
+        "/ˈaʊ̯ɡə/",
+        "",
+        "",
+        "/œj/",
+        ""
+      ]
+    },
+    {
+      "index": 74,
+      "ipa": [
+        "",
+        "/ˈnaːzə/",
+        "",
+        "",
+        "/ne/",
+        ""
+      ]
+    },
+    {
+      "index": 75,
+      "ipa": [
+        "",
+        "/mʊnt/",
+        "",
+        "",
+        "/buʃ/",
+        ""
+      ]
+    },
+    {
+      "index": 76,
+      "ipa": [
+        "",
+        "/tsaːn/",
+        "",
+        "",
+        "/dɑ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 77,
+      "ipa": [
+        "",
+        "/ˈtsʊŋə/",
+        "",
+        "",
+        "/lɑ̃ɡ/",
+        ""
+      ]
+    },
+    {
+      "index": 78,
+      "ipa": [
+        "",
+        "/ˈfɪŋɐnaːɡəl/",
+        "",
+        "",
+        "/ɔ̃ɡl/",
+        ""
+      ]
+    },
+    {
+      "index": 79,
+      "ipa": [
+        "",
+        "/fuːs/",
+        "",
+        "",
+        "/pje/",
+        ""
+      ]
+    },
+    {
+      "index": 80,
+      "ipa": [
+        "",
+        "/baɪ̯n/",
+        "",
+        "",
+        "/ʒɑ̃b/",
+        ""
+      ]
+    },
+    {
+      "index": 81,
+      "ipa": [
+        "",
+        "/kniː/",
+        "",
+        "",
+        "/ʒənu/",
+        ""
+      ]
+    },
+    {
+      "index": 82,
+      "ipa": [
+        "",
+        "/hant/",
+        "",
+        "",
+        "/mɛ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 83,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/ɛl/",
+        ""
+      ]
+    },
+    {
+      "index": 84,
+      "ipa": [
+        "",
+        "/baʊ̯x/, /laɪ̯p/",
+        "",
+        "",
+        "/vɑ̃tʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 85,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/ɑ̃tʁɑj/, /ɛ̃tɛstɛ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 86,
+      "ipa": [
+        "",
+        "/hals/, /ˈnakən/",
+        "",
+        "",
+        "/ku/",
+        ""
+      ]
+    },
+    {
+      "index": 87,
+      "ipa": [
+        "",
+        "/ˈʁʏkən/",
+        "",
+        "",
+        "/do/",
+        ""
+      ]
+    },
+    {
+      "index": 88,
+      "ipa": [
+        "",
+        "/bʁʊst/, /ˈbuːzn̩/",
+        "",
+        "",
+        "/sɛ̃/, /pwatʁin/",
+        ""
+      ]
+    },
+    {
+      "index": 89,
+      "ipa": [
+        "",
+        "/hɛʁts/",
+        "",
+        "",
+        "/kœʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 90,
+      "ipa": [
+        "",
+        "/ˈleːbɐ/",
+        "",
+        "",
+        "/fwɑ/",
+        ""
+      ]
+    },
+    {
+      "index": 91,
+      "ipa": [
+        "",
+        "/ˈtʁɪŋkən/",
+        "",
+        "",
+        "/bwɑʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 92,
+      "ipa": [
+        "",
+        "/ˈɛsən/",
+        "",
+        "",
+        "/mɑ̃ʒe/",
+        ""
+      ]
+    },
+    {
+      "index": 93,
+      "ipa": [
+        "",
+        "/ˈbaɪ̯sən/",
+        "",
+        "",
+        "/mɔʁdʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 94,
+      "ipa": [
+        "",
+        "/ˈlʊ.t͡ʃn̩/, /ˈzaʊ̯ɡən/",
+        "",
+        "",
+        "/syse/",
+        ""
+      ]
+    },
+    {
+      "index": 95,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/kʁaʃe/",
+        ""
+      ]
+    },
+    {
+      "index": 96,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/vɔmiʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 97,
+      "ipa": [
+        "",
+        "/ˈblaːzən/, /ˈpuːstən/, /ˈveː.ən/",
+        "",
+        "",
+        "/sufle/",
+        ""
+      ]
+    },
+    {
+      "index": 98,
+      "ipa": [
+        "",
+        "/ˈaːtmən/",
+        "",
+        "",
+        "/ʁɛspiʁe/",
+        ""
+      ]
+    },
+    {
+      "index": 99,
+      "ipa": [
+        "",
+        "/ˈlaxən/",
+        "",
+        "",
+        "/ʁiʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 100,
+      "ipa": [
+        "",
+        "/ˈzeːən/",
+        "",
+        "",
+        "/vwaʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 101,
+      "ipa": [
+        "",
+        "/ˈhøːʁən/",
+        "",
+        "",
+        "/ɑ̃tɑ̃dʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 102,
+      "ipa": [
+        "",
+        "/ˈkɛnən/, /ˈvɪsən/",
+        "",
+        "",
+        "/savwaʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 103,
+      "ipa": [
+        "",
+        "/ˈdɛŋkən/",
+        "",
+        "",
+        "/pɑ̃se/",
+        ""
+      ]
+    },
+    {
+      "index": 104,
+      "ipa": [
+        "",
+        "/ˈʁiːçən/",
+        "",
+        "",
+        "/sɑ̃tiʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 105,
+      "ipa": [
+        "",
+        "/ˈfʏʁçtən/",
+        "",
+        "",
+        "/kʁɛ̃dʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 106,
+      "ipa": [
+        "",
+        "/ˈʃlaːfən/",
+        "",
+        "",
+        "/dɔʁmiʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 107,
+      "ipa": [
+        "",
+        "/ˈleːbən/",
+        "",
+        "",
+        "/vivʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 108,
+      "ipa": [
+        "",
+        "/ˈʃtɛʁbən/",
+        "",
+        "",
+        "/muʁiʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 109,
+      "ipa": [
+        "",
+        "/ˈtøːtən/, /ˈʔʊmˌbʁɪŋən/",
+        "",
+        "",
+        "/tɥe/",
+        ""
+      ]
+    },
+    {
+      "index": 110,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/səbatʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 111,
+      "ipa": [
+        "",
+        "/ˈjaːɡən/",
+        "",
+        "",
+        "/ʃase/",
+        ""
+      ]
+    },
+    {
+      "index": 112,
+      "ipa": [
+        "",
+        "/ˈʃlaːɡən/",
+        "",
+        "",
+        "/fʁape/",
+        ""
+      ]
+    },
+    {
+      "index": 113,
+      "ipa": [
+        "",
+        "/ˈʃnaɪ̯dən/",
+        "",
+        "",
+        "/kupe/",
+        ""
+      ]
+    },
+    {
+      "index": 114,
+      "ipa": [
+        "",
+        "/ˈʃpaltən/, /ˈʃplaɪ̯sn̩/",
+        "",
+        "",
+        "/fɑ̃dʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 115,
+      "ipa": [
+        "",
+        "/ˈʃtɛçən/",
+        "",
+        "",
+        "/pwaɲaʁde/",
+        ""
+      ]
+    },
+    {
+      "index": 116,
+      "ipa": [
+        "",
+        "/ˈkʁatsən/, /ˈʁɪt͡sən/, /ˈʃaʁn̩/",
+        "",
+        "",
+        "/ɡʁate/",
+        ""
+      ]
+    },
+    {
+      "index": 117,
+      "ipa": [
+        "",
+        "/ˈɡʁaːbən/",
+        "",
+        "",
+        "/kʁøze/",
+        ""
+      ]
+    },
+    {
+      "index": 118,
+      "ipa": [
+        "",
+        "/ˈʃvɪmən/",
+        "",
+        "",
+        "/naʒe/",
+        ""
+      ]
+    },
+    {
+      "index": 119,
+      "ipa": [
+        "",
+        "/ˈfliːɡən/",
+        "",
+        "",
+        "/vɔle/",
+        ""
+      ]
+    },
+    {
+      "index": 120,
+      "ipa": [
+        "",
+        "/ˈɡeːən/",
+        "",
+        "",
+        "/maʁʃe/",
+        ""
+      ]
+    },
+    {
+      "index": 121,
+      "ipa": [
+        "",
+        "/ˈkɔmən/",
+        "",
+        "",
+        "/vəniʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 122,
+      "ipa": [
+        "",
+        "/ˈliːɡən/",
+        "",
+        "",
+        "/setɑ̃dʁ/, /ɛtʁetɑ̃dy/",
+        ""
+      ]
+    },
+    {
+      "index": 123,
+      "ipa": [
+        "",
+        "/ˈzɪtsən/",
+        "",
+        "",
+        "/saswaʁ/, /ɛtʁasi/",
+        ""
+      ]
+    },
+    {
+      "index": 124,
+      "ipa": [
+        "",
+        "/ˈʃteːən/",
+        "",
+        "",
+        "/sələve/, /sətəniʁdəbu/",
+        ""
+      ]
+    },
+    {
+      "index": 125,
+      "ipa": [
+        "",
+        "/ˈdʁeːən/",
+        "",
+        "",
+        "/tuʁne/",
+        ""
+      ]
+    },
+    {
+      "index": 126,
+      "ipa": [
+        "",
+        "/ˈfalən/",
+        "",
+        "",
+        "/tɔ̃be/",
+        ""
+      ]
+    },
+    {
+      "index": 127,
+      "ipa": [
+        "",
+        "/ˈɡeːbən/",
+        "",
+        "",
+        "/dɔne/",
+        ""
+      ]
+    },
+    {
+      "index": 128,
+      "ipa": [
+        "",
+        "/ˈhaltən/",
+        "",
+        "",
+        "/təniʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 129,
+      "ipa": [
+        "",
+        "/ˈkvɛtʃən/",
+        "",
+        "",
+        "/seʁe/",
+        ""
+      ]
+    },
+    {
+      "index": 130,
+      "ipa": [
+        "",
+        "/ˈʁaɪ̯bən/",
+        "",
+        "",
+        "/fʁɔte/",
+        ""
+      ]
+    },
+    {
+      "index": 131,
+      "ipa": [
+        "",
+        "/ˈvaʃən/",
+        "",
+        "",
+        "/lave/",
+        ""
+      ]
+    },
+    {
+      "index": 132,
+      "ipa": [
+        "",
+        "/ˈvɪʃən/",
+        "",
+        "",
+        "/esɥije/",
+        ""
+      ]
+    },
+    {
+      "index": 133,
+      "ipa": [
+        "",
+        "/ˈtsiːən/",
+        "",
+        "",
+        "/tiʁe/",
+        ""
+      ]
+    },
+    {
+      "index": 134,
+      "ipa": [
+        "",
+        "/ˈdʁʏkən/, /ˈʃiːbən/",
+        "",
+        "",
+        "/puse/",
+        ""
+      ]
+    },
+    {
+      "index": 135,
+      "ipa": [
+        "",
+        "/ˈvɛʁfən/",
+        "",
+        "",
+        "/ʒəte/, /lɑ̃se/",
+        ""
+      ]
+    },
+    {
+      "index": 136,
+      "ipa": [
+        "",
+        "/ˈbɪndən/, /ˈknʏpfən/",
+        "",
+        "",
+        "/lje/",
+        ""
+      ]
+    },
+    {
+      "index": 137,
+      "ipa": [
+        "",
+        "/ˈnɛːən/",
+        "",
+        "",
+        "/kudʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 138,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/kɔ̃te/",
+        ""
+      ]
+    },
+    {
+      "index": 139,
+      "ipa": [
+        "",
+        "/ˈzaːɡən/",
+        "",
+        "",
+        "/diʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 140,
+      "ipa": [
+        "",
+        "/ˈzɪŋən/",
+        "",
+        "",
+        "/ʃɑ̃te/",
+        ""
+      ]
+    },
+    {
+      "index": 141,
+      "ipa": [
+        "",
+        "/ˈʃpiːlən/",
+        "",
+        "",
+        "/ʒwe/",
+        ""
+      ]
+    },
+    {
+      "index": 142,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/flɔte/",
+        ""
+      ]
+    },
+    {
+      "index": 143,
+      "ipa": [
+        "",
+        "/ˈfliːsən/, /ˈʃtʁøːmən/",
+        "",
+        "",
+        "/kule/",
+        ""
+      ]
+    },
+    {
+      "index": 144,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/ʒəle/",
+        ""
+      ]
+    },
+    {
+      "index": 145,
+      "ipa": [
+        "",
+        "/ˈʃvɛlən/",
+        "",
+        "",
+        "/ɡɔ̃fle/",
+        ""
+      ]
+    },
+    {
+      "index": 146,
+      "ipa": [
+        "",
+        "/ˈzɔnə/",
+        "",
+        "",
+        "/sɔlɛj/",
+        ""
+      ]
+    },
+    {
+      "index": 147,
+      "ipa": [
+        "",
+        "/moːnt/",
+        "",
+        "",
+        "/lyn/",
+        ""
+      ]
+    },
+    {
+      "index": 148,
+      "ipa": [
+        "",
+        "/ʃtɛʁn/",
+        "",
+        "",
+        "/etwal/",
+        ""
+      ]
+    },
+    {
+      "index": 149,
+      "ipa": [
+        "",
+        "/ˈvasɐ/",
+        "",
+        "",
+        "/o/",
+        ""
+      ]
+    },
+    {
+      "index": 150,
+      "ipa": [
+        "",
+        "/ˈʁeːɡən/",
+        "",
+        "",
+        "/plɥi/",
+        ""
+      ]
+    },
+    {
+      "index": 151,
+      "ipa": [
+        "",
+        "/flʊs/",
+        "",
+        "",
+        "/ʁivjɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 152,
+      "ipa": [
+        "",
+        "/zeː/",
+        "",
+        "",
+        "/lak/",
+        ""
+      ]
+    },
+    {
+      "index": 153,
+      "ipa": [
+        "",
+        "/meːɐ̯/",
+        "",
+        "",
+        "/mɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 154,
+      "ipa": [
+        "",
+        "/zalts/",
+        "",
+        "",
+        "/sɛl/",
+        ""
+      ]
+    },
+    {
+      "index": 155,
+      "ipa": [
+        "",
+        "/ʃtaɪ̯n/",
+        "",
+        "",
+        "/pjɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 156,
+      "ipa": [
+        "",
+        "/zant/",
+        "",
+        "",
+        "/sabl/",
+        ""
+      ]
+    },
+    {
+      "index": 157,
+      "ipa": [
+        "",
+        "/ʃtaʊ̯p/",
+        "",
+        "",
+        "/pusjɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 158,
+      "ipa": [
+        "",
+        "/ˈeːɐ̯də/",
+        "",
+        "",
+        "/tɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 159,
+      "ipa": [
+        "",
+        "/ˈvɔlkə/",
+        "",
+        "",
+        "/nɥaʒ/",
+        ""
+      ]
+    },
+    {
+      "index": 160,
+      "ipa": [
+        "",
+        "/ˈneːbəl/",
+        "",
+        "",
+        "/bʁujaʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 161,
+      "ipa": [
+        "",
+        "/ˈhɪməl/",
+        "",
+        "",
+        "/sjɛl/",
+        ""
+      ]
+    },
+    {
+      "index": 162,
+      "ipa": [
+        "",
+        "/vɪnt/",
+        "",
+        "",
+        "/vɑ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 163,
+      "ipa": [
+        "",
+        "/ʃneː/",
+        "",
+        "",
+        "/nɛʒ/",
+        ""
+      ]
+    },
+    {
+      "index": 164,
+      "ipa": [
+        "",
+        "/aɪ̯s/",
+        "",
+        "",
+        "/ɡlas/",
+        ""
+      ]
+    },
+    {
+      "index": 165,
+      "ipa": [
+        "",
+        "/ʁaʊ̯x/",
+        "",
+        "",
+        "/fyme/",
+        ""
+      ]
+    },
+    {
+      "index": 166,
+      "ipa": [
+        "",
+        "/ˈfɔʏɐ/",
+        "",
+        "",
+        "/fø/",
+        ""
+      ]
+    },
+    {
+      "index": 167,
+      "ipa": [
+        "",
+        "/ˈaʃə/",
+        "",
+        "",
+        "/sɑ̃dʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 168,
+      "ipa": [
+        "",
+        "/ˈbʁɛnən/",
+        "",
+        "",
+        "/bʁyle/",
+        ""
+      ]
+    },
+    {
+      "index": 169,
+      "ipa": [
+        "",
+        "/ˈʃtʁaːsə/",
+        "",
+        "",
+        "/ʁut/",
+        ""
+      ]
+    },
+    {
+      "index": 170,
+      "ipa": [
+        "",
+        "/bɛʁk/",
+        "",
+        "",
+        "/mɔ̃taɲ/",
+        ""
+      ]
+    },
+    {
+      "index": 171,
+      "ipa": [
+        "",
+        "/ʁoːt/",
+        "",
+        "",
+        "/ʁuʒ/",
+        ""
+      ]
+    },
+    {
+      "index": 172,
+      "ipa": [
+        "",
+        "/ɡʁyːn/",
+        "",
+        "",
+        "/vɛʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 173,
+      "ipa": [
+        "",
+        "/ɡɛlp/",
+        "",
+        "",
+        "/ʒon/",
+        ""
+      ]
+    },
+    {
+      "index": 174,
+      "ipa": [
+        "",
+        "/vaɪ̯s/",
+        "",
+        "",
+        "/blɑ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 175,
+      "ipa": [
+        "",
+        "/ʃvaʁts/",
+        "",
+        "",
+        "/nwaʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 176,
+      "ipa": [
+        "",
+        "/naxt/",
+        "",
+        "",
+        "/nɥi/",
+        ""
+      ]
+    },
+    {
+      "index": 177,
+      "ipa": [
+        "",
+        "/taːk/",
+        "",
+        "",
+        "/ʒuʁ/",
+        ""
+      ]
+    },
+    {
+      "index": 178,
+      "ipa": [
+        "",
+        "/jaːɐ̯/",
+        "",
+        "",
+        "/ɑ̃/, /ane/",
+        ""
+      ]
+    },
+    {
+      "index": 179,
+      "ipa": [
+        "",
+        "/vaʁm/",
+        "",
+        "",
+        "/ʃo/",
+        ""
+      ]
+    },
+    {
+      "index": 180,
+      "ipa": [
+        "",
+        "/kalt/",
+        "",
+        "",
+        "/fʁwa/",
+        ""
+      ]
+    },
+    {
+      "index": 181,
+      "ipa": [
+        "",
+        "/fɔl/",
+        "",
+        "",
+        "/plɛ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 182,
+      "ipa": [
+        "",
+        "/nɔʏ̯/",
+        "",
+        "",
+        "/nuvo/, /nœf/",
+        ""
+      ]
+    },
+    {
+      "index": 183,
+      "ipa": [
+        "",
+        "/alt/",
+        "",
+        "",
+        "/vjø/",
+        ""
+      ]
+    },
+    {
+      "index": 184,
+      "ipa": [
+        "",
+        "/ɡuːt/",
+        "",
+        "",
+        "/bɔ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 185,
+      "ipa": [
+        "",
+        "/ʃlɛçt/, /ˈʔyː.bl̩/",
+        "",
+        "",
+        "/movɛ/",
+        ""
+      ]
+    },
+    {
+      "index": 186,
+      "ipa": [
+        "",
+        "/faʊ̯l/, /fɛɐ̯ˈʁɔtət/",
+        "",
+        "",
+        "/puri/",
+        ""
+      ]
+    },
+    {
+      "index": 187,
+      "ipa": [
+        "",
+        "/ˈʃmʊtsɪç/, /ˈdʁɛkɪç/",
+        "",
+        "",
+        "/sal/",
+        ""
+      ]
+    },
+    {
+      "index": 188,
+      "ipa": [
+        "",
+        "/ɡ(ə)ˈʁaːdə/",
+        "",
+        "",
+        "/dʁwa/",
+        ""
+      ]
+    },
+    {
+      "index": 189,
+      "ipa": [
+        "",
+        "/ʁʊnt/",
+        "",
+        "",
+        "/ʁɔ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 190,
+      "ipa": [
+        "",
+        "/ʃaʁf/",
+        "",
+        "",
+        "/tʁɑ̃ʃɑ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 191,
+      "ipa": [
+        "",
+        "/ʃtʊmpf/",
+        "",
+        "",
+        "/emuse/",
+        ""
+      ]
+    },
+    {
+      "index": 192,
+      "ipa": [
+        "",
+        "/ɡlat/",
+        "",
+        "",
+        "/lis/",
+        ""
+      ]
+    },
+    {
+      "index": 193,
+      "ipa": [
+        "",
+        "/nas/, /fɔʏ̯çt/",
+        "",
+        "",
+        "/muje/",
+        ""
+      ]
+    },
+    {
+      "index": 194,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/sɛk/",
+        ""
+      ]
+    },
+    {
+      "index": 195,
+      "ipa": [
+        "",
+        "/ˈʁɪçtɪç/",
+        "",
+        "",
+        "/ʒyst/",
+        ""
+      ]
+    },
+    {
+      "index": 196,
+      "ipa": [
+        "",
+        "/ˈnaː/",
+        "",
+        "",
+        "/pʁɛ/",
+        ""
+      ]
+    },
+    {
+      "index": 197,
+      "ipa": [
+        "",
+        "/fɛʁn/, /vaɪ̯t/",
+        "",
+        "",
+        "/lwɛ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 198,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/dʁwat/",
+        ""
+      ]
+    },
+    {
+      "index": 199,
+      "ipa": [
+        "",
+        "",
+        "",
+        "",
+        "/ɡoʃ/",
+        ""
+      ]
+    },
+    {
+      "index": 200,
+      "ipa": [
+        "",
+        "/an/, /baɪ̯/",
+        "",
+        "",
+        "/a/",
+        ""
+      ]
+    },
+    {
+      "index": 201,
+      "ipa": [
+        "",
+        "/ɪn/",
+        "",
+        "",
+        "/dɑ̃/",
+        ""
+      ]
+    },
+    {
+      "index": 202,
+      "ipa": [
+        "",
+        "/mɪt/",
+        "",
+        "",
+        "/avɛk/",
+        ""
+      ]
+    },
+    {
+      "index": 203,
+      "ipa": [
+        "",
+        "/ʊnt/",
+        "",
+        "",
+        "/e/",
+        ""
+      ]
+    },
+    {
+      "index": 204,
+      "ipa": [
+        "",
+        "/ɔp/, /vɛn/",
+        "",
+        "",
+        "/si/",
+        ""
+      ]
+    },
+    {
+      "index": 205,
+      "ipa": [
+        "",
+        "/vaɪ̯l/",
+        "",
+        "",
+        "/paʁsəkə/",
+        ""
+      ]
+    },
+    {
+      "index": 206,
+      "ipa": [
+        "",
+        "/ˈnaːmə/",
+        "",
+        "",
+        "/nɔ̃/",
+        ""
+      ]
+    }
+  ]
+}

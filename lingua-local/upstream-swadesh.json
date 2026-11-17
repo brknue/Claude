@@ -1,0 +1,5439 @@
+{
+  "license": "CC-BY-SA-4.0",
+  "attribution": "Wiktionary contributors; data transcription via DCS77/swadesh-lists contributors",
+  "source_commit": "f72486ac841221b41f8e351d75bbab08f1b3d185",
+  "sources": [
+    {
+      "language": "english",
+      "url": "https://en.wiktionary.org/wiki/Appendix:English_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:English_Swadesh_list&action=history",
+      "source_blob": "28c69d2c601effb089cc1598b8d3a96fedf0ed33"
+    },
+    {
+      "language": "german",
+      "url": "https://en.wiktionary.org/wiki/Appendix:German_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:German_Swadesh_list&action=history",
+      "source_blob": "9f0f0c5aaf9ff2a0eace444d12c6959a73aef99a"
+    },
+    {
+      "language": "turkish",
+      "url": "https://en.wiktionary.org/wiki/Appendix:Turkish_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:Turkish_Swadesh_list&action=history",
+      "source_blob": "8fa688876b253527f0f745785f192a4584e48354"
+    },
+    {
+      "language": "spanish",
+      "url": "https://en.wiktionary.org/wiki/Appendix:Spanish_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:Spanish_Swadesh_list&action=history",
+      "source_blob": "5b54db282b33dabc78ce5f53a975b1b4301beaa3"
+    },
+    {
+      "language": "french",
+      "url": "https://en.wiktionary.org/wiki/Appendix:French_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:French_Swadesh_list&action=history",
+      "source_blob": "fdb667e0c3484f1aad1fd21d88a2a4c734bf16fb"
+    },
+    {
+      "language": "italian",
+      "url": "https://en.wiktionary.org/wiki/Appendix:Italian_Swadesh_list",
+      "history": "https://en.wiktionary.org/w/index.php?title=Appendix:Italian_Swadesh_list&action=history",
+      "source_blob": "cc4991133d4e5f5527b23920910af2543c76fb4b"
+    }
+  ],
+  "data": {
+    "english": [
+      {
+        "index": 0,
+        "representation_1": "I"
+      },
+      {
+        "index": 1,
+        "representation_1": "you (singular)"
+      },
+      {
+        "index": 2,
+        "representation_1": "they (singular)"
+      },
+      {
+        "index": 3,
+        "representation_1": "we"
+      },
+      {
+        "index": 4,
+        "representation_1": "you (plural)"
+      },
+      {
+        "index": 5,
+        "representation_1": "they (plural)"
+      },
+      {
+        "index": 6,
+        "representation_1": "this"
+      },
+      {
+        "index": 7,
+        "representation_1": "that"
+      },
+      {
+        "index": 8,
+        "representation_1": "here"
+      },
+      {
+        "index": 9,
+        "representation_1": "there"
+      },
+      {
+        "index": 10,
+        "representation_1": "who"
+      },
+      {
+        "index": 11,
+        "representation_1": "what"
+      },
+      {
+        "index": 12,
+        "representation_1": "where"
+      },
+      {
+        "index": 13,
+        "representation_1": "when"
+      },
+      {
+        "index": 14,
+        "representation_1": "how"
+      },
+      {
+        "index": 15,
+        "representation_1": "not"
+      },
+      {
+        "index": 16,
+        "representation_1": "all"
+      },
+      {
+        "index": 17,
+        "representation_1": "many"
+      },
+      {
+        "index": 18,
+        "representation_1": "some"
+      },
+      {
+        "index": 19,
+        "representation_1": "few"
+      },
+      {
+        "index": 20,
+        "representation_1": "other"
+      },
+      {
+        "index": 21,
+        "representation_1": "one"
+      },
+      {
+        "index": 22,
+        "representation_1": "two"
+      },
+      {
+        "index": 23,
+        "representation_1": "three"
+      },
+      {
+        "index": 24,
+        "representation_1": "four"
+      },
+      {
+        "index": 25,
+        "representation_1": "five"
+      },
+      {
+        "index": 26,
+        "representation_1": "big"
+      },
+      {
+        "index": 27,
+        "representation_1": "long"
+      },
+      {
+        "index": 28,
+        "representation_1": "wide"
+      },
+      {
+        "index": 29,
+        "representation_1": "thick"
+      },
+      {
+        "index": 30,
+        "representation_1": "heavy"
+      },
+      {
+        "index": 31,
+        "representation_1": "small"
+      },
+      {
+        "index": 32,
+        "representation_1": "short"
+      },
+      {
+        "index": 33,
+        "representation_1": "narrow"
+      },
+      {
+        "index": 34,
+        "representation_1": "thin"
+      },
+      {
+        "index": 35,
+        "representation_1": "woman"
+      },
+      {
+        "index": 36,
+        "representation_1": "man (adult male)"
+      },
+      {
+        "index": 37,
+        "representation_1": "man (human being)"
+      },
+      {
+        "index": 38,
+        "representation_1": "child"
+      },
+      {
+        "index": 39,
+        "representation_1": "wife"
+      },
+      {
+        "index": 40,
+        "representation_1": "husband"
+      },
+      {
+        "index": 41,
+        "representation_1": "mother"
+      },
+      {
+        "index": 42,
+        "representation_1": "father"
+      },
+      {
+        "index": 43,
+        "representation_1": "animal"
+      },
+      {
+        "index": 44,
+        "representation_1": "fish"
+      },
+      {
+        "index": 45,
+        "representation_1": "bird"
+      },
+      {
+        "index": 46,
+        "representation_1": "dog"
+      },
+      {
+        "index": 47,
+        "representation_1": "louse"
+      },
+      {
+        "index": 48,
+        "representation_1": "snake"
+      },
+      {
+        "index": 49,
+        "representation_1": "worm"
+      },
+      {
+        "index": 50,
+        "representation_1": "tree"
+      },
+      {
+        "index": 51,
+        "representation_1": "forest"
+      },
+      {
+        "index": 52,
+        "representation_1": "stick"
+      },
+      {
+        "index": 53,
+        "representation_1": "fruit"
+      },
+      {
+        "index": 54,
+        "representation_1": "seed"
+      },
+      {
+        "index": 55,
+        "representation_1": "leaf"
+      },
+      {
+        "index": 56,
+        "representation_1": "root"
+      },
+      {
+        "index": 57,
+        "representation_1": "bark (of a tree)"
+      },
+      {
+        "index": 58,
+        "representation_1": "flower"
+      },
+      {
+        "index": 59,
+        "representation_1": "grass"
+      },
+      {
+        "index": 60,
+        "representation_1": "rope"
+      },
+      {
+        "index": 61,
+        "representation_1": "skin"
+      },
+      {
+        "index": 62,
+        "representation_1": "meat"
+      },
+      {
+        "index": 63,
+        "representation_1": "blood"
+      },
+      {
+        "index": 64,
+        "representation_1": "bone"
+      },
+      {
+        "index": 65,
+        "representation_1": "fat (noun)"
+      },
+      {
+        "index": 66,
+        "representation_1": "egg"
+      },
+      {
+        "index": 67,
+        "representation_1": "horn"
+      },
+      {
+        "index": 68,
+        "representation_1": "tail"
+      },
+      {
+        "index": 69,
+        "representation_1": "feather"
+      },
+      {
+        "index": 70,
+        "representation_1": "hair"
+      },
+      {
+        "index": 71,
+        "representation_1": "head"
+      },
+      {
+        "index": 72,
+        "representation_1": "ear"
+      },
+      {
+        "index": 73,
+        "representation_1": "eye"
+      },
+      {
+        "index": 74,
+        "representation_1": "nose"
+      },
+      {
+        "index": 75,
+        "representation_1": "mouth"
+      },
+      {
+        "index": 76,
+        "representation_1": "tooth"
+      },
+      {
+        "index": 77,
+        "representation_1": "tongue (organ)"
+      },
+      {
+        "index": 78,
+        "representation_1": "fingernail"
+      },
+      {
+        "index": 79,
+        "representation_1": "foot"
+      },
+      {
+        "index": 80,
+        "representation_1": "leg"
+      },
+      {
+        "index": 81,
+        "representation_1": "knee"
+      },
+      {
+        "index": 82,
+        "representation_1": "hand"
+      },
+      {
+        "index": 83,
+        "representation_1": "wing"
+      },
+      {
+        "index": 84,
+        "representation_1": "belly"
+      },
+      {
+        "index": 85,
+        "representation_1": "guts"
+      },
+      {
+        "index": 86,
+        "representation_1": "neck"
+      },
+      {
+        "index": 87,
+        "representation_1": "back"
+      },
+      {
+        "index": 88,
+        "representation_1": "breast"
+      },
+      {
+        "index": 89,
+        "representation_1": "heart"
+      },
+      {
+        "index": 90,
+        "representation_1": "liver"
+      },
+      {
+        "index": 91,
+        "representation_1": "to drink"
+      },
+      {
+        "index": 92,
+        "representation_1": "to eat"
+      },
+      {
+        "index": 93,
+        "representation_1": "to bite"
+      },
+      {
+        "index": 94,
+        "representation_1": "to suck"
+      },
+      {
+        "index": 95,
+        "representation_1": "to spit"
+      },
+      {
+        "index": 96,
+        "representation_1": "to vomit"
+      },
+      {
+        "index": 97,
+        "representation_1": "to blow"
+      },
+      {
+        "index": 98,
+        "representation_1": "to breathe"
+      },
+      {
+        "index": 99,
+        "representation_1": "to laugh"
+      },
+      {
+        "index": 100,
+        "representation_1": "to see"
+      },
+      {
+        "index": 101,
+        "representation_1": "to hear"
+      },
+      {
+        "index": 102,
+        "representation_1": "to know"
+      },
+      {
+        "index": 103,
+        "representation_1": "to think"
+      },
+      {
+        "index": 104,
+        "representation_1": "to smell"
+      },
+      {
+        "index": 105,
+        "representation_1": "to fear"
+      },
+      {
+        "index": 106,
+        "representation_1": "to sleep"
+      },
+      {
+        "index": 107,
+        "representation_1": "to live"
+      },
+      {
+        "index": 108,
+        "representation_1": "to die"
+      },
+      {
+        "index": 109,
+        "representation_1": "to kill"
+      },
+      {
+        "index": 110,
+        "representation_1": "to fight"
+      },
+      {
+        "index": 111,
+        "representation_1": "to hunt"
+      },
+      {
+        "index": 112,
+        "representation_1": "to hit"
+      },
+      {
+        "index": 113,
+        "representation_1": "to cut"
+      },
+      {
+        "index": 114,
+        "representation_1": "to split"
+      },
+      {
+        "index": 115,
+        "representation_1": "to stab"
+      },
+      {
+        "index": 116,
+        "representation_1": "to scratch"
+      },
+      {
+        "index": 117,
+        "representation_1": "to dig"
+      },
+      {
+        "index": 118,
+        "representation_1": "to swim"
+      },
+      {
+        "index": 119,
+        "representation_1": "to fly"
+      },
+      {
+        "index": 120,
+        "representation_1": "to walk"
+      },
+      {
+        "index": 121,
+        "representation_1": "to come"
+      },
+      {
+        "index": 122,
+        "representation_1": "to lie (as in a bed)"
+      },
+      {
+        "index": 123,
+        "representation_1": "to sit"
+      },
+      {
+        "index": 124,
+        "representation_1": "to stand"
+      },
+      {
+        "index": 125,
+        "representation_1": "to turn (intransitive)"
+      },
+      {
+        "index": 126,
+        "representation_1": "to fall"
+      },
+      {
+        "index": 127,
+        "representation_1": "to give"
+      },
+      {
+        "index": 128,
+        "representation_1": "to hold"
+      },
+      {
+        "index": 129,
+        "representation_1": "to squeeze"
+      },
+      {
+        "index": 130,
+        "representation_1": "to rub"
+      },
+      {
+        "index": 131,
+        "representation_1": "to wash"
+      },
+      {
+        "index": 132,
+        "representation_1": "to wipe"
+      },
+      {
+        "index": 133,
+        "representation_1": "to pull"
+      },
+      {
+        "index": 134,
+        "representation_1": "to push"
+      },
+      {
+        "index": 135,
+        "representation_1": "to throw"
+      },
+      {
+        "index": 136,
+        "representation_1": "to tie"
+      },
+      {
+        "index": 137,
+        "representation_1": "to sew"
+      },
+      {
+        "index": 138,
+        "representation_1": "to count"
+      },
+      {
+        "index": 139,
+        "representation_1": "to say"
+      },
+      {
+        "index": 140,
+        "representation_1": "to sing"
+      },
+      {
+        "index": 141,
+        "representation_1": "to play"
+      },
+      {
+        "index": 142,
+        "representation_1": "to float"
+      },
+      {
+        "index": 143,
+        "representation_1": "to flow"
+      },
+      {
+        "index": 144,
+        "representation_1": "to freeze"
+      },
+      {
+        "index": 145,
+        "representation_1": "to swell"
+      },
+      {
+        "index": 146,
+        "representation_1": "sun"
+      },
+      {
+        "index": 147,
+        "representation_1": "moon"
+      },
+      {
+        "index": 148,
+        "representation_1": "star"
+      },
+      {
+        "index": 149,
+        "representation_1": "water"
+      },
+      {
+        "index": 150,
+        "representation_1": "rain"
+      },
+      {
+        "index": 151,
+        "representation_1": "river"
+      },
+      {
+        "index": 152,
+        "representation_1": "lake"
+      },
+      {
+        "index": 153,
+        "representation_1": "sea"
+      },
+      {
+        "index": 154,
+        "representation_1": "salt"
+      },
+      {
+        "index": 155,
+        "representation_1": "stone"
+      },
+      {
+        "index": 156,
+        "representation_1": "sand"
+      },
+      {
+        "index": 157,
+        "representation_1": "dust"
+      },
+      {
+        "index": 158,
+        "representation_1": "earth"
+      },
+      {
+        "index": 159,
+        "representation_1": "cloud"
+      },
+      {
+        "index": 160,
+        "representation_1": "fog"
+      },
+      {
+        "index": 161,
+        "representation_1": "sky"
+      },
+      {
+        "index": 162,
+        "representation_1": "wind"
+      },
+      {
+        "index": 163,
+        "representation_1": "snow"
+      },
+      {
+        "index": 164,
+        "representation_1": "ice"
+      },
+      {
+        "index": 165,
+        "representation_1": "smoke"
+      },
+      {
+        "index": 166,
+        "representation_1": "fire"
+      },
+      {
+        "index": 167,
+        "representation_1": "ash"
+      },
+      {
+        "index": 168,
+        "representation_1": "to burn"
+      },
+      {
+        "index": 169,
+        "representation_1": "road"
+      },
+      {
+        "index": 170,
+        "representation_1": "mountain"
+      },
+      {
+        "index": 171,
+        "representation_1": "red"
+      },
+      {
+        "index": 172,
+        "representation_1": "green"
+      },
+      {
+        "index": 173,
+        "representation_1": "yellow"
+      },
+      {
+        "index": 174,
+        "representation_1": "white"
+      },
+      {
+        "index": 175,
+        "representation_1": "black"
+      },
+      {
+        "index": 176,
+        "representation_1": "night"
+      },
+      {
+        "index": 177,
+        "representation_1": "day"
+      },
+      {
+        "index": 178,
+        "representation_1": "year"
+      },
+      {
+        "index": 179,
+        "representation_1": "warm"
+      },
+      {
+        "index": 180,
+        "representation_1": "cold"
+      },
+      {
+        "index": 181,
+        "representation_1": "full"
+      },
+      {
+        "index": 182,
+        "representation_1": "new"
+      },
+      {
+        "index": 183,
+        "representation_1": "old"
+      },
+      {
+        "index": 184,
+        "representation_1": "good"
+      },
+      {
+        "index": 185,
+        "representation_1": "bad"
+      },
+      {
+        "index": 186,
+        "representation_1": "rotten"
+      },
+      {
+        "index": 187,
+        "representation_1": "dirty"
+      },
+      {
+        "index": 188,
+        "representation_1": "straight"
+      },
+      {
+        "index": 189,
+        "representation_1": "round"
+      },
+      {
+        "index": 190,
+        "representation_1": "sharp (as a knife)"
+      },
+      {
+        "index": 191,
+        "representation_1": "dull (as a knife)"
+      },
+      {
+        "index": 192,
+        "representation_1": "smooth"
+      },
+      {
+        "index": 193,
+        "representation_1": "wet"
+      },
+      {
+        "index": 194,
+        "representation_1": "dry"
+      },
+      {
+        "index": 195,
+        "representation_1": "correct"
+      },
+      {
+        "index": 196,
+        "representation_1": "near"
+      },
+      {
+        "index": 197,
+        "representation_1": "far"
+      },
+      {
+        "index": 198,
+        "representation_1": "right"
+      },
+      {
+        "index": 199,
+        "representation_1": "left"
+      },
+      {
+        "index": 200,
+        "representation_1": "at"
+      },
+      {
+        "index": 201,
+        "representation_1": "in"
+      },
+      {
+        "index": 202,
+        "representation_1": "with"
+      },
+      {
+        "index": 203,
+        "representation_1": "and"
+      },
+      {
+        "index": 204,
+        "representation_1": "if"
+      },
+      {
+        "index": 205,
+        "representation_1": "because"
+      },
+      {
+        "index": 206,
+        "representation_1": "name"
+      }
+    ],
+    "german": [
+      {
+        "index": 0,
+        "representation_1": "ich",
+        "ipa": "/ɪç/"
+      },
+      {
+        "index": 1,
+        "representation_1": "du, Sie",
+        "ipa": "/duː/, /ziː/"
+      },
+      {
+        "index": 2,
+        "representation_1": "er, sie, es",
+        "ipa": "/eːɐ̯/, /ziː/, /ɛs/"
+      },
+      {
+        "index": 3,
+        "representation_1": "wir",
+        "ipa": "/viːɐ̯/"
+      },
+      {
+        "index": 4,
+        "representation_1": "ihr, Sie",
+        "ipa": "/iːɐ̯/, /ziː/"
+      },
+      {
+        "index": 5,
+        "representation_1": "sie",
+        "ipa": "/ziː/"
+      },
+      {
+        "index": 6,
+        "representation_1": "dieser, diese, dieses, dies",
+        "ipa": "/ˈdiːzɐ/, /ˈdiːzə/, /ˈdiːzəs/, /diːs/"
+      },
+      {
+        "index": 7,
+        "representation_1": "der, die, das, jener, jene, jenes",
+        "ipa": "/deːɐ̯/, /diː/, /das/, /ˈjeːnɐ/, /ˈjeːnə/, /ˈjeːnəs/"
+      },
+      {
+        "index": 8,
+        "representation_1": "hier",
+        "ipa": "/hiːɐ̯/"
+      },
+      {
+        "index": 9,
+        "representation_1": "da, dort",
+        "ipa": "/daː/, /dɔʁt/"
+      },
+      {
+        "index": 10,
+        "representation_1": "wer",
+        "ipa": "/veːɐ̯/"
+      },
+      {
+        "index": 11,
+        "representation_1": "was",
+        "ipa": "/vas/"
+      },
+      {
+        "index": 12,
+        "representation_1": "wo",
+        "ipa": "/voː/"
+      },
+      {
+        "index": 13,
+        "representation_1": "wann",
+        "ipa": "/van/"
+      },
+      {
+        "index": 14,
+        "representation_1": "wie",
+        "ipa": "/viː/"
+      },
+      {
+        "index": 15,
+        "representation_1": "nicht",
+        "ipa": "/nɪçt/"
+      },
+      {
+        "index": 16,
+        "representation_1": "alle",
+        "ipa": "/ˈalə/"
+      },
+      {
+        "index": 17,
+        "representation_1": "viele",
+        "ipa": "/ˈfiːlə/"
+      },
+      {
+        "index": 18,
+        "representation_1": "einige, manche",
+        "ipa": "/ˈaɪ̯nɪɡə/, /mançə/"
+      },
+      {
+        "index": 19,
+        "representation_1": "wenig",
+        "ipa": "/ˈveːnɪç/"
+      },
+      {
+        "index": 20,
+        "representation_1": "anderer",
+        "ipa": "/ˈand(ə)ʁɐ/"
+      },
+      {
+        "index": 21,
+        "representation_1": "eins",
+        "ipa": "/aɪ̯ns/"
+      },
+      {
+        "index": 22,
+        "representation_1": "zwei, zwo",
+        "ipa": "/tsvaɪ̯/, /t͡svoː/"
+      },
+      {
+        "index": 23,
+        "representation_1": "drei",
+        "ipa": "/dʁaɪ̯/"
+      },
+      {
+        "index": 24,
+        "representation_1": "vier",
+        "ipa": "/fiːɐ̯/"
+      },
+      {
+        "index": 25,
+        "representation_1": "fünf",
+        "ipa": "/fʏnf/"
+      },
+      {
+        "index": 26,
+        "representation_1": "groß",
+        "ipa": "/ɡʁoːs/"
+      },
+      {
+        "index": 27,
+        "representation_1": "lang",
+        "ipa": "/laŋ/"
+      },
+      {
+        "index": 28,
+        "representation_1": "breit, weit",
+        "ipa": "/bʁaɪ̯t/, /vaɪ̯t/"
+      },
+      {
+        "index": 29,
+        "representation_1": "dick",
+        "ipa": "/dɪk/"
+      },
+      {
+        "index": 30,
+        "representation_1": "schwer",
+        "ipa": "/ʃveːɐ̯/"
+      },
+      {
+        "index": 31,
+        "representation_1": "klein",
+        "ipa": "/klaɪ̯n/"
+      },
+      {
+        "index": 32,
+        "representation_1": "kurz",
+        "ipa": "/kʊʁts/"
+      },
+      {
+        "index": 33,
+        "representation_1": "eng, schmal",
+        "ipa": "/ɛŋ/, /ʃmaːl/"
+      },
+      {
+        "index": 34,
+        "representation_1": "dünn",
+        "ipa": "/dʏn/"
+      },
+      {
+        "index": 35,
+        "representation_1": "Frau, Weib",
+        "ipa": "/fʁaʊ̯/, /vaɪ̯p/"
+      },
+      {
+        "index": 36,
+        "representation_1": "Mann",
+        "ipa": "/man/"
+      },
+      {
+        "index": 37,
+        "representation_1": "Mensch",
+        "ipa": "/mɛnʃ/"
+      },
+      {
+        "index": 38,
+        "representation_1": "Kind",
+        "ipa": "/kɪnt/"
+      },
+      {
+        "index": 39,
+        "representation_1": "Frau, Ehefrau",
+        "ipa": "/fʁaʊ̯/, /ˈeːəfʁaʊ̯/"
+      },
+      {
+        "index": 40,
+        "representation_1": "Mann, Ehemann",
+        "ipa": "/man/, /ˈeːəman/"
+      },
+      {
+        "index": 41,
+        "representation_1": "Mutter",
+        "ipa": "/ˈmʊtɐ/"
+      },
+      {
+        "index": 42,
+        "representation_1": "Vater",
+        "ipa": "/ˈfaːtɐ/"
+      },
+      {
+        "index": 43,
+        "representation_1": "Tier",
+        "ipa": "/tiːɐ̯/"
+      },
+      {
+        "index": 44,
+        "representation_1": "Fisch",
+        "ipa": "/fɪʃ/"
+      },
+      {
+        "index": 45,
+        "representation_1": "Vogel",
+        "ipa": "/ˈfoːɡəl/"
+      },
+      {
+        "index": 46,
+        "representation_1": "Hund",
+        "ipa": "/hʊnt/"
+      },
+      {
+        "index": 47,
+        "representation_1": "Laus",
+        "ipa": "/laʊ̯s/"
+      },
+      {
+        "index": 48,
+        "representation_1": "Schlange",
+        "ipa": "/ˈʃlaŋə/"
+      },
+      {
+        "index": 49,
+        "representation_1": "Wurm",
+        "ipa": "/vʊʁm/"
+      },
+      {
+        "index": 50,
+        "representation_1": "Baum",
+        "ipa": "/baʊ̯m/"
+      },
+      {
+        "index": 51,
+        "representation_1": "Forst, Wald",
+        "ipa": "/fɔɐ̯st/, /valt/"
+      },
+      {
+        "index": 52,
+        "representation_1": "Stock",
+        "ipa": "/ʃtɔk/"
+      },
+      {
+        "index": 53,
+        "representation_1": "Frucht, Obst",
+        "ipa": "/fʁʊxt/, /oːpst/"
+      },
+      {
+        "index": 54,
+        "representation_1": "Samen, Saat",
+        "ipa": "/ˈzaːmən/, /zaːt/"
+      },
+      {
+        "index": 55,
+        "representation_1": "Blatt",
+        "ipa": "/blat/"
+      },
+      {
+        "index": 56,
+        "representation_1": "Wurzel",
+        "ipa": "/ˈvʊʁtsəl/"
+      },
+      {
+        "index": 57,
+        "representation_1": "Borke, Rinde",
+        "ipa": "/ˈbɔʁ.kə/, /ˈʁɪndə/"
+      },
+      {
+        "index": 58,
+        "representation_1": "Blume",
+        "ipa": "/ˈbluːmə/"
+      },
+      {
+        "index": 59,
+        "representation_1": "Gras",
+        "ipa": "/ɡʁaːs/"
+      },
+      {
+        "index": 60,
+        "representation_1": "Leine, Seil, Strick",
+        "ipa": "/ˈlaɪ̯nə/, /zaɪ̯l/, /ʃtʁɪk/"
+      },
+      {
+        "index": 61,
+        "representation_1": "Haut",
+        "ipa": "/haʊ̯t/"
+      },
+      {
+        "index": 62,
+        "representation_1": "Fleisch",
+        "ipa": "/flaɪ̯ʃ/"
+      },
+      {
+        "index": 63,
+        "representation_1": "Blut",
+        "ipa": "/bluːt/"
+      },
+      {
+        "index": 64,
+        "representation_1": "Knochen",
+        "ipa": "/ˈknɔxən/"
+      },
+      {
+        "index": 65,
+        "representation_1": "Fett",
+        "ipa": "/fɛt/"
+      },
+      {
+        "index": 66,
+        "representation_1": "Ei",
+        "ipa": "/aɪ̯/"
+      },
+      {
+        "index": 67,
+        "representation_1": "Horn",
+        "ipa": "/hɔʁn/"
+      },
+      {
+        "index": 68,
+        "representation_1": "Schwanz, Schweif",
+        "ipa": "/ʃvants/, /ʃvaɪ̯f/"
+      },
+      {
+        "index": 69,
+        "representation_1": "Feder",
+        "ipa": "/ˈfeːdɐ/"
+      },
+      {
+        "index": 70,
+        "representation_1": "Haar",
+        "ipa": "/haːɐ̯/"
+      },
+      {
+        "index": 71,
+        "representation_1": "Haupt, Kopf",
+        "ipa": "/haʊ̯pt/, /kɔpf/"
+      },
+      {
+        "index": 72,
+        "representation_1": "Ohr",
+        "ipa": "/oːɐ̯/"
+      },
+      {
+        "index": 73,
+        "representation_1": "Auge",
+        "ipa": "/ˈaʊ̯ɡə/"
+      },
+      {
+        "index": 74,
+        "representation_1": "Nase",
+        "ipa": "/ˈnaːzə/"
+      },
+      {
+        "index": 75,
+        "representation_1": "Mund",
+        "ipa": "/mʊnt/"
+      },
+      {
+        "index": 76,
+        "representation_1": "Zahn",
+        "ipa": "/tsaːn/"
+      },
+      {
+        "index": 77,
+        "representation_1": "Zunge",
+        "ipa": "/ˈtsʊŋə/"
+      },
+      {
+        "index": 78,
+        "representation_1": "Fingernagel",
+        "ipa": "/ˈfɪŋɐnaːɡəl/"
+      },
+      {
+        "index": 79,
+        "representation_1": "Fuß",
+        "ipa": "/fuːs/"
+      },
+      {
+        "index": 80,
+        "representation_1": "Bein",
+        "ipa": "/baɪ̯n/"
+      },
+      {
+        "index": 81,
+        "representation_1": "Knie",
+        "ipa": "/kniː/"
+      },
+      {
+        "index": 82,
+        "representation_1": "Hand",
+        "ipa": "/hant/"
+      },
+      {
+        "index": 83,
+        "representation_1": "Fittich, Flügel, Schwinge",
+        "ipa": "/ˈfɪtɪç/, /ˈflyːɡəl/, /ˈʃvɪŋə/"
+      },
+      {
+        "index": 84,
+        "representation_1": "Bauch, Leib",
+        "ipa": "/baʊ̯x/, /laɪ̯p/"
+      },
+      {
+        "index": 85,
+        "representation_1": "Eingeweide, Gedärm, Innereien, Kaldaunen",
+        "ipa": "/ˈaɪ̯nɡəvaɪ̯də/, /ɡəˈdɛrm/, /ɪnəˈʁaɪ̯ən/, /kalˈdaʊ̯nən/"
+      },
+      {
+        "index": 86,
+        "representation_1": "Hals, Nacken",
+        "ipa": "/hals/, /ˈnakən/"
+      },
+      {
+        "index": 87,
+        "representation_1": "Rücken",
+        "ipa": "/ˈʁʏkən/"
+      },
+      {
+        "index": 88,
+        "representation_1": "Brust, Busen",
+        "ipa": "/bʁʊst/, /ˈbuːzn̩/"
+      },
+      {
+        "index": 89,
+        "representation_1": "Herz",
+        "ipa": "/hɛʁts/"
+      },
+      {
+        "index": 90,
+        "representation_1": "Leber",
+        "ipa": "/ˈleːbɐ/"
+      },
+      {
+        "index": 91,
+        "representation_1": "trinken",
+        "ipa": "/ˈtʁɪŋkən/"
+      },
+      {
+        "index": 92,
+        "representation_1": "essen",
+        "ipa": "/ˈɛsən/"
+      },
+      {
+        "index": 93,
+        "representation_1": "beißen",
+        "ipa": "/ˈbaɪ̯sən/"
+      },
+      {
+        "index": 94,
+        "representation_1": "lutschen, saugen",
+        "ipa": "/ˈlʊ.t͡ʃn̩/, /ˈzaʊ̯ɡən/"
+      },
+      {
+        "index": 95,
+        "representation_1": "speien, spucken",
+        "ipa": "/ˈʃpaɪ̯ən/, /ˈʃpʊkən/"
+      },
+      {
+        "index": 96,
+        "representation_1": "brechen, erbrechen",
+        "ipa": "/ˈbʁɛçən/, /ɛɐ̯ˈbʁɛçən/"
+      },
+      {
+        "index": 97,
+        "representation_1": "blasen, pusten, wehen",
+        "ipa": "/ˈblaːzən/, /ˈpuːstən/, /ˈveː.ən/"
+      },
+      {
+        "index": 98,
+        "representation_1": "atmen",
+        "ipa": "/ˈaːtmən/"
+      },
+      {
+        "index": 99,
+        "representation_1": "lachen",
+        "ipa": "/ˈlaxən/"
+      },
+      {
+        "index": 100,
+        "representation_1": "sehen",
+        "ipa": "/ˈzeːən/"
+      },
+      {
+        "index": 101,
+        "representation_1": "hören",
+        "ipa": "/ˈhøːʁən/"
+      },
+      {
+        "index": 102,
+        "representation_1": "kennen, wissen",
+        "ipa": "/ˈkɛnən/, /ˈvɪsən/"
+      },
+      {
+        "index": 103,
+        "representation_1": "denken",
+        "ipa": "/ˈdɛŋkən/"
+      },
+      {
+        "index": 104,
+        "representation_1": "riechen",
+        "ipa": "/ˈʁiːçən/"
+      },
+      {
+        "index": 105,
+        "representation_1": "fürchten",
+        "ipa": "/ˈfʏʁçtən/"
+      },
+      {
+        "index": 106,
+        "representation_1": "schlafen",
+        "ipa": "/ˈʃlaːfən/"
+      },
+      {
+        "index": 107,
+        "representation_1": "leben",
+        "ipa": "/ˈleːbən/"
+      },
+      {
+        "index": 108,
+        "representation_1": "sterben",
+        "ipa": "/ˈʃtɛʁbən/"
+      },
+      {
+        "index": 109,
+        "representation_1": "töten, umbringen",
+        "ipa": "/ˈtøːtən/, /ˈʔʊmˌbʁɪŋən/"
+      },
+      {
+        "index": 110,
+        "representation_1": "fechten, kämpfen",
+        "ipa": "/ˈfɛçtən/, /ˈkɛmpfən/"
+      },
+      {
+        "index": 111,
+        "representation_1": "jagen",
+        "ipa": "/ˈjaːɡən/"
+      },
+      {
+        "index": 112,
+        "representation_1": "schlagen",
+        "ipa": "/ˈʃlaːɡən/"
+      },
+      {
+        "index": 113,
+        "representation_1": "schneiden",
+        "ipa": "/ˈʃnaɪ̯dən/"
+      },
+      {
+        "index": 114,
+        "representation_1": "spalten, spleißen",
+        "ipa": "/ˈʃpaltən/, /ˈʃplaɪ̯sn̩/"
+      },
+      {
+        "index": 115,
+        "representation_1": "stechen",
+        "ipa": "/ˈʃtɛçən/"
+      },
+      {
+        "index": 116,
+        "representation_1": "kratzen, ritzen, scharren",
+        "ipa": "/ˈkʁatsən/, /ˈʁɪt͡sən/, /ˈʃaʁn̩/"
+      },
+      {
+        "index": 117,
+        "representation_1": "graben",
+        "ipa": "/ˈɡʁaːbən/"
+      },
+      {
+        "index": 118,
+        "representation_1": "schwimmen",
+        "ipa": "/ˈʃvɪmən/"
+      },
+      {
+        "index": 119,
+        "representation_1": "fliegen",
+        "ipa": "/ˈfliːɡən/"
+      },
+      {
+        "index": 120,
+        "representation_1": "gehen",
+        "ipa": "/ˈɡeːən/"
+      },
+      {
+        "index": 121,
+        "representation_1": "kommen",
+        "ipa": "/ˈkɔmən/"
+      },
+      {
+        "index": 122,
+        "representation_1": "liegen",
+        "ipa": "/ˈliːɡən/"
+      },
+      {
+        "index": 123,
+        "representation_1": "sitzen",
+        "ipa": "/ˈzɪtsən/"
+      },
+      {
+        "index": 124,
+        "representation_1": "stehen",
+        "ipa": "/ˈʃteːən/"
+      },
+      {
+        "index": 125,
+        "representation_1": "drehen",
+        "ipa": "/ˈdʁeːən/"
+      },
+      {
+        "index": 126,
+        "representation_1": "fallen",
+        "ipa": "/ˈfalən/"
+      },
+      {
+        "index": 127,
+        "representation_1": "geben",
+        "ipa": "/ˈɡeːbən/"
+      },
+      {
+        "index": 128,
+        "representation_1": "halten",
+        "ipa": "/ˈhaltən/"
+      },
+      {
+        "index": 129,
+        "representation_1": "quetschen",
+        "ipa": "/ˈkvɛtʃən/"
+      },
+      {
+        "index": 130,
+        "representation_1": "reiben",
+        "ipa": "/ˈʁaɪ̯bən/"
+      },
+      {
+        "index": 131,
+        "representation_1": "waschen",
+        "ipa": "/ˈvaʃən/"
+      },
+      {
+        "index": 132,
+        "representation_1": "wischen",
+        "ipa": "/ˈvɪʃən/"
+      },
+      {
+        "index": 133,
+        "representation_1": "ziehen",
+        "ipa": "/ˈtsiːən/"
+      },
+      {
+        "index": 134,
+        "representation_1": "drücken, schieben",
+        "ipa": "/ˈdʁʏkən/, /ˈʃiːbən/"
+      },
+      {
+        "index": 135,
+        "representation_1": "werfen",
+        "ipa": "/ˈvɛʁfən/"
+      },
+      {
+        "index": 136,
+        "representation_1": "binden, knüpfen",
+        "ipa": "/ˈbɪndən/, /ˈknʏpfən/"
+      },
+      {
+        "index": 137,
+        "representation_1": "nähen",
+        "ipa": "/ˈnɛːən/"
+      },
+      {
+        "index": 138,
+        "representation_1": "rechnen, zählen",
+        "ipa": "/ˈʁɛçnən/, /ˈtsɛːlən/"
+      },
+      {
+        "index": 139,
+        "representation_1": "sagen",
+        "ipa": "/ˈzaːɡən/"
+      },
+      {
+        "index": 140,
+        "representation_1": "singen",
+        "ipa": "/ˈzɪŋən/"
+      },
+      {
+        "index": 141,
+        "representation_1": "spielen",
+        "ipa": "/ˈʃpiːlən/"
+      },
+      {
+        "index": 142,
+        "representation_1": "schweben",
+        "ipa": "/ˈʃveːbən/"
+      },
+      {
+        "index": 143,
+        "representation_1": "fließen, strömen",
+        "ipa": "/ˈfliːsən/, /ˈʃtʁøːmən/"
+      },
+      {
+        "index": 144,
+        "representation_1": "frieren",
+        "ipa": "/ˈfʁiːrən/"
+      },
+      {
+        "index": 145,
+        "representation_1": "schwellen",
+        "ipa": "/ˈʃvɛlən/"
+      },
+      {
+        "index": 146,
+        "representation_1": "Sonne",
+        "ipa": "/ˈzɔnə/"
+      },
+      {
+        "index": 147,
+        "representation_1": "Mond",
+        "ipa": "/moːnt/"
+      },
+      {
+        "index": 148,
+        "representation_1": "Stern",
+        "ipa": "/ʃtɛʁn/"
+      },
+      {
+        "index": 149,
+        "representation_1": "Wasser",
+        "ipa": "/ˈvasɐ/"
+      },
+      {
+        "index": 150,
+        "representation_1": "Regen",
+        "ipa": "/ˈʁeːɡən/"
+      },
+      {
+        "index": 151,
+        "representation_1": "Fluss",
+        "ipa": "/flʊs/"
+      },
+      {
+        "index": 152,
+        "representation_1": "See",
+        "ipa": "/zeː/"
+      },
+      {
+        "index": 153,
+        "representation_1": "Meer",
+        "ipa": "/meːɐ̯/"
+      },
+      {
+        "index": 154,
+        "representation_1": "Salz",
+        "ipa": "/zalts/"
+      },
+      {
+        "index": 155,
+        "representation_1": "Stein",
+        "ipa": "/ʃtaɪ̯n/"
+      },
+      {
+        "index": 156,
+        "representation_1": "Sand",
+        "ipa": "/zant/"
+      },
+      {
+        "index": 157,
+        "representation_1": "Staub",
+        "ipa": "/ʃtaʊ̯p/"
+      },
+      {
+        "index": 158,
+        "representation_1": "Erde",
+        "ipa": "/ˈeːɐ̯də/"
+      },
+      {
+        "index": 159,
+        "representation_1": "Wolke",
+        "ipa": "/ˈvɔlkə/"
+      },
+      {
+        "index": 160,
+        "representation_1": "Nebel",
+        "ipa": "/ˈneːbəl/"
+      },
+      {
+        "index": 161,
+        "representation_1": "Himmel",
+        "ipa": "/ˈhɪməl/"
+      },
+      {
+        "index": 162,
+        "representation_1": "Wind",
+        "ipa": "/vɪnt/"
+      },
+      {
+        "index": 163,
+        "representation_1": "Schnee",
+        "ipa": "/ʃneː/"
+      },
+      {
+        "index": 164,
+        "representation_1": "Eis",
+        "ipa": "/aɪ̯s/"
+      },
+      {
+        "index": 165,
+        "representation_1": "Rauch",
+        "ipa": "/ʁaʊ̯x/"
+      },
+      {
+        "index": 166,
+        "representation_1": "Feuer",
+        "ipa": "/ˈfɔʏɐ/"
+      },
+      {
+        "index": 167,
+        "representation_1": "Asche",
+        "ipa": "/ˈaʃə/"
+      },
+      {
+        "index": 168,
+        "representation_1": "brennen",
+        "ipa": "/ˈbʁɛnən/"
+      },
+      {
+        "index": 169,
+        "representation_1": "Straße",
+        "ipa": "/ˈʃtʁaːsə/"
+      },
+      {
+        "index": 170,
+        "representation_1": "Berg",
+        "ipa": "/bɛʁk/"
+      },
+      {
+        "index": 171,
+        "representation_1": "rot",
+        "ipa": "/ʁoːt/"
+      },
+      {
+        "index": 172,
+        "representation_1": "grün",
+        "ipa": "/ɡʁyːn/"
+      },
+      {
+        "index": 173,
+        "representation_1": "gelb",
+        "ipa": "/ɡɛlp/"
+      },
+      {
+        "index": 174,
+        "representation_1": "weiß",
+        "ipa": "/vaɪ̯s/"
+      },
+      {
+        "index": 175,
+        "representation_1": "schwarz",
+        "ipa": "/ʃvaʁts/"
+      },
+      {
+        "index": 176,
+        "representation_1": "Nacht",
+        "ipa": "/naxt/"
+      },
+      {
+        "index": 177,
+        "representation_1": "Tag",
+        "ipa": "/taːk/"
+      },
+      {
+        "index": 178,
+        "representation_1": "Jahr",
+        "ipa": "/jaːɐ̯/"
+      },
+      {
+        "index": 179,
+        "representation_1": "warm",
+        "ipa": "/vaʁm/"
+      },
+      {
+        "index": 180,
+        "representation_1": "kalt",
+        "ipa": "/kalt/"
+      },
+      {
+        "index": 181,
+        "representation_1": "voll",
+        "ipa": "/fɔl/"
+      },
+      {
+        "index": 182,
+        "representation_1": "neu",
+        "ipa": "/nɔʏ̯/"
+      },
+      {
+        "index": 183,
+        "representation_1": "alt",
+        "ipa": "/alt/"
+      },
+      {
+        "index": 184,
+        "representation_1": "gut",
+        "ipa": "/ɡuːt/"
+      },
+      {
+        "index": 185,
+        "representation_1": "schlecht, übel",
+        "ipa": "/ʃlɛçt/, /ˈʔyː.bl̩/"
+      },
+      {
+        "index": 186,
+        "representation_1": "faul, verrottet",
+        "ipa": "/faʊ̯l/, /fɛɐ̯ˈʁɔtət/"
+      },
+      {
+        "index": 187,
+        "representation_1": "schmutzig, dreckig",
+        "ipa": "/ˈʃmʊtsɪç/, /ˈdʁɛkɪç/"
+      },
+      {
+        "index": 188,
+        "representation_1": "gerade",
+        "ipa": "/ɡ(ə)ˈʁaːdə/"
+      },
+      {
+        "index": 189,
+        "representation_1": "rund",
+        "ipa": "/ʁʊnt/"
+      },
+      {
+        "index": 190,
+        "representation_1": "scharf",
+        "ipa": "/ʃaʁf/"
+      },
+      {
+        "index": 191,
+        "representation_1": "stumpf",
+        "ipa": "/ʃtʊmpf/"
+      },
+      {
+        "index": 192,
+        "representation_1": "glatt",
+        "ipa": "/ɡlat/"
+      },
+      {
+        "index": 193,
+        "representation_1": "nass, feucht",
+        "ipa": "/nas/, /fɔʏ̯çt/"
+      },
+      {
+        "index": 194,
+        "representation_1": "dürr, trocken",
+        "ipa": "/dʏʁ/, /ˈtʁɔkən/"
+      },
+      {
+        "index": 195,
+        "representation_1": "richtig",
+        "ipa": "/ˈʁɪçtɪç/"
+      },
+      {
+        "index": 196,
+        "representation_1": "nah",
+        "ipa": "/ˈnaː/"
+      },
+      {
+        "index": 197,
+        "representation_1": "fern, weit",
+        "ipa": "/fɛʁn/, /vaɪ̯t/"
+      },
+      {
+        "index": 198,
+        "representation_1": "recht",
+        "ipa": "/ʁɛçt/"
+      },
+      {
+        "index": 199,
+        "representation_1": "link",
+        "ipa": "/lɪŋk/"
+      },
+      {
+        "index": 200,
+        "representation_1": "an, bei",
+        "ipa": "/an/, /baɪ̯/"
+      },
+      {
+        "index": 201,
+        "representation_1": "in",
+        "ipa": "/ɪn/"
+      },
+      {
+        "index": 202,
+        "representation_1": "mit",
+        "ipa": "/mɪt/"
+      },
+      {
+        "index": 203,
+        "representation_1": "und",
+        "ipa": "/ʊnt/"
+      },
+      {
+        "index": 204,
+        "representation_1": "ob, wenn",
+        "ipa": "/ɔp/, /vɛn/"
+      },
+      {
+        "index": 205,
+        "representation_1": "weil",
+        "ipa": "/vaɪ̯l/"
+      },
+      {
+        "index": 206,
+        "representation_1": "Name",
+        "ipa": "/ˈnaːmə/"
+      }
+    ],
+    "turkish": [
+      {
+        "index": 0,
+        "representation_1": "ben"
+      },
+      {
+        "index": 1,
+        "representation_1": "sen, siz"
+      },
+      {
+        "index": 2,
+        "representation_1": "o"
+      },
+      {
+        "index": 3,
+        "representation_1": "biz"
+      },
+      {
+        "index": 4,
+        "representation_1": "siz"
+      },
+      {
+        "index": 5,
+        "representation_1": "onlar"
+      },
+      {
+        "index": 6,
+        "representation_1": "bu"
+      },
+      {
+        "index": 7,
+        "representation_1": "şu, o"
+      },
+      {
+        "index": 8,
+        "representation_1": "burada"
+      },
+      {
+        "index": 9,
+        "representation_1": "şurada, orada"
+      },
+      {
+        "index": 10,
+        "representation_1": "kim"
+      },
+      {
+        "index": 11,
+        "representation_1": "ne"
+      },
+      {
+        "index": 12,
+        "representation_1": "nerede"
+      },
+      {
+        "index": 13,
+        "representation_1": "ne zaman"
+      },
+      {
+        "index": 14,
+        "representation_1": "nasıl"
+      },
+      {
+        "index": 15,
+        "representation_1": "değil"
+      },
+      {
+        "index": 16,
+        "representation_1": "bütün, tüm"
+      },
+      {
+        "index": 17,
+        "representation_1": "çok"
+      },
+      {
+        "index": 18,
+        "representation_1": "biraz, birkaç, bazı"
+      },
+      {
+        "index": 19,
+        "representation_1": "az"
+      },
+      {
+        "index": 20,
+        "representation_1": "başka, diğer, öbür, öteki"
+      },
+      {
+        "index": 21,
+        "representation_1": "bir"
+      },
+      {
+        "index": 22,
+        "representation_1": "iki"
+      },
+      {
+        "index": 23,
+        "representation_1": "üç"
+      },
+      {
+        "index": 24,
+        "representation_1": "dört"
+      },
+      {
+        "index": 25,
+        "representation_1": "beş"
+      },
+      {
+        "index": 26,
+        "representation_1": "büyük"
+      },
+      {
+        "index": 27,
+        "representation_1": "uzun"
+      },
+      {
+        "index": 28,
+        "representation_1": "geniş"
+      },
+      {
+        "index": 29,
+        "representation_1": "kalın"
+      },
+      {
+        "index": 30,
+        "representation_1": "ağır"
+      },
+      {
+        "index": 31,
+        "representation_1": "küçük"
+      },
+      {
+        "index": 32,
+        "representation_1": "kısa"
+      },
+      {
+        "index": 33,
+        "representation_1": "dar"
+      },
+      {
+        "index": 34,
+        "representation_1": "ince"
+      },
+      {
+        "index": 35,
+        "representation_1": "kadın"
+      },
+      {
+        "index": 36,
+        "representation_1": "adam"
+      },
+      {
+        "index": 37,
+        "representation_1": "insan, kişi"
+      },
+      {
+        "index": 38,
+        "representation_1": "çocuk"
+      },
+      {
+        "index": 39,
+        "representation_1": "karı"
+      },
+      {
+        "index": 40,
+        "representation_1": "koca"
+      },
+      {
+        "index": 41,
+        "representation_1": "anne, ana"
+      },
+      {
+        "index": 42,
+        "representation_1": "baba, ata"
+      },
+      {
+        "index": 43,
+        "representation_1": "hayvan"
+      },
+      {
+        "index": 44,
+        "representation_1": "balık"
+      },
+      {
+        "index": 45,
+        "representation_1": "kuş"
+      },
+      {
+        "index": 46,
+        "representation_1": "köpek, it"
+      },
+      {
+        "index": 47,
+        "representation_1": "bit"
+      },
+      {
+        "index": 48,
+        "representation_1": "yılan"
+      },
+      {
+        "index": 49,
+        "representation_1": "solucan, kurt"
+      },
+      {
+        "index": 50,
+        "representation_1": "ağaç"
+      },
+      {
+        "index": 51,
+        "representation_1": "orman"
+      },
+      {
+        "index": 52,
+        "representation_1": "çubuk, değnek, çıta"
+      },
+      {
+        "index": 53,
+        "representation_1": "meyve, meyva"
+      },
+      {
+        "index": 54,
+        "representation_1": "tohum"
+      },
+      {
+        "index": 55,
+        "representation_1": "yaprak"
+      },
+      {
+        "index": 56,
+        "representation_1": "kök"
+      },
+      {
+        "index": 57,
+        "representation_1": "kabuk"
+      },
+      {
+        "index": 58,
+        "representation_1": "çiçek"
+      },
+      {
+        "index": 59,
+        "representation_1": "ot, çimen, çim"
+      },
+      {
+        "index": 60,
+        "representation_1": "ip, halat"
+      },
+      {
+        "index": 61,
+        "representation_1": "deri, ten"
+      },
+      {
+        "index": 62,
+        "representation_1": "et"
+      },
+      {
+        "index": 63,
+        "representation_1": "kan"
+      },
+      {
+        "index": 64,
+        "representation_1": "kemik"
+      },
+      {
+        "index": 65,
+        "representation_1": "yağ"
+      },
+      {
+        "index": 66,
+        "representation_1": "yumurta"
+      },
+      {
+        "index": 67,
+        "representation_1": "boynuz"
+      },
+      {
+        "index": 68,
+        "representation_1": "kuyruk"
+      },
+      {
+        "index": 69,
+        "representation_1": "tüy"
+      },
+      {
+        "index": 70,
+        "representation_1": "saç, kıl"
+      },
+      {
+        "index": 71,
+        "representation_1": "baş, kafa"
+      },
+      {
+        "index": 72,
+        "representation_1": "kulak"
+      },
+      {
+        "index": 73,
+        "representation_1": "göz"
+      },
+      {
+        "index": 74,
+        "representation_1": "burun"
+      },
+      {
+        "index": 75,
+        "representation_1": "ağız"
+      },
+      {
+        "index": 76,
+        "representation_1": "diş"
+      },
+      {
+        "index": 77,
+        "representation_1": "dil"
+      },
+      {
+        "index": 78,
+        "representation_1": "tırnak"
+      },
+      {
+        "index": 79,
+        "representation_1": "ayak"
+      },
+      {
+        "index": 80,
+        "representation_1": "bacak"
+      },
+      {
+        "index": 81,
+        "representation_1": "diz"
+      },
+      {
+        "index": 82,
+        "representation_1": "el"
+      },
+      {
+        "index": 83,
+        "representation_1": "kanat"
+      },
+      {
+        "index": 84,
+        "representation_1": "karın, göbek"
+      },
+      {
+        "index": 85,
+        "representation_1": "bağırsak, barsak"
+      },
+      {
+        "index": 86,
+        "representation_1": "boyun"
+      },
+      {
+        "index": 87,
+        "representation_1": "arka, sırt"
+      },
+      {
+        "index": 88,
+        "representation_1": "göğüs"
+      },
+      {
+        "index": 89,
+        "representation_1": "yürek, kalp"
+      },
+      {
+        "index": 90,
+        "representation_1": "karaciğer, ciğer"
+      },
+      {
+        "index": 91,
+        "representation_1": "içmek"
+      },
+      {
+        "index": 92,
+        "representation_1": "yemek"
+      },
+      {
+        "index": 93,
+        "representation_1": "ısırmak"
+      },
+      {
+        "index": 94,
+        "representation_1": "emmek"
+      },
+      {
+        "index": 95,
+        "representation_1": "tükürmek"
+      },
+      {
+        "index": 96,
+        "representation_1": "kusmak"
+      },
+      {
+        "index": 97,
+        "representation_1": "üflemek"
+      },
+      {
+        "index": 98,
+        "representation_1": "soluk almak, solumak, nefes almak"
+      },
+      {
+        "index": 99,
+        "representation_1": "gülmek"
+      },
+      {
+        "index": 100,
+        "representation_1": "görmek"
+      },
+      {
+        "index": 101,
+        "representation_1": "işitmek, duymak"
+      },
+      {
+        "index": 102,
+        "representation_1": "bilmek"
+      },
+      {
+        "index": 103,
+        "representation_1": "düşünmek"
+      },
+      {
+        "index": 104,
+        "representation_1": "koklamak, kokmak"
+      },
+      {
+        "index": 105,
+        "representation_1": "korkmak"
+      },
+      {
+        "index": 106,
+        "representation_1": "uyumak"
+      },
+      {
+        "index": 107,
+        "representation_1": "yaşamak, oturmak"
+      },
+      {
+        "index": 108,
+        "representation_1": "ölmek"
+      },
+      {
+        "index": 109,
+        "representation_1": "öldürmek"
+      },
+      {
+        "index": 110,
+        "representation_1": "dövüşmek, kavga etmek"
+      },
+      {
+        "index": 111,
+        "representation_1": "avlamak"
+      },
+      {
+        "index": 112,
+        "representation_1": "vurmak"
+      },
+      {
+        "index": 113,
+        "representation_1": "kesmek"
+      },
+      {
+        "index": 114,
+        "representation_1": "yarmak, ayırmak"
+      },
+      {
+        "index": 115,
+        "representation_1": "bıçaklamak"
+      },
+      {
+        "index": 116,
+        "representation_1": "kaşımak"
+      },
+      {
+        "index": 117,
+        "representation_1": "kazmak"
+      },
+      {
+        "index": 118,
+        "representation_1": "yüzmek"
+      },
+      {
+        "index": 119,
+        "representation_1": "uçmak"
+      },
+      {
+        "index": 120,
+        "representation_1": "yürümek"
+      },
+      {
+        "index": 121,
+        "representation_1": "gelmek"
+      },
+      {
+        "index": 122,
+        "representation_1": "yatmak, uzanmak"
+      },
+      {
+        "index": 123,
+        "representation_1": "oturmak"
+      },
+      {
+        "index": 124,
+        "representation_1": "durmak, dikilmek"
+      },
+      {
+        "index": 125,
+        "representation_1": "dönmek"
+      },
+      {
+        "index": 126,
+        "representation_1": "düşmek"
+      },
+      {
+        "index": 127,
+        "representation_1": "vermek"
+      },
+      {
+        "index": 128,
+        "representation_1": "tutmak"
+      },
+      {
+        "index": 129,
+        "representation_1": "sıkmak"
+      },
+      {
+        "index": 130,
+        "representation_1": "sürmek, sürtmek, uğmak"
+      },
+      {
+        "index": 131,
+        "representation_1": "yıkamak, yunmak"
+      },
+      {
+        "index": 132,
+        "representation_1": "silmek"
+      },
+      {
+        "index": 133,
+        "representation_1": "çekmek"
+      },
+      {
+        "index": 134,
+        "representation_1": "itmek"
+      },
+      {
+        "index": 135,
+        "representation_1": "atmak"
+      },
+      {
+        "index": 136,
+        "representation_1": "bağlamak"
+      },
+      {
+        "index": 137,
+        "representation_1": "dikmek"
+      },
+      {
+        "index": 138,
+        "representation_1": "saymak"
+      },
+      {
+        "index": 139,
+        "representation_1": "demek, söylemek"
+      },
+      {
+        "index": 140,
+        "representation_1": "şarkı söylemek"
+      },
+      {
+        "index": 141,
+        "representation_1": "oynamak"
+      },
+      {
+        "index": 142,
+        "representation_1": "yüzmek"
+      },
+      {
+        "index": 143,
+        "representation_1": "akmak"
+      },
+      {
+        "index": 144,
+        "representation_1": "donmak, dondurmak"
+      },
+      {
+        "index": 145,
+        "representation_1": "şişmek"
+      },
+      {
+        "index": 146,
+        "representation_1": "güneş"
+      },
+      {
+        "index": 147,
+        "representation_1": "ay"
+      },
+      {
+        "index": 148,
+        "representation_1": "yıldız"
+      },
+      {
+        "index": 149,
+        "representation_1": "su"
+      },
+      {
+        "index": 150,
+        "representation_1": "yağmur"
+      },
+      {
+        "index": 151,
+        "representation_1": "ırmak, nehir"
+      },
+      {
+        "index": 152,
+        "representation_1": "göl"
+      },
+      {
+        "index": 153,
+        "representation_1": "deniz"
+      },
+      {
+        "index": 154,
+        "representation_1": "tuz"
+      },
+      {
+        "index": 155,
+        "representation_1": "taş"
+      },
+      {
+        "index": 156,
+        "representation_1": "kum"
+      },
+      {
+        "index": 157,
+        "representation_1": "toz"
+      },
+      {
+        "index": 158,
+        "representation_1": "yer, yeryüzü, dünya"
+      },
+      {
+        "index": 159,
+        "representation_1": "bulut"
+      },
+      {
+        "index": 160,
+        "representation_1": "sis"
+      },
+      {
+        "index": 161,
+        "representation_1": "gök, gökyüzü"
+      },
+      {
+        "index": 162,
+        "representation_1": "yel, rüzgâr"
+      },
+      {
+        "index": 163,
+        "representation_1": "kar"
+      },
+      {
+        "index": 164,
+        "representation_1": "buz"
+      },
+      {
+        "index": 165,
+        "representation_1": "duman"
+      },
+      {
+        "index": 166,
+        "representation_1": "od, ateş"
+      },
+      {
+        "index": 167,
+        "representation_1": "kül"
+      },
+      {
+        "index": 168,
+        "representation_1": "yakmak, yanmak"
+      },
+      {
+        "index": 169,
+        "representation_1": "yol"
+      },
+      {
+        "index": 170,
+        "representation_1": "dağ"
+      },
+      {
+        "index": 171,
+        "representation_1": "kızıl, kırmızı"
+      },
+      {
+        "index": 172,
+        "representation_1": "yeşil"
+      },
+      {
+        "index": 173,
+        "representation_1": "sarı"
+      },
+      {
+        "index": 174,
+        "representation_1": "ak, beyaz"
+      },
+      {
+        "index": 175,
+        "representation_1": "kara, siyah"
+      },
+      {
+        "index": 176,
+        "representation_1": "gece"
+      },
+      {
+        "index": 177,
+        "representation_1": "gün, gündüz"
+      },
+      {
+        "index": 178,
+        "representation_1": "yıl, sene"
+      },
+      {
+        "index": 179,
+        "representation_1": "sıcak, ılık"
+      },
+      {
+        "index": 180,
+        "representation_1": "soğuk, serin"
+      },
+      {
+        "index": 181,
+        "representation_1": "dolu"
+      },
+      {
+        "index": 182,
+        "representation_1": "yeni"
+      },
+      {
+        "index": 183,
+        "representation_1": "eski, yaşlı"
+      },
+      {
+        "index": 184,
+        "representation_1": "iyi"
+      },
+      {
+        "index": 185,
+        "representation_1": "kötü"
+      },
+      {
+        "index": 186,
+        "representation_1": "çürük"
+      },
+      {
+        "index": 187,
+        "representation_1": "pis, kirli"
+      },
+      {
+        "index": 188,
+        "representation_1": "düz, düzgün, doğru"
+      },
+      {
+        "index": 189,
+        "representation_1": "yuvarlak, toparlak"
+      },
+      {
+        "index": 190,
+        "representation_1": "keskin"
+      },
+      {
+        "index": 191,
+        "representation_1": "kör"
+      },
+      {
+        "index": 192,
+        "representation_1": "pürüzsüz, düzgün"
+      },
+      {
+        "index": 193,
+        "representation_1": "ıslak, nemli"
+      },
+      {
+        "index": 194,
+        "representation_1": "kuru"
+      },
+      {
+        "index": 195,
+        "representation_1": "doğru, gerçek"
+      },
+      {
+        "index": 196,
+        "representation_1": "yakın"
+      },
+      {
+        "index": 197,
+        "representation_1": "uzak"
+      },
+      {
+        "index": 198,
+        "representation_1": "sağ"
+      },
+      {
+        "index": 199,
+        "representation_1": "sol"
+      },
+      {
+        "index": 200,
+        "representation_1": "-da, -de, -a, -e"
+      },
+      {
+        "index": 201,
+        "representation_1": "-da, -de, içinde, içerisinde"
+      },
+      {
+        "index": 202,
+        "representation_1": "ile, -le"
+      },
+      {
+        "index": 203,
+        "representation_1": "ve, ile"
+      },
+      {
+        "index": 204,
+        "representation_1": "-sa, -se, ise, eğer"
+      },
+      {
+        "index": 205,
+        "representation_1": "çünkü"
+      },
+      {
+        "index": 206,
+        "representation_1": "ad, isim"
+      }
+    ],
+    "spanish": [
+      {
+        "index": 0,
+        "representation_1": "yo"
+      },
+      {
+        "index": 1,
+        "representation_1": "tú, vos, usted (formal)"
+      },
+      {
+        "index": 2,
+        "representation_1": "él, ella"
+      },
+      {
+        "index": 3,
+        "representation_1": "nosotros, nosotras"
+      },
+      {
+        "index": 4,
+        "representation_1": "vosotros, vosotras, ustedes"
+      },
+      {
+        "index": 5,
+        "representation_1": "ellos, ellas"
+      },
+      {
+        "index": 6,
+        "representation_1": "este"
+      },
+      {
+        "index": 7,
+        "representation_1": "ese, aquel"
+      },
+      {
+        "index": 8,
+        "representation_1": "aquí, acá"
+      },
+      {
+        "index": 9,
+        "representation_1": "ahí"
+      },
+      {
+        "index": 10,
+        "representation_1": "quién"
+      },
+      {
+        "index": 11,
+        "representation_1": "qué"
+      },
+      {
+        "index": 12,
+        "representation_1": "dónde"
+      },
+      {
+        "index": 13,
+        "representation_1": "cuándo"
+      },
+      {
+        "index": 14,
+        "representation_1": "cómo"
+      },
+      {
+        "index": 15,
+        "representation_1": "no"
+      },
+      {
+        "index": 16,
+        "representation_1": "todo"
+      },
+      {
+        "index": 17,
+        "representation_1": "mucho"
+      },
+      {
+        "index": 18,
+        "representation_1": "alguno"
+      },
+      {
+        "index": 19,
+        "representation_1": "poco"
+      },
+      {
+        "index": 20,
+        "representation_1": "otro"
+      },
+      {
+        "index": 21,
+        "representation_1": "uno"
+      },
+      {
+        "index": 22,
+        "representation_1": "dos"
+      },
+      {
+        "index": 23,
+        "representation_1": "tres"
+      },
+      {
+        "index": 24,
+        "representation_1": "cuatro"
+      },
+      {
+        "index": 25,
+        "representation_1": "cinco"
+      },
+      {
+        "index": 26,
+        "representation_1": "grande"
+      },
+      {
+        "index": 27,
+        "representation_1": "largo"
+      },
+      {
+        "index": 28,
+        "representation_1": "ancho"
+      },
+      {
+        "index": 29,
+        "representation_1": "grueso"
+      },
+      {
+        "index": 30,
+        "representation_1": "pesado"
+      },
+      {
+        "index": 31,
+        "representation_1": "pequeño"
+      },
+      {
+        "index": 32,
+        "representation_1": "corto"
+      },
+      {
+        "index": 33,
+        "representation_1": "estrecho, angosto"
+      },
+      {
+        "index": 34,
+        "representation_1": "delgado, flaco"
+      },
+      {
+        "index": 35,
+        "representation_1": "mujer"
+      },
+      {
+        "index": 36,
+        "representation_1": "varón"
+      },
+      {
+        "index": 37,
+        "representation_1": "hombre"
+      },
+      {
+        "index": 38,
+        "representation_1": "niño"
+      },
+      {
+        "index": 39,
+        "representation_1": "esposa, mujer"
+      },
+      {
+        "index": 40,
+        "representation_1": "esposo, marido"
+      },
+      {
+        "index": 41,
+        "representation_1": "madre"
+      },
+      {
+        "index": 42,
+        "representation_1": "padre"
+      },
+      {
+        "index": 43,
+        "representation_1": "animal"
+      },
+      {
+        "index": 44,
+        "representation_1": "pez, pescado"
+      },
+      {
+        "index": 45,
+        "representation_1": "pájaro"
+      },
+      {
+        "index": 46,
+        "representation_1": "perro"
+      },
+      {
+        "index": 47,
+        "representation_1": "piojo"
+      },
+      {
+        "index": 48,
+        "representation_1": "serpiente, víbora, culebra"
+      },
+      {
+        "index": 49,
+        "representation_1": "gusano"
+      },
+      {
+        "index": 50,
+        "representation_1": "árbol"
+      },
+      {
+        "index": 51,
+        "representation_1": "bosque"
+      },
+      {
+        "index": 52,
+        "representation_1": "palo"
+      },
+      {
+        "index": 53,
+        "representation_1": "fruta"
+      },
+      {
+        "index": 54,
+        "representation_1": "semilla"
+      },
+      {
+        "index": 55,
+        "representation_1": "hoja"
+      },
+      {
+        "index": 56,
+        "representation_1": "raíz"
+      },
+      {
+        "index": 57,
+        "representation_1": "corteza"
+      },
+      {
+        "index": 58,
+        "representation_1": "flor"
+      },
+      {
+        "index": 59,
+        "representation_1": "hierba, grama"
+      },
+      {
+        "index": 60,
+        "representation_1": "cuerda"
+      },
+      {
+        "index": 61,
+        "representation_1": "piel"
+      },
+      {
+        "index": 62,
+        "representation_1": "carne"
+      },
+      {
+        "index": 63,
+        "representation_1": "sangre"
+      },
+      {
+        "index": 64,
+        "representation_1": "hueso"
+      },
+      {
+        "index": 65,
+        "representation_1": "grasa"
+      },
+      {
+        "index": 66,
+        "representation_1": "huevo"
+      },
+      {
+        "index": 67,
+        "representation_1": "cuerno"
+      },
+      {
+        "index": 68,
+        "representation_1": "cola"
+      },
+      {
+        "index": 69,
+        "representation_1": "pluma"
+      },
+      {
+        "index": 70,
+        "representation_1": "pelo, cabello"
+      },
+      {
+        "index": 71,
+        "representation_1": "cabeza"
+      },
+      {
+        "index": 72,
+        "representation_1": "oreja"
+      },
+      {
+        "index": 73,
+        "representation_1": "ojo"
+      },
+      {
+        "index": 74,
+        "representation_1": "nariz"
+      },
+      {
+        "index": 75,
+        "representation_1": "boca"
+      },
+      {
+        "index": 76,
+        "representation_1": "diente"
+      },
+      {
+        "index": 77,
+        "representation_1": "lengua"
+      },
+      {
+        "index": 78,
+        "representation_1": "uña"
+      },
+      {
+        "index": 79,
+        "representation_1": "pie"
+      },
+      {
+        "index": 80,
+        "representation_1": "pierna"
+      },
+      {
+        "index": 81,
+        "representation_1": "rodilla"
+      },
+      {
+        "index": 82,
+        "representation_1": "mano"
+      },
+      {
+        "index": 83,
+        "representation_1": "ala"
+      },
+      {
+        "index": 84,
+        "representation_1": "barriga, vientre"
+      },
+      {
+        "index": 85,
+        "representation_1": "tripas"
+      },
+      {
+        "index": 86,
+        "representation_1": "cuello"
+      },
+      {
+        "index": 87,
+        "representation_1": "espalda"
+      },
+      {
+        "index": 88,
+        "representation_1": "pecho"
+      },
+      {
+        "index": 89,
+        "representation_1": "corazón"
+      },
+      {
+        "index": 90,
+        "representation_1": "hígado"
+      },
+      {
+        "index": 91,
+        "representation_1": "beber"
+      },
+      {
+        "index": 92,
+        "representation_1": "comer"
+      },
+      {
+        "index": 93,
+        "representation_1": "morder"
+      },
+      {
+        "index": 94,
+        "representation_1": "chupar"
+      },
+      {
+        "index": 95,
+        "representation_1": "escupir"
+      },
+      {
+        "index": 96,
+        "representation_1": "vomitar"
+      },
+      {
+        "index": 97,
+        "representation_1": "soplar"
+      },
+      {
+        "index": 98,
+        "representation_1": "respirar"
+      },
+      {
+        "index": 99,
+        "representation_1": "reír"
+      },
+      {
+        "index": 100,
+        "representation_1": "ver"
+      },
+      {
+        "index": 101,
+        "representation_1": "oír"
+      },
+      {
+        "index": 102,
+        "representation_1": "saber"
+      },
+      {
+        "index": 103,
+        "representation_1": "pensar"
+      },
+      {
+        "index": 104,
+        "representation_1": "oler"
+      },
+      {
+        "index": 105,
+        "representation_1": "temer"
+      },
+      {
+        "index": 106,
+        "representation_1": "dormir"
+      },
+      {
+        "index": 107,
+        "representation_1": "vivir"
+      },
+      {
+        "index": 108,
+        "representation_1": "morir"
+      },
+      {
+        "index": 109,
+        "representation_1": "matar"
+      },
+      {
+        "index": 110,
+        "representation_1": "pelear"
+      },
+      {
+        "index": 111,
+        "representation_1": "cazar"
+      },
+      {
+        "index": 112,
+        "representation_1": "golpear"
+      },
+      {
+        "index": 113,
+        "representation_1": "cortar"
+      },
+      {
+        "index": 114,
+        "representation_1": "partir"
+      },
+      {
+        "index": 115,
+        "representation_1": "apuñalar"
+      },
+      {
+        "index": 116,
+        "representation_1": "arañar, rascar"
+      },
+      {
+        "index": 117,
+        "representation_1": "cavar, excavar"
+      },
+      {
+        "index": 118,
+        "representation_1": "nadar"
+      },
+      {
+        "index": 119,
+        "representation_1": "volar"
+      },
+      {
+        "index": 120,
+        "representation_1": "caminar"
+      },
+      {
+        "index": 121,
+        "representation_1": "venir"
+      },
+      {
+        "index": 122,
+        "representation_1": "echarse (action), yacer, estar en el suelo (state)"
+      },
+      {
+        "index": 123,
+        "representation_1": "sentarse, estar sentado (state)"
+      },
+      {
+        "index": 124,
+        "representation_1": "levantarse, estar de pie"
+      },
+      {
+        "index": 125,
+        "representation_1": "girar, dar una vuelta"
+      },
+      {
+        "index": 126,
+        "representation_1": "caer"
+      },
+      {
+        "index": 127,
+        "representation_1": "dar"
+      },
+      {
+        "index": 128,
+        "representation_1": "tener"
+      },
+      {
+        "index": 129,
+        "representation_1": "apretar"
+      },
+      {
+        "index": 130,
+        "representation_1": "frotar"
+      },
+      {
+        "index": 131,
+        "representation_1": "lavar"
+      },
+      {
+        "index": 132,
+        "representation_1": "limpiar"
+      },
+      {
+        "index": 133,
+        "representation_1": "tirar de, jalar, halar"
+      },
+      {
+        "index": 134,
+        "representation_1": "empujar"
+      },
+      {
+        "index": 135,
+        "representation_1": "tirar, arrojar"
+      },
+      {
+        "index": 136,
+        "representation_1": "atar"
+      },
+      {
+        "index": 137,
+        "representation_1": "coser"
+      },
+      {
+        "index": 138,
+        "representation_1": "contar"
+      },
+      {
+        "index": 139,
+        "representation_1": "decir"
+      },
+      {
+        "index": 140,
+        "representation_1": "cantar"
+      },
+      {
+        "index": 141,
+        "representation_1": "jugar"
+      },
+      {
+        "index": 142,
+        "representation_1": "flotar"
+      },
+      {
+        "index": 143,
+        "representation_1": "fluir"
+      },
+      {
+        "index": 144,
+        "representation_1": "congelarse, helar"
+      },
+      {
+        "index": 145,
+        "representation_1": "hincharse"
+      },
+      {
+        "index": 146,
+        "representation_1": "sol"
+      },
+      {
+        "index": 147,
+        "representation_1": "luna"
+      },
+      {
+        "index": 148,
+        "representation_1": "estrella"
+      },
+      {
+        "index": 149,
+        "representation_1": "agua"
+      },
+      {
+        "index": 150,
+        "representation_1": "lluvia"
+      },
+      {
+        "index": 151,
+        "representation_1": "río"
+      },
+      {
+        "index": 152,
+        "representation_1": "lago"
+      },
+      {
+        "index": 153,
+        "representation_1": "mar"
+      },
+      {
+        "index": 154,
+        "representation_1": "sal"
+      },
+      {
+        "index": 155,
+        "representation_1": "piedra"
+      },
+      {
+        "index": 156,
+        "representation_1": "arena"
+      },
+      {
+        "index": 157,
+        "representation_1": "polvo"
+      },
+      {
+        "index": 158,
+        "representation_1": "tierra"
+      },
+      {
+        "index": 159,
+        "representation_1": "nube"
+      },
+      {
+        "index": 160,
+        "representation_1": "niebla"
+      },
+      {
+        "index": 161,
+        "representation_1": "cielo"
+      },
+      {
+        "index": 162,
+        "representation_1": "viento"
+      },
+      {
+        "index": 163,
+        "representation_1": "nieve"
+      },
+      {
+        "index": 164,
+        "representation_1": "hielo"
+      },
+      {
+        "index": 165,
+        "representation_1": "humo"
+      },
+      {
+        "index": 166,
+        "representation_1": "fuego"
+      },
+      {
+        "index": 167,
+        "representation_1": "cenizas"
+      },
+      {
+        "index": 168,
+        "representation_1": "quemar"
+      },
+      {
+        "index": 169,
+        "representation_1": "camino"
+      },
+      {
+        "index": 170,
+        "representation_1": "montaña"
+      },
+      {
+        "index": 171,
+        "representation_1": "rojo"
+      },
+      {
+        "index": 172,
+        "representation_1": "verde"
+      },
+      {
+        "index": 173,
+        "representation_1": "amarillo"
+      },
+      {
+        "index": 174,
+        "representation_1": "blanco"
+      },
+      {
+        "index": 175,
+        "representation_1": "negro"
+      },
+      {
+        "index": 176,
+        "representation_1": "noche"
+      },
+      {
+        "index": 177,
+        "representation_1": "día"
+      },
+      {
+        "index": 178,
+        "representation_1": "año"
+      },
+      {
+        "index": 179,
+        "representation_1": "caliente, cálido"
+      },
+      {
+        "index": 180,
+        "representation_1": "frío"
+      },
+      {
+        "index": 181,
+        "representation_1": "lleno"
+      },
+      {
+        "index": 182,
+        "representation_1": "nuevo"
+      },
+      {
+        "index": 183,
+        "representation_1": "viejo"
+      },
+      {
+        "index": 184,
+        "representation_1": "bueno"
+      },
+      {
+        "index": 185,
+        "representation_1": "malo"
+      },
+      {
+        "index": 186,
+        "representation_1": "podrido"
+      },
+      {
+        "index": 187,
+        "representation_1": "sucio"
+      },
+      {
+        "index": 188,
+        "representation_1": "recto"
+      },
+      {
+        "index": 189,
+        "representation_1": "redondo"
+      },
+      {
+        "index": 190,
+        "representation_1": "agudo, afilado"
+      },
+      {
+        "index": 191,
+        "representation_1": "sin filo, desafilado, embotado, romo"
+      },
+      {
+        "index": 192,
+        "representation_1": "liso"
+      },
+      {
+        "index": 193,
+        "representation_1": "mojado"
+      },
+      {
+        "index": 194,
+        "representation_1": "seco"
+      },
+      {
+        "index": 195,
+        "representation_1": "correcto"
+      },
+      {
+        "index": 196,
+        "representation_1": "cerca"
+      },
+      {
+        "index": 197,
+        "representation_1": "lejos"
+      },
+      {
+        "index": 198,
+        "representation_1": "derecha"
+      },
+      {
+        "index": 199,
+        "representation_1": "izquierda"
+      },
+      {
+        "index": 200,
+        "representation_1": "en, a"
+      },
+      {
+        "index": 201,
+        "representation_1": "en"
+      },
+      {
+        "index": 202,
+        "representation_1": "con"
+      },
+      {
+        "index": 203,
+        "representation_1": "y, e"
+      },
+      {
+        "index": 204,
+        "representation_1": "si"
+      },
+      {
+        "index": 205,
+        "representation_1": "porque"
+      },
+      {
+        "index": 206,
+        "representation_1": "nombre"
+      }
+    ],
+    "french": [
+      {
+        "index": 0,
+        "representation_1": "je",
+        "ipa": "/ʒə/"
+      },
+      {
+        "index": 1,
+        "representation_1": "tu (informal), vous (formal)",
+        "ipa": "/ty/, /vu/"
+      },
+      {
+        "index": 2,
+        "representation_1": "il (masculine), elle (feminine)",
+        "ipa": "/il/, /ɛl/"
+      },
+      {
+        "index": 3,
+        "representation_1": "nous",
+        "ipa": "/nu/"
+      },
+      {
+        "index": 4,
+        "representation_1": "vous",
+        "ipa": "/vu/"
+      },
+      {
+        "index": 5,
+        "representation_1": "ils (masculine), elles (feminine)",
+        "ipa": "/il/, /ɛl/"
+      },
+      {
+        "index": 6,
+        "representation_1": "ceci",
+        "ipa": "/sə.si/"
+      },
+      {
+        "index": 7,
+        "representation_1": "cela",
+        "ipa": "/sə.la/"
+      },
+      {
+        "index": 8,
+        "representation_1": "ici",
+        "ipa": "/i.si/"
+      },
+      {
+        "index": 9,
+        "representation_1": "là",
+        "ipa": "/la/"
+      },
+      {
+        "index": 10,
+        "representation_1": "qui",
+        "ipa": "/ki/"
+      },
+      {
+        "index": 11,
+        "representation_1": "quoi",
+        "ipa": "/kwa/"
+      },
+      {
+        "index": 12,
+        "representation_1": "où",
+        "ipa": "/u/"
+      },
+      {
+        "index": 13,
+        "representation_1": "quand",
+        "ipa": "/kã/"
+      },
+      {
+        "index": 14,
+        "representation_1": "comment",
+        "ipa": "/kɔ.mã/"
+      },
+      {
+        "index": 15,
+        "representation_1": "ne pas",
+        "ipa": "/nə ... pɑ/"
+      },
+      {
+        "index": 16,
+        "representation_1": "tout",
+        "ipa": "/tu/"
+      },
+      {
+        "index": 17,
+        "representation_1": "beaucoup",
+        "ipa": "/bo.ku/"
+      },
+      {
+        "index": 18,
+        "representation_1": "quelques",
+        "ipa": "/kelk/"
+      },
+      {
+        "index": 19,
+        "representation_1": "peu",
+        "ipa": "/pø/"
+      },
+      {
+        "index": 20,
+        "representation_1": "autre",
+        "ipa": "/otʁ/"
+      },
+      {
+        "index": 21,
+        "representation_1": "un",
+        "ipa": "/œ̃/"
+      },
+      {
+        "index": 22,
+        "representation_1": "deux",
+        "ipa": "/dø/"
+      },
+      {
+        "index": 23,
+        "representation_1": "trois",
+        "ipa": "/tʁwɑ/"
+      },
+      {
+        "index": 24,
+        "representation_1": "quatre",
+        "ipa": "/katʁ/"
+      },
+      {
+        "index": 25,
+        "representation_1": "cinq",
+        "ipa": "/sɛ̃k/"
+      },
+      {
+        "index": 26,
+        "representation_1": "grand",
+        "ipa": "/ɡʁã/"
+      },
+      {
+        "index": 27,
+        "representation_1": "long",
+        "ipa": "/lõ/"
+      },
+      {
+        "index": 28,
+        "representation_1": "large",
+        "ipa": "/laʁʒ/"
+      },
+      {
+        "index": 29,
+        "representation_1": "épais",
+        "ipa": "/epɛ/"
+      },
+      {
+        "index": 30,
+        "representation_1": "lourd",
+        "ipa": "/luʁ/"
+      },
+      {
+        "index": 31,
+        "representation_1": "petit",
+        "ipa": "/pəti/"
+      },
+      {
+        "index": 32,
+        "representation_1": "court",
+        "ipa": "/kuʁ/"
+      },
+      {
+        "index": 33,
+        "representation_1": "étroit",
+        "ipa": "/etʁwa/"
+      },
+      {
+        "index": 34,
+        "representation_1": "mince",
+        "ipa": "/mɛ̃s/"
+      },
+      {
+        "index": 35,
+        "representation_1": "femme",
+        "ipa": "/fam/"
+      },
+      {
+        "index": 36,
+        "representation_1": "homme",
+        "ipa": "/ɔm/"
+      },
+      {
+        "index": 37,
+        "representation_1": "homme",
+        "ipa": "/ɔm/"
+      },
+      {
+        "index": 38,
+        "representation_1": "enfant",
+        "ipa": "/ɑ̃fɑ̃/"
+      },
+      {
+        "index": 39,
+        "representation_1": "femme, épouse",
+        "ipa": "/fam/, /epuz/"
+      },
+      {
+        "index": 40,
+        "representation_1": "mari, époux",
+        "ipa": "/maʁi/, /epu/"
+      },
+      {
+        "index": 41,
+        "representation_1": "mère",
+        "ipa": "/mɛʁ/"
+      },
+      {
+        "index": 42,
+        "representation_1": "père",
+        "ipa": "/pɛʁ/"
+      },
+      {
+        "index": 43,
+        "representation_1": "animal",
+        "ipa": "/animal/"
+      },
+      {
+        "index": 44,
+        "representation_1": "poisson",
+        "ipa": "/pwasõ/"
+      },
+      {
+        "index": 45,
+        "representation_1": "oiseau",
+        "ipa": "/wazo/"
+      },
+      {
+        "index": 46,
+        "representation_1": "chien",
+        "ipa": "/ʃjɛ̃/"
+      },
+      {
+        "index": 47,
+        "representation_1": "pou",
+        "ipa": "/pu/"
+      },
+      {
+        "index": 48,
+        "representation_1": "serpent",
+        "ipa": "/sɛʁpɑ̃/"
+      },
+      {
+        "index": 49,
+        "representation_1": "ver",
+        "ipa": "/vɛʁ/"
+      },
+      {
+        "index": 50,
+        "representation_1": "arbre",
+        "ipa": "/aʁbʁ/"
+      },
+      {
+        "index": 51,
+        "representation_1": "forêt",
+        "ipa": "/fɔʁɛ/"
+      },
+      {
+        "index": 52,
+        "representation_1": "bâton",
+        "ipa": "/bɑtɔ̃/"
+      },
+      {
+        "index": 53,
+        "representation_1": "fruit",
+        "ipa": "/fʁɥi/"
+      },
+      {
+        "index": 54,
+        "representation_1": "graine",
+        "ipa": "/ɡʁɛn/"
+      },
+      {
+        "index": 55,
+        "representation_1": "feuille",
+        "ipa": "/fœj/"
+      },
+      {
+        "index": 56,
+        "representation_1": "racine",
+        "ipa": "/ʁasin/"
+      },
+      {
+        "index": 57,
+        "representation_1": "écorce",
+        "ipa": "/ekɔʁs/"
+      },
+      {
+        "index": 58,
+        "representation_1": "fleur",
+        "ipa": "/flœʁ/"
+      },
+      {
+        "index": 59,
+        "representation_1": "herbe",
+        "ipa": "/ɛʁb/"
+      },
+      {
+        "index": 60,
+        "representation_1": "corde",
+        "ipa": "/kɔʁd/"
+      },
+      {
+        "index": 61,
+        "representation_1": "peau",
+        "ipa": "/po/"
+      },
+      {
+        "index": 62,
+        "representation_1": "viande",
+        "ipa": "/vjɑ̃d/"
+      },
+      {
+        "index": 63,
+        "representation_1": "sang",
+        "ipa": "/sɑ̃/"
+      },
+      {
+        "index": 64,
+        "representation_1": "os",
+        "ipa": "/ɔs/"
+      },
+      {
+        "index": 65,
+        "representation_1": "graisse",
+        "ipa": "/ɡʁɛs/"
+      },
+      {
+        "index": 66,
+        "representation_1": "œuf",
+        "ipa": "/œf/"
+      },
+      {
+        "index": 67,
+        "representation_1": "corne",
+        "ipa": "/kɔʁn/"
+      },
+      {
+        "index": 68,
+        "representation_1": "queue",
+        "ipa": "/kø/"
+      },
+      {
+        "index": 69,
+        "representation_1": "plume",
+        "ipa": "/plym/"
+      },
+      {
+        "index": 70,
+        "representation_1": "cheveux",
+        "ipa": "/ʃəvø/"
+      },
+      {
+        "index": 71,
+        "representation_1": "tête",
+        "ipa": "/tɛt/"
+      },
+      {
+        "index": 72,
+        "representation_1": "oreille",
+        "ipa": "/ɔʁɛj/"
+      },
+      {
+        "index": 73,
+        "representation_1": "œil",
+        "ipa": "/œj/"
+      },
+      {
+        "index": 74,
+        "representation_1": "nez",
+        "ipa": "/ne/"
+      },
+      {
+        "index": 75,
+        "representation_1": "bouche",
+        "ipa": "/buʃ/"
+      },
+      {
+        "index": 76,
+        "representation_1": "dent",
+        "ipa": "/dɑ̃/"
+      },
+      {
+        "index": 77,
+        "representation_1": "langue",
+        "ipa": "/lɑ̃ɡ/"
+      },
+      {
+        "index": 78,
+        "representation_1": "ongle",
+        "ipa": "/ɔ̃ɡl/"
+      },
+      {
+        "index": 79,
+        "representation_1": "pied",
+        "ipa": "/pje/"
+      },
+      {
+        "index": 80,
+        "representation_1": "jambe",
+        "ipa": "/ʒɑ̃b/"
+      },
+      {
+        "index": 81,
+        "representation_1": "genou",
+        "ipa": "/ʒənu/"
+      },
+      {
+        "index": 82,
+        "representation_1": "main",
+        "ipa": "/mɛ̃/"
+      },
+      {
+        "index": 83,
+        "representation_1": "aile",
+        "ipa": "/ɛl/"
+      },
+      {
+        "index": 84,
+        "representation_1": "ventre",
+        "ipa": "/vɑ̃tʁ/"
+      },
+      {
+        "index": 85,
+        "representation_1": "entrailles, intestins",
+        "ipa": "/ɑ̃tʁɑj/, /ɛ̃tɛstɛ̃/"
+      },
+      {
+        "index": 86,
+        "representation_1": "cou",
+        "ipa": "/ku/"
+      },
+      {
+        "index": 87,
+        "representation_1": "dos",
+        "ipa": "/do/"
+      },
+      {
+        "index": 88,
+        "representation_1": "sein, poitrine",
+        "ipa": "/sɛ̃/, /pwatʁin/"
+      },
+      {
+        "index": 89,
+        "representation_1": "cœur",
+        "ipa": "/kœʁ/"
+      },
+      {
+        "index": 90,
+        "representation_1": "foie",
+        "ipa": "/fwɑ/"
+      },
+      {
+        "index": 91,
+        "representation_1": "boire",
+        "ipa": "/bwɑʁ/"
+      },
+      {
+        "index": 92,
+        "representation_1": "manger",
+        "ipa": "/mɑ̃ʒe/"
+      },
+      {
+        "index": 93,
+        "representation_1": "mordre",
+        "ipa": "/mɔʁdʁ/"
+      },
+      {
+        "index": 94,
+        "representation_1": "sucer",
+        "ipa": "/syse/"
+      },
+      {
+        "index": 95,
+        "representation_1": "cracher",
+        "ipa": "/kʁaʃe/"
+      },
+      {
+        "index": 96,
+        "representation_1": "vomir",
+        "ipa": "/vɔmiʁ/"
+      },
+      {
+        "index": 97,
+        "representation_1": "souffler",
+        "ipa": "/sufle/"
+      },
+      {
+        "index": 98,
+        "representation_1": "respirer",
+        "ipa": "/ʁɛspiʁe/"
+      },
+      {
+        "index": 99,
+        "representation_1": "rire",
+        "ipa": "/ʁiʁ/"
+      },
+      {
+        "index": 100,
+        "representation_1": "voir",
+        "ipa": "/vwaʁ/"
+      },
+      {
+        "index": 101,
+        "representation_1": "entendre",
+        "ipa": "/ɑ̃tɑ̃dʁ/"
+      },
+      {
+        "index": 102,
+        "representation_1": "savoir",
+        "ipa": "/savwaʁ/"
+      },
+      {
+        "index": 103,
+        "representation_1": "penser",
+        "ipa": "/pɑ̃se/"
+      },
+      {
+        "index": 104,
+        "representation_1": "sentir",
+        "ipa": "/sɑ̃tiʁ/"
+      },
+      {
+        "index": 105,
+        "representation_1": "craindre",
+        "ipa": "/kʁɛ̃dʁ/"
+      },
+      {
+        "index": 106,
+        "representation_1": "dormir",
+        "ipa": "/dɔʁmiʁ/"
+      },
+      {
+        "index": 107,
+        "representation_1": "vivre",
+        "ipa": "/vivʁ/"
+      },
+      {
+        "index": 108,
+        "representation_1": "mourir",
+        "ipa": "/muʁiʁ/"
+      },
+      {
+        "index": 109,
+        "representation_1": "tuer",
+        "ipa": "/tɥe/"
+      },
+      {
+        "index": 110,
+        "representation_1": "se battre",
+        "ipa": "/səbatʁ/"
+      },
+      {
+        "index": 111,
+        "representation_1": "chasser",
+        "ipa": "/ʃase/"
+      },
+      {
+        "index": 112,
+        "representation_1": "frapper",
+        "ipa": "/fʁape/"
+      },
+      {
+        "index": 113,
+        "representation_1": "couper",
+        "ipa": "/kupe/"
+      },
+      {
+        "index": 114,
+        "representation_1": "fendre",
+        "ipa": "/fɑ̃dʁ/"
+      },
+      {
+        "index": 115,
+        "representation_1": "poignarder",
+        "ipa": "/pwaɲaʁde/"
+      },
+      {
+        "index": 116,
+        "representation_1": "gratter",
+        "ipa": "/ɡʁate/"
+      },
+      {
+        "index": 117,
+        "representation_1": "creuser",
+        "ipa": "/kʁøze/"
+      },
+      {
+        "index": 118,
+        "representation_1": "nager",
+        "ipa": "/naʒe/"
+      },
+      {
+        "index": 119,
+        "representation_1": "voler",
+        "ipa": "/vɔle/"
+      },
+      {
+        "index": 120,
+        "representation_1": "marcher",
+        "ipa": "/maʁʃe/"
+      },
+      {
+        "index": 121,
+        "representation_1": "venir",
+        "ipa": "/vəniʁ/"
+      },
+      {
+        "index": 122,
+        "representation_1": "s'étendre (action), être étendu (state)",
+        "ipa": "/setɑ̃dʁ/, /ɛtʁetɑ̃dy/"
+      },
+      {
+        "index": 123,
+        "representation_1": "s'asseoir (action), être assis (state)",
+        "ipa": "/saswaʁ/, /ɛtʁasi/"
+      },
+      {
+        "index": 124,
+        "representation_1": "se lever (action), se tenir debout (state)",
+        "ipa": "/sələve/, /sətəniʁdəbu/"
+      },
+      {
+        "index": 125,
+        "representation_1": "tourner",
+        "ipa": "/tuʁne/"
+      },
+      {
+        "index": 126,
+        "representation_1": "tomber",
+        "ipa": "/tɔ̃be/"
+      },
+      {
+        "index": 127,
+        "representation_1": "donner",
+        "ipa": "/dɔne/"
+      },
+      {
+        "index": 128,
+        "representation_1": "tenir",
+        "ipa": "/təniʁ/"
+      },
+      {
+        "index": 129,
+        "representation_1": "serrer",
+        "ipa": "/seʁe/"
+      },
+      {
+        "index": 130,
+        "representation_1": "frotter",
+        "ipa": "/fʁɔte/"
+      },
+      {
+        "index": 131,
+        "representation_1": "laver",
+        "ipa": "/lave/"
+      },
+      {
+        "index": 132,
+        "representation_1": "essuyer",
+        "ipa": "/esɥije/"
+      },
+      {
+        "index": 133,
+        "representation_1": "tirer",
+        "ipa": "/tiʁe/"
+      },
+      {
+        "index": 134,
+        "representation_1": "pousser",
+        "ipa": "/puse/"
+      },
+      {
+        "index": 135,
+        "representation_1": "jeter, lancer",
+        "ipa": "/ʒəte/, /lɑ̃se/"
+      },
+      {
+        "index": 136,
+        "representation_1": "lier",
+        "ipa": "/lje/"
+      },
+      {
+        "index": 137,
+        "representation_1": "coudre",
+        "ipa": "/kudʁ/"
+      },
+      {
+        "index": 138,
+        "representation_1": "compter",
+        "ipa": "/kɔ̃te/"
+      },
+      {
+        "index": 139,
+        "representation_1": "dire",
+        "ipa": "/diʁ/"
+      },
+      {
+        "index": 140,
+        "representation_1": "chanter",
+        "ipa": "/ʃɑ̃te/"
+      },
+      {
+        "index": 141,
+        "representation_1": "jouer",
+        "ipa": "/ʒwe/"
+      },
+      {
+        "index": 142,
+        "representation_1": "flotter",
+        "ipa": "/flɔte/"
+      },
+      {
+        "index": 143,
+        "representation_1": "couler",
+        "ipa": "/kule/"
+      },
+      {
+        "index": 144,
+        "representation_1": "geler",
+        "ipa": "/ʒəle/"
+      },
+      {
+        "index": 145,
+        "representation_1": "gonfler",
+        "ipa": "/ɡɔ̃fle/"
+      },
+      {
+        "index": 146,
+        "representation_1": "soleil",
+        "ipa": "/sɔlɛj/"
+      },
+      {
+        "index": 147,
+        "representation_1": "lune",
+        "ipa": "/lyn/"
+      },
+      {
+        "index": 148,
+        "representation_1": "étoile",
+        "ipa": "/etwal/"
+      },
+      {
+        "index": 149,
+        "representation_1": "eau",
+        "ipa": "/o/"
+      },
+      {
+        "index": 150,
+        "representation_1": "pluie",
+        "ipa": "/plɥi/"
+      },
+      {
+        "index": 151,
+        "representation_1": "rivière",
+        "ipa": "/ʁivjɛʁ/"
+      },
+      {
+        "index": 152,
+        "representation_1": "lac",
+        "ipa": "/lak/"
+      },
+      {
+        "index": 153,
+        "representation_1": "mer",
+        "ipa": "/mɛʁ/"
+      },
+      {
+        "index": 154,
+        "representation_1": "sel",
+        "ipa": "/sɛl/"
+      },
+      {
+        "index": 155,
+        "representation_1": "pierre",
+        "ipa": "/pjɛʁ/"
+      },
+      {
+        "index": 156,
+        "representation_1": "sable",
+        "ipa": "/sabl/"
+      },
+      {
+        "index": 157,
+        "representation_1": "poussière",
+        "ipa": "/pusjɛʁ/"
+      },
+      {
+        "index": 158,
+        "representation_1": "terre",
+        "ipa": "/tɛʁ/"
+      },
+      {
+        "index": 159,
+        "representation_1": "nuage",
+        "ipa": "/nɥaʒ/"
+      },
+      {
+        "index": 160,
+        "representation_1": "brouillard",
+        "ipa": "/bʁujaʁ/"
+      },
+      {
+        "index": 161,
+        "representation_1": "ciel",
+        "ipa": "/sjɛl/"
+      },
+      {
+        "index": 162,
+        "representation_1": "vent",
+        "ipa": "/vɑ̃/"
+      },
+      {
+        "index": 163,
+        "representation_1": "neige",
+        "ipa": "/nɛʒ/"
+      },
+      {
+        "index": 164,
+        "representation_1": "glace",
+        "ipa": "/ɡlas/"
+      },
+      {
+        "index": 165,
+        "representation_1": "fumée",
+        "ipa": "/fyme/"
+      },
+      {
+        "index": 166,
+        "representation_1": "feu",
+        "ipa": "/fø/"
+      },
+      {
+        "index": 167,
+        "representation_1": "cendre",
+        "ipa": "/sɑ̃dʁ/"
+      },
+      {
+        "index": 168,
+        "representation_1": "brûler",
+        "ipa": "/bʁyle/"
+      },
+      {
+        "index": 169,
+        "representation_1": "route",
+        "ipa": "/ʁut/"
+      },
+      {
+        "index": 170,
+        "representation_1": "montagne",
+        "ipa": "/mɔ̃taɲ/"
+      },
+      {
+        "index": 171,
+        "representation_1": "rouge",
+        "ipa": "/ʁuʒ/"
+      },
+      {
+        "index": 172,
+        "representation_1": "vert",
+        "ipa": "/vɛʁ/"
+      },
+      {
+        "index": 173,
+        "representation_1": "jaune",
+        "ipa": "/ʒon/"
+      },
+      {
+        "index": 174,
+        "representation_1": "blanc",
+        "ipa": "/blɑ̃/"
+      },
+      {
+        "index": 175,
+        "representation_1": "noir",
+        "ipa": "/nwaʁ/"
+      },
+      {
+        "index": 176,
+        "representation_1": "nuit",
+        "ipa": "/nɥi/"
+      },
+      {
+        "index": 177,
+        "representation_1": "jour",
+        "ipa": "/ʒuʁ/"
+      },
+      {
+        "index": 178,
+        "representation_1": "an, année",
+        "ipa": "/ɑ̃/, /ane/"
+      },
+      {
+        "index": 179,
+        "representation_1": "chaud",
+        "ipa": "/ʃo/"
+      },
+      {
+        "index": 180,
+        "representation_1": "froid",
+        "ipa": "/fʁwa/"
+      },
+      {
+        "index": 181,
+        "representation_1": "plein",
+        "ipa": "/plɛ̃/"
+      },
+      {
+        "index": 182,
+        "representation_1": "nouveau, neuf",
+        "ipa": "/nuvo/, /nœf/"
+      },
+      {
+        "index": 183,
+        "representation_1": "vieux",
+        "ipa": "/vjø/"
+      },
+      {
+        "index": 184,
+        "representation_1": "bon",
+        "ipa": "/bɔ̃/"
+      },
+      {
+        "index": 185,
+        "representation_1": "mauvais",
+        "ipa": "/movɛ/"
+      },
+      {
+        "index": 186,
+        "representation_1": "pourri",
+        "ipa": "/puri/"
+      },
+      {
+        "index": 187,
+        "representation_1": "sale",
+        "ipa": "/sal/"
+      },
+      {
+        "index": 188,
+        "representation_1": "droit",
+        "ipa": "/dʁwa/"
+      },
+      {
+        "index": 189,
+        "representation_1": "rond",
+        "ipa": "/ʁɔ̃/"
+      },
+      {
+        "index": 190,
+        "representation_1": "tranchant",
+        "ipa": "/tʁɑ̃ʃɑ̃/"
+      },
+      {
+        "index": 191,
+        "representation_1": "émoussé",
+        "ipa": "/emuse/"
+      },
+      {
+        "index": 192,
+        "representation_1": "lisse",
+        "ipa": "/lis/"
+      },
+      {
+        "index": 193,
+        "representation_1": "mouillé",
+        "ipa": "/muje/"
+      },
+      {
+        "index": 194,
+        "representation_1": "sec",
+        "ipa": "/sɛk/"
+      },
+      {
+        "index": 195,
+        "representation_1": "juste",
+        "ipa": "/ʒyst/"
+      },
+      {
+        "index": 196,
+        "representation_1": "près",
+        "ipa": "/pʁɛ/"
+      },
+      {
+        "index": 197,
+        "representation_1": "loin",
+        "ipa": "/lwɛ̃/"
+      },
+      {
+        "index": 198,
+        "representation_1": "droite",
+        "ipa": "/dʁwat/"
+      },
+      {
+        "index": 199,
+        "representation_1": "gauche",
+        "ipa": "/ɡoʃ/"
+      },
+      {
+        "index": 200,
+        "representation_1": "à",
+        "ipa": "/a/"
+      },
+      {
+        "index": 201,
+        "representation_1": "dans",
+        "ipa": "/dɑ̃/"
+      },
+      {
+        "index": 202,
+        "representation_1": "avec",
+        "ipa": "/avɛk/"
+      },
+      {
+        "index": 203,
+        "representation_1": "et",
+        "ipa": "/e/"
+      },
+      {
+        "index": 204,
+        "representation_1": "si",
+        "ipa": "/si/"
+      },
+      {
+        "index": 205,
+        "representation_1": "parce que",
+        "ipa": "/paʁsəkə/"
+      },
+      {
+        "index": 206,
+        "representation_1": "nom",
+        "ipa": "/nɔ̃/"
+      }
+    ],
+    "italian": [
+      {
+        "index": 0,
+        "representation_1": "io"
+      },
+      {
+        "index": 1,
+        "representation_1": "tu"
+      },
+      {
+        "index": 2,
+        "representation_1": "egli, lui"
+      },
+      {
+        "index": 3,
+        "representation_1": "noi"
+      },
+      {
+        "index": 4,
+        "representation_1": "voi"
+      },
+      {
+        "index": 5,
+        "representation_1": "loro, essi"
+      },
+      {
+        "index": 6,
+        "representation_1": "questo"
+      },
+      {
+        "index": 7,
+        "representation_1": "quello"
+      },
+      {
+        "index": 8,
+        "representation_1": "qui, qua"
+      },
+      {
+        "index": 9,
+        "representation_1": "lì, là"
+      },
+      {
+        "index": 10,
+        "representation_1": "chi"
+      },
+      {
+        "index": 11,
+        "representation_1": "che, cosa"
+      },
+      {
+        "index": 12,
+        "representation_1": "dove"
+      },
+      {
+        "index": 13,
+        "representation_1": "quando"
+      },
+      {
+        "index": 14,
+        "representation_1": "come"
+      },
+      {
+        "index": 15,
+        "representation_1": "non"
+      },
+      {
+        "index": 16,
+        "representation_1": "tutto"
+      },
+      {
+        "index": 17,
+        "representation_1": "tanto"
+      },
+      {
+        "index": 18,
+        "representation_1": "alcuni"
+      },
+      {
+        "index": 19,
+        "representation_1": "poco"
+      },
+      {
+        "index": 20,
+        "representation_1": "altro"
+      },
+      {
+        "index": 21,
+        "representation_1": "un, uno, una, un'"
+      },
+      {
+        "index": 22,
+        "representation_1": "due"
+      },
+      {
+        "index": 23,
+        "representation_1": "tre"
+      },
+      {
+        "index": 24,
+        "representation_1": "quattro"
+      },
+      {
+        "index": 25,
+        "representation_1": "cinque"
+      },
+      {
+        "index": 26,
+        "representation_1": "grande"
+      },
+      {
+        "index": 27,
+        "representation_1": "lungo"
+      },
+      {
+        "index": 28,
+        "representation_1": "largo"
+      },
+      {
+        "index": 29,
+        "representation_1": "spesso"
+      },
+      {
+        "index": 30,
+        "representation_1": "pesante"
+      },
+      {
+        "index": 31,
+        "representation_1": "piccolo"
+      },
+      {
+        "index": 32,
+        "representation_1": "corto"
+      },
+      {
+        "index": 33,
+        "representation_1": "stretto"
+      },
+      {
+        "index": 34,
+        "representation_1": "sottile"
+      },
+      {
+        "index": 35,
+        "representation_1": "donna"
+      },
+      {
+        "index": 36,
+        "representation_1": "uomo"
+      },
+      {
+        "index": 37,
+        "representation_1": "persona"
+      },
+      {
+        "index": 38,
+        "representation_1": "bambino"
+      },
+      {
+        "index": 39,
+        "representation_1": "moglie"
+      },
+      {
+        "index": 40,
+        "representation_1": "marito"
+      },
+      {
+        "index": 41,
+        "representation_1": "madre"
+      },
+      {
+        "index": 42,
+        "representation_1": "padre"
+      },
+      {
+        "index": 43,
+        "representation_1": "animale"
+      },
+      {
+        "index": 44,
+        "representation_1": "pesce"
+      },
+      {
+        "index": 45,
+        "representation_1": "uccello"
+      },
+      {
+        "index": 46,
+        "representation_1": "cane"
+      },
+      {
+        "index": 47,
+        "representation_1": "pidocchio"
+      },
+      {
+        "index": 48,
+        "representation_1": "serpente"
+      },
+      {
+        "index": 49,
+        "representation_1": "verme"
+      },
+      {
+        "index": 50,
+        "representation_1": "albero, pianta"
+      },
+      {
+        "index": 51,
+        "representation_1": "foresta, bosco"
+      },
+      {
+        "index": 52,
+        "representation_1": "bastone"
+      },
+      {
+        "index": 53,
+        "representation_1": "frutta"
+      },
+      {
+        "index": 54,
+        "representation_1": "seme"
+      },
+      {
+        "index": 55,
+        "representation_1": "foglia"
+      },
+      {
+        "index": 56,
+        "representation_1": "radice"
+      },
+      {
+        "index": 57,
+        "representation_1": "corteccia"
+      },
+      {
+        "index": 58,
+        "representation_1": "fiore"
+      },
+      {
+        "index": 59,
+        "representation_1": "erba"
+      },
+      {
+        "index": 60,
+        "representation_1": "corda, fune"
+      },
+      {
+        "index": 61,
+        "representation_1": "pelle"
+      },
+      {
+        "index": 62,
+        "representation_1": "carne"
+      },
+      {
+        "index": 63,
+        "representation_1": "sangue"
+      },
+      {
+        "index": 64,
+        "representation_1": "osso"
+      },
+      {
+        "index": 65,
+        "representation_1": "grasso"
+      },
+      {
+        "index": 66,
+        "representation_1": "uovo"
+      },
+      {
+        "index": 67,
+        "representation_1": "corno"
+      },
+      {
+        "index": 68,
+        "representation_1": "coda"
+      },
+      {
+        "index": 69,
+        "representation_1": "penna"
+      },
+      {
+        "index": 70,
+        "representation_1": "capello"
+      },
+      {
+        "index": 71,
+        "representation_1": "testa"
+      },
+      {
+        "index": 72,
+        "representation_1": "orecchio"
+      },
+      {
+        "index": 73,
+        "representation_1": "occhio"
+      },
+      {
+        "index": 74,
+        "representation_1": "naso"
+      },
+      {
+        "index": 75,
+        "representation_1": "bocca"
+      },
+      {
+        "index": 76,
+        "representation_1": "dente"
+      },
+      {
+        "index": 77,
+        "representation_1": "lingua"
+      },
+      {
+        "index": 78,
+        "representation_1": "unghia"
+      },
+      {
+        "index": 79,
+        "representation_1": "piede"
+      },
+      {
+        "index": 80,
+        "representation_1": "gamba"
+      },
+      {
+        "index": 81,
+        "representation_1": "ginocchio"
+      },
+      {
+        "index": 82,
+        "representation_1": "mano"
+      },
+      {
+        "index": 83,
+        "representation_1": "ala"
+      },
+      {
+        "index": 84,
+        "representation_1": "pancia"
+      },
+      {
+        "index": 85,
+        "representation_1": "intestino"
+      },
+      {
+        "index": 86,
+        "representation_1": "collo"
+      },
+      {
+        "index": 87,
+        "representation_1": "schiena"
+      },
+      {
+        "index": 88,
+        "representation_1": "petto"
+      },
+      {
+        "index": 89,
+        "representation_1": "cuore"
+      },
+      {
+        "index": 90,
+        "representation_1": "fegato"
+      },
+      {
+        "index": 91,
+        "representation_1": "bere"
+      },
+      {
+        "index": 92,
+        "representation_1": "mangiare"
+      },
+      {
+        "index": 93,
+        "representation_1": "mordere"
+      },
+      {
+        "index": 94,
+        "representation_1": "succhiare"
+      },
+      {
+        "index": 95,
+        "representation_1": "sputare"
+      },
+      {
+        "index": 96,
+        "representation_1": "vomitare"
+      },
+      {
+        "index": 97,
+        "representation_1": "soffiare"
+      },
+      {
+        "index": 98,
+        "representation_1": "respirare"
+      },
+      {
+        "index": 99,
+        "representation_1": "ridere"
+      },
+      {
+        "index": 100,
+        "representation_1": "vedere"
+      },
+      {
+        "index": 101,
+        "representation_1": "sentire"
+      },
+      {
+        "index": 102,
+        "representation_1": "sapere"
+      },
+      {
+        "index": 103,
+        "representation_1": "pensare"
+      },
+      {
+        "index": 104,
+        "representation_1": "odorare"
+      },
+      {
+        "index": 105,
+        "representation_1": "temere"
+      },
+      {
+        "index": 106,
+        "representation_1": "dormire"
+      },
+      {
+        "index": 107,
+        "representation_1": "vivere"
+      },
+      {
+        "index": 108,
+        "representation_1": "morire"
+      },
+      {
+        "index": 109,
+        "representation_1": "uccidere, ammazzare"
+      },
+      {
+        "index": 110,
+        "representation_1": "combattere"
+      },
+      {
+        "index": 111,
+        "representation_1": "cacciare"
+      },
+      {
+        "index": 112,
+        "representation_1": "colpire"
+      },
+      {
+        "index": 113,
+        "representation_1": "tagliare"
+      },
+      {
+        "index": 114,
+        "representation_1": "dividere"
+      },
+      {
+        "index": 115,
+        "representation_1": "pugnalare"
+      },
+      {
+        "index": 116,
+        "representation_1": "graffiare"
+      },
+      {
+        "index": 117,
+        "representation_1": "scavare"
+      },
+      {
+        "index": 118,
+        "representation_1": "nuotare"
+      },
+      {
+        "index": 119,
+        "representation_1": "volare"
+      },
+      {
+        "index": 120,
+        "representation_1": "camminare"
+      },
+      {
+        "index": 121,
+        "representation_1": "venire"
+      },
+      {
+        "index": 122,
+        "representation_1": "distendersi, giacere"
+      },
+      {
+        "index": 123,
+        "representation_1": "sedersi"
+      },
+      {
+        "index": 124,
+        "representation_1": "stare in piedi, stare eretto"
+      },
+      {
+        "index": 125,
+        "representation_1": "girare"
+      },
+      {
+        "index": 126,
+        "representation_1": "cadere"
+      },
+      {
+        "index": 127,
+        "representation_1": "dare"
+      },
+      {
+        "index": 128,
+        "representation_1": "tenere"
+      },
+      {
+        "index": 129,
+        "representation_1": "spremere"
+      },
+      {
+        "index": 130,
+        "representation_1": "strofinare"
+      },
+      {
+        "index": 131,
+        "representation_1": "lavare"
+      },
+      {
+        "index": 132,
+        "representation_1": "asciugare"
+      },
+      {
+        "index": 133,
+        "representation_1": "tirare"
+      },
+      {
+        "index": 134,
+        "representation_1": "spingere"
+      },
+      {
+        "index": 135,
+        "representation_1": "lanciare"
+      },
+      {
+        "index": 136,
+        "representation_1": "legare"
+      },
+      {
+        "index": 137,
+        "representation_1": "cucire"
+      },
+      {
+        "index": 138,
+        "representation_1": "contare"
+      },
+      {
+        "index": 139,
+        "representation_1": "dire"
+      },
+      {
+        "index": 140,
+        "representation_1": "cantare"
+      },
+      {
+        "index": 141,
+        "representation_1": "giocare"
+      },
+      {
+        "index": 142,
+        "representation_1": "galleggiare"
+      },
+      {
+        "index": 143,
+        "representation_1": "fluire, scorrere"
+      },
+      {
+        "index": 144,
+        "representation_1": "gelare"
+      },
+      {
+        "index": 145,
+        "representation_1": "gonfiare"
+      },
+      {
+        "index": 146,
+        "representation_1": "sole"
+      },
+      {
+        "index": 147,
+        "representation_1": "luna"
+      },
+      {
+        "index": 148,
+        "representation_1": "stella"
+      },
+      {
+        "index": 149,
+        "representation_1": "acqua"
+      },
+      {
+        "index": 150,
+        "representation_1": "pioggia"
+      },
+      {
+        "index": 151,
+        "representation_1": "fiume"
+      },
+      {
+        "index": 152,
+        "representation_1": "lago"
+      },
+      {
+        "index": 153,
+        "representation_1": "mare"
+      },
+      {
+        "index": 154,
+        "representation_1": "sale"
+      },
+      {
+        "index": 155,
+        "representation_1": "sasso, pietra"
+      },
+      {
+        "index": 156,
+        "representation_1": "sabbia"
+      },
+      {
+        "index": 157,
+        "representation_1": "polvere"
+      },
+      {
+        "index": 158,
+        "representation_1": "terra, mondo"
+      },
+      {
+        "index": 159,
+        "representation_1": "nuvola"
+      },
+      {
+        "index": 160,
+        "representation_1": "nebbia"
+      },
+      {
+        "index": 161,
+        "representation_1": "cielo"
+      },
+      {
+        "index": 162,
+        "representation_1": "vento"
+      },
+      {
+        "index": 163,
+        "representation_1": "neve"
+      },
+      {
+        "index": 164,
+        "representation_1": "ghiaccio"
+      },
+      {
+        "index": 165,
+        "representation_1": "fumo"
+      },
+      {
+        "index": 166,
+        "representation_1": "fuoco"
+      },
+      {
+        "index": 167,
+        "representation_1": "cenere"
+      },
+      {
+        "index": 168,
+        "representation_1": "bruciare"
+      },
+      {
+        "index": 169,
+        "representation_1": "strada"
+      },
+      {
+        "index": 170,
+        "representation_1": "montagna"
+      },
+      {
+        "index": 171,
+        "representation_1": "rosso"
+      },
+      {
+        "index": 172,
+        "representation_1": "verde"
+      },
+      {
+        "index": 173,
+        "representation_1": "giallo"
+      },
+      {
+        "index": 174,
+        "representation_1": "bianco"
+      },
+      {
+        "index": 175,
+        "representation_1": "nero"
+      },
+      {
+        "index": 176,
+        "representation_1": "notte"
+      },
+      {
+        "index": 177,
+        "representation_1": "giorno"
+      },
+      {
+        "index": 178,
+        "representation_1": "anno"
+      },
+      {
+        "index": 179,
+        "representation_1": "caldo"
+      },
+      {
+        "index": 180,
+        "representation_1": "freddo"
+      },
+      {
+        "index": 181,
+        "representation_1": "pieno"
+      },
+      {
+        "index": 182,
+        "representation_1": "nuovo"
+      },
+      {
+        "index": 183,
+        "representation_1": "vecchio"
+      },
+      {
+        "index": 184,
+        "representation_1": "buono"
+      },
+      {
+        "index": 185,
+        "representation_1": "cattivo"
+      },
+      {
+        "index": 186,
+        "representation_1": "marcio"
+      },
+      {
+        "index": 187,
+        "representation_1": "sporco"
+      },
+      {
+        "index": 188,
+        "representation_1": "dritto"
+      },
+      {
+        "index": 189,
+        "representation_1": "rotondo"
+      },
+      {
+        "index": 190,
+        "representation_1": "affilato"
+      },
+      {
+        "index": 191,
+        "representation_1": "smussato"
+      },
+      {
+        "index": 192,
+        "representation_1": "liscio"
+      },
+      {
+        "index": 193,
+        "representation_1": "bagnato"
+      },
+      {
+        "index": 194,
+        "representation_1": "secco"
+      },
+      {
+        "index": 195,
+        "representation_1": "giusto, corretto"
+      },
+      {
+        "index": 196,
+        "representation_1": "vicino"
+      },
+      {
+        "index": 197,
+        "representation_1": "lontano"
+      },
+      {
+        "index": 198,
+        "representation_1": "destra"
+      },
+      {
+        "index": 199,
+        "representation_1": "sinistra"
+      },
+      {
+        "index": 200,
+        "representation_1": "a"
+      },
+      {
+        "index": 201,
+        "representation_1": "in"
+      },
+      {
+        "index": 202,
+        "representation_1": "con"
+      },
+      {
+        "index": 203,
+        "representation_1": "e"
+      },
+      {
+        "index": 204,
+        "representation_1": "se"
+      },
+      {
+        "index": 205,
+        "representation_1": "perché"
+      },
+      {
+        "index": 206,
+        "representation_1": "nome"
+      }
+    ]
+  }
+}
