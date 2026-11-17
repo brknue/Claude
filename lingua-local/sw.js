@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='lingua-local-v2-'+self.registration.scope;
+const CACHE='lingua-local-v3-'+self.registration.scope;
 const PAGE=new URL('./index.html',self.location.href).href;
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll([PAGE])).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
