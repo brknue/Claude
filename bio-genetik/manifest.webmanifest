@@ -1,0 +1,10 @@
+{
+  "name": "Genetik verstehen",
+  "short_name": "Genetik",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f5fb",
+  "theme_color": "#6a3fd1",
+  "lang": "de",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
