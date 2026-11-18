@@ -6,6 +6,7 @@ Type what you ate and what you did today. An AI works out the calories, protein,
 - tomorrow's estimated **body fat** and **muscle** change in grams
 - **how many more steps** you'd need to walk off the fat you stored today (plus km, minutes, or jogging time)
 - a score and honest feedback: what went well, what you could have done differently, and a plan for tomorrow
+- **saved days**: save any day, open it later, add more food or activity to it and update it, or delete it; a History tab shows your last 7 days
 
 Works on phone, tablet and computer. Light and dark mode.
 
@@ -14,6 +15,15 @@ Works on phone, tablet and computer. Light and dark mode.
 16 built-in languages: English, Deutsch, Türkçe, Español, Français, Italiano, Português, Nederlands, Polski, Русский, Українська, العربية (right-to-left), हिन्दी, 中文, 日本語, 한국어.
 
 Pick **🌐 Other language…** and type any language: the AI translates the whole page once and the browser remembers it. The AI also writes the food names and feedback in the selected language.
+
+## Privacy
+
+- **Everything stays on your device.** Saved days, your profile and settings live only in your browser's storage. There is no account, no server and no database.
+- **Optional password lock.** Encrypts all saved data with AES-256-GCM (key from PBKDF2-SHA-256, 600,000 rounds, random salt). The key only exists in memory, and the app locks itself after 10 minutes without use. A forgotten password cannot be recovered.
+- **Only "Analyze" sends data**: the food/activity text plus age, sex, height, weight and goal go to the AI to calculate the results. Nothing else leaves the device.
+- **No ads, trackers, cookies, analytics or outside fonts.** The GitHub version has a strict Content-Security-Policy, so the page can only talk to `api.anthropic.com`.
+- **Backups** (to move to another device) are encrypted with your password when the lock is on, and never include your API key.
+- **Delete all my data** wipes everything from the device in one tap.
 
 ## How to run
 
@@ -34,4 +44,4 @@ These are estimates for general guidance, not medical advice. The scale also mov
 ## Files
 
 - `index.html`: the app
-- `i18n.js`: translations
+- `i18n.js`, `i18n-more.js`: translations
