@@ -1,80 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GamePulse — All Games Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>body{font-family:Inter,system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}.gradient-text{background:linear-gradient(135deg,#0ea5e9,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>GamePulse — game finder</title>
+<style>:root{--bg:#0b1120;--card:#111a2e;--line:#22304d;--ink:#e6ecf5;--mut:#93a1b8;--acc:#38bdf8}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc)}.wrap{max-width:960px;margin:0 auto;padding:16px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav .brand{font-weight:800;color:var(--ink);text-decoration:none;font-size:18px}nav .links{display:flex;gap:16px;font-size:15px}
+h1{font-size:clamp(28px,6vw,44px);line-height:1.15;margin:28px 0 10px}h2{font-size:20px;margin:28px 0 12px}
+.mut{color:var(--mut)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-decoration:none;color:var(--ink)}
+.card:hover,.card:focus-visible{border-color:var(--acc)}.card small{display:block;color:var(--mut);margin-top:4px}
+.search{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.search input{flex:1 1 220px;min-width:0;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;padding:12px 16px;border-radius:10px;border:0;background:var(--acc);color:#04111f;font-weight:700}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:500;padding:6px 10px}
+.results{display:flex;flex-wrap:wrap;gap:8px}.results a{padding:8px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}.chips a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink)}.chips a.on{border-color:var(--acc);color:var(--acc)}
+.big{font-size:56px;line-height:1}.bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.bar[hidden]{display:none}footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 16px;color:var(--mut);font-size:13px;text-align:center}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
-  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-      <a href="index.html" class="flex items-center gap-2 font-bold">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-violet-600 flex items-center justify-center text-sm">GP</div>
-        Game<span class="gradient-text">Pulse</span>
-      </a>
-      <div class="flex gap-4 text-sm">
-        <a href="catalog.html" class="hover:text-sky-400">Catalog</a>
-        <a href="../citypulse/index.html" class="text-emerald-400">CityPulse →</a>
-      </div>
-    </div>
-  </nav>
+<body>
+<nav><a class="brand" href="index.html">Game<span style="color:#38bdf8">Pulse</span></a><div class="links"><a href="catalog.html">Catalog</a><a href="../citypulse/index.html">CityPulse →</a></div></nav>
+<main class="wrap">
+<h1>Every game, one place to start.</h1>
+<p class="mut">A small list of featured games across consoles, PC, mobile and Roblox. For any other game, search and pick where to look.</p>
+<div class="search"><input id="q" type="search" placeholder="Search any game…" aria-label="Search any game…"><button id="go">Search</button></div>
+<div id="res" class="results" aria-live="polite"></div>
+<h2>Featured</h2><div class="grid"><a class="card" href="track.html?game=gta-6"><span style="font-size:28px">🚗</span><br><strong>Grand Theft Auto VI</strong><small>Console &amp; PC · Rockstar Games</small></a><a class="card" href="track.html?game=minecraft"><span style="font-size:28px">⛏️</span><br><strong>Minecraft</strong><small>Console, PC &amp; Mobile · Mojang</small></a><a class="card" href="track.html?game=fortnite"><span style="font-size:28px">🪂</span><br><strong>Fortnite</strong><small>Console, PC &amp; Mobile · Epic Games</small></a><a class="card" href="track.html?game=clash-royale"><span style="font-size:28px">👑</span><br><strong>Clash Royale</strong><small>Mobile · Supercell</small></a><a class="card" href="track.html?game=blox-fruits"><span style="font-size:28px">🍎</span><br><strong>Blox Fruits</strong><small>Roblox experience</small></a><a class="card" href="track.html?game=murder-mystery-2"><span style="font-size:28px">🔪</span><br><strong>Murder Mystery 2</strong><small>Roblox experience</small></a><a class="card" href="track.html?game=brookhaven"><span style="font-size:28px">🏡</span><br><strong>Brookhaven RP</strong><small>Roblox experience</small></a><a class="card" href="track.html?game=adopt-me"><span style="font-size:28px">🐣</span><br><strong>Adopt Me!</strong><small>Roblox experience</small></a></div>
+<h2>Platforms</h2><div class="chips"><a href="catalog.html?group=Console & PC">Console &amp; PC</a><a href="catalog.html?group=Mobile">Mobile</a><a href="catalog.html?group=Roblox">Roblox</a><a href="catalog.html">All</a></div>
+</main>
+<footer>GamePulse · Not affiliated with any game, studio or store named here. Names are trademarks of their owners.</footer>
+<script>
+const ITEMS={"gta-6": {"name": "Grand Theft Auto VI", "icon": "🚗", "tag": "Console & PC · Rockstar Games", "group": "Console & PC", "note": "Open-world action game from Rockstar Games."}, "minecraft": {"name": "Minecraft", "icon": "⛏️", "tag": "Console, PC & Mobile · Mojang", "group": "Console & PC", "note": "Block-building sandbox game: survive, explore and build."}, "fortnite": {"name": "Fortnite", "icon": "🪂", "tag": "Console, PC & Mobile · Epic Games", "group": "Console & PC", "note": "Online battle royale and creative building game."}, "clash-royale": {"name": "Clash Royale", "icon": "👑", "tag": "Mobile · Supercell", "group": "Mobile", "note": "Real-time card and tower battle game."}, "blox-fruits": {"name": "Blox Fruits", "icon": "🍎", "tag": "Roblox experience", "group": "Roblox", "note": "Pirate adventure: fight, level up and collect fruit powers."}, "murder-mystery-2": {"name": "Murder Mystery 2", "icon": "🔪", "tag": "Roblox experience", "group": "Roblox", "note": "Find the murderer before time runs out."}, "brookhaven": {"name": "Brookhaven RP", "icon": "🏡", "tag": "Roblox experience", "group": "Roblox", "note": "Town role-play: houses, cars and jobs."}, "adopt-me": {"name": "Adopt Me!", "icon": "🐣", "tag": "Roblox experience", "group": "Roblox", "note": "Raise and trade pets in a family role-play world."}};
+const SEARCH=[["RAWG", "https://rawg.io/search?query=", ""], ["Steam", "https://store.steampowered.com/search/?term=", ""], ["Wikipedia", "https://en.wikipedia.org/w/index.php?search=", "+video+game"]];
 
-  <header class="pt-24 pb-12 px-4">
-    <div class="max-w-7xl mx-auto">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-medium mb-4">AAA · Indie · Mobile · Esports · Roblox</div>
-      <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-4">Every Game.<br><span class="gradient-text">Every Update.</span></h1>
-      <p class="text-slate-400 text-lg max-w-2xl mb-6">Track news across all platforms — not Roblox-only. Open any game in its own tab. Search the world via RAWG / Steam when a title is not in the local list.</p>
-      <div class="flex flex-wrap gap-3 mb-8">
-        <a href="catalog.html" class="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-sm">Full Catalog →</a>
-        <a href="track.html?game=gta-6" target="_blank" class="px-5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm">GTA 6</a>
-        <a href="track.html?game=blox-fruits" target="_blank" class="px-5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm">Blox Fruits</a>
-      </div>
-      <div class="flex flex-col sm:flex-row gap-2 max-w-xl">
-        <input id="worldQ" type="text" placeholder="Search any game in the world…" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-        <button onclick="searchWorld()" class="px-4 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-sm font-semibold">Search world</button>
-      </div>
-      <p class="text-xs text-slate-500 mt-2">Opens RAWG (500k+ games) + Steam + Google. Free API: rawg.io/apidocs</p>
-    </div>
-  </header>
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function searchLinks(q,box){q=q.trim();box.innerHTML='';if(!q)return;const e=encodeURIComponent(q);
+ box.innerHTML='<span class="mut">Search “'+esc(q)+'” on:</span> '+SEARCH.map(s=>'<a href="'+s[1]+e+s[2]+'" target="_blank" rel="noopener noreferrer">'+s[0]+' ↗</a>').join('');}
+function wire(inputId,btnId,boxId){const i=document.getElementById(inputId),b=document.getElementById(btnId),x=document.getElementById(boxId);
+ b.addEventListener('click',()=>searchLinks(i.value,x));i.addEventListener('keydown',ev=>{if(ev.key==='Enter')searchLinks(i.value,x)});}
 
-  <section class="max-w-7xl mx-auto px-4 mb-12">
-    <h2 class="text-xl font-bold mb-4">Platforms</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">🎮 AAA / Console</a>
-      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">🕹️ Indie / PC</a>
-      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">📱 Mobile</a>
-      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">🧱 Roblox</a>
-    </div>
-  </section>
-
-  <section class="max-w-7xl mx-auto px-4 mb-16">
-    <h2 class="text-xl font-bold mb-4">Featured (open in new tabs)</h2>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <a href="track.html?game=gta-6" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🚗 <strong>GTA 6</strong><br><span class="text-xs text-slate-500">AAA · Launch Nov 2026</span></a>
-      <a href="track.html?game=blox-fruits" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🍎 <strong>Blox Fruits</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
-      <a href="track.html?game=steal-an-egg" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🥚 <strong>Steal An Egg</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
-      <a href="track.html?game=murder-mystery-2" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🔪 <strong>Murder Mystery 2</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
-      <a href="track.html?game=brookhaven" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🏡 <strong>Brookhaven</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
-      <a href="track.html?game=adopt-me" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-sky-500/50 block">🐣 <strong>Adopt Me!</strong><br><span class="text-xs text-slate-500">Roblox</span></a>
-    </div>
-  </section>
-
-  <footer class="border-t border-slate-800 py-8 text-center text-sm text-slate-500">
-    GamePulse · Claude repo · Not every game hardcoded — use Search world + RAWG for full coverage
-  </footer>
-  <script>
-    function searchWorld(){
-      const q=document.getElementById('worldQ').value.trim();
-      if(!q)return;
-      const e=encodeURIComponent(q);
-      window.open('https://rawg.io/search?query='+e,'_blank');
-      window.open('https://store.steampowered.com/search/?term='+e,'_blank');
-      window.open('https://www.google.com/search?q='+e+'+game','_blank');
-    }
-    document.getElementById('worldQ').addEventListener('keydown',e=>{if(e.key==='Enter')searchWorld()});
-  </script>
+wire('q','go','res');
+</script>
 </body>
 </html>

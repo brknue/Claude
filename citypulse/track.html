@@ -1,51 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CityPulse — City Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>body{font-family:system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>CityPulse</title>
+<style>:root{--bg:#0b1120;--card:#111a2e;--line:#22304d;--ink:#e6ecf5;--mut:#93a1b8;--acc:#34d399}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc)}.wrap{max-width:960px;margin:0 auto;padding:16px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav .brand{font-weight:800;color:var(--ink);text-decoration:none;font-size:18px}nav .links{display:flex;gap:16px;font-size:15px}
+h1{font-size:clamp(28px,6vw,44px);line-height:1.15;margin:28px 0 10px}h2{font-size:20px;margin:28px 0 12px}
+.mut{color:var(--mut)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-decoration:none;color:var(--ink)}
+.card:hover,.card:focus-visible{border-color:var(--acc)}.card small{display:block;color:var(--mut);margin-top:4px}
+.search{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.search input{flex:1 1 220px;min-width:0;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;padding:12px 16px;border-radius:10px;border:0;background:var(--acc);color:#04111f;font-weight:700}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:500;padding:6px 10px}
+.results{display:flex;flex-wrap:wrap;gap:8px}.results a{padding:8px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}.chips a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink)}.chips a.on{border-color:var(--acc);color:var(--acc)}
+.big{font-size:56px;line-height:1}.bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.bar[hidden]{display:none}footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 16px;color:var(--mut);font-size:13px;text-align:center}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
-  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-      <a href="index.html" class="font-bold text-emerald-400">← CityPulse</a>
-      <button onclick="addTrack()" id="btn" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-xs font-semibold">+ Track This</button>
-    </div>
-  </nav>
-  <main class="pt-20 pb-16 max-w-3xl mx-auto px-4">
-    <div id="out"></div>
-  </main>
-  <div id="bar" class="fixed bottom-0 left-0 right-0 glass border-t border-slate-800 p-3 hidden">
-    <div class="max-w-7xl mx-auto flex gap-2 items-center overflow-x-auto text-xs">
-      <span class="text-slate-500 shrink-0">Tracked:</span>
-      <div id="list" class="flex gap-2"></div>
-      <button onclick="localStorage.removeItem('cp_tracked');renderBar()" class="ml-auto text-slate-500 hover:text-rose-400">Clear</button>
-    </div>
-  </div>
-  <script>
-    const CITIES = {
-      "hallstatt": { name: "Hallstatt", flag: "🇦🇹", country: "Austria", region: "Europe", note: "UNESCO alpine lake village, salt mining history." },
-      "chefchaouen": { name: "Chefchaouen", flag: "🇲🇦", country: "Morocco", region: "Africa", note: "Blue medina in the Rif Mountains." },
-      "giethoorn": { name: "Giethoorn", flag: "🇳🇱", country: "Netherlands", region: "Europe", note: "Canal village — Dutch Venice, car-free core." },
-      "shirakawa-go": { name: "Shirakawa-go", flag: "🇯🇵", country: "Japan", region: "Asia", note: "UNESCO thatched-roof mountain village." },
-      "bled": { name: "Bled", flag: "🇸🇮", country: "Slovenia", region: "Europe", note: "Alpine lake with island church and cliff castle." },
-      "reine": { name: "Reine", flag: "🇳🇴", country: "Norway", region: "Europe", note: "Dramatic Lofoten fishing village." }
-    };
-    const slug = new URLSearchParams(location.search).get('city') || '';
-    const c = CITIES[slug];
-    const el = document.getElementById('out');
-    if (!c) {
-      el.innerHTML = '<h1 class="text-2xl font-bold mb-2">City not found</h1><p class="text-slate-400 mb-4">Use catalog or world search.</p><a href="catalog.html" class="text-emerald-400">Catalog →</a>';
-    } else {
-      document.title = c.name + ' — CityPulse';
-      el.innerHTML = `<div class="text-5xl mb-3">${c.flag}</div><h1 class="text-3xl font-bold">${c.name}</h1><p class="text-slate-400 text-sm mt-1">${c.country} · ${c.region}</p><p class="mt-4 text-slate-300">${c.note}</p>`;
-    }
-    function getT(){try{return JSON.parse(localStorage.getItem('cp_tracked')||'[]')}catch{return[]}}
-    function addTrack(){if(!slug||!CITIES[slug])return;let t=getT();if(!t.includes(slug)){t.push(slug);localStorage.setItem('cp_tracked',JSON.stringify(t))}document.getElementById('btn').textContent='✓ Tracked';renderBar()}
-    function renderBar(){const t=getT();const bar=document.getElementById('bar');if(!t.length){bar.classList.add('hidden');return}bar.classList.remove('hidden');document.getElementById('list').innerHTML=t.map(s=>{const x=CITIES[s];return x?`<a href="track.html?city=${s}" target="_blank" class="px-2 py-1 rounded bg-slate-800">${x.flag} ${x.name}</a>`:''}).join('')}
-    renderBar(); if(getT().includes(slug)) document.getElementById('btn').textContent='✓ Tracked';
-  </script>
+<body>
+<nav><a class="brand" href="index.html">City<span style="color:#34d399">Pulse</span></a><div class="links"><a href="catalog.html">Catalog</a><a href="../gamepulse/index.html">GamePulse →</a></div></nav>
+<main class="wrap" id="out"></main>
+<div class="bar" id="bar" hidden><span class="mut">Saved:</span><span id="list" class="results"></span><button class="ghost" id="clr">Clear</button></div>
+<footer>CityPulse · Search links go to OpenStreetMap, Wikipedia and GeoNames.</footer>
+<script>
+const ITEMS={"hallstatt": {"name": "Hallstatt", "icon": "🇦🇹", "tag": "Austria · Alpine lake", "group": "Europe", "note": "UNESCO lake village with a long salt-mining history."}, "giethoorn": {"name": "Giethoorn", "icon": "🇳🇱", "tag": "Netherlands · Canals", "group": "Europe", "note": "Canal village with a mostly car-free centre."}, "bled": {"name": "Bled", "icon": "🇸🇮", "tag": "Slovenia · Lake island", "group": "Europe", "note": "Alpine lake with an island church and a cliff-top castle."}, "reine": {"name": "Reine", "icon": "🇳🇴", "tag": "Norway · Lofoten", "group": "Europe", "note": "Fishing village between steep mountains in the Lofoten islands."}, "shirakawa-go": {"name": "Shirakawa-go", "icon": "🇯🇵", "tag": "Japan · Thatched houses", "group": "Asia", "note": "UNESCO mountain village of steep thatched-roof farmhouses."}, "hoi-an": {"name": "Hội An", "icon": "🇻🇳", "tag": "Vietnam · Old trading port", "group": "Asia", "note": "UNESCO old town known for lanterns and wooden shophouses."}, "chefchaouen": {"name": "Chefchaouen", "icon": "🇲🇦", "tag": "Morocco · Blue medina", "group": "Africa", "note": "Blue-painted old town in the Rif Mountains."}, "guanajuato": {"name": "Guanajuato", "icon": "🇲🇽", "tag": "Mexico · Colourful hills", "group": "Americas", "note": "UNESCO colonial city with colourful houses and tunnels."}, "akaroa": {"name": "Akaroa", "icon": "🇳🇿", "tag": "New Zealand · Harbour village", "group": "Oceania", "note": "Harbour village in an old volcanic crater on Banks Peninsula."}};
+const SEARCH=[["OpenStreetMap", "https://www.openstreetmap.org/search?query=", ""], ["Wikipedia", "https://en.wikipedia.org/w/index.php?search=", ""], ["GeoNames", "https://www.geonames.org/search.html?q=", ""]];
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function searchLinks(q,box){q=q.trim();box.innerHTML='';if(!q)return;const e=encodeURIComponent(q);
+ box.innerHTML='<span class="mut">Search “'+esc(q)+'” on:</span> '+SEARCH.map(s=>'<a href="'+s[1]+e+s[2]+'" target="_blank" rel="noopener noreferrer">'+s[0]+' ↗</a>').join('');}
+function wire(inputId,btnId,boxId){const i=document.getElementById(inputId),b=document.getElementById(btnId),x=document.getElementById(boxId);
+ b.addEventListener('click',()=>searchLinks(i.value,x));i.addEventListener('keydown',ev=>{if(ev.key==='Enter')searchLinks(i.value,x)});}
+
+const KEY='city',SK='cp_tracked';const slug=new URLSearchParams(location.search).get(KEY)||'';const v=Object.prototype.hasOwnProperty.call(ITEMS,slug)?ITEMS[slug]:null;
+const get=()=>{try{const a=JSON.parse(localStorage.getItem(SK)||'[]');return Array.isArray(a)?a.filter(s=>ITEMS[s]):[]}catch(e){return[]}};
+const set=a=>{try{localStorage.setItem(SK,JSON.stringify(a))}catch(e){}};
+const out=document.getElementById('out');
+if(!v){out.innerHTML='<h1>Not found</h1><p class="mut">This one is not in the list.</p><p><a href="catalog.html">Open the catalog →</a></p>';}
+else{document.title=v.name+' — CityPulse';
+ out.innerHTML='<div class="big" aria-hidden="true">'+v.icon+'</div><h1>'+esc(v.name)+'</h1><p class="mut">'+esc(v.tag)+'</p><p>'+esc(v.note)+'</p><p><button id="save"></button></p><h2>Find the latest</h2><div class="results">'+SEARCH.map(s=>'<a href="'+s[1]+encodeURIComponent(v.name)+s[2]+'" target="_blank" rel="noopener noreferrer">'+s[0]+' ↗</a>').join('')+'</div><p class="mut" style="margin-top:24px;font-size:14px">This page has no live data. Use the links above for maps and current information.</p>';
+ const b=document.getElementById('save');const lab=()=>{b.textContent=get().includes(slug)?'✓ Saved':'☆ Save to my list'};lab();
+ b.addEventListener('click',()=>{let a=get();a=a.includes(slug)?a.filter(x=>x!==slug):[...a,slug];set(a);lab();bar()});}
+function bar(){const a=get(),el=document.getElementById('bar');el.hidden=!a.length;document.getElementById('list').innerHTML=a.map(s=>'<a href="track.html?'+KEY+'='+s+'">'+ITEMS[s].icon+' '+esc(ITEMS[s].name)+'</a>').join('')}
+document.getElementById('clr').addEventListener('click',()=>{set([]);bar();const b=document.getElementById('save');if(b)b.textContent='☆ Save to my list'});bar();
+</script>
 </body>
 </html>

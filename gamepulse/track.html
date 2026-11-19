@@ -1,51 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GamePulse — Track Game</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>body{font-family:system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>GamePulse</title>
+<style>:root{--bg:#0b1120;--card:#111a2e;--line:#22304d;--ink:#e6ecf5;--mut:#93a1b8;--acc:#38bdf8}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc)}.wrap{max-width:960px;margin:0 auto;padding:16px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav .brand{font-weight:800;color:var(--ink);text-decoration:none;font-size:18px}nav .links{display:flex;gap:16px;font-size:15px}
+h1{font-size:clamp(28px,6vw,44px);line-height:1.15;margin:28px 0 10px}h2{font-size:20px;margin:28px 0 12px}
+.mut{color:var(--mut)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-decoration:none;color:var(--ink)}
+.card:hover,.card:focus-visible{border-color:var(--acc)}.card small{display:block;color:var(--mut);margin-top:4px}
+.search{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.search input{flex:1 1 220px;min-width:0;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;padding:12px 16px;border-radius:10px;border:0;background:var(--acc);color:#04111f;font-weight:700}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:500;padding:6px 10px}
+.results{display:flex;flex-wrap:wrap;gap:8px}.results a{padding:8px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}.chips a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink)}.chips a.on{border-color:var(--acc);color:var(--acc)}
+.big{font-size:56px;line-height:1}.bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.bar[hidden]{display:none}footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 16px;color:var(--mut);font-size:13px;text-align:center}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
-  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-      <a href="index.html" class="font-bold text-sky-400">← GamePulse</a>
-      <button onclick="addTrack()" id="btn" class="px-3 py-1.5 rounded-lg bg-sky-500 text-xs font-semibold">+ Track This</button>
-    </div>
-  </nav>
-  <main class="pt-20 pb-16 max-w-3xl mx-auto px-4">
-    <div id="out"></div>
-  </main>
-  <div id="bar" class="fixed bottom-0 left-0 right-0 glass border-t border-slate-800 p-3 hidden">
-    <div class="max-w-7xl mx-auto flex gap-2 items-center overflow-x-auto text-xs">
-      <span class="text-slate-500 shrink-0">Tracked:</span>
-      <div id="list" class="flex gap-2"></div>
-      <button onclick="localStorage.removeItem('gp_tracked');renderBar()" class="ml-auto text-slate-500 hover:text-rose-400">Clear</button>
-    </div>
-  </div>
-  <script>
-    const GAMES = {
-      "gta-6": { title: "Grand Theft Auto VI", icon: "🚗", platform: "AAA / Console", players: "Pre-order record", note: "Launch targeted for Nov 19, 2026. Most pre-ordered Rockstar title." },
-      "steal-an-egg": { title: "Steal An Egg", icon: "🥚", platform: "Roblox", players: "500k+", note: "Alien Biome and ongoing updates. Top concurrent experience." },
-      "murder-mystery-2": { title: "Murder Mystery 2", icon: "🔪", platform: "Roblox", players: "460k+", note: "Seasonal content and rounds continue." },
-      "brookhaven": { title: "Brookhaven RP", icon: "🏡", platform: "Roblox", players: "325k+", note: "Downtown and vehicle updates." },
-      "blox-fruits": { title: "Blox Fruits", icon: "🍎", platform: "Roblox", players: "200k+", note: "Fruit reworks and seasonal events." },
-      "adopt-me": { title: "Adopt Me!", icon: "🐣", platform: "Roblox", players: "140k+", note: "Pets, eggs, and seasonal drops." }
-    };
-    const slug = new URLSearchParams(location.search).get('game') || '';
-    const g = GAMES[slug];
-    const el = document.getElementById('out');
-    if (!g) {
-      el.innerHTML = '<h1 class="text-2xl font-bold mb-2">Game not found</h1><p class="text-slate-400 mb-4">Use catalog or world search for any title.</p><a href="catalog.html" class="text-sky-400">Catalog →</a>';
-    } else {
-      document.title = g.title + ' — GamePulse';
-      el.innerHTML = `<div class="text-5xl mb-3">${g.icon}</div><h1 class="text-3xl font-bold">${g.title}</h1><p class="text-slate-400 text-sm mt-1">${g.platform} · ${g.players}</p><p class="mt-4 text-slate-300">${g.note}</p><p class="mt-6 text-xs text-slate-500">Open more games from the catalog in additional tabs.</p>`;
-    }
-    function getT(){try{return JSON.parse(localStorage.getItem('gp_tracked')||'[]')}catch{return[]}}
-    function addTrack(){if(!slug||!GAMES[slug])return;let t=getT();if(!t.includes(slug)){t.push(slug);localStorage.setItem('gp_tracked',JSON.stringify(t))}document.getElementById('btn').textContent='✓ Tracked';renderBar()}
-    function renderBar(){const t=getT();const bar=document.getElementById('bar');if(!t.length){bar.classList.add('hidden');return}bar.classList.remove('hidden');document.getElementById('list').innerHTML=t.map(s=>{const x=GAMES[s];return x?`<a href="track.html?game=${s}" target="_blank" class="px-2 py-1 rounded bg-slate-800">${x.icon} ${x.title}</a>`:''}).join('')}
-    renderBar(); if(getT().includes(slug)) document.getElementById('btn').textContent='✓ Tracked';
-  </script>
+<body>
+<nav><a class="brand" href="index.html">Game<span style="color:#38bdf8">Pulse</span></a><div class="links"><a href="catalog.html">Catalog</a><a href="../citypulse/index.html">CityPulse →</a></div></nav>
+<main class="wrap" id="out"></main>
+<div class="bar" id="bar" hidden><span class="mut">Saved:</span><span id="list" class="results"></span><button class="ghost" id="clr">Clear</button></div>
+<footer>GamePulse · Not affiliated with any game, studio or store named here. Names are trademarks of their owners.</footer>
+<script>
+const ITEMS={"gta-6": {"name": "Grand Theft Auto VI", "icon": "🚗", "tag": "Console & PC · Rockstar Games", "group": "Console & PC", "note": "Open-world action game from Rockstar Games."}, "minecraft": {"name": "Minecraft", "icon": "⛏️", "tag": "Console, PC & Mobile · Mojang", "group": "Console & PC", "note": "Block-building sandbox game: survive, explore and build."}, "fortnite": {"name": "Fortnite", "icon": "🪂", "tag": "Console, PC & Mobile · Epic Games", "group": "Console & PC", "note": "Online battle royale and creative building game."}, "clash-royale": {"name": "Clash Royale", "icon": "👑", "tag": "Mobile · Supercell", "group": "Mobile", "note": "Real-time card and tower battle game."}, "blox-fruits": {"name": "Blox Fruits", "icon": "🍎", "tag": "Roblox experience", "group": "Roblox", "note": "Pirate adventure: fight, level up and collect fruit powers."}, "murder-mystery-2": {"name": "Murder Mystery 2", "icon": "🔪", "tag": "Roblox experience", "group": "Roblox", "note": "Find the murderer before time runs out."}, "brookhaven": {"name": "Brookhaven RP", "icon": "🏡", "tag": "Roblox experience", "group": "Roblox", "note": "Town role-play: houses, cars and jobs."}, "adopt-me": {"name": "Adopt Me!", "icon": "🐣", "tag": "Roblox experience", "group": "Roblox", "note": "Raise and trade pets in a family role-play world."}};
+const SEARCH=[["RAWG", "https://rawg.io/search?query=", ""], ["Steam", "https://store.steampowered.com/search/?term=", ""], ["Wikipedia", "https://en.wikipedia.org/w/index.php?search=", "+video+game"]];
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function searchLinks(q,box){q=q.trim();box.innerHTML='';if(!q)return;const e=encodeURIComponent(q);
+ box.innerHTML='<span class="mut">Search “'+esc(q)+'” on:</span> '+SEARCH.map(s=>'<a href="'+s[1]+e+s[2]+'" target="_blank" rel="noopener noreferrer">'+s[0]+' ↗</a>').join('');}
+function wire(inputId,btnId,boxId){const i=document.getElementById(inputId),b=document.getElementById(btnId),x=document.getElementById(boxId);
+ b.addEventListener('click',()=>searchLinks(i.value,x));i.addEventListener('keydown',ev=>{if(ev.key==='Enter')searchLinks(i.value,x)});}
+
+const KEY='game',SK='gp_tracked';const slug=new URLSearchParams(location.search).get(KEY)||'';const v=Object.prototype.hasOwnProperty.call(ITEMS,slug)?ITEMS[slug]:null;
+const get=()=>{try{const a=JSON.parse(localStorage.getItem(SK)||'[]');return Array.isArray(a)?a.filter(s=>ITEMS[s]):[]}catch(e){return[]}};
+const set=a=>{try{localStorage.setItem(SK,JSON.stringify(a))}catch(e){}};
+const out=document.getElementById('out');
+if(!v){out.innerHTML='<h1>Not found</h1><p class="mut">This one is not in the list.</p><p><a href="catalog.html">Open the catalog →</a></p>';}
+else{document.title=v.name+' — GamePulse';
+ out.innerHTML='<div class="big" aria-hidden="true">'+v.icon+'</div><h1>'+esc(v.name)+'</h1><p class="mut">'+esc(v.tag)+'</p><p>'+esc(v.note)+'</p><p><button id="save"></button></p><h2>Find the latest</h2><div class="results">'+SEARCH.map(s=>'<a href="'+s[1]+encodeURIComponent(v.name)+s[2]+'" target="_blank" rel="noopener noreferrer">'+s[0]+' ↗</a>').join('')+'</div><p class="mut" style="margin-top:24px;font-size:14px">This page has no live data. Use the links above for current news and updates.</p>';
+ const b=document.getElementById('save');const lab=()=>{b.textContent=get().includes(slug)?'✓ Saved':'☆ Save to my list'};lab();
+ b.addEventListener('click',()=>{let a=get();a=a.includes(slug)?a.filter(x=>x!==slug):[...a,slug];set(a);lab();bar()});}
+function bar(){const a=get(),el=document.getElementById('bar');el.hidden=!a.length;document.getElementById('list').innerHTML=a.map(s=>'<a href="track.html?'+KEY+'='+s+'">'+ITEMS[s].icon+' '+esc(ITEMS[s].name)+'</a>').join('')}
+document.getElementById('clr').addEventListener('click',()=>{set([]);bar();const b=document.getElementById('save');if(b)b.textContent='☆ Save to my list'});bar();
+</script>
 </body>
 </html>

@@ -1,31 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CityPulse Catalog</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Catalog — CityPulse</title>
+<style>:root{--bg:#0b1120;--card:#111a2e;--line:#22304d;--ink:#e6ecf5;--mut:#93a1b8;--acc:#34d399}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc)}.wrap{max-width:960px;margin:0 auto;padding:16px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav .brand{font-weight:800;color:var(--ink);text-decoration:none;font-size:18px}nav .links{display:flex;gap:16px;font-size:15px}
+h1{font-size:clamp(28px,6vw,44px);line-height:1.15;margin:28px 0 10px}h2{font-size:20px;margin:28px 0 12px}
+.mut{color:var(--mut)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-decoration:none;color:var(--ink)}
+.card:hover,.card:focus-visible{border-color:var(--acc)}.card small{display:block;color:var(--mut);margin-top:4px}
+.search{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.search input{flex:1 1 220px;min-width:0;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;padding:12px 16px;border-radius:10px;border:0;background:var(--acc);color:#04111f;font-weight:700}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:500;padding:6px 10px}
+.results{display:flex;flex-wrap:wrap;gap:8px}.results a{padding:8px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}.chips a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink)}.chips a.on{border-color:var(--acc);color:var(--acc)}
+.big{font-size:56px;line-height:1}.bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.bar[hidden]{display:none}footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 16px;color:var(--mut);font-size:13px;text-align:center}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
-  <a href="index.html" class="text-emerald-400 text-sm">← CityPulse</a>
-  <h1 class="text-2xl font-bold mt-4 mb-2">Catalog</h1>
-  <p class="text-slate-400 text-sm mb-4 max-w-2xl">Local featured towns. For <strong>any</strong> city on Earth use Search world (GeoNames / OSM / Wikipedia). Full dumps: GeoNames or joelacus/world-cities.</p>
-  <div class="flex flex-col sm:flex-row gap-2 mb-8 max-w-2xl">
-    <input id="q" type="text" placeholder="Search any city or town…" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-    <button onclick="searchAny()" class="px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold">Search everywhere</button>
-  </div>
-  <h2 class="font-bold mb-3">Featured</h2>
-  <div class="grid gap-3 sm:grid-cols-2 max-w-3xl">
-    <a href="track.html?city=hallstatt" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇦🇹 Hallstatt</a>
-    <a href="track.html?city=chefchaouen" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇲🇦 Chefchaouen</a>
-    <a href="track.html?city=giethoorn" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇳🇱 Giethoorn</a>
-    <a href="track.html?city=shirakawa-go" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇯🇵 Shirakawa-go</a>
-    <a href="track.html?city=bled" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇸🇮 Bled</a>
-    <a href="track.html?city=reine" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4">🇳🇴 Reine</a>
-  </div>
-  <script>
-    function searchAny(){const q=document.getElementById('q').value.trim();if(!q)return;const e=encodeURIComponent(q);window.open('https://www.geonames.org/search.html?q='+e,'_blank');window.open('https://www.openstreetmap.org/search?query='+e,'_blank');window.open('https://en.wikipedia.org/w/index.php?search='+e,'_blank')}
-    document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')searchAny()});
-  </script>
+<body>
+<nav><a class="brand" href="index.html">City<span style="color:#34d399">Pulse</span></a><div class="links"><a href="catalog.html">Catalog</a><a href="../gamepulse/index.html">GamePulse →</a></div></nav>
+<main class="wrap">
+<h1>Catalog</h1>
+<div class="chips" id="chips"></div>
+<div class="search"><input id="f" type="search" placeholder="Filter this list…" aria-label="Filter this list"></div>
+<div class="grid" id="list"></div>
+<p class="mut" id="none" hidden>Nothing in this list matches. Search the web instead:</p>
+<div class="search"><input id="q" type="search" placeholder="Search any city or town…" aria-label="Search any city or town…"><button id="go">Search</button></div>
+<div id="res" class="results" aria-live="polite"></div>
+</main>
+<footer>CityPulse · Search links go to OpenStreetMap, Wikipedia and GeoNames.</footer>
+<script>
+const ITEMS={"hallstatt": {"name": "Hallstatt", "icon": "🇦🇹", "tag": "Austria · Alpine lake", "group": "Europe", "note": "UNESCO lake village with a long salt-mining history."}, "giethoorn": {"name": "Giethoorn", "icon": "🇳🇱", "tag": "Netherlands · Canals", "group": "Europe", "note": "Canal village with a mostly car-free centre."}, "bled": {"name": "Bled", "icon": "🇸🇮", "tag": "Slovenia · Lake island", "group": "Europe", "note": "Alpine lake with an island church and a cliff-top castle."}, "reine": {"name": "Reine", "icon": "🇳🇴", "tag": "Norway · Lofoten", "group": "Europe", "note": "Fishing village between steep mountains in the Lofoten islands."}, "shirakawa-go": {"name": "Shirakawa-go", "icon": "🇯🇵", "tag": "Japan · Thatched houses", "group": "Asia", "note": "UNESCO mountain village of steep thatched-roof farmhouses."}, "hoi-an": {"name": "Hội An", "icon": "🇻🇳", "tag": "Vietnam · Old trading port", "group": "Asia", "note": "UNESCO old town known for lanterns and wooden shophouses."}, "chefchaouen": {"name": "Chefchaouen", "icon": "🇲🇦", "tag": "Morocco · Blue medina", "group": "Africa", "note": "Blue-painted old town in the Rif Mountains."}, "guanajuato": {"name": "Guanajuato", "icon": "🇲🇽", "tag": "Mexico · Colourful hills", "group": "Americas", "note": "UNESCO colonial city with colourful houses and tunnels."}, "akaroa": {"name": "Akaroa", "icon": "🇳🇿", "tag": "New Zealand · Harbour village", "group": "Oceania", "note": "Harbour village in an old volcanic crater on Banks Peninsula."}};
+const SEARCH=[["OpenStreetMap", "https://www.openstreetmap.org/search?query=", ""], ["Wikipedia", "https://en.wikipedia.org/w/index.php?search=", ""], ["GeoNames", "https://www.geonames.org/search.html?q=", ""]];
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function searchLinks(q,box){q=q.trim();box.innerHTML='';if(!q)return;const e=encodeURIComponent(q);
+ box.innerHTML='<span class="mut">Search “'+esc(q)+'” on:</span> '+SEARCH.map(s=>'<a href="'+s[1]+e+s[2]+'" target="_blank" rel="noopener noreferrer">'+s[0]+' ↗</a>').join('');}
+function wire(inputId,btnId,boxId){const i=document.getElementById(inputId),b=document.getElementById(btnId),x=document.getElementById(boxId);
+ b.addEventListener('click',()=>searchLinks(i.value,x));i.addEventListener('keydown',ev=>{if(ev.key==='Enter')searchLinks(i.value,x)});}
+
+wire('q','go','res');
+const GROUPS=["Europe", "Asia", "Africa", "Americas", "Oceania"];const KEY='city';
+let group=new URLSearchParams(location.search).get('group')||'';if(!GROUPS.includes(group))group='';
+function draw(){const f=document.getElementById('f').value.trim().toLowerCase();
+ document.getElementById('chips').innerHTML=['',...GROUPS].map(g=>'<a href="?'+(g?'group='+encodeURIComponent(g):'')+'" class="'+(g===group?'on':'')+'">'+(g||'All')+'</a>').join('');
+ const rows=Object.entries(ITEMS).filter(([s,v])=>(!group||v.group===group)&&(!f||(v.name+' '+v.tag).toLowerCase().includes(f)));
+ document.getElementById('list').innerHTML=rows.map(([s,v])=>'<a class="card" href="track.html?'+KEY+'='+s+'"><span style="font-size:28px">'+v.icon+'</span><br><strong>'+esc(v.name)+'</strong><small>'+esc(v.tag)+'</small></a>').join('');
+ document.getElementById('none').hidden=rows.length>0;}
+document.getElementById('f').addEventListener('input',draw);draw();
+</script>
 </body>
 </html>

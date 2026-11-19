@@ -1,66 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CityPulse — Small Cities & Towns Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>body{font-family:Inter,system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}.gradient-text{background:linear-gradient(135deg,#34d399,#0ea5e9,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>CityPulse — small towns of the world</title>
+<style>:root{--bg:#0b1120;--card:#111a2e;--line:#22304d;--ink:#e6ecf5;--mut:#93a1b8;--acc:#34d399}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc)}.wrap{max-width:960px;margin:0 auto;padding:16px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav .brand{font-weight:800;color:var(--ink);text-decoration:none;font-size:18px}nav .links{display:flex;gap:16px;font-size:15px}
+h1{font-size:clamp(28px,6vw,44px);line-height:1.15;margin:28px 0 10px}h2{font-size:20px;margin:28px 0 12px}
+.mut{color:var(--mut)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-decoration:none;color:var(--ink)}
+.card:hover,.card:focus-visible{border-color:var(--acc)}.card small{display:block;color:var(--mut);margin-top:4px}
+.search{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.search input{flex:1 1 220px;min-width:0;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;padding:12px 16px;border-radius:10px;border:0;background:var(--acc);color:#04111f;font-weight:700}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:500;padding:6px 10px}
+.results{display:flex;flex-wrap:wrap;gap:8px}.results a{padding:8px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}.chips a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink)}.chips a.on{border-color:var(--acc);color:var(--acc)}
+.big{font-size:56px;line-height:1}.bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.bar[hidden]{display:none}footer{border-top:1px solid var(--line);margin-top:40px;padding:20px 16px;color:var(--mut);font-size:13px;text-align:center}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
-  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-      <a href="index.html" class="flex items-center gap-2 font-bold">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-sm">CP</div>
-        City<span class="gradient-text">Pulse</span>
-      </a>
-      <div class="flex gap-4 text-sm">
-        <a href="catalog.html" class="hover:text-emerald-400">Catalog</a>
-        <a href="../gamepulse/index.html" class="text-sky-400">GamePulse →</a>
-      </div>
-    </div>
-  </nav>
-  <header class="pt-24 pb-12 px-4">
-    <div class="max-w-7xl mx-auto">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium mb-4">Worldwide · Small cities & towns</div>
-      <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-4">Every small city.<br><span class="gradient-text">One place to track it.</span></h1>
-      <p class="text-slate-400 text-lg max-w-2xl mb-4">Notable towns across every continent. Open any city in its own tab. Search the world via GeoNames / OSM / Wikipedia for places not in the local list.</p>
-      <p class="text-slate-500 text-sm max-w-2xl mb-6"><strong class="text-slate-400">Reality:</strong> Millions of places exist. Local catalog = featured; world search + GeoNames dumps = path to full coverage.</p>
-      <div class="flex flex-wrap gap-3 mb-8">
-        <a href="catalog.html" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm">Full Catalog →</a>
-      </div>
-      <div class="flex flex-col sm:flex-row gap-2 max-w-xl">
-        <input id="worldQ" type="text" placeholder="Search any city or town in the world…" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        <button onclick="searchWorld()" class="px-4 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-sm font-semibold">Search world</button>
-      </div>
-    </div>
-  </header>
-  <section class="max-w-7xl mx-auto px-4 mb-12">
-    <h2 class="text-xl font-bold mb-4">Featured</h2>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <a href="track.html?city=hallstatt" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇦🇹 <strong>Hallstatt</strong><br><span class="text-xs text-slate-500">Austria · Alpine lake</span></a>
-      <a href="track.html?city=chefchaouen" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇲🇦 <strong>Chefchaouen</strong><br><span class="text-xs text-slate-500">Morocco · Blue medina</span></a>
-      <a href="track.html?city=giethoorn" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇳🇱 <strong>Giethoorn</strong><br><span class="text-xs text-slate-500">Netherlands · Canals</span></a>
-      <a href="track.html?city=shirakawa-go" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇯🇵 <strong>Shirakawa-go</strong><br><span class="text-xs text-slate-500">Japan · Thatched houses</span></a>
-      <a href="track.html?city=bled" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇸🇮 <strong>Bled</strong><br><span class="text-xs text-slate-500">Slovenia · Lake island</span></a>
-      <a href="track.html?city=reine" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-5 block hover:border-emerald-500/50">🇳🇴 <strong>Reine</strong><br><span class="text-xs text-slate-500">Norway · Lofoten</span></a>
-    </div>
-  </section>
-  <section class="max-w-7xl mx-auto px-4 mb-16">
-    <h2 class="text-xl font-bold mb-4">Regions</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-      <a href="catalog.html?region=europe" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-emerald-500/50">🇪🇺 Europe</a>
-      <a href="catalog.html?region=asia" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-emerald-500/50">🌏 Asia</a>
-      <a href="catalog.html?region=americas" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-emerald-500/50">🌎 Americas</a>
-      <a href="catalog.html?region=africa" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-emerald-500/50">🌍 Africa</a>
-      <a href="catalog.html" class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center hover:border-sky-500/50">🗺️ All</a>
-    </div>
-  </section>
-  <footer class="border-t border-slate-800 py-8 text-center text-sm text-slate-500">CityPulse · Claude repo · GeoNames / world-cities JSON for full coverage</footer>
-  <script>
-    function searchWorld(){const q=document.getElementById('worldQ').value.trim();if(!q)return;const e=encodeURIComponent(q);window.open('https://www.geonames.org/search.html?q='+e,'_blank');window.open('https://www.openstreetmap.org/search?query='+e,'_blank');window.open('https://en.wikipedia.org/w/index.php?search='+e,'_blank')}
-    document.getElementById('worldQ').addEventListener('keydown',e=>{if(e.key==='Enter')searchWorld()});
-  </script>
+<body>
+<nav><a class="brand" href="index.html">City<span style="color:#34d399">Pulse</span></a><div class="links"><a href="catalog.html">Catalog</a><a href="../gamepulse/index.html">GamePulse →</a></div></nav>
+<main class="wrap">
+<h1>Small towns worth knowing.</h1>
+<p class="mut">A short list of beautiful small towns on every continent. For any other place, search and pick where to look.</p>
+<div class="search"><input id="q" type="search" placeholder="Search any city or town…" aria-label="Search any city or town…"><button id="go">Search</button></div>
+<div id="res" class="results" aria-live="polite"></div>
+<h2>Featured</h2><div class="grid"><a class="card" href="track.html?city=hallstatt"><span style="font-size:28px">🇦🇹</span><br><strong>Hallstatt</strong><small>Austria · Alpine lake</small></a><a class="card" href="track.html?city=giethoorn"><span style="font-size:28px">🇳🇱</span><br><strong>Giethoorn</strong><small>Netherlands · Canals</small></a><a class="card" href="track.html?city=bled"><span style="font-size:28px">🇸🇮</span><br><strong>Bled</strong><small>Slovenia · Lake island</small></a><a class="card" href="track.html?city=reine"><span style="font-size:28px">🇳🇴</span><br><strong>Reine</strong><small>Norway · Lofoten</small></a><a class="card" href="track.html?city=shirakawa-go"><span style="font-size:28px">🇯🇵</span><br><strong>Shirakawa-go</strong><small>Japan · Thatched houses</small></a><a class="card" href="track.html?city=hoi-an"><span style="font-size:28px">🇻🇳</span><br><strong>Hội An</strong><small>Vietnam · Old trading port</small></a><a class="card" href="track.html?city=chefchaouen"><span style="font-size:28px">🇲🇦</span><br><strong>Chefchaouen</strong><small>Morocco · Blue medina</small></a><a class="card" href="track.html?city=guanajuato"><span style="font-size:28px">🇲🇽</span><br><strong>Guanajuato</strong><small>Mexico · Colourful hills</small></a><a class="card" href="track.html?city=akaroa"><span style="font-size:28px">🇳🇿</span><br><strong>Akaroa</strong><small>New Zealand · Harbour village</small></a></div>
+<h2>Regions</h2><div class="chips"><a href="catalog.html?group=Europe">Europe</a><a href="catalog.html?group=Asia">Asia</a><a href="catalog.html?group=Africa">Africa</a><a href="catalog.html?group=Americas">Americas</a><a href="catalog.html?group=Oceania">Oceania</a><a href="catalog.html">All</a></div>
+</main>
+<footer>CityPulse · Search links go to OpenStreetMap, Wikipedia and GeoNames.</footer>
+<script>
+const ITEMS={"hallstatt": {"name": "Hallstatt", "icon": "🇦🇹", "tag": "Austria · Alpine lake", "group": "Europe", "note": "UNESCO lake village with a long salt-mining history."}, "giethoorn": {"name": "Giethoorn", "icon": "🇳🇱", "tag": "Netherlands · Canals", "group": "Europe", "note": "Canal village with a mostly car-free centre."}, "bled": {"name": "Bled", "icon": "🇸🇮", "tag": "Slovenia · Lake island", "group": "Europe", "note": "Alpine lake with an island church and a cliff-top castle."}, "reine": {"name": "Reine", "icon": "🇳🇴", "tag": "Norway · Lofoten", "group": "Europe", "note": "Fishing village between steep mountains in the Lofoten islands."}, "shirakawa-go": {"name": "Shirakawa-go", "icon": "🇯🇵", "tag": "Japan · Thatched houses", "group": "Asia", "note": "UNESCO mountain village of steep thatched-roof farmhouses."}, "hoi-an": {"name": "Hội An", "icon": "🇻🇳", "tag": "Vietnam · Old trading port", "group": "Asia", "note": "UNESCO old town known for lanterns and wooden shophouses."}, "chefchaouen": {"name": "Chefchaouen", "icon": "🇲🇦", "tag": "Morocco · Blue medina", "group": "Africa", "note": "Blue-painted old town in the Rif Mountains."}, "guanajuato": {"name": "Guanajuato", "icon": "🇲🇽", "tag": "Mexico · Colourful hills", "group": "Americas", "note": "UNESCO colonial city with colourful houses and tunnels."}, "akaroa": {"name": "Akaroa", "icon": "🇳🇿", "tag": "New Zealand · Harbour village", "group": "Oceania", "note": "Harbour village in an old volcanic crater on Banks Peninsula."}};
+const SEARCH=[["OpenStreetMap", "https://www.openstreetmap.org/search?query=", ""], ["Wikipedia", "https://en.wikipedia.org/w/index.php?search=", ""], ["GeoNames", "https://www.geonames.org/search.html?q=", ""]];
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function searchLinks(q,box){q=q.trim();box.innerHTML='';if(!q)return;const e=encodeURIComponent(q);
+ box.innerHTML='<span class="mut">Search “'+esc(q)+'” on:</span> '+SEARCH.map(s=>'<a href="'+s[1]+e+s[2]+'" target="_blank" rel="noopener noreferrer">'+s[0]+' ↗</a>').join('');}
+function wire(inputId,btnId,boxId){const i=document.getElementById(inputId),b=document.getElementById(btnId),x=document.getElementById(boxId);
+ b.addEventListener('click',()=>searchLinks(i.value,x));i.addEventListener('keydown',ev=>{if(ev.key==='Enter')searchLinks(i.value,x)});}
+
+wire('q','go','res');
+</script>
 </body>
 </html>
