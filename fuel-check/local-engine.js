@@ -339,7 +339,7 @@
         if (conf === 'low' && i === 0) notes.push(['a_default', { x: segRaw.trim(), g: Math.round(grams) }]);
         const label = hits.length > 1 ? segRaw.trim() + ' — ' + item.k : segRaw.trim();
         const fi = foodItem(item, grams, conf, label); fi.amount = amount.trim();
-        foods.push(fi); rec.items.push(fi);
+        foods.push(fi); rec.items.push(fi); (rec.keys = rec.keys || []).push(item.k);
       });
     }
     return foods;
@@ -448,5 +448,6 @@
     return norm(segRaw).replace(/\d+([.,\/]\d+)?\s*(kg|g|gr|grams?|gramm|ml|cl|dl|l|kcal)?\b/g, ' ').split(/\s+/)
       .filter(x => x && WORDNUM[x] == null && !UNITS.some(([, rx]) => rx.test(x)) && !/^(of|von|de|di|du|des|der|die|das|the|a|an|mit|with|ile)$/.test(x)).join(' ').trim();
   }
-  window.FuelLocal = { analyze, feedback, lookup, custom, lookupAct, amount, foodWords, cleanQuery, _parseFoods: parseFoods, _parseActivity: parseActivity, _norm: norm };
+  function aliasesOf(key) { const it = F.find(x => x.k === key); return it ? [...new Set(it.a.split(',').flatMap(a => norm(a).split(' ')).filter(w => w.length >= 4))] : []; }
+  window.FuelLocal = { analyze, feedback, lookup, custom, lookupAct, amount, foodWords, cleanQuery, aliasesOf, _parseFoods: parseFoods, _parseActivity: parseActivity, _norm: norm };
 })();

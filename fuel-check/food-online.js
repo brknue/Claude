@@ -10,7 +10,7 @@
   const BASE = 'https://world.openfoodfacts.org';
   const FIELDS = 'code,product_name,product_name_en,generic_name,brands,nutriments,serving_quantity,product_quantity';
   const PER_RUN = 6, PER_MIN = 8, TTL = 30 * 864e5;
-  let runCount = 0;
+  let runCount = 0, lastSearch = 0;
   const ls = { get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
   const cacheGet = k => { const o = ls.get('fc_off2:' + k); return o && Date.now() - o.t < TTL ? o.v : undefined; };
   const cacheSet = (k, v) => ls.set('fc_off2:' + k, { t: Date.now(), v });
@@ -60,13 +60,15 @@
 
   /* search(words, mustWords) -> {name, brand, url, per100, serving, pack, branded, n} | null
    * mustWords: words that must all appear in the product's name or brand (brand/product lookups) */
-  async function search(words, mustWords) {
+  async function search(words, mustWords, kindWords) {
     const q = norm(words).split(' ').filter(Boolean).slice(0, 6).join(' ');
     if (q.length < 3) return null;
-    const key = q + '|' + (mustWords || '');
+    const kinds = (kindWords || []).map(norm).filter(Boolean);
+    const key = q + '|' + (mustWords || '') + '|' + kinds.length;
     const c = cacheGet(key); if (c !== undefined) return c;
     if (!canSearch()) throw new Error('budget');
-    noteSearch();
+    const gap = Date.now() - lastSearch; if (gap < 1500) await wait(1500 - gap);
+    noteSearch(); lastSearch = Date.now();
     const j = await getJSON(BASE + '/cgi/search.pl?' + new URLSearchParams({ search_terms: q, json: '1', page_size: '20', fields: FIELDS }), true);
     const qt = q.split(' ').filter(x => x.length > 1), must = norm(mustWords || '').split(' ').filter(x => x.length > 1);
     const cands = [];
@@ -74,7 +76,9 @@
       const v = per100(h); if (!v) continue;
       const hay = norm(nameOf(h) + ' ' + (h.brands || ''));
       if (must.length && wordsHit(must, hay) < must.length) continue;
-      const score = qt.length ? wordsHit(qt, hay) / qt.length : 0;
+      const kindHit = kinds.length && wordsHit(kinds, hay) > 0;
+      if (kinds.length && !kindHit) continue;                     // a "Milka chocolate" must be a chocolate, not a Milka cake
+      const score = Math.min(1, (qt.length ? wordsHit(qt, hay) / qt.length : 0) + (kindHit ? 0.5 : 0));
       if (score >= (must.length ? 0.6 : 0.5)) cands.push({ h, v, score, name: nameOf(h) });
     }
     let res = null;
@@ -142,7 +146,8 @@
           const hit = await search(FuelLocal.cleanQuery(s.raw) || FuelLocal.foodWords(s.raw));
           if (hit) { s.items = [makeItem(s, hit)]; s.unknown = false; used.push(s.raw); }
         } else {
-          const hit = await search(FuelLocal.cleanQuery(s.raw) || FuelLocal.foodWords(s.raw), s.extra);
+          const kinds = (s.keys || []).flatMap(k => FuelLocal.aliasesOf(k));
+          const hit = await search(s.extra + ' ' + (s.keys && s.keys[0] || ''), s.extra, kinds);
           if (hit) { const old = s.items.reduce((t, x) => t + (x.grams || 0), 0); s.items = [makeItem(s, hit, old || null)]; used.push(s.raw); }
         }
       } catch (e) {
