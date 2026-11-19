@@ -101,7 +101,7 @@ window.PLAIN_FILES = {
    "fuel-check/index.html",
    "fuel-check/local-engine.js"
   ],
-  "bytes": 397616
+  "bytes": 401083
  },
  "plain-wiki": {
   "files": [
@@ -270,16 +270,7 @@ window.PLAIN_FILES = {
    "verity/verity-local.js",
    "verity/worker.mjs"
   ],
-  "bytes": 111842
- },
- "gamepulse": {
-  "files": [
-   "gamepulse/README.md",
-   "gamepulse/catalog.html",
-   "gamepulse/index.html",
-   "gamepulse/track.html"
-  ],
-  "bytes": 21774
+  "bytes": 111909
  },
  "citypulse": {
   "files": [

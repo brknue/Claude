@@ -302,7 +302,7 @@ window.PLAIN_PROJECTS = [
     }
   },
   {
-    id: 'verity', name: 'Verity', entry: 'verity/index.html', open: 'verity/',
+    id: 'verity', name: 'Know', entry: 'verity/index.html', open: 'verity/',
     tags: ['tools'], lang: '', notes: ['lookup'],
     desc: {
       en: 'Paste a post, article or link: it finds the factual claims and shows matching passages from Wikipedia, with an optional on-device AI check.',
@@ -325,32 +325,6 @@ window.PLAIN_PROJECTS = [
       id: 'Tempel postingan, artikel atau tautan: menemukan klaim fakta dan menampilkan bagian Wikipedia yang cocok, dengan cek AI di perangkat opsional.',
       vi: 'Dán bài đăng, bài báo hoặc liên kết: tìm các khẳng định và hiển thị đoạn Wikipedia phù hợp, có thể kiểm tra bằng AI trên máy.',
       sv: 'Klistra in ett inlägg, en artikel eller länk: hittar påståendena och visar matchande stycken från Wikipedia, med valfri AI-kontroll på enheten.'
-    }
-  },
-  {
-    id: 'gamepulse', name: 'GamePulse', entry: 'gamepulse/index.html', open: 'gamepulse/',
-    tags: ['explore'], lang: 'en', notes: [],
-    desc: {
-      en: 'A small game finder: featured games for console, PC, mobile and Roblox, with quick search links for any other game.',
-      de: 'Kleiner Spiele-Finder: ausgewählte Spiele für Konsole, PC, Handy und Roblox, mit Suchlinks für jedes andere Spiel.',
-      tr: 'Küçük oyun bulucu: konsol, PC, mobil ve Roblox için öne çıkan oyunlar ve diğerleri için arama bağlantıları.',
-      es: 'Buscador de juegos: destacados de consola, PC, móvil y Roblox, con enlaces de búsqueda para cualquier otro.',
-      fr: 'Petit chercheur de jeux : sélection console, PC, mobile et Roblox, avec liens de recherche pour tout autre jeu.',
-      it: 'Piccolo cercagiochi: giochi in evidenza per console, PC, mobile e Roblox, con link di ricerca per qualsiasi altro.',
-      pt: 'Pequeno buscador de jogos: destaques de console, PC, celular e Roblox, com links de busca para qualquer outro.',
-      nl: 'Kleine gamezoeker: uitgelichte games voor console, pc, mobiel en Roblox, met zoeklinks voor elke andere game.',
-      pl: 'Mała wyszukiwarka gier: polecane gry na konsole, PC, telefon i Roblox oraz linki do szukania innych.',
-      ru: 'Небольшой поиск игр: избранное для консолей, ПК, телефонов и Roblox и ссылки для поиска любой другой игры.',
-      uk: 'Невеликий пошук ігор: добірка для консолей, ПК, телефонів і Roblox та посилання для пошуку будь-якої іншої.',
-      ar: 'باحث ألعاب صغير: ألعاب مختارة للأجهزة والحاسوب والجوال وروبلوكس، مع روابط بحث لأي لعبة أخرى.',
-      fa: 'یابنده کوچک بازی: بازی‌های برگزیده کنسول، رایانه، موبایل و روبلاکس با پیوند جست‌وجو برای هر بازی دیگر.',
-      hi: 'छोटा गेम फ़ाइंडर: कंसोल, PC, मोबाइल और Roblox के चुनिंदा गेम, किसी भी अन्य गेम के लिए खोज लिंक।',
-      zh: '小型游戏查找器：主机、PC、手机和 Roblox 精选游戏，并可快速搜索其他任何游戏。',
-      ja: '小さなゲーム検索：家庭用機・PC・スマホ・Robloxのおすすめと、他のゲームを探す検索リンク。',
-      ko: '작은 게임 찾기: 콘솔, PC, 모바일, Roblox 추천 게임과 다른 게임 검색 링크.',
-      id: 'Pencari game kecil: game pilihan untuk konsol, PC, ponsel dan Roblox, plus tautan cari untuk game lain.',
-      vi: 'Công cụ tìm game nhỏ: game nổi bật cho console, PC, di động và Roblox, kèm liên kết tìm game khác.',
-      sv: 'Liten spelhittare: utvalda spel för konsol, pc, mobil och Roblox, med söklänkar för alla andra spel.'
     }
   },
   {

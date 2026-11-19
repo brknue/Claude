@@ -15,6 +15,7 @@ Things made with Claude.
 - [`bio-genetik/`](bio-genetik/): Genetik-Lernseite für die Bio-Kursarbeit (Zellkern, Chromosomen, DNA, Replikation, Mitose, Proteinbiosynthese) mit 13 Animationen, Quiz, Karteikarten, Übungslabor und Probearbeit; 6 Sprachen, Fortschritt nur lokal gespeichert.
 - [`lingua-local/`](lingua-local/): offline phrasebook and flashcards for six languages with a personal routine.
 - [`mathe-klar/`](mathe-klar/): visual maths course for Realschule grades 5–10 (German), 77 animated lessons.
-- [`verity/`](verity/): evidence-first fact checker that runs in the browser: finds claims and shows matching Wikipedia passages, optional on-device AI (no key).
-- [`gamepulse/`](gamepulse/) and [`citypulse/`](citypulse/): small game finder and small-towns explorer.
+- [`verity/`](verity/): **Know**, an evidence-first fact checker that runs in the browser: finds claims and shows matching Wikipedia passages, optional on-device AI (no key).
+- [`citypulse/`](citypulse/): small-towns explorer.
+- [`gamepulse/`](gamepulse/): small game finder (not listed on plain).
 - [`deep-dig/`](deep-dig/) and [`roblox-knowledge/`](roblox-knowledge/): Roblox game code and research notes (not web pages).

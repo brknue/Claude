@@ -8,14 +8,14 @@
 
   /* ---------------- texts ---------------- */
   const I = {
-    en: { headline: 'Before you believe it, <em>follow the evidence.</em>', lead: 'Paste a post, an article or a link. Verity finds the factual claims, looks each one up in Wikipedia and shows you the passages, so you can judge for yourself.',
+    en: { headline: 'Before you believe it, <em>follow the evidence.</em>', lead: 'Paste a post, an article or a link. Know finds the factual claims, looks each one up in Wikipedia and shows you the passages, so you can judge for yourself.',
       tabText: '≡ Text', tabLink: '↗ Link', textLabel: 'Paste the words you want to check', textHint: 'Posts, captions, transcripts or articles. Up to 30,000 characters.', linkLabel: 'Public article link',
       linkHint: 'The page is read through Jina Reader (a free public service). Logins, paywalls and video sites can’t be read: paste the text instead.', evLang: 'Look up evidence in', find: 'Find the claims',
       claimsTitle: 'Claims found', claimsHint: 'Untick anything that isn’t a factual claim, or add your own.', addPh: 'Add a claim…', add: 'Add', check: 'Check the evidence', report: 'Evidence report',
       copy: 'Copy', download: 'Download', print: 'Print / PDF', aiTitle: 'Optional: let an on-device AI read the evidence',
       aiHint: 'Runs entirely in your browser (no key, nothing sent to an AI company). Downloads a small model once (about 1 GB) and needs WebGPU: current Chrome or Edge, or Safari 26+. It only reads the passages shown below, so it can still be wrong.',
       aiRun: 'Ask the on-device AI', howTitle: 'How it works',
-      how1: '1. Verity splits the text into sentences and keeps those that state checkable facts (numbers, dates, names, “is/was/has”). You can edit the list.',
+      how1: '1. Know splits the text into sentences and keeps those that state checkable facts (numbers, dates, names, “is/was/has”). You can edit the list.',
       how2: '2. For each claim it searches Wikipedia and reads the best matching articles, then picks the sentences that share the most words and numbers with the claim.',
       how3: '3. Labels: <b>Numbers match</b> = the passage talks about the same thing and contains the claim’s numbers. <b>Numbers differ</b> = the same topic with other numbers, read carefully. <b>Related</b> = on topic, but not decisive. <b>Nothing clear</b> = no good passage found. These are automatic text matches, not verdicts.',
       how4: 'Limits: Wikipedia can be incomplete or out of date, recent news is often missing, and word matching can miss meaning. Open the sources before you rely on anything.',
@@ -27,14 +27,14 @@
       ai_supported: 'AI: supported', ai_contradicted: 'AI: contradicted', ai_unclear: 'AI: not enough evidence', aiNoGPU: 'This browser has no WebGPU, so the on-device AI can’t run here. The evidence above still works.',
       aiLoading: 'Loading the model… {p}% (only the first time)', aiReading: 'AI is reading claim {i} of {n}…', aiDone: 'AI finished. Check the passages yourself, the AI can be wrong.', aiFail: 'The AI could not run: {e}',
       copied: 'Copied.', maxClaims: 'Only the first 10 claims are checked.', theme: 'Dark mode', themeL: 'Light mode' },
-    de: { headline: 'Bevor du es glaubst, <em>folge den Belegen.</em>', lead: 'Füge einen Beitrag, einen Artikel oder einen Link ein. Verity findet die Tatsachenbehauptungen, schlägt jede in Wikipedia nach und zeigt dir die Stellen, damit du selbst urteilen kannst.',
+    de: { headline: 'Bevor du es glaubst, <em>folge den Belegen.</em>', lead: 'Füge einen Beitrag, einen Artikel oder einen Link ein. Know findet die Tatsachenbehauptungen, schlägt jede in Wikipedia nach und zeigt dir die Stellen, damit du selbst urteilen kannst.',
       tabText: '≡ Text', tabLink: '↗ Link', textLabel: 'Füge den Text ein, den du prüfen willst', textHint: 'Beiträge, Untertitel, Transkripte oder Artikel. Bis zu 30.000 Zeichen.', linkLabel: 'Öffentlicher Artikel-Link',
       linkHint: 'Die Seite wird über Jina Reader gelesen (ein kostenloser öffentlicher Dienst). Logins, Bezahlschranken und Videoseiten gehen nicht: dann den Text einfügen.', evLang: 'Belege suchen in', find: 'Behauptungen finden',
       claimsTitle: 'Gefundene Behauptungen', claimsHint: 'Entferne den Haken bei allem, was keine Tatsachenbehauptung ist, oder füge eigene hinzu.', addPh: 'Behauptung hinzufügen…', add: 'Hinzufügen', check: 'Belege prüfen', report: 'Belegbericht',
       copy: 'Kopieren', download: 'Herunterladen', print: 'Drucken / PDF', aiTitle: 'Optional: eine KI auf deinem Gerät die Belege lesen lassen',
       aiHint: 'Läuft komplett in deinem Browser (kein Schlüssel, nichts geht an eine KI-Firma). Lädt einmalig ein kleines Modell (etwa 1 GB) und braucht WebGPU: aktuelles Chrome oder Edge oder Safari 26+. Sie liest nur die unten gezeigten Stellen und kann sich trotzdem irren.',
       aiRun: 'KI auf dem Gerät fragen', howTitle: 'So funktioniert es',
-      how1: '1. Verity zerlegt den Text in Sätze und behält die, die prüfbare Fakten nennen (Zahlen, Daten, Namen, „ist/war/hat“). Du kannst die Liste bearbeiten.',
+      how1: '1. Know zerlegt den Text in Sätze und behält die, die prüfbare Fakten nennen (Zahlen, Daten, Namen, „ist/war/hat“). Du kannst die Liste bearbeiten.',
       how2: '2. Für jede Behauptung sucht es in Wikipedia, liest die passendsten Artikel und wählt die Sätze, die die meisten Wörter und Zahlen mit der Behauptung teilen.',
       how3: '3. Markierungen: <b>Zahlen passen</b> = die Stelle behandelt dasselbe und enthält die Zahlen der Behauptung. <b>Zahlen weichen ab</b> = gleiches Thema, andere Zahlen, genau lesen. <b>Verwandt</b> = zum Thema, aber nicht entscheidend. <b>Nichts Eindeutiges</b> = keine gute Stelle gefunden. Das sind automatische Textvergleiche, keine Urteile.',
       how4: 'Grenzen: Wikipedia kann unvollständig oder veraltet sein, aktuelle Nachrichten fehlen oft, und Wortvergleiche können Bedeutungen übersehen. Öffne die Quellen, bevor du dich auf etwas verlässt.',
@@ -46,14 +46,14 @@
       ai_supported: 'KI: gestützt', ai_contradicted: 'KI: widerlegt', ai_unclear: 'KI: zu wenig Belege', aiNoGPU: 'Dieser Browser hat kein WebGPU, die KI kann hier nicht laufen. Die Belege oben funktionieren trotzdem.',
       aiLoading: 'Modell wird geladen… {p} % (nur beim ersten Mal)', aiReading: 'KI liest Behauptung {i} von {n}…', aiDone: 'KI fertig. Prüfe die Stellen selbst, die KI kann sich irren.', aiFail: 'Die KI konnte nicht laufen: {e}',
       copied: 'Kopiert.', maxClaims: 'Nur die ersten 10 Behauptungen werden geprüft.', theme: 'Dunkelmodus', themeL: 'Hellmodus' },
-    tr: { headline: 'İnanmadan önce <em>kanıtların izini sür.</em>', lead: 'Bir gönderi, makale ya da bağlantı yapıştır. Verity olgusal iddiaları bulur, her birini Vikipedi’de arar ve ilgili bölümleri gösterir; kararı sen verirsin.',
+    tr: { headline: 'İnanmadan önce <em>kanıtların izini sür.</em>', lead: 'Bir gönderi, makale ya da bağlantı yapıştır. Know olgusal iddiaları bulur, her birini Vikipedi’de arar ve ilgili bölümleri gösterir; kararı sen verirsin.',
       tabText: '≡ Metin', tabLink: '↗ Bağlantı', textLabel: 'Kontrol etmek istediğin metni yapıştır', textHint: 'Gönderiler, altyazılar, dökümler veya makaleler. En fazla 30.000 karakter.', linkLabel: 'Herkese açık makale bağlantısı',
       linkHint: 'Sayfa Jina Reader (ücretsiz, herkese açık bir hizmet) ile okunur. Giriş gerektiren, ücretli ve video sitelerinde metni yapıştır.', evLang: 'Kanıtları şurada ara', find: 'İddiaları bul',
       claimsTitle: 'Bulunan iddialar', claimsHint: 'Olgusal iddia olmayanların işaretini kaldır ya da kendin ekle.', addPh: 'İddia ekle…', add: 'Ekle', check: 'Kanıtları kontrol et', report: 'Kanıt raporu',
       copy: 'Kopyala', download: 'İndir', print: 'Yazdır / PDF', aiTitle: 'İsteğe bağlı: kanıtları cihazındaki yapay zekâ okusun',
       aiHint: 'Tamamen tarayıcında çalışır (anahtar yok, hiçbir şey bir yapay zekâ şirketine gitmez). Bir kez küçük bir model indirir (yaklaşık 1 GB) ve WebGPU gerekir: güncel Chrome veya Edge ya da Safari 26+. Yalnızca aşağıdaki bölümleri okur; yine de yanılabilir.',
       aiRun: 'Cihazdaki yapay zekâya sor', howTitle: 'Nasıl çalışır',
-      how1: '1. Verity metni cümlelere ayırır ve doğrulanabilir bilgi içerenleri (sayılar, tarihler, isimler) tutar. Listeyi düzenleyebilirsin.',
+      how1: '1. Know metni cümlelere ayırır ve doğrulanabilir bilgi içerenleri (sayılar, tarihler, isimler) tutar. Listeyi düzenleyebilirsin.',
       how2: '2. Her iddia için Vikipedi’de arar, en uygun makaleleri okur ve iddiayla en çok sözcük ve sayıyı paylaşan cümleleri seçer.',
       how3: '3. Etiketler: <b>Sayılar uyuşuyor</b> = bölüm aynı konudan söz ediyor ve iddiadaki sayıları içeriyor. <b>Sayılar farklı</b> = aynı konu, başka sayılar; dikkatle oku. <b>İlgili</b> = konuyla ilgili ama belirleyici değil. <b>Net bir şey yok</b> = iyi bir bölüm bulunamadı. Bunlar otomatik metin eşleşmeleridir, hüküm değildir.',
       how4: 'Sınırlar: Vikipedi eksik ya da eski olabilir, güncel haberler çoğu zaman yoktur ve sözcük eşleşmesi anlamı kaçırabilir. Bir şeye güvenmeden önce kaynakları aç.',
@@ -258,11 +258,11 @@
     </article>`).join('');
   }
   function reportText(rep) {
-    return 'Verity — ' + t('report') + ' (' + rep.date.toLocaleString(lang) + ')\n\n' + rep.results.map((r, i) =>
+    return 'Know — ' + t('report') + ' (' + rep.date.toLocaleString(lang) + ')\n\n' + rep.results.map((r, i) =>
       `${i + 1}. ${r.claim}\n   [${t('l_' + r.label)}]${r.ai ? ' [' + t('ai_' + r.ai.verdict) + '] ' + (r.ai.reason || '') : ''}\n` + r.ev.map(e => `   • "${e.s}"\n     ${e.url}`).join('\n')).join('\n\n') + '\n';
   }
   $('copy').onclick = () => { if (!lastReport) return; navigator.clipboard.writeText(reportText(lastReport)).then(() => status(t('copied'))).catch(() => {}); };
-  $('dl').onclick = () => { if (!lastReport) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([reportText(lastReport)], { type: 'text/plain' })); a.download = 'verity-report.txt'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); };
+  $('dl').onclick = () => { if (!lastReport) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([reportText(lastReport)], { type: 'text/plain' })); a.download = 'know-report.txt'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); };
   $('print').onclick = () => window.print();
 
   /* ---------------- optional on-device AI ---------------- */

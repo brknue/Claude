@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1c392f">
 <meta name="referrer" content="no-referrer">
-<meta name="description" content="Verity: paste a claim, a post or an article and follow the evidence. Runs in your browser, no account, no key.">
+<meta name="description" content="Know: paste a claim, a post or an article and follow the evidence. Runs in your browser, no account, no key.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RnC4RBF8aUcdqdRYmyGZIB9RcHg4yHEaBVozOPnOa9g=' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://*.wikipedia.org https://r.jina.ai https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
-<title>Verity · Follow the evidence</title>
+<title>Know · Follow the evidence</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
 :root{--bg:#f6f4ee;--card:#fff;--ink:#17231f;--mut:#5f6b66;--line:#e2ded3;--brand:#1c392f;--acc:#2f6b55;--good:#2f7d4f;--goodbg:#e6f3ea;--warn:#a46a10;--warnbg:#fbf0dc;--bad:#b23a32;--badbg:#f9e5e2;--info:#3a5a8c;--infobg:#e7eef9}
@@ -68,7 +68,7 @@ footer{color:var(--mut);font-size:13px;padding:24px 0;display:flex;gap:12px;flex
 <body>
 <div class="wrap">
   <header>
-    <a class="brand" href="./">verity<span>.</span></a>
+    <a class="brand" href="./">know<span>.</span></a>
     <div class="top">
       <select id="lang" aria-label="Language"><option value="en">English</option><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
       <button class="ib" id="theme" type="button" aria-label="Dark mode">☾</button>
@@ -76,7 +76,7 @@ footer{color:var(--mut);font-size:13px;padding:24px 0;display:flex;gap:12px;flex
   </header>
 
   <h1 data-i="headline">Before you believe it, <em>follow the evidence.</em></h1>
-  <p class="lead" data-i="lead">Paste a post, an article or a link. Verity finds the factual claims, looks each one up in Wikipedia and shows you the passages, so you can judge for yourself.</p>
+  <p class="lead" data-i="lead">Paste a post, an article or a link. Know finds the factual claims, looks each one up in Wikipedia and shows you the passages, so you can judge for yourself.</p>
 
   <section class="card input">
     <div class="tabs" role="tablist">
@@ -125,15 +125,15 @@ footer{color:var(--mut);font-size:13px;padding:24px 0;display:flex;gap:12px;flex
 
   <section class="method card">
     <h2 data-i="howTitle">How it works</h2>
-    <p data-i="how1">1. Verity splits the text into sentences and keeps those that state checkable facts (numbers, dates, names, “is/was/has”). You can edit the list.</p>
+    <p data-i="how1">1. Know splits the text into sentences and keeps those that state checkable facts (numbers, dates, names, “is/was/has”). You can edit the list.</p>
     <p data-i="how2">2. For each claim it searches Wikipedia and reads the best matching articles, then picks the sentences that share the most words and numbers with the claim.</p>
     <p data-i="how3">3. Labels: <b>Numbers match</b> = the passage talks about the same thing and contains the claim’s numbers. <b>Numbers differ</b> = the same topic with other numbers, read carefully. <b>Related</b> = on topic, but not decisive. <b>Nothing clear</b> = no good passage found. These are automatic text matches, not verdicts.</p>
     <p data-i="how4">Limits: Wikipedia can be incomplete or out of date, recent news is often missing, and word matching can miss meaning. Open the sources before you rely on anything.</p>
     <p data-i="privacy">Privacy: no account, no tracking. Search words go to Wikipedia; links go to Jina Reader; the optional AI model is downloaded from Hugging Face. Nothing is stored except your theme and language.</p>
   </section>
 
-  <footer><span>verity · <span data-i="foot">Curiosity over certainty.</span></span><a href="https://github.com/brknue/claude/tree/main/verity" rel="noopener">GitHub</a><a href="../" data-i="more">More projects</a></footer>
+  <footer><span>know · <span data-i="foot">Curiosity over certainty.</span></span><a href="https://github.com/brknue/claude/tree/main/verity" rel="noopener">GitHub</a><a href="../" data-i="more">More projects</a></footer>
 </div>
-<script src="verity-local.js"></script>
+<script src="verity-local.js?v=know1"></script>
 </body>
 </html>
