@@ -56,7 +56,9 @@
   }
   const median = a => { a = a.slice().sort((x, y) => x - y); const m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; };
   const nameOf = h => h.product_name || h.product_name_en || h.generic_name || '';
-  function wordsHit(qt, hay) { const hw = hay.split(' '); return qt.filter(x => hw.some(w => w === x || (x.length >= 5 && w.length >= 5 && (w.startsWith(x.slice(0, x.length - 1)) || x.startsWith(w.slice(0, w.length - 1)))))).length; }
+  // a word matches if equal, or the same word with a short ending (schokolade/schokoladen, egg/eggs) — not "choco" vs "chocolate"
+  function same(x, w) { if (x === w) return true; const a = x.length < w.length ? x : w, b = a === x ? w : x; return a.length >= 4 && b.length - a.length <= 3 && b.startsWith(a) && (b.length - a.length <= 2 || a.length >= 6); }
+  function wordsHit(qt, hay) { const hw = hay.split(' '); return qt.filter(x => hw.some(w => same(x, w))).length; }
 
   /* search(words, mustWords) -> {name, brand, url, per100, serving, pack, branded, n} | null
    * mustWords: words that must all appear in the product's name or brand (brand/product lookups) */
@@ -113,6 +115,7 @@
     const a = FuelLocal.amount(raw), seg = norm(raw);
     if (a.grams) return { g: a.grams, conf: 'high' };
     if (PACK.test(seg) && hit.pack) return { g: a.qty * hit.pack, conf: 'medium' };
+    if (/\b(tafel|tafeln|tablet)\b/.test(seg)) return { g: a.qty * 100, conf: 'medium' };   // a chocolate bar (Tafel) is 100 g
     if (/\b(bar|bars|riegel|riegels)\b/.test(seg) && hit.pack && hit.pack <= 150) return { g: a.qty * hit.pack, conf: 'medium' };
     if (hit.serving) return { g: a.qty * hit.serving, conf: a.given ? 'medium' : 'low' };
     if (fallback) return { g: fallback, conf: 'low' };
