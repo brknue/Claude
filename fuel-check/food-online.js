@@ -82,7 +82,7 @@
       const kindHit = kindsUse.length && wordsHit(kindsUse, hay) > 0;
       if (kindsUse.length && !kindHit) continue;                     // a "Milka chocolate" must be a chocolate, not a Milka cake
       const score = Math.min(1, (qt.length ? wordsHit(qt, hay) / qt.length : 0) + (kindHit ? 0.5 : 0));
-      if (score >= (must.length ? 0.6 : 0.5)) cands.push({ h, v, score, name: nameOf(h) });
+      if (score >= 0.5) cands.push({ h, v, score, name: nameOf(h) });
     }
     let res = null;
     if (cands.length) {
@@ -93,7 +93,8 @@
       const serv = top.map(x => num(x.h.serving_quantity)).filter(x => x && x < 1500);
       const pack = top.map(x => num(x.h.product_quantity)).filter(x => x && x < 5000);
       const branded = must.length > 0;
-      res = { name: best.name, brand: branded ? String(best.h.brands || '').split(',')[0] : '', n: top.length, branded,
+      const shown = top.map(x => x.name).filter(n => n && n.length <= 40 && n !== n.toUpperCase() && (!must.length || wordsHit(must, norm(n + ' ' + (top.find(t => t.name === n).h.brands || ''))) === must.length)).sort((a, b) => a.length - b.length)[0] || best.name;
+      res = { name: shown, brand: branded ? String(best.h.brands || '').split(',')[0] : '', n: top.length, branded,
         url: branded && best.h.code ? BASE + '/product/' + best.h.code : BASE + '/cgi/search.pl?search_simple=1&action=process&search_terms=' + encodeURIComponent(q),
         per100: { p: pick('p'), c: pick('c'), f: pick('f'), fib: pick('fib'), sat: pick('sat'), sug: pick('sug'), alc: pick('alc') },
         serving: serv.length ? median(serv) : null, pack: pack.length ? median(pack) : null };
@@ -153,7 +154,7 @@
           let kinds = (s.keys || []).flatMap(k => FuelLocal.aliasesOf(k));
           // "Snickers", "Monster", "Red Bull" are themselves the food: don't also require a word like "chocolate"
           if (s.extra.split(' ').every(w => kinds.includes(w) || w === 'red' || w === 'bull')) kinds = [];
-          const hit = await search(kinds.length ? s.extra + ' ' + (s.keys && s.keys[0] || '') : s.extra, s.extra, kinds);
+          const hit = await search(s.extra + ' ' + (s.keys && s.keys[0] || ''), s.extra, kinds);
           if (hit) { const old = s.items.reduce((t, x) => t + (x.grams || 0), 0); s.items = [makeItem(s, hit, old || null)]; used.push(s.raw); }
         }
       } catch (e) {
