@@ -127,7 +127,7 @@
     const { g, conf } = gramsFor(rec, hit, fallbackGrams);
     const it = FuelLocal.custom(rec.raw, g, hit.per100);
     it.confidence = conf;
-    it.amount = '🌐 ' + ((hit.brand && !norm(hit.name).includes(norm(hit.brand)) ? hit.brand + ' ' : '') + (hit.name || '')).trim().slice(0, 48);
+    it.amount = '🌐 ' + ((hit.brand && hit.brand.length <= 15 && !norm(hit.name).includes(norm(hit.brand)) ? hit.brand + ' ' : '') + (hit.name || '')).trim().slice(0, 48);
     return it;
   }
 
