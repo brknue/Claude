@@ -236,10 +236,52 @@
       alcohol_g: round1(alc * k), free_sugar_g: round1(sug * k), sat_fat_g: round1(sat * k), confidence: conf, _key: item.k };
   }
 
-  function parseFoods(text, notes) {
+  // typo-tolerant match for single words ("bannana", "spagetti", "joghurt")
+  function lev(a, b) {
+    if (Math.abs(a.length - b.length) > 2) return 9;
+    let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) { const cur = [i]; for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; }
+    return prev[b.length];
+  }
+  const SINGLE = FIDX.filter(([al]) => !al.includes(' ') && al.length >= 4);
+  function fuzzy(seg) {
+    let best = null;
+    seg.split(/[^\p{L}]+/u).filter(w => w.length >= 4).forEach((w, idx, arr) => {
+      for (const [al, item] of SINGLE) {
+        const lim = al.length >= 8 ? 2 : 1, d = lev(w, al);
+        if (d <= lim && (!best || d < best.d)) { const start = seg.indexOf(w); best = { item, start, end: start + w.length, d }; }
+      }
+    });
+    return best ? { item: best.item, start: best.start, end: best.end } : null;
+  }
+  // words that say more than the matched food ("Milka", "Ülker", "zero", "protein") -> worth an online lookup
+  const GENERIC = new Set(('big large small little huge mini xl medium grilled fried boiled baked roasted cooked raw fresh homemade home made organic bio plain natural hot cold warm ' +
+    'piece pieces plate bowl glass cup can bottle slice slices portion serving handful scoop bar tablet pack packet box serving my some half whole ' +
+    'gross grosse grossen grosser klein kleine kleinen gebraten gekocht gegrillt frisch selbstgemacht hausgemacht portion stuck teller schussel glas tasse dose flasche scheibe scheiben tafel packung riegel ' +
+    'buyuk kucuk kizarmis haslanmis firinda izgara taze ev yapimi porsiyon tabak bardak kase dilim paket adet tane ' +
+    'grande pequeno frito cocido asado casero plato vaso taza lata botella rebanada petit gros cuit maison assiette verre tasse ' +
+    'breakfast lunch dinner snack fruhstuck mittag mittagessen abend abendessen abends morgens kahvalti ogle aksam ara ogun desayuno almuerzo cena').split(' '));
+  function extraWords(seg, hits) {
+    let rest = seg;
+    hits.forEach(h => { rest = rest.slice(0, h.start) + ' '.repeat(h.end - h.start) + rest.slice(h.end); });
+    return foodWords(rest).split(' ').filter(w => w.length >= 3 && !GENERIC.has(w) && !STOPW.has(w) && !known(w)).join(' ');
+  }
+  let VOCAB = null;
+  function known(w) {
+    if (!VOCAB) { VOCAB = new Set(); FIDX.forEach(([al]) => al.split(' ').forEach(x => x.length >= 3 && VOCAB.add(x))); }
+    if (VOCAB.has(w) || VOCAB.has(w.replace(/(es|s|n|en|e|er|ler|lar|i)$/, ''))) return true;
+    if (w.length >= 5) for (const v of VOCAB) if (v.length >= 5 && lev(w, v) <= (w.length >= 8 ? 2 : 1)) return true;
+    return false;
+  }
+  function cleanQuery(segRaw) { return foodWords(segRaw).split(' ').filter(w => w && !GENERIC.has(w) && !STOPW.has(w)).join(' '); }
+  const STOPW = new Set('and with mit und ile ve con avec com met plus dazu oder or the der die das ein eine bir'.split(' '));
+
+  function parseFoods(text, notes, segsOut) {
     const foods = [];
     for (const segRaw of segments(text)) {
       const seg = norm(segRaw);
+      const rec = { raw: segRaw.trim(), items: [], unknown: false, extra: '', barcode: (segRaw.match(/\b\d{8,14}\b/) || [])[0] || '' };
+      if (segsOut) segsOut.push(rec);
       // user-given calories: "snack 250 kcal"
       const kc = seg.match(/(\d+(?:[.,]\d+)?)\s*(kcal|cal|calories|kalorien|kalori|calorias|калори\w*)\b/);
       if (kc) {
@@ -247,11 +289,14 @@
         foods.push({ name: segRaw, amount: Math.round(kcal) + ' kcal', grams: 0, protein_g: round1(kcal * 0.15 / 4), carbs_g: round1(kcal * 0.5 / 4), fat_g: round1(kcal * 0.35 / 9),
           fiber_g: 0, alcohol_g: 0, free_sugar_g: 0, sat_fat_g: round1(kcal * 0.12 / 9), confidence: 'high' });
         notes.push(['a_custom', { x: segRaw, n: Math.round(kcal) }]);
+        rec.items.push(foods[foods.length - 1]); rec.fixed = true;
         continue;
       }
       let hits = findAll(seg, FIDX);
       hits = hits.filter((h, i) => !(h.item.k === 'cheese' && seg.slice(h.start, h.end) === 'kase' && i + 1 < hits.length));
-      if (!hits.length) { notes.push(['a_unknown', { x: segRaw }]); continue; }
+      if (!hits.length) { const fz = fuzzy(seg); if (fz) hits = [fz]; }
+      if (!hits.length) { rec.unknown = true; notes.push(['a_unknown', { x: segRaw }]); continue; }
+      rec.extra = extraWords(seg, hits);
       hits.forEach((h, i) => {
         const item = h.item, before = seg.slice(i ? hits[i - 1].end : 0, h.start), after = seg.slice(h.end, i + 1 < hits.length ? hits[i + 1].start : seg.length);
         const zone = (before + ' ' + (i === 0 ? after : '')).trim();
@@ -294,7 +339,7 @@
         if (conf === 'low' && i === 0) notes.push(['a_default', { x: segRaw.trim(), g: Math.round(grams) }]);
         const label = hits.length > 1 ? segRaw.trim() + ' — ' + item.k : segRaw.trim();
         const fi = foodItem(item, grams, conf, label); fi.amount = amount.trim();
-        foods.push(fi);
+        foods.push(fi); rec.items.push(fi);
       });
     }
     return foods;
@@ -369,7 +414,8 @@
   /* analyze(foodText, actText, ctx, tr, chips) -> result object compatible with the AI JSON */
   function analyze(foodText, actText, ctx, tr, chips) {
     const notes = [];
-    const foods = parseFoods(foodText, notes);
+    const segs = [];
+    const foods = parseFoods(foodText, notes, segs);
     const act = parseActivity(actText, chips || [], notes);
     const r = { foods, steps: act.steps, activities: act.activities, strength_training: act.strength_training, local: true };
     r.feedback = feedback(r, ctx, tr);
@@ -379,6 +425,7 @@
     notes.filter(n => n[0] !== 'a_default').forEach(([k, v]) => r.assumptions.push(tr(k === 'a_unknown' ? 'lf_a_unknown' : k === 'a_mins' ? 'lf_a_mins' : 'lf_a_custom', v)));
     r.unmatched = notes.filter(n => n[0] === 'a_unknown').length;
     r._unknown = notes.filter(n => n[0] === 'a_unknown').map(n => n[1].x);
+    r._segs = segs;
     foods.forEach(f => delete f._key);
     return r;
   }
@@ -401,5 +448,5 @@
     return norm(segRaw).replace(/\d+([.,\/]\d+)?\s*(kg|g|gr|grams?|gramm|ml|cl|dl|l|kcal)?\b/g, ' ').split(/\s+/)
       .filter(x => x && WORDNUM[x] == null && !UNITS.some(([, rx]) => rx.test(x)) && !/^(of|von|de|di|du|des|der|die|das|the|a|an|mit|with|ile)$/.test(x)).join(' ').trim();
   }
-  window.FuelLocal = { analyze, feedback, lookup, custom, lookupAct, amount, foodWords, _parseFoods: parseFoods, _parseActivity: parseActivity, _norm: norm };
+  window.FuelLocal = { analyze, feedback, lookup, custom, lookupAct, amount, foodWords, cleanQuery, _parseFoods: parseFoods, _parseActivity: parseActivity, _norm: norm };
 })();

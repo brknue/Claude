@@ -99,10 +99,9 @@ window.PLAIN_FILES = {
    "fuel-check/i18n-sci.js",
    "fuel-check/i18n.js",
    "fuel-check/index.html",
-   "fuel-check/local-engine.js",
-   "fuel-check/ondevice-ai.js"
+   "fuel-check/local-engine.js"
   ],
-  "bytes": 427245
+  "bytes": 396434
  },
  "plain-wiki": {
   "files": [

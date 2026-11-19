@@ -14,13 +14,13 @@ Works on phone, tablet and computer. Light and dark mode.
 
 16 built-in languages: English, Deutsch, Türkçe, Español, Français, Italiano, Português, Nederlands, Polski, Русский, Українська, العربية (right-to-left), हिन्दी, 中文, 日本語, 한국어.
 
-With an AI key connected you can also pick **🌐 Other language…** and type any language: the AI translates the whole page once and the browser remembers it.
+
 
 ## Privacy
 
 - **Everything stays on your device.** Saved days, your profile and settings live only in your browser's storage. There is no account, no server and no database.
 - **Optional password lock.** Encrypts all saved data with AES-256-GCM (key from PBKDF2-SHA-256, 600,000 rounds, random salt). The key only exists in memory, and the app locks itself after 10 minutes without use. A forgotten password cannot be recovered.
-- **Nothing leaves the device** by default: the built-in estimator runs in your browser. Only if you add your own AI key does "Analyze" send the food/activity text plus age, sex, height, weight and goal to Anthropic.
+- **No AI, no account, no key.** Everything is calculated in your browser. With online lookup on, only food words (or a barcode) go to Open Food Facts; nothing about you is sent.
 - **No ads, trackers, cookies, analytics or outside fonts.** The GitHub version has a strict Content-Security-Policy, so the page can only talk to `api.anthropic.com`.
 - **Backups** (to move to another device) are encrypted with your password when the lock is on, and never include your API key.
 - **Delete all my data** wipes everything from the device in one tap.
@@ -29,17 +29,13 @@ With an AI key connected you can also pick **🌐 Other language…** and type a
 
 Open `index.html` in a browser (or host the folder on GitHub Pages). No build step.
 
-**No AI needed.** `local-engine.js` reads the text on the device: it splits meals into items, reads amounts ("200 g", "2 slices", "a glass", "big plate", "0,5 l", "1/2"), matches about 120 foods and dishes (names in English, German, Turkish, Spanish, French, Italian, Portuguese, Dutch, Polish and some Russian) to a nutrient table (USDA FoodData Central / national food tables, per 100 g as eaten), reads steps and activities with minutes, hours or km (MET values from the 2024 Compendium) and writes rule-based feedback in all 16 languages. Unknown items are listed and not counted; write "snack 250 kcal" to add any food by its calories.
+**How it reads your text (no AI).** `local-engine.js` reads the text on the device: it splits meals into items, reads amounts ("200 g", "2 slices", "a glass", "big plate", "0,5 l", "1/2"), matches about 120 foods and dishes (names in English, German, Turkish, Spanish, French, Italian, Portuguese, Dutch, Polish and some Russian) to a nutrient table (USDA FoodData Central / national food tables, per 100 g as eaten), reads steps and activities with minutes, hours or km (MET values from the 2024 Compendium) and writes rule-based feedback in all 16 languages. Typos are tolerated. Unknown items are looked up on Open Food Facts (below), otherwise listed and not counted; write "snack 250 kcal" to add any food by its calories.
 
-**Online food lookup (on by default, can be turned off):** foods the built-in table doesn't know, and branded products named by the on-device AI, are looked up on [Open Food Facts](https://world.openfoodfacts.org), a free, non-profit database with millions of products (no key). Only the food words are sent. For branded products the product's own label values are used; for other foods the median of the best matching entries, after dropping inconsistent ones. Portion = your grams, or count × the product's serving size. At most 8 searches per analysis (Open Food Facts allows about 10 per minute); results are cached in the browser for 30 days. Matches are marked 🌐. Data © Open Food Facts contributors, [ODbL](https://opendatacommons.org/licenses/odbl/1-0/).
-
-**Optional on-device AI (no key):** tick "Use on-device AI to read my text". A warning explains the one-time download (about 1 GB, or 2 GB for the better model), WebGPU, battery and memory use before anything is downloaded. The model (Qwen2.5 via [WebLLM](https://github.com/mlc-ai/web-llm)) runs in the browser: it turns any wording into foods, grams and minutes; nutrients still come from the built-in table, and only foods missing from the table are estimated by the AI (shown 🟠). Your text is not sent anywhere. Without WebGPU, or if the AI fails, the built-in table is used.
-
-**Optional cloud AI:** inside claude.ai the page uses Claude directly. Anywhere else, you can open "Optional: use AI" and add your own [Anthropic API key](https://console.anthropic.com/) for more precise reading of free text. The key is stored only in your browser's localStorage and is sent only to `api.anthropic.com`.
+**Online food lookup (on by default, can be turned off):** foods the built-in table doesn't know, branded products ("Milka", "Ülker Albeni", "Ritter Sport") and barcodes (8–14 digits, e.g. `3017620422003`) are looked up on [Open Food Facts](https://world.openfoodfacts.org), a free, non-profit database with millions of products (no key). Only the food words are sent. A brand word next to a known food ("a Milka chocolate bar") triggers a product lookup where every brand word must appear in the product; otherwise the median of the best matching entries is used, after dropping entries whose macros don't add up to their calories. Portion = your grams, or packs/bars × pack size, or count × serving size. Typos are tolerated ("bannanas", "spagetti"). Open Food Facts allows about 10 searches per minute (over that, its answers fail in the browser), so the page does at most 6 per analysis and 8 per minute, and caches every answer for 30 days. Tested live from brknue.github.io: `/cgi/search.pl` and `/api/v2/product` work from the browser; `search.openfoodfacts.org` does not (no CORS). Matches are marked 🌐. Data © Open Food Facts contributors, [ODbL](https://opendatacommons.org/licenses/odbl/1-0/).
 
 ## How the numbers are calculated (research-based)
 
-The estimator (or the optional AI) only turns your text into **grams, nutrients, step count and activities (MET + minutes)**. All energy maths is done by the app with published formulas:
+The estimator only turns your text into **grams, nutrients, step count and activities (MET + minutes)**. All energy maths is done by the app with published formulas:
 
 | What | Method | Source |
 |---|---|---|
