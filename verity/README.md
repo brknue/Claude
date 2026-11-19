@@ -2,7 +2,25 @@
 
 A multilingual evidence-first fact-checking app. English, German and Turkish interfaces; reports follow the selected language.
 
-## Status
+## Browser edition (live, no key)
+
+**Open it:** https://brknue.github.io/Claude/verity/
+
+`index.html` + `verity-local.js` run entirely in the browser, with no server, account or API key:
+
+1. Paste text (or a public link, read through [Jina Reader](https://jina.ai/reader), which is free and keyless).
+2. Verity picks out the checkable factual sentences (numbers, dates, names). You can untick or add claims.
+3. For each claim it searches Wikipedia (20 languages to choose from), reads the best matching articles and shows the sentences that share the most words and numbers, with links.
+4. Labels are automatic text matches, not verdicts: **Numbers match**, **Numbers differ**, **Related**, **Nothing clear**. No made-up score.
+5. Optional: an on-device AI (Qwen2.5 1.5B via WebLLM, WebGPU, about 1 GB downloaded once) reads only those passages and says supported / contradicted / not enough evidence, with one sentence why.
+
+Interface in English, German and Turkish. Report can be copied, downloaded or printed. Only the theme and language are stored (localStorage).
+
+## Server edition (`public/`, `worker.mjs`)
+
+The original version below uses OpenAI web search and transcription on a Cloudflare Worker. It needs a server and an OpenAI key, so it is kept as source only.
+
+### Status
 
 The website and server are implemented. **Live AI research requires an OpenAI API key in the hosted server environment. Until configured, the app clearly reports `setup_required` and never generates a verdict or score.** Live external-provider requests have not been tested with a real key. Automated tests use controlled mock provider responses, not actual fact checks.
 

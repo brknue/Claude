@@ -1536,4 +1536,10 @@ if(LANG!='English')reapply();
 {let at=0;const ap=()=>{at=0;if(LANG=='English')return;document.querySelectorAll('[placeholder],[title]').forEach(e=>{if(e.id=='tst')return;['placeholder','title'].forEach(a=>{if(!e.hasAttribute(a))return;const k='te_'+a,cur=e.getAttribute(a);if(e.dataset[k]===undefined)e.dataset[k]=cur;else if(cur!==e.dataset[k]&&cur!==tr(e.dataset[k]))e.dataset[k]=cur;const v=tr(e.dataset[k]);if(v!==cur)e.setAttribute(a,v)})})};
  new MutationObserver(()=>{if(!at&&LANG!='English')at=setTimeout(ap,150)}).observe(document.body,{childList:true,subtree:true});window.__attrPass=ap}
 setSeq(seq);rs();changed();build('O');requestAnimationFrame(loop);setTimeout(dbInit,60);
+</script><script>
+/* Public copy (no Claude, no key): hide features that need an AI and keep only the built-in languages. */
+(function(){if(window.claude&&window.claude.use)return;
+var ai=document.getElementById('ai');if(ai)ai.style.display='none';
+var lg=document.getElementById('lg');if(lg){[].slice.call(lg.options).forEach(function(o){if(['English','German','Turkish'].indexOf(o.value)<0)o.remove()});var lo=document.getElementById('lo');if(lo)lo.hidden=true;
+try{var sl=localStorage.getItem('mlang');if(sl&&['English','German','Turkish'].indexOf(sl)<0){localStorage.setItem('mlang','English');}}catch(e){}}})();
 </script></body></html>

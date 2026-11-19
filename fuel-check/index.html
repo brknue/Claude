@@ -186,13 +186,13 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 
   <!-- ===== TODAY ===== -->
   <section class="view on" id="v-today">
-    <div class="card keycard" id="keyCard">
-      <div class="sec-title" data-i="key_h"></div>
+    <details class="card keycard" id="keyCard">
+      <summary class="sec-title" data-i="key_h" style="cursor:pointer"></summary>
       <div class="note" data-i="key_note"></div>
       <div class="keyrow"><input id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off">
         <button class="btn" id="keySave" data-i="key_save"></button><button class="btn ghost" id="keyClear" data-i="key_clear"></button></div>
       <div class="note" id="keyState" style="margin-top:6px"></div>
-    </div>
+    </details>
 
     <div class="card">
       <div class="step"><div class="num">1</div><h2 data-i="about"></h2>
@@ -391,6 +391,8 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 <script src="i18n.js"></script>
 <script src="i18n-more.js"></script>
 <script src="i18n-sci.js"></script>
+<script src="i18n-local.js"></script>
+<script src="local-engine.js"></script>
 <script>
 (function(){
 'use strict';
@@ -461,7 +463,7 @@ function buildLangSelect(){
   const add=(v,txt)=>{const o=document.createElement('option'); o.value=v; o.textContent=txt; sel.appendChild(o);};
   for(const c in I18N_NAMES) add(c, I18N_NAMES[c][0]);
   for(const n in custom) add(n, custom[n]._native||n);
-  add('__other','🌐 '+t('other_lang'));
+  if((window.claude&&window.claude.use) || (typeof V!=='undefined' && V && V.key)) add('__other','🌐 '+t('other_lang'));
   sel.value=S.lang;
 }
 function applyLang(){
@@ -594,8 +596,8 @@ const samplePromise = (window.claude && window.claude.use) ? window.claude.use('
 samplePromise.then(s=>{ if(!s) $('keyCard').style.display='block'; });
 const getKey = () => (V && V.key) || '';
 function updateKeyState(){ $('keyState').textContent = getKey()? t('key_saved') : ''; }
-$('keySave').addEventListener('click',()=>{ const k=$('apiKey').value.trim(); if(k&&V){ V.key=k; $('apiKey').value=''; persist(); } updateKeyState(); });
-$('keyClear').addEventListener('click',()=>{ if(V){ V.key=''; persist(); } updateKeyState(); });
+$('keySave').addEventListener('click',()=>{ const k=$('apiKey').value.trim(); if(k&&V){ V.key=k; $('apiKey').value=''; persist(); } updateKeyState(); buildLangSelect(); });
+$('keyClear').addEventListener('click',()=>{ if(V){ V.key=''; persist(); } updateKeyState(); buildLangSelect(); });
 async function askAI(prompt, maxTokens){
   const sample = await samplePromise;
   if(sample){ const r=await sample(prompt); return r.text; }
@@ -610,7 +612,7 @@ async function askAI(prompt, maxTokens){
   if(!res.ok) throw {code:'api_'+res.status};
   const j=await res.json(); return (j.content||[]).map(c=>c.text||'').join('');
 }
-function errText(e){ const c=e&&e.code; return c==='no_ai'?t('e_noai'):c==='not_granted'?t('e_denied'):c==='rate_limited'?t('e_rate'):c==='bad_key'?t('e_key'):t('e_parse'); }
+function errText(e){ const c=e&&e.code; return c==='local_none'?t('lf_nothing'):c==='no_ai'?t('e_noai'):c==='not_granted'?t('e_denied'):c==='rate_limited'?t('e_rate'):c==='bad_key'?t('e_key'):t('e_parse'); }
 function showErr(m){ $('err').textContent=m; $('err').style.display=m?'block':'none'; }
 function parseJSON(x){ if(typeof x!=='string') return x; x=x.replace(/```json|```/g,'').trim(); const s=x.indexOf('{'), e=x.lastIndexOf('}'); return JSON.parse(x.slice(s,e+1)); }
 
@@ -668,13 +670,19 @@ $('go').addEventListener('click', async ()=>{
   if(c.age<13) return showErr(t('e_age'));
   if(!$('food').value.trim()) return showErr(t('e_food'));
   const sample=await samplePromise;
-  if(!sample && !getKey()) return showErr(t('e_noai'));
+  const useLocal = !sample && !getKey();
   $('go').disabled=true; $('results').style.display='none';
   $('loading').style.display='block'; let i=1; $('loadMsg').textContent=t('load1');
   msgTimer=setInterval(()=>{i=Math.min(i+1,5); $('loadMsg').textContent=t('load'+i)},2200);
   try{
     let data=null;
-    if(sample && typeof sample.json==='function'){ try{ data=await sample.json(buildPrompt(c)); }catch(e){ if(e&&e.code) throw e; data=null; } }
+    if(useLocal){
+      await new Promise(r=>setTimeout(r,250));
+      const chips=['c_steps','c_gym','c_run','c_bike','c_ball','c_desk','c_feet'].map(k=>[t(k),{c_steps:'steps',c_gym:'gym',c_run:'run',c_bike:'bike',c_ball:'football',c_desk:'desk',c_feet:'feet'}[k]]);
+      data=FuelLocal.analyze($('food').value, $('act').value, c, t, chips);
+      if(!data.foods.length) throw {code:'local_none'};
+    }
+    if(!data && sample && typeof sample.json==='function'){ try{ data=await sample.json(buildPrompt(c)); }catch(e){ if(e&&e.code) throw e; data=null; } }
     if(data && !Array.isArray(data.foods)) data=null;
     if(!data||!Array.isArray(data.foods)) data=parseJSON(await askAI(buildPrompt(c),4000));
     if(!data||!Array.isArray(data.foods)) throw new Error('bad');

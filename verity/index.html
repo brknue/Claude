@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c392f">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Verity: paste a claim, a post or an article and follow the evidence. Runs in your browser, no account, no key.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RnC4RBF8aUcdqdRYmyGZIB9RcHg4yHEaBVozOPnOa9g=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://*.wikipedia.org https://r.jina.ai https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
+<title>Verity · Follow the evidence</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#f6f4ee;--card:#fff;--ink:#17231f;--mut:#5f6b66;--line:#e2ded3;--brand:#1c392f;--acc:#2f6b55;--good:#2f7d4f;--goodbg:#e6f3ea;--warn:#a46a10;--warnbg:#fbf0dc;--bad:#b23a32;--badbg:#f9e5e2;--info:#3a5a8c;--infobg:#e7eef9}
+[data-theme=dark]{--bg:#0f1513;--card:#17201c;--ink:#e8eee9;--mut:#9aa8a1;--line:#2a3631;--brand:#bfe3d0;--acc:#7cc4a1;--good:#7fd19f;--goodbg:#173326;--warn:#f0c06a;--warnbg:#3a2c12;--bad:#f19a92;--badbg:#3c1d1a;--info:#9ab9ec;--infobg:#1a2638}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif}
+a{color:var(--acc)}button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:900px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left)) 48px max(16px,env(safe-area-inset-right))}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 0}
+.brand{font-weight:800;font-size:22px;color:var(--brand);text-decoration:none;letter-spacing:-.02em}.brand span{color:var(--acc)}
+.top{display:flex;gap:8px;align-items:center}
+select,.ib{height:40px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:0 10px}
+.ib{width:40px;padding:0;cursor:pointer}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:500;font-size:clamp(30px,6vw,46px);line-height:1.1;margin:18px 0 8px;letter-spacing:-.02em}
+h1 em{color:var(--acc)}
+.lead{color:var(--mut);max-width:640px;margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:1px solid var(--line);background:none;border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
+.tabs button[aria-selected=true]{background:var(--brand);border-color:var(--brand);color:var(--bg)}
+label{display:block;font-weight:600;margin:6px 0}
+textarea,input[type=url],input[type=text]{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}
+textarea{min-height:150px;resize:vertical}
+.hint{color:var(--mut);font-size:14px;margin:6px 0 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.row .grow{flex:1 1 200px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 16px;cursor:pointer;min-height:44px}
+.primary{background:var(--brand);color:var(--bg);border-color:var(--brand);font-weight:700}
+.btn:disabled{opacity:.5;cursor:default}
+.status{color:var(--mut);font-size:15px;min-height:1.5em;margin-top:10px}
+.claims{list-style:none;padding:0;margin:8px 0}
+.claims li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+.claims li:first-child{border-top:0}
+.claims input[type=checkbox]{width:20px;height:20px;margin-top:3px;flex:none}
+.claims .ct{flex:1;min-width:0;overflow-wrap:anywhere}
+.result{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;background:var(--card)}
+.result h3{font-size:16px;margin:0 0 8px;font-weight:600;overflow-wrap:anywhere}
+.badge{display:inline-block;font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px;margin:0 6px 6px 0}
+.b-match{background:var(--goodbg);color:var(--good)}.b-differ{background:var(--warnbg);color:var(--warn)}.b-related{background:var(--infobg);color:var(--info)}.b-none{background:var(--line);color:var(--mut)}
+.b-supported{background:var(--goodbg);color:var(--good)}.b-contradicted{background:var(--badbg);color:var(--bad)}.b-unclear{background:var(--line);color:var(--mut)}
+blockquote{margin:8px 0;padding:8px 12px;border-left:3px solid var(--acc);background:var(--bg);border-radius:0 10px 10px 0;font-size:15px;overflow-wrap:anywhere}
+blockquote cite{display:block;font-style:normal;font-size:13px;margin-top:4px}
+mark{background:var(--warnbg);color:inherit;border-radius:3px;padding:0 2px}
+.ai{font-size:15px;margin-top:6px}
+.summary{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 2px}
+details{margin-top:8px}summary{cursor:pointer;color:var(--acc)}
+.method{color:var(--mut);font-size:15px}.method h2{color:var(--ink);font-size:20px}
+footer{color:var(--mut);font-size:13px;padding:24px 0;display:flex;gap:12px;flex-wrap:wrap}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:s 1s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+[hidden]{display:none!important}
+@media print{header .top,.card.input,#aiBox,footer,.noprint{display:none!important}body{background:#fff}}
+</style>
+<script>(function(){var t=null;try{t=localStorage.getItem('verity.theme')}catch(e){}if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})();</script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="./">verity<span>.</span></a>
+    <div class="top">
+      <select id="lang" aria-label="Language"><option value="en">English</option><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
+      <button class="ib" id="theme" type="button" aria-label="Dark mode">☾</button>
+    </div>
+  </header>
+
+  <h1 data-i="headline">Before you believe it, <em>follow the evidence.</em></h1>
+  <p class="lead" data-i="lead">Paste a post, an article or a link. Verity finds the factual claims, looks each one up in Wikipedia and shows you the passages, so you can judge for yourself.</p>
+
+  <section class="card input">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tText" aria-selected="true" data-i="tabText">≡ Text</button>
+      <button type="button" role="tab" id="tLink" aria-selected="false" data-i="tabLink">↗ Link</button>
+    </div>
+    <div id="pText">
+      <label for="text" data-i="textLabel">Paste the words you want to check</label>
+      <textarea id="text" maxlength="30000" placeholder="The Eiffel Tower was completed in 1889 and is 330 metres tall."></textarea>
+      <p class="hint" data-i="textHint">Posts, captions, transcripts or articles. Up to 30,000 characters.</p>
+    </div>
+    <div id="pLink" hidden>
+      <label for="url" data-i="linkLabel">Public article link</label>
+      <input id="url" type="url" inputmode="url" placeholder="https://…" autocomplete="off">
+      <p class="hint" data-i="linkHint">The page is read through Jina Reader (a free public service). Logins, paywalls and video sites can’t be read: paste the text instead.</p>
+    </div>
+    <div class="row">
+      <div class="grow"><label for="wlang" style="display:inline;margin-right:8px" data-i="evLang">Look up evidence in</label>
+        <select id="wlang"></select></div>
+      <button class="btn primary" id="find" type="button" data-i="find">Find the claims</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="claimBox" hidden>
+    <h2 style="margin:0 0 4px;font-size:20px" data-i="claimsTitle">Claims found</h2>
+    <p class="hint" data-i="claimsHint">Untick anything that isn’t a factual claim, or add your own.</p>
+    <ul class="claims" id="claims"></ul>
+    <div class="row"><input type="text" id="addClaim" class="grow" data-ph="addPh" placeholder="Add a claim…" maxlength="400"><button class="btn" id="addBtn" type="button" data-i="add">Add</button></div>
+    <div class="row"><button class="btn primary" id="check" type="button" data-i="check">Check the evidence</button></div>
+  </section>
+
+  <section id="report" hidden>
+    <div class="row noprint" style="justify-content:space-between">
+      <h2 style="margin:0;font-size:22px" data-i="report">Evidence report</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="copy" type="button" data-i="copy">Copy</button><button class="btn" id="dl" type="button" data-i="download">Download</button><button class="btn" id="print" type="button" data-i="print">Print / PDF</button></div>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div id="aiBox" class="card">
+      <strong data-i="aiTitle">Optional: let an on-device AI read the evidence</strong>
+      <p class="hint" data-i="aiHint">Runs entirely in your browser (no key, nothing sent to an AI company). Downloads a small model once (about 1 GB) and needs WebGPU: current Chrome or Edge, or Safari 26+. It only reads the passages shown below, so it can still be wrong.</p>
+      <div class="row"><button class="btn" id="aiRun" type="button" data-i="aiRun">Ask the on-device AI</button><span class="status" id="aiStatus" style="margin:0"></span></div>
+    </div>
+    <div id="results"></div>
+  </section>
+
+  <section class="method card">
+    <h2 data-i="howTitle">How it works</h2>
+    <p data-i="how1">1. Verity splits the text into sentences and keeps those that state checkable facts (numbers, dates, names, “is/was/has”). You can edit the list.</p>
+    <p data-i="how2">2. For each claim it searches Wikipedia and reads the best matching articles, then picks the sentences that share the most words and numbers with the claim.</p>
+    <p data-i="how3">3. Labels: <b>Numbers match</b> = the passage talks about the same thing and contains the claim’s numbers. <b>Numbers differ</b> = the same topic with other numbers, read carefully. <b>Related</b> = on topic, but not decisive. <b>Nothing clear</b> = no good passage found. These are automatic text matches, not verdicts.</p>
+    <p data-i="how4">Limits: Wikipedia can be incomplete or out of date, recent news is often missing, and word matching can miss meaning. Open the sources before you rely on anything.</p>
+    <p data-i="privacy">Privacy: no account, no tracking. Search words go to Wikipedia; links go to Jina Reader; the optional AI model is downloaded from Hugging Face. Nothing is stored except your theme and language.</p>
+  </section>
+
+  <footer><span>verity · <span data-i="foot">Curiosity over certainty.</span></span><a href="https://github.com/brknue/claude/tree/main/verity" rel="noopener">GitHub</a><a href="../" data-i="more">More projects</a></footer>
+</div>
+<script src="verity-local.js"></script>
+</body>
+</html>

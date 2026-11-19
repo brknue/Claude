@@ -1,6 +1,6 @@
 # Daily Fuel Check
 
-Type what you ate and what you did today. An AI works out the calories, protein, carbs, fat and what you burned, then tells you:
+Type what you ate and what you did today. The page works out the calories, protein, carbs, fat and what you burned, then tells you:
 
 - calories eaten vs. burned (BMR + digestion + activity)
 - tomorrow's estimated **body fat** and **muscle** change in grams
@@ -14,13 +14,13 @@ Works on phone, tablet and computer. Light and dark mode.
 
 16 built-in languages: English, Deutsch, Türkçe, Español, Français, Italiano, Português, Nederlands, Polski, Русский, Українська, العربية (right-to-left), हिन्दी, 中文, 日本語, 한국어.
 
-Pick **🌐 Other language…** and type any language: the AI translates the whole page once and the browser remembers it. The AI also writes the food names and feedback in the selected language.
+With an AI key connected you can also pick **🌐 Other language…** and type any language: the AI translates the whole page once and the browser remembers it.
 
 ## Privacy
 
 - **Everything stays on your device.** Saved days, your profile and settings live only in your browser's storage. There is no account, no server and no database.
 - **Optional password lock.** Encrypts all saved data with AES-256-GCM (key from PBKDF2-SHA-256, 600,000 rounds, random salt). The key only exists in memory, and the app locks itself after 10 minutes without use. A forgotten password cannot be recovered.
-- **Only "Analyze" sends data**: the food/activity text plus age, sex, height, weight and goal go to the AI to calculate the results. Nothing else leaves the device.
+- **Nothing leaves the device** by default: the built-in estimator runs in your browser. Only if you add your own AI key does "Analyze" send the food/activity text plus age, sex, height, weight and goal to Anthropic.
 - **No ads, trackers, cookies, analytics or outside fonts.** The GitHub version has a strict Content-Security-Policy, so the page can only talk to `api.anthropic.com`.
 - **Backups** (to move to another device) are encrypted with your password when the lock is on, and never include your API key.
 - **Delete all my data** wipes everything from the device in one tap.
@@ -29,11 +29,13 @@ Pick **🌐 Other language…** and type any language: the AI translates the who
 
 Open `index.html` in a browser (or host the folder on GitHub Pages). No build step.
 
-**AI:** inside claude.ai the page uses Claude directly. Anywhere else, it shows a box for your own [Anthropic API key](https://console.anthropic.com/). The key is stored only in your browser's localStorage and is sent only to `api.anthropic.com`.
+**No AI needed.** `local-engine.js` reads the text on the device: it splits meals into items, reads amounts ("200 g", "2 slices", "a glass", "big plate", "0,5 l", "1/2"), matches about 120 foods and dishes (names in English, German, Turkish, Spanish, French, Italian, Portuguese, Dutch, Polish and some Russian) to a nutrient table (USDA FoodData Central / national food tables, per 100 g as eaten), reads steps and activities with minutes, hours or km (MET values from the 2024 Compendium) and writes rule-based feedback in all 16 languages. Unknown items are listed and not counted; write "snack 250 kcal" to add any food by its calories.
+
+**Optional AI:** inside claude.ai the page uses Claude directly. Anywhere else, you can open "Optional: use AI" and add your own [Anthropic API key](https://console.anthropic.com/) for more precise reading of free text. The key is stored only in your browser's localStorage and is sent only to `api.anthropic.com`.
 
 ## How the numbers are calculated (research-based)
 
-The AI only turns your text into **grams, nutrients, step count and activities (MET + minutes)**. All energy maths is done by the app with published formulas:
+The estimator (or the optional AI) only turns your text into **grams, nutrients, step count and activities (MET + minutes)**. All energy maths is done by the app with published formulas:
 
 | What | Method | Source |
 |---|---|---|

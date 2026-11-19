@@ -67,7 +67,7 @@ window.PLAIN_FILES = {
    "rookstorm/sw.js",
    "rookstorm/workbox-9c191d2f.js"
   ],
-  "bytes": 11709883
+  "bytes": 11707831
  },
  "bio-genetik": {
   "files": [
@@ -88,17 +88,19 @@ window.PLAIN_FILES = {
    "bio-genetik/styles.css",
    "bio-genetik/tests.mjs"
   ],
-  "bytes": 557665
+  "bytes": 553890
  },
  "fuel-check": {
   "files": [
    "fuel-check/README.md",
+   "fuel-check/i18n-local.js",
    "fuel-check/i18n-more.js",
    "fuel-check/i18n-sci.js",
    "fuel-check/i18n.js",
-   "fuel-check/index.html"
+   "fuel-check/index.html",
+   "fuel-check/local-engine.js"
   ],
-  "bytes": 241055
+  "bytes": 350378
  },
  "plain-wiki": {
   "files": [
@@ -107,7 +109,7 @@ window.PLAIN_FILES = {
    "plain-wiki/vendor/marked-LICENSE.md",
    "plain-wiki/vendor/marked.min.js"
   ],
-  "bytes": 143388
+  "bytes": 142824
  },
  "mathe-klar": {
   "files": [
@@ -121,7 +123,7 @@ window.PLAIN_FILES = {
    "mathe-klar/tests.mjs",
    "mathe-klar/visuals.js"
   ],
-  "bytes": 213701
+  "bytes": 209808
  },
  "lingua-local": {
   "files": [
@@ -135,7 +137,7 @@ window.PLAIN_FILES = {
    "lingua-local/sw.js",
    "lingua-local/upstream-swadesh.json"
   ],
-  "bytes": 263004
+  "bytes": 253042
  },
  "der-die-das": {
   "files": [
@@ -157,7 +159,7 @@ window.PLAIN_FILES = {
    "der-die-das/sw.js",
    "der-die-das/template.html"
   ],
-  "bytes": 293969
+  "bytes": 292987
  },
  "fluent-path": {
   "files": [
@@ -188,12 +190,13 @@ window.PLAIN_FILES = {
    "fluent-path/tests.mjs",
    "fluent-path/tools/build_tatoeba.py"
   ],
-  "bytes": 1195500
+  "bytes": 1188641
  },
  "youtube-to-pdf": {
   "files": [
    "youtube-to-pdf/.gitignore",
    "youtube-to-pdf/README.md",
+   "youtube-to-pdf/index.html",
    "youtube-to-pdf/lib/youtube.mjs",
    "youtube-to-pdf/netlify/functions/transcript.mjs",
    "youtube-to-pdf/netlify.toml",
@@ -210,14 +213,14 @@ window.PLAIN_FILES = {
    "youtube-to-pdf/server.mjs",
    "youtube-to-pdf/test/youtube.test.mjs"
   ],
-  "bytes": 51969
+  "bytes": 51722
  },
  "molecule-lab": {
   "files": [
    "molecule-lab/README.md",
    "molecule-lab/index.html"
   ],
-  "bytes": 3284067
+  "bytes": 3283098
  },
  "physica": {
   "files": [
@@ -247,7 +250,7 @@ window.PLAIN_FILES = {
    "physica/js/thumbs.js",
    "physica/manifest.webmanifest"
   ],
-  "bytes": 804636
+  "bytes": 797396
  },
  "verity": {
   "files": [
@@ -256,14 +259,17 @@ window.PLAIN_FILES = {
    "verity/README.md",
    "verity/build.mjs",
    "verity/dev.mjs",
+   "verity/icon.svg",
+   "verity/index.html",
    "verity/package.json",
    "verity/public/app.js",
    "verity/public/index.html",
    "verity/public/style.css",
    "verity/test/worker.test.mjs",
+   "verity/verity-local.js",
    "verity/worker.mjs"
   ],
-  "bytes": 69704
+  "bytes": 111823
  },
  "gamepulse": {
   "files": [
@@ -272,7 +278,7 @@ window.PLAIN_FILES = {
    "gamepulse/index.html",
    "gamepulse/track.html"
   ],
-  "bytes": 21948
+  "bytes": 21774
  },
  "citypulse": {
   "files": [
@@ -281,6 +287,6 @@ window.PLAIN_FILES = {
    "citypulse/index.html",
    "citypulse/track.html"
   ],
-  "bytes": 22609
+  "bytes": 22437
  }
 };
