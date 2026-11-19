@@ -9,7 +9,7 @@
   'use strict';
   const BASE = 'https://world.openfoodfacts.org';
   const FIELDS = 'code,product_name,product_name_en,generic_name,brands,nutriments,serving_quantity,product_quantity';
-  const PER_RUN = 6, PER_MIN = 8, TTL = 30 * 864e5;
+  const PER_RUN = 5, PER_MIN = 8, TTL = 30 * 864e5;
   let runCount = 0, lastSearch = 0;
   const ls = { get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
   const cacheGet = k => { const o = ls.get('fc_off2:' + k); return o && Date.now() - o.t < TTL ? o.v : undefined; };
@@ -30,9 +30,9 @@
     for (let attempt = 0; ; attempt++) {
       try { return await getOnce(url); }
       catch (e) {
-        if (attempt >= 2) throw e;
+        if (attempt >= 1) throw e;                       // one retry only: retries also count against OFF's limit
         if (isSearch) { if (!canSearch(true)) throw new Error('budget'); noteSearch(true); }
-        await wait(attempt ? 6000 : 2500);
+        await wait(4000);
       }
     }
   }
@@ -152,13 +152,15 @@
         }
       } catch (e) {
         if (e && e.message === 'budget') { busy = true; continue; }
-        failed = true; fails++;
+        if (kind === 0) continue;
+        busy = true; fails++;                            // OFF refuses searches when busy or over its per-minute limit
       }
     }
     r.foods = segs.flatMap(s => s.items);
     const found = new Set(used);
     r.assumptions = r.assumptions.filter(a => !segs.some(s => found.has(s.raw) && a === tr('lf_a_unknown', { x: s.raw })));
     if (used.length) r.assumptions.push(tr('ol_used', { x: used.join(', ') }));
+    if (busy && typeof navigator !== 'undefined' && navigator.onLine === false) { failed = true; busy = false; }
     if (failed) r.assumptions.push(tr('ol_fail'));
     else if (busy) r.assumptions.push(tr('ol_busy'));
     return r;
