@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src https://api.anthropic.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src data: blob:; connect-src https://api.anthropic.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
 <title>Daily Fuel Check</title>
 <style>
 :root{
@@ -149,6 +149,11 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 #lockView{display:none;max-width:420px;margin:30px auto 0;text-align:center}
 #lockView .big{font-size:46px}
 [dir=rtl] .fb li,[dir=rtl] .walk{direction:rtl}
+.odrow{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer}
+.odrow input{width:22px;height:22px;flex:none;accent-color:var(--accent)}
+#odWarn{border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);max-width:min(520px,calc(100vw - 24px));padding:20px}
+#odWarn::backdrop{background:rgba(0,0,0,.45)}
+.odlist{list-style:none;padding:0;margin:0 0 14px;display:grid;gap:10px;font-size:15px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -193,6 +198,18 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
         <button class="btn" id="keySave" data-i="key_save"></button><button class="btn ghost" id="keyClear" data-i="key_clear"></button></div>
       <div class="note" id="keyState" style="margin-top:6px"></div>
     </details>
+
+    <div class="card" id="odCard">
+      <label class="odrow"><input type="checkbox" id="odOn"><span data-i="od_on"></span></label>
+      <div class="note" data-i="od_note" style="margin-top:4px"></div>
+      <div id="odOpts" style="margin-top:8px;display:none"><select id="odModel" aria-label="Model"><option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" data-i="od_small"></option><option value="Qwen2.5-3B-Instruct-q4f16_1-MLC" data-i="od_big"></option></select></div>
+      <div class="note" id="odState" style="margin-top:6px"></div>
+    </div>
+    <dialog id="odWarn" aria-labelledby="odWarnH">
+      <h2 id="odWarnH" data-i="warn_title" style="margin:0 0 8px;font-size:20px"></h2>
+      <ul class="odlist"><li>⬇️ <span id="odW1"></span></li><li>🖥️ <span data-i="warn_2"></span></li><li>🔋 <span data-i="warn_3"></span></li><li>🔒 <span data-i="warn_4"></span></li><li>⚠️ <span data-i="warn_5"></span></li></ul>
+      <div class="btnrow" style="justify-content:flex-end"><button class="btn ghost" id="odNo" data-i="warn_cancel"></button><button class="btn" id="odYes" data-i="warn_ok"></button></div>
+    </dialog>
 
     <div class="card">
       <div class="step"><div class="num">1</div><h2 data-i="about"></h2>
@@ -393,6 +410,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 <script src="i18n-sci.js"></script>
 <script src="i18n-local.js"></script>
 <script src="local-engine.js"></script>
+<script src="ondevice-ai.js"></script>
 <script>
 (function(){
 'use strict';
@@ -660,6 +678,41 @@ Reply with ONLY this JSON, no markdown:
 "assumptions":["",""]}`;
 }
 
+/* ---------- on-device AI (opt-in) ---------- */
+const odActive = () => !!(V && V.ondevice && V.ondevice.on && FuelAI.supported());
+function odSize(){ return FuelAI.MODELS[$('odModel').value] || '1 GB'; }
+function odRender(){
+  const on=!!(V&&V.ondevice&&V.ondevice.on);
+  $('odOn').checked=on; $('odOpts').style.display=on?'block':'none';
+  if(V&&V.ondevice&&V.ondevice.model) $('odModel').value=V.ondevice.model;
+  if(on && !FuelAI.supported()) $('odState').textContent=t('od_nogpu');
+}
+async function odWarm(){
+  if(!odActive()) return;
+  try{ await FuelAI.load(V.ondevice.model, p=>{ $('odState').textContent=t('od_loading',{p}); }); $('odState').textContent=t('od_ready'); }
+  catch(e){ $('odState').textContent=t('od_fail',{e:(e&&e.message)||e}); }
+}
+function odAsk(){
+  $('odW1').textContent=t('warn_1',{s:odSize()});
+  const d=$('odWarn'); if(d.showModal) d.showModal(); else d.setAttribute('open','');
+}
+$('odOn').addEventListener('change',e=>{
+  if(!V) return;
+  if(e.target.checked){ e.target.checked=false; odAsk(); }
+  else { V.ondevice=Object.assign({},V.ondevice||{},{on:false}); persist(); odRender(); $('odState').textContent=''; }
+});
+$('odModel').addEventListener('change',()=>{
+  if(!V||!V.ondevice||!V.ondevice.on) return;
+  odAsk();   // a different model is a new download: ask again
+});
+$('odNo').addEventListener('click',()=>{ $('odWarn').close(); odRender(); });
+$('odYes').addEventListener('click',()=>{
+  $('odWarn').close();
+  V.ondevice={on:true, model:$('odModel').value, accepted:Date.now()}; persist(); odRender();
+  if(!FuelAI.supported()) return;
+  odWarm();
+});
+
 /* ---------- analyze ---------- */
 let current = null;   // {date, food, act, result, ctx, dirty}
 let msgTimer;
@@ -676,10 +729,17 @@ $('go').addEventListener('click', async ()=>{
   msgTimer=setInterval(()=>{i=Math.min(i+1,5); $('loadMsg').textContent=t('load'+i)},2200);
   try{
     let data=null;
-    if(useLocal){
+    const chips=['c_steps','c_gym','c_run','c_bike','c_ball','c_desk','c_feet'].map(k=>[t(k),{c_steps:'steps',c_gym:'gym',c_run:'run',c_bike:'bike',c_ball:'football',c_desk:'desk',c_feet:'feet'}[k]]);
+    if(useLocal && odActive()){
+      clearInterval(msgTimer);
+      try{ data=await FuelAI.analyze($('food').value, $('act').value, c, t, V.ondevice.model, m=>{ $('loadMsg').textContent=m; $('odState').textContent=m; }); $('odState').textContent=t('od_ready'); }
+      catch(e){ if(e&&e.code==='local_none') throw e; data=null; $('odState').textContent=t('od_fail',{e:(e&&e.message)||e}); }
+    }
+    if(useLocal && !data){
       await new Promise(r=>setTimeout(r,250));
-      const chips=['c_steps','c_gym','c_run','c_bike','c_ball','c_desk','c_feet'].map(k=>[t(k),{c_steps:'steps',c_gym:'gym',c_run:'run',c_bike:'bike',c_ball:'football',c_desk:'desk',c_feet:'feet'}[k]]);
+      const chips0=['c_steps','c_gym','c_run','c_bike','c_ball','c_desk','c_feet'].map(k=>[t(k),{c_steps:'steps',c_gym:'gym',c_run:'run',c_bike:'bike',c_ball:'football',c_desk:'desk',c_feet:'feet'}[k]]);
       data=FuelLocal.analyze($('food').value, $('act').value, c, t, chips);
+      if(odActive()===false && V.ondevice && V.ondevice.on && !FuelAI.supported()) data.assumptions.push(t('od_nogpu'));
       if(!data.foods.length) throw {code:'local_none'};
     }
     if(!data && sample && typeof sample.json==='function'){ try{ data=await sample.json(buildPrompt(c)); }catch(e){ if(e&&e.code) throw e; data=null; } }
@@ -992,7 +1052,7 @@ $('wipeBtn').addEventListener('click', e=>armConfirm(e.currentTarget, async ()=>
 function startApp(){
   $('lockView').style.display='none'; $('appView').style.display='block';
   if(!V) V=emptyData(); if(!V.days) V.days={};
-  fillForm(); applyLang(); showView('today'); touch();
+  fillForm(); applyLang(); showView('today'); touch(); odRender();
 }
 (function boot(){
   // language (not personal, stored outside the vault so the lock screen can be translated)

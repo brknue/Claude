@@ -381,5 +381,9 @@
     foods.forEach(f => delete f._key);
     return r;
   }
-  window.FuelLocal = { analyze, _parseFoods: parseFoods, _parseActivity: parseActivity, _norm: norm };
+  // helpers for the on-device AI: look up one food / activity by (English) name
+  function lookup(name, grams) { const h = findAll(norm(name), FIDX)[0]; return h ? foodItem(h.item, grams, 'medium', name) : null; }
+  function custom(name, grams, n) { return foodItem({ k: '', n: [n.p, n.c, n.f, n.fib, n.sat, n.sug, n.alc].map(x => Math.max(0, +x || 0)) }, grams, 'low', name); }
+  function lookupAct(name) { const h = findAll(norm(name), AIDX)[0]; return h ? h.item : null; }
+  window.FuelLocal = { analyze, feedback, lookup, custom, lookupAct, _parseFoods: parseFoods, _parseActivity: parseActivity, _norm: norm };
 })();

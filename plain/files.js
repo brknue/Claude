@@ -98,9 +98,10 @@ window.PLAIN_FILES = {
    "fuel-check/i18n-sci.js",
    "fuel-check/i18n.js",
    "fuel-check/index.html",
-   "fuel-check/local-engine.js"
+   "fuel-check/local-engine.js",
+   "fuel-check/ondevice-ai.js"
   ],
-  "bytes": 350378
+  "bytes": 392860
  },
  "plain-wiki": {
   "files": [
@@ -269,7 +270,7 @@ window.PLAIN_FILES = {
    "verity/verity-local.js",
    "verity/worker.mjs"
   ],
-  "bytes": 111823
+  "bytes": 111842
  },
  "gamepulse": {
   "files": [
