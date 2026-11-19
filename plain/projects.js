@@ -69,7 +69,7 @@ window.PLAIN_PROJECTS = [
   },
   {
     id: 'fuel-check', name: 'Fuel Check', entry: 'fuel-check/index.html', open: 'fuel-check/',
-    tags: ['health', 'tools'], lang: '', notes: ['ondevice'],
+    tags: ['health', 'tools'], lang: '', notes: ['foodlookup', 'ondevice'],
     desc: {
       en: 'Type what you ate and did today; it estimates calories, macros and tomorrow’s fat and muscle change. Works without any key; an optional AI can run on your own device.',
       de: 'Schreib, was du heute gegessen und gemacht hast; es schätzt Kalorien, Makros und die Fett- und Muskeländerung. Ohne Schlüssel; optional läuft eine KI auf deinem eigenen Gerät.',

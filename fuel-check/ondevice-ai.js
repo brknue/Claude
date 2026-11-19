@@ -30,22 +30,34 @@
   }
   const num = (x, lo, hi) => { x = +x; return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : 0; };
 
-  async function analyze(foodText, actText, ctx, tr, model, onStatus) {
+  async function analyze(foodText, actText, ctx, tr, model, onStatus, online) {
     await load(model, p => onStatus && onStatus(tr('od_loading', { p })));
     onStatus && onStatus(tr('od_reading'));
     const read = await ask(
       'You turn a person\'s free-text food and activity diary (any language) into JSON. Split meals into single foods and drinks. ' +
-      'For each food give "label" (the person\'s own words), "en" (a short, simple English food name like "boiled egg", "white rice", "beer") and "grams" (edible weight as eaten; ml for drinks count as grams; use a typical adult portion if no amount is given). ' +
+      'For each food give "label" (the person\'s own words), "en" (a short, simple English food name like "boiled egg", "white rice", "beer"), "brand" (the brand or product name if one is mentioned, e.g. "Milka", "Ülker", "Coca-Cola", otherwise "") and "grams" (edible weight as eaten; ml for drinks count as grams; use a typical adult portion if no amount is given). ' +
       'Include cooking oil, butter, sauces and drinks if mentioned. "steps" = step count if given, else null. For other activities give "label", "en" (simple English, e.g. "running", "gym", "cycling") and "minutes" (typical duration if not given). ' +
-      'Reply with JSON only: {"foods":[{"label":"","en":"","grams":0}],"steps":null,"activities":[{"label":"","en":"","minutes":0}]}',
+      'Reply with JSON only: {"foods":[{"label":"","en":"","brand":"","grams":0}],"steps":null,"activities":[{"label":"","en":"","minutes":0}]}',
       'FOOD:\n' + String(foodText).slice(0, 3000) + '\n\nACTIVITY:\n' + (String(actText || '').slice(0, 1500) || '(none)'), 1200);
 
-    const foods = [], unknown = [];
+    const foods = [], unknown = [], fromWeb = [];
+    const web = async (q, brand) => { if (!online || !window.FuelOnline) return null; try { return await FuelOnline.lookup(q, brand); } catch (e) { return null; } };
     for (const f of (Array.isArray(read.foods) ? read.foods : []).slice(0, 40)) {
       const label = String(f.label || f.en || '').slice(0, 120), en = String(f.en || f.label || '').slice(0, 80), g = num(f.grams, 0, 3000);
+      const brand = String(f.brand || '').slice(0, 60).trim();
       if (!label || !g) continue;
-      const it = FuelLocal.lookup(en, g) || FuelLocal.lookup(label, g);
-      if (it) { it.name = label; it.amount = ''; foods.push(it); } else unknown.push({ label, en, g });
+      let it = null;
+      if (brand) {                                   // packaged product: its label values are best
+        onStatus && onStatus(tr('ol_searching'));
+        const h = await web(en, brand);
+        if (h && h.branded) { it = FuelLocal.custom(label, g, h.per100); it.confidence = 'medium'; it.amount = '🌐 ' + (h.name + (h.brand ? ' (' + h.brand.split(',')[0] + ')' : '')).slice(0, 48); fromWeb.push(label); }
+      }
+      if (!it) { it = FuelLocal.lookup(en, g) || FuelLocal.lookup(label, g); if (it) { it.name = label; it.amount = ''; } }
+      if (!it) {
+        const h = await web(en);
+        if (h) { it = FuelLocal.custom(label, g, h.per100); it.confidence = 'low'; it.amount = '🌐 ' + (h.name || en).slice(0, 40); fromWeb.push(label); }
+      }
+      if (it) foods.push(it); else unknown.push({ label, en, g });
     }
     if (unknown.length) {
       try {
@@ -74,6 +86,7 @@
     const r = { foods, steps, activities, strength_training: strength, local: true, ondevice: true };
     r.feedback = FuelLocal.feedback(r, ctx, tr);
     r.assumptions = [tr('lf_a_ondevice')];
+    if (fromWeb.length) r.assumptions.push(tr('ol_used', { x: fromWeb.join(', ') }));
     unknown.filter(u => !u.done).forEach(u => r.assumptions.push(tr('lf_a_unknown', { x: u.label })));
     foods.forEach(f => delete f._key);
     return r;

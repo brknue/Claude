@@ -14,7 +14,7 @@ const projects = ctx.window.PLAIN_PROJECTS, i18n = ctx.window.PLAIN_I18N;
 
 const SKIP = new Set(['.git', 'node_modules', '.DS_Store', '.env', '.netlify', '.vercel']);
 const TAGS = ['science', 'language', 'learning', 'tools', 'health', 'explore'];
-const NOTES = ['apikey', 'server', 'external', 'webgpu', 'german', 'lookup', 'ondevice'];
+const NOTES = ['apikey', 'server', 'external', 'webgpu', 'german', 'lookup', 'ondevice', 'foodlookup'];
 const errors = [], warnings = [];
 
 function walk(dir, out) {

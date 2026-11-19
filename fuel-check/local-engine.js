@@ -378,6 +378,7 @@
     if (defs.length) r.assumptions.push(tr('lf_a_default', { x: defs.join(', ') }));
     notes.filter(n => n[0] !== 'a_default').forEach(([k, v]) => r.assumptions.push(tr(k === 'a_unknown' ? 'lf_a_unknown' : k === 'a_mins' ? 'lf_a_mins' : 'lf_a_custom', v)));
     r.unmatched = notes.filter(n => n[0] === 'a_unknown').length;
+    r._unknown = notes.filter(n => n[0] === 'a_unknown').map(n => n[1].x);
     foods.forEach(f => delete f._key);
     return r;
   }
@@ -385,5 +386,20 @@
   function lookup(name, grams) { const h = findAll(norm(name), FIDX)[0]; return h ? foodItem(h.item, grams, 'medium', name) : null; }
   function custom(name, grams, n) { return foodItem({ k: '', n: [n.p, n.c, n.f, n.fib, n.sat, n.sug, n.alc].map(x => Math.max(0, +x || 0)) }, grams, 'low', name); }
   function lookupAct(name) { const h = findAll(norm(name), AIDX)[0]; return h ? h.item : null; }
-  window.FuelLocal = { analyze, feedback, lookup, custom, lookupAct, _parseFoods: parseFoods, _parseActivity: parseActivity, _norm: norm };
+  // amount in a free-text segment: explicit grams/ml, else a count (number or word)
+  function amount(segRaw) {
+    const seg = norm(segRaw);
+    const wm = seg.match(/(\d+(?:[.,]\d+)?)\s*(kg|g|gr|grams?|gramm|gram|ml|cl|dl|l|liter|litre|liters|litres)\b/);
+    if (wm) { const v = parseFloat(wm[1].replace(',', '.')), u = wm[2]; return { grams: u === 'kg' ? v * 1000 : u === 'l' || /^lit/.test(u) ? v * 1000 : u === 'dl' ? v * 100 : u === 'cl' ? v * 10 : v, qty: 1, text: wm[0] }; }
+    const w = seg.split(/\s+/); let qty = null;
+    for (const x of w) { const n = parseNumber(x); if (n != null) { qty = n; break; } }
+    const frac = seg.match(/(\d+)\s*\/\s*(\d+)/); if (frac && +frac[2]) qty = +frac[1] / +frac[2];
+    return { grams: null, qty: qty == null ? 1 : qty, given: qty != null };
+  }
+  // the food words of a segment, without amounts and units (for online search)
+  function foodWords(segRaw) {
+    return norm(segRaw).replace(/\d+([.,\/]\d+)?\s*(kg|g|gr|grams?|gramm|ml|cl|dl|l|kcal)?\b/g, ' ').split(/\s+/)
+      .filter(x => x && WORDNUM[x] == null && !UNITS.some(([, rx]) => rx.test(x)) && !/^(of|von|de|di|du|des|der|die|das|the|a|an|mit|with|ile)$/.test(x)).join(' ').trim();
+  }
+  window.FuelLocal = { analyze, feedback, lookup, custom, lookupAct, amount, foodWords, _parseFoods: parseFoods, _parseActivity: parseActivity, _norm: norm };
 })();

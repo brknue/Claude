@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src data: blob:; connect-src https://api.anthropic.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src data: blob:; connect-src https://api.anthropic.com https://search.openfoodfacts.org https://world.openfoodfacts.org https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
 <title>Daily Fuel Check</title>
 <style>
 :root{
@@ -204,6 +204,8 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
       <div class="note" data-i="od_note" style="margin-top:4px"></div>
       <div id="odOpts" style="margin-top:8px;display:none"><select id="odModel" aria-label="Model"><option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" data-i="od_small"></option><option value="Qwen2.5-3B-Instruct-q4f16_1-MLC" data-i="od_big"></option></select></div>
       <div class="note" id="odState" style="margin-top:6px"></div>
+      <label class="odrow" style="margin-top:14px"><input type="checkbox" id="olOn" checked><span data-i="ol_on"></span></label>
+      <div class="note" style="margin-top:4px"><span data-i="ol_note"></span> <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener noreferrer">openfoodfacts.org</a></div>
     </div>
     <dialog id="odWarn" aria-labelledby="odWarnH">
       <h2 id="odWarnH" data-i="warn_title" style="margin:0 0 8px;font-size:20px"></h2>
@@ -411,6 +413,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 <script src="i18n-local.js"></script>
 <script src="local-engine.js"></script>
 <script src="ondevice-ai.js"></script>
+<script src="food-online.js"></script>
 <script>
 (function(){
 'use strict';
@@ -678,12 +681,16 @@ Reply with ONLY this JSON, no markdown:
 "assumptions":["",""]}`;
 }
 
+/* ---------- online lookup (Open Food Facts) ---------- */
+const olActive = () => !!(window.FuelOnline && (!V || V.online !== false));
+$('olOn').addEventListener('change',e=>{ if(!V) return; V.online=e.target.checked; persist(); });
+
 /* ---------- on-device AI (opt-in) ---------- */
 const odActive = () => !!(V && V.ondevice && V.ondevice.on && FuelAI.supported());
 function odSize(){ return FuelAI.MODELS[$('odModel').value] || '1 GB'; }
 function odRender(){
   const on=!!(V&&V.ondevice&&V.ondevice.on);
-  $('odOn').checked=on; $('odOpts').style.display=on?'block':'none';
+  $('odOn').checked=on; $('odOpts').style.display=on?'block':'none'; $('olOn').checked = !(V && V.online===false);
   if(V&&V.ondevice&&V.ondevice.model) $('odModel').value=V.ondevice.model;
   if(on && !FuelAI.supported()) $('odState').textContent=t('od_nogpu');
 }
@@ -717,6 +724,7 @@ $('odYes').addEventListener('click',()=>{
 let current = null;   // {date, food, act, result, ctx, dirty}
 let msgTimer;
 $('go').addEventListener('click', async ()=>{
+  if(window.FuelOnline) FuelOnline.resetBudget();
   showErr('');
   const c=curCtx();
   if(!c.b) return showErr(t('e_profile'));
@@ -732,15 +740,17 @@ $('go').addEventListener('click', async ()=>{
     const chips=['c_steps','c_gym','c_run','c_bike','c_ball','c_desk','c_feet'].map(k=>[t(k),{c_steps:'steps',c_gym:'gym',c_run:'run',c_bike:'bike',c_ball:'football',c_desk:'desk',c_feet:'feet'}[k]]);
     if(useLocal && odActive()){
       clearInterval(msgTimer);
-      try{ data=await FuelAI.analyze($('food').value, $('act').value, c, t, V.ondevice.model, m=>{ $('loadMsg').textContent=m; $('odState').textContent=m; }); $('odState').textContent=t('od_ready'); }
+      try{ data=await FuelAI.analyze($('food').value, $('act').value, c, t, V.ondevice.model, m=>{ $('loadMsg').textContent=m; $('odState').textContent=m; }, olActive()); $('odState').textContent=t('od_ready'); }
       catch(e){ if(e&&e.code==='local_none') throw e; data=null; $('odState').textContent=t('od_fail',{e:(e&&e.message)||e}); }
     }
     if(useLocal && !data){
       await new Promise(r=>setTimeout(r,250));
       const chips0=['c_steps','c_gym','c_run','c_bike','c_ball','c_desk','c_feet'].map(k=>[t(k),{c_steps:'steps',c_gym:'gym',c_run:'run',c_bike:'bike',c_ball:'football',c_desk:'desk',c_feet:'feet'}[k]]);
       data=FuelLocal.analyze($('food').value, $('act').value, c, t, chips);
-      if(odActive()===false && V.ondevice && V.ondevice.on && !FuelAI.supported()) data.assumptions.push(t('od_nogpu'));
+      if(olActive() && data._unknown && data._unknown.length){ clearInterval(msgTimer); await FuelOnline.enrichLocal(data, $('food').value, t, m=>{ $('loadMsg').textContent=m; }); data.feedback=FuelLocal.feedback(data, c, t); }
+      delete data._unknown;
       if(!data.foods.length) throw {code:'local_none'};
+      if(odActive()===false && V.ondevice && V.ondevice.on && !FuelAI.supported()) data.assumptions.push(t('od_nogpu'));
     }
     if(!data && sample && typeof sample.json==='function'){ try{ data=await sample.json(buildPrompt(c)); }catch(e){ if(e&&e.code) throw e; data=null; } }
     if(data && !Array.isArray(data.foods)) data=null;
