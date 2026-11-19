@@ -16,9 +16,9 @@
     { k: 'plant milk', n: [1, 3, 1.5, 0.3, 0.2, 2, 0], por: 250, a: 'oat milk,soy milk,almond milk,hafermilch,sojamilch,mandelmilch,yulaf sutu,soya sutu,badem sutu,leche de avena,leche de soja,lait d avoine,lait de soja' },
     { k: 'yogurt', n: [3.5, 4.7, 3.3, 0, 2.1, 0, 0], por: 150, a: 'yogurt,yoghurt,joghurt,yogurt naturale,yogur,yaourt,iogurte,jogurt,йогурт,yogurt,yoğurt,yogurt plain' },
     { k: 'ayran', n: [1.7, 2, 1.7, 0, 1.1, 0, 0], por: 250, a: 'ayran,kefir,buttermilk,buttermilch,dugh,lassi' },
-    { k: 'greek yogurt', n: [9, 4, 5, 0, 3.2, 0, 0], por: 170, a: 'greek yogurt,greek yoghurt,griechischer joghurt,suzme yogurt,yogur griego,yaourt grec,yogurt greco,iogurte grego,skyr' },
+    { k: 'greek yogurt', n: [9, 4, 5, 0, 3.2, 0, 0], por: 170, a: 'greek yogurt,greek yoghurt,griechischer joghurt,suzme yogurt,yogur griego,yaourt grec,yogurt greco,iogurte grego' },
     { k: 'fruit yogurt', n: [3.5, 15, 2.5, 0.2, 1.6, 10, 0], por: 150, a: 'fruit yogurt,fruchtjoghurt,meyveli yogurt,yogur de frutas,yaourt aux fruits,yogurt alla frutta' },
-    { k: 'quark', n: [12, 4, 0.3, 0, 0.2, 0, 0], por: 250, a: 'quark,magerquark,curd,lor peyniri,cottage cheese,huttenkase,körniger frischkase,kwark,twarog' },
+    { k: 'quark', n: [12, 4, 0.3, 0, 0.2, 0, 0], por: 250, a: 'quark,skyr,magerquark,curd,lor peyniri,cottage cheese,huttenkase,körniger frischkase,kwark,twarog' },
     { k: 'cheese', n: [25, 1.3, 33, 0, 19, 0, 0], por: 30, sl: 20, a: 'cheese,cheddar,gouda,emmental,kase,kasar,peynir,queso,fromage,formaggio,queijo,kaas,ser,сыр,parmesan,edamer' },
     { k: 'mozzarella', n: [22, 2.2, 22, 0, 13, 0, 0], por: 125, a: 'mozzarella,burrata' },
     { k: 'feta', n: [14, 4, 21, 0, 15, 0, 0], por: 30, a: 'feta,beyaz peynir,schafskase,hirtenkase,queso feta' },
@@ -175,10 +175,11 @@
     ['handful', /^(handfuls?|handvoll|avuc|punados?|poignees?|manciat\w*|punhados?|handjes?|garsc\w*)$/],
     ['scoop', /^(scoops?|kugeln?|messloffel|olcek|top|cucharon|boules?|palline?|bolas?|bolletjes?|galk\w*)$/],
     ['shot', /^(shots?|kurze|kurzer)$/],
+    ['tafel', /^(tafel|tafeln|tablets?)$/],
     ['piece', /^(pieces?|pcs|stuck|stueck|stk|adet|tane|parca|piezas?|morceaux?|pezzi|pezzo|pedacos?|unidades?|stuks?|kawalk\w*|sztuk\w*|шт\w*)$/],
     ['bar', /^(bars?|riegel|bar)$/]
   ];
-  const UNIT_G = { cup: 240, glass: 250, bowl: 300, plate: 350, can: 330, bottle: 500, tbsp: 15, tsp: 5, handful: 30, scoop: 30, shot: 40 };
+  const UNIT_G = { tafel: 100, cup: 240, glass: 250, bowl: 300, plate: 350, can: 330, bottle: 500, tbsp: 15, tsp: 5, handful: 30, scoop: 30, shot: 40 };
   const BIG = /\b(big|large|huge|xl|gross|grosse|grossen|grosser|riesig|buyuk|kocaman|grande|grandes|gros|grosse|groot|grote|duz\w*|duzy|большой|double|doppelt|doppelte|cift)\b/;
   const SMALL = /\b(small|little|mini|klein|kleine|kleinen|kleiner|kucuk|pequeno|pequena|petit|petite|piccolo|piccola|klein|maly|mala|маленьк\w*)\b/;
 
