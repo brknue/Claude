@@ -206,11 +206,13 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
         <div id="hImp" style="display:none"><label data-i="height_ft"></label>
           <div class="row2"><input id="hft" type="number" inputmode="numeric" placeholder="5"><input id="hin" type="number" inputmode="numeric" placeholder="10"></div></div>
         <div><label id="wLabel" data-i="weight_kg"></label><input id="w" type="number" inputmode="decimal" placeholder="75" autocomplete="off"></div>
+        <div><label data-i="bf_lbl"></label><input id="bf" type="number" inputmode="decimal" min="3" max="60" placeholder="—" autocomplete="off"></div>
+        <div><label data-i="exp_lbl"></label><select id="exp"><option value="none" data-i="exp_none"></option><option value="beg" data-i="exp_beg"></option><option value="mid" data-i="exp_mid"></option><option value="adv" data-i="exp_adv"></option></select></div>
       </div>
       <div style="margin-top:10px"><label data-i="goal"></label>
         <div class="seg" id="goal"><button data-g="lose fat" data-i="g_lose"></button><button data-g="maintain" class="on" data-i="g_maint"></button><button data-g="build muscle" data-i="g_build"></button></div>
       </div>
-      <div class="bmr"><div><small data-i="bmr_lbl"></small><b id="bmrVal">—</b></div><div class="r"><small data-i="prot_target"></small><b id="protT" style="font-size:20px">—</b></div></div>
+      <div class="bmr"><div><small data-i="bmr_lbl"></small><b id="bmrVal">—</b><small id="bmrInfo"></small></div><div class="r"><small data-i="prot_target"></small><b id="protT" style="font-size:20px">—</b></div></div>
     </div>
 
     <div class="card" id="foodCard">
@@ -246,7 +248,8 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
           <div class="stat"><div class="v" id="rOut">—</div><div class="l" data-i="burned"></div></div>
           <div class="stat"><div class="v" id="rBal">—</div><div class="l" id="rBalL"></div></div>
         </div>
-        <details style="margin-top:12px"><summary data-i="how_burned"></summary><div class="note" id="burnBreak" style="margin-top:8px"></div></details>
+        <div class="note" id="rangeNote" style="margin-top:10px"></div>
+        <details style="margin-top:8px"><summary data-i="how_burned"></summary><div class="note" id="burnBreak" style="margin-top:8px"></div></details>
       </div>
 
       <div class="card">
@@ -255,7 +258,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
           <div class="tm fat" id="tmFat"><div class="t" data-i="body_fat"></div><div class="v" id="fatV">—</div><div class="d" id="fatD"></div></div>
           <div class="tm mus" id="tmMus"><div class="t" data-i="muscle"></div><div class="v" id="musV">—</div><div class="d" id="musD"></div></div>
         </div>
-        <div class="note" style="margin-top:10px" data-i="scale_note"></div>
+        <div class="note" style="margin-top:10px"><span data-i="lean_note"></span> <span data-i="scale_note"></span></div>
       </div>
 
       <div class="card">
@@ -281,6 +284,33 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
         <div class="sec-title" data-i="act_bd"></div>
         <table><thead><tr><th data-i="th_act"></th><th class="n">kcal</th></tr></thead><tbody id="actT"></tbody></table>
         <details style="margin-top:12px"><summary data-i="assumptions"></summary><ul class="note" id="assump" style="padding-inline-start:18px"></ul></details>
+      </div>
+
+      <div class="card">
+        <details><summary style="font-size:15px;font-weight:700;color:var(--ink)" data-i="meth_h"></summary>
+          <ul class="note" style="padding-inline-start:18px;margin:10px 0">
+            <li data-i="meth_1"></li><li data-i="meth_2"></li><li data-i="meth_3"></li><li data-i="meth_4"></li><li data-i="meth_5"></li><li data-i="meth_6"></li><li data-i="meth_7"></li><li data-i="unc_note"></li>
+          </ul>
+          <div class="fbh">Sources</div>
+          <ul class="note" style="padding-inline-start:18px;margin:6px 0;word-break:break-word">
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/15883556/" target="_blank" rel="noopener noreferrer">Frankenfield et al. 2005 — RMR equations, systematic review</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/37632665/" target="_blank" rel="noopener noreferrer">O'Neill et al. 2023 — RMR equations in athletes, meta-analysis</a></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4183531/" target="_blank" rel="noopener noreferrer">ten Haaf &amp; Weijs 2014 — Cunningham equation in recreational athletes</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/2043597/" target="_blank" rel="noopener noreferrer">Deurenberg et al. 1991 — body fat from BMI, age, sex</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/38242596/" target="_blank" rel="noopener noreferrer">Herrmann et al. 2024 — Adult Compendium of Physical Activities</a></li>
+            <li><a href="https://link.springer.com/article/10.1186/1743-7075-1-5" target="_blank" rel="noopener noreferrer">Westerterp 2004 — Diet-induced thermogenesis</a></li>
+            <li><a href="https://www.fao.org/4/Y5022e/y5022e05.htm" target="_blank" rel="noopener noreferrer">FAO 2003 — Food energy conversion factors</a></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2376744/" target="_blank" rel="noopener noreferrer">Hall 2008 — Energy density of weight change</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/17367567/" target="_blank" rel="noopener noreferrer">Hall 2007 — Forbes's theory revisited</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/28698222/" target="_blank" rel="noopener noreferrer">Morton et al. 2018 — Protein &amp; resistance training, meta-analysis</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/26817506/" target="_blank" rel="noopener noreferrer">Longland et al. 2016 — High protein in an energy deficit</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/24092765/" target="_blank" rel="noopener noreferrer">Helms et al. 2014 — Protein during calorie restriction</a></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9285060/" target="_blank" rel="noopener noreferrer">2022 meta-analysis — Resistance training and lean mass</a></li>
+            <li><a href="https://www.frontiersin.org/articles/10.3389/fpubh.2022.911863/full" target="_blank" rel="noopener noreferrer">Schantz et al. 2022 — Energy cost of walking per km</a></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3862460/" target="_blank" rel="noopener noreferrer">CALERIE 2 — Under-reporting of food intake (~15%)</a></li>
+            <li><a href="https://www.who.int/news-room/fact-sheets/detail/healthy-diet" target="_blank" rel="noopener noreferrer">WHO — Healthy diet (free sugars, fats)</a></li>
+          </ul>
+        </details>
       </div>
 
       <button class="again" id="again" data-i="again"></button>
@@ -360,6 +390,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 
 <script src="i18n.js"></script>
 <script src="i18n-more.js"></script>
+<script src="i18n-sci.js"></script>
 <script>
 (function(){
 'use strict';
@@ -496,29 +527,58 @@ function heightCm(prev){
   return +$('hcm').value||0;
 }
 function weightKg(prev){ const imp = prev ? S.units!=='imperial' : S.units==='imperial'; const v=+$('w').value||0; return imp? v/2.20462 : v; }
-function bmrOf(w,h,a,sex){ if(!h||!w||!a) return 0; return Math.round(10*w+6.25*h-5*a+(sex==='male'?5:-161)); } // Mifflin-St Jeor
-function curCtx(){ const w=weightKg(), h=heightCm(), a=+$('age').value||0; return {b:bmrOf(w,h,a,S.sex), w, hcm:h, age:a, sex:S.sex, goal:S.goal}; }
-const strideOf = c => (c.hcm||170)*0.415/100;                 // metres per step
-const perStepOf = c => 0.55 * c.w * strideOf(c) / 1000;        // net kcal per step (0.55 kcal/kg/km)
-const protTOf = c => c.w ? Math.round(c.w*(c.goal==='maintain'?1.4:1.8)) : 0;
-function calc(){ const c=curCtx(); $('bmrVal').textContent=c.b? nf(c.b)+' kcal':'—'; $('protT').textContent=protTOf(c)? protTOf(c)+' g':'—'; }
+/* ---------- science constants (sources listed in the page's "How it's calculated") ---------- */
+const SCI = {
+  walkNet: 0.6,                 // net kcal per kg per km of level walking (Schantz 2022: 0.8 field, ~30 % less on flat/treadmill)
+  metKcal: 0.0175,              // kcal per kg per minute per MET (3.5 ml O2/kg/min × 5 kcal/L) — 2024 Adult Compendium
+  metKcal60: 0.0135,            // 60+ years: 2.7 ml O2/kg/min per MET — Older Adult Compendium 2024
+  defaultSteps: 5000,           // assumed when no steps are given (low-active day)
+  rhoFat: 9.44, rhoLean: 1.816, // kcal per gram of fat mass / lean mass change (Hall 2008: 39.5 and 7.6 MJ/kg)
+  forbesC: 10.4,                // Forbes constant: lean share of weight change = 10.4 / (10.4 + fat mass kg)
+  tef: {p:0.25, c:0.075, f:0.02, a:0.15},          // thermic effect per nutrient (Westerterp 2004)
+  atw: {p:4, c:4, f:9, fib:2, a:7},                 // energy factors kcal/g (FAO 2003 / EU 1169/2011)
+  unc: {high:0.10, medium:0.20, low:0.35},          // 1-SD uncertainty of a food estimate by confidence
+  gainPerSession: {none:33, beg:33, mid:17, adv:8}  // g lean mass per strength session (≈1.2 kg / 36 sessions for novices, halving with experience)
+};
+function bfEstimate(w,h,a,sex){ if(!w||!h||!a) return 0; const bmi=w/((h/100)**2); return Math.max(4, Math.min(60, 1.2*bmi+0.23*a-10.8*(sex==='male'?1:0)-5.4)); } // Deurenberg 1991
+function bmrInfo(w,h,a,sex,bf,exp){
+  if(!h||!w||!a) return {b:0,method:''};
+  if(bf && (exp==='mid'||exp==='adv')) return {b:Math.round(500+22*w*(1-bf/100)), method:'cun'};   // Cunningham (athletes)
+  return {b:Math.round(10*w+6.25*h-5*a+(sex==='male'?5:-161)), method:'mif'};                      // Mifflin-St Jeor
+}
+function curCtx(){
+  const w=weightKg(), h=heightCm(), a=+$('age').value||0, bfIn=+$('bf').value||0, exp=$('exp').value||'none';
+  const bfE=bfEstimate(w,h,a,S.sex), bi=bmrInfo(w,h,a,S.sex,bfIn,exp);
+  return {b:bi.b, method:bi.method, w, hcm:h, age:a, sex:S.sex, goal:S.goal, bf:bfIn||0, bfEst:bfE, exp, v:2};
+}
+const bfOf = c => c.bf || c.bfEst || bfEstimate(c.w,c.hcm,c.age,c.sex) || 20;
+const strideOf = c => (c.hcm||170)*(c.sex==='female'?0.413:0.415)/100;   // metres per step
+const perStepOf = c => SCI.walkNet * c.w * strideOf(c) / 1000;            // net kcal per step
+const protTOf = c => c.w ? Math.round(c.w*(c.goal==='lose fat'?2.0:c.goal==='build muscle'?1.6:1.4)) : 0;  // Helms 2014 / Morton 2018
+function calc(){
+  const c=curCtx();
+  $('bmrVal').textContent=c.b? nf(c.b)+' kcal':'—'; $('protT').textContent=protTOf(c)? protTOf(c)+' g':'—';
+  $('bmrInfo').textContent = c.b ? t(c.method==='cun'?'bmr_cun':'bmr_mif')+' · '+(c.bf? t('bf_given',{n:c.bf}) : t('bf_est_lbl',{n:Math.round(c.bfEst)})) : '';
+}
 function saveForm(){
   if(!V) return;
-  V.profile={units:S.units,sex:S.sex,goal:S.goal,age:$('age').value,hcm:$('hcm').value,hft:$('hft').value,hin:$('hin').value,w:$('w').value};
+  V.profile={units:S.units,sex:S.sex,goal:S.goal,age:$('age').value,hcm:$('hcm').value,hft:$('hft').value,hin:$('hin').value,w:$('w').value,bf:$('bf').value,exp:$('exp').value};
   V.draft={food:$('food').value, act:$('act').value};
   persistSoon();
 }
-['age','hcm','hft','hin','w','food','act'].forEach(id=>$(id).addEventListener('input',()=>{calc();saveForm();}));
+['age','hcm','hft','hin','w','bf','food','act'].forEach(id=>$(id).addEventListener('input',()=>{calc();saveForm();}));
+$('exp').addEventListener('change',()=>{calc();saveForm();});
 function fillForm(){
   const p=V.profile||{};
   Object.assign(S,{units:p.units||'metric',sex:p.sex||'male',goal:p.goal||'maintain'});
-  ['age','hcm','hft','hin','w'].forEach(k=>$(k).value=p[k]||'');
+  ['age','hcm','hft','hin','w','bf'].forEach(k=>$(k).value=p[k]||''); $('exp').value=p.exp||'none';
   setSeg('units','u',S.units); setSeg('sex','s',S.sex); setSeg('goal','g',S.goal); applyUnits();
   $('food').value=(V.draft&&V.draft.food)||''; $('act').value=(V.draft&&V.draft.act)||'';
   $('dayDate').value=todayStr(); calc();
 }
 function clearForm(){
-  ['age','hcm','hft','hin','w','food','act','apiKey','pw1','pw2','pwCur','unlockPw','importText','importPw','exportText'].forEach(id=>$(id).value='');
+  $('exp').value='none';
+  ['age','hcm','hft','hin','w','bf','food','act','apiKey','pw1','pw2','pwCur','unlockPw','importText','importPw','exportText'].forEach(id=>$(id).value='');
   $('exportBox').style.display='none'; $('results').style.display='none';
   $('histList').innerHTML=''; $('weekBars').innerHTML='';
 }
@@ -565,19 +625,34 @@ FOOD EATEN THAT DAY (user's words, may be in any language):
 ACTIVITY THAT DAY (user's words):
 """${$('act').value.trim() || '(nothing given)'}"""
 
-RULES
-- Estimate realistic portion sizes when not given (normal adult portions; restaurant meals are bigger). Include drinks, oils, sauces, alcohol.
-- Activity kcal must be NET ABOVE BMR (do not include BMR again). Use the person's weight. For steps use exactly ${perStepOf(c).toFixed(4)} kcal per step (already adjusted for their weight and stride).
-- If the user gave no info about general daily movement (no steps), add one item "Daily living (estimated)" of about 15% of BMR. If steps are given, the steps already cover daily movement.
+Your job is ONLY to turn the text into structured amounts. The app does all energy maths itself, so be precise about grams and nutrients.
+
+FOOD RULES
+- Split into individual items. For each, estimate the edible weight in grams. If no amount is given, use a standard adult portion (restaurant/takeaway portions are ~1.5x home portions). Include drinks, cooking oil, butter, sauces, dressings and alcohol — these are the most commonly forgotten.
+- Use nutrient values from standard food composition data (USDA FoodData Central or the national food table of the food's country) for the food as eaten (cooked weight for cooked foods).
+- carbs_g = AVAILABLE carbohydrate (excluding fibre). fiber_g separately. alcohol_g = grams of ethanol (e.g. 0.5 L beer at 5 % ≈ 20 g).
+- free_sugar_g = WHO "free sugars" (added sugars + honey, syrups, juices; NOT sugar naturally in whole fruit, vegetables or milk).
+- confidence: "high" if the user gave weights or packaged amounts, "medium" if clear portions ("2 eggs", "a bowl"), "low" if vague ("some pasta", "snacks").
+
+ACTIVITY RULES
+- steps = the step count if the user gave one, otherwise null. Do NOT add walking as a separate activity when it is covered by the step count.
+- For every other activity give the MET value from the 2024 Adult Compendium of Physical Activities${c.age>=60?' (use the Older Adult Compendium MET values, the person is 60+)':''} and the duration in minutes. Pick the closest Compendium entry and intensity; put the entry name in "detail". If no duration is given, assume a typical duration and say so in assumptions.
+- For resistance training use the realistic working time (a 60-min gym session is ~60 min at the Compendium value for resistance training, not a higher cardio value).
+- Do NOT use calorie numbers from watches or apps (wrist devices often err by 25 %+); convert the activity itself.
 - strength_training = true only if they did weights / resistance / calisthenics that day.
-- Feedback: honest, specific, friendly, short sentences, refer to the actual foods/activities. Tailor to the goal. "improve" = what they could have done differently (concrete swaps or additions with numbers). "tomorrow" = 2-3 concrete actions. If intake is very low (under ~1200 kcal) or extremely high, say so clearly and recommend a healthier range instead of praising it. Never suggest crash dieting.
+
+FEEDBACK RULES
+- Honest, specific, friendly, short sentences, referring to the actual foods/activities and the goal. Don't quote exact daily calorie totals (the app shows them); talk about foods, protein, fibre, sugar, alcohol, activity.
+- "improve" = what they could have done differently (concrete swaps or additions with numbers). "tomorrow" = 2-3 concrete actions.
+- Protein guidance: about 1.6 g/kg for muscle gain (more brings little extra), about 1.8-2.4 g/kg while losing fat.
+- If intake looks very low (under ~1200 kcal) or extremely high, say so clearly and recommend a healthier range instead of praising it. Never suggest crash dieting.
 - score 0-100 = how well the day fits the goal and general health.
-- LANGUAGE: write every text value (food names, amounts, activity names, details, feedback, assumptions) in ${langNameEnglish()}.
+- LANGUAGE: write every text value (food names, amounts, details, feedback, assumptions) in ${langNameEnglish()}.
 
 Reply with ONLY this JSON, no markdown:
-{"foods":[{"name":"","amount":"","kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0}],
-"totals":{"kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0,"sugar_g":0,"alcohol_g":0},
-"activities":[{"name":"","detail":"","kcal":0}],
+{"foods":[{"name":"","amount":"","grams":0,"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0,"alcohol_g":0,"free_sugar_g":0,"sat_fat_g":0,"confidence":"medium"}],
+"steps":null,
+"activities":[{"name":"","detail":"","met":0,"minutes":0}],
 "strength_training":false,
 "feedback":{"score":0,"summary":"one or two sentences","good":["",""],"improve":["",""],"tomorrow":["",""]},
 "assumptions":["",""]}`;
@@ -600,8 +675,9 @@ $('go').addEventListener('click', async ()=>{
   try{
     let data=null;
     if(sample && typeof sample.json==='function'){ try{ data=await sample.json(buildPrompt(c)); }catch(e){ if(e&&e.code) throw e; data=null; } }
-    if(!data||!data.totals) data=parseJSON(await askAI(buildPrompt(c),4000));
-    if(!data||!data.totals) throw new Error('bad');
+    if(data && !Array.isArray(data.foods)) data=null;
+    if(!data||!Array.isArray(data.foods)) data=parseJSON(await askAI(buildPrompt(c),4000));
+    if(!data||!Array.isArray(data.foods)) throw new Error('bad');
     current={date:$('dayDate').value||todayStr(), food:$('food').value, act:$('act').value, result:data, ctx:c, dirty:true};
     showResult();
     setTimeout(()=>$('results').scrollIntoView({behavior:'smooth',block:'start'}),50);
@@ -640,24 +716,72 @@ $('again').addEventListener('click',()=>{
 });
 
 /* ---------- numbers ---------- */
-function bodyChange(balance, protein, w, strength){
-  const ppk=protein/w; let muscle=0, why;
+// Splits a day's energy balance E (kcal) into fat and lean mass change (grams).
+// Base split: Forbes (lean share = 10.4 / (10.4 + fat mass)), energy densities from Hall 2008.
+// Adjustments: strength training adds lean mass (capped per session, reduced below 1.6 g/kg protein
+// or in a big deficit — Morton 2018, Longland 2016); high protein limits lean loss in a deficit.
+function bodyChange(E, c, protein, strength){
+  const ppk = protein / c.w, FM = c.w*bfOf(c)/100;
+  const p = SCI.forbesC / (SCI.forbesC + FM);
+  const perG = p*SCI.rhoLean + (1-p)*SCI.rhoFat;
+  let lean = (E / perG) * p, why;
   if(strength){
-    if(ppk>=1.6){muscle=25; why=t('m_t_good');} else if(ppk>=1.2){muscle=12; why=t('m_t_mid');} else {muscle=4; why=t('m_t_low');}
-    if(balance<-500){muscle=Math.round(muscle*0.4); why+='; '+t('m_big_def');}
-  } else {
-    if(balance<-500&&ppk<1.2){muscle=-20; why=t('m_def_low');} else if(balance<-500){muscle=-6; why=t('m_def');}
-    else if(ppk<0.8){muscle=-4; why=t('m_lowp');} else {muscle=0; why=t('m_none');}
+    const pot = SCI.gainPerSession[c.exp||'none'] || 33;
+    const pf = ppk>=1.6 ? 1 : ppk>=1.2 ? 0.75 : ppk>=0.8 ? 0.5 : 0.25;
+    const ef = E>=-300 ? 1 : E>=-750 ? (ppk>=2 ? 0.8 : 0.6) : (ppk>=2 ? 0.5 : 0.3);
+    lean = Math.max(lean, 0) + pot*pf*ef;
+    why = t(ppk>=1.6?'m_t_good':ppk>=1.2?'m_t_mid':'m_t_low') + (E<-750 ? '; '+t('m_big_def') : '');
+  } else if(E < -50){
+    const mod = ppk>=1.6 ? 0.5 : ppk>=1.2 ? 0.75 : 1;
+    lean *= mod;
+    why = t(ppk<0.8 ? 'm_lowp' : mod<1 ? 'm_deficit_hp' : 'm_deficit');
+  } else if(E > 50){ why = t('m_surplus'); }
+  else { why = t('m_none'); }
+  const fat = (E - lean*SCI.rhoLean) / SCI.rhoFat;
+  return {fat:Math.round(fat), muscle:Math.round(lean), why};
+}
+function foodTotals(r){
+  const T={kcal:0,p:0,c:0,f:0,fib:0,a:0,sug:0,sat:0,tef:0,varK:0,legacy:false};
+  const foods=r.foods||[];
+  const modern = foods.some(x=>x && ('fiber_g' in x || 'grams' in x || 'confidence' in x));
+  if(!modern && r.totals){            // results saved by the older version
+    const o=r.totals; Object.assign(T,{kcal:+o.kcal||0,p:+o.protein_g||0,c:+o.carbs_g||0,f:+o.fat_g||0,fib:+o.fiber_g||0,a:+o.alcohol_g||0,sug:+o.sugar_g||0,legacy:true});
+    T.tef=T.kcal*0.1; T.varK=(T.kcal*0.2)**2; foods.forEach(x=>x._kcal=+x.kcal||0); return T;
   }
-  return {fat:Math.round((balance-muscle*1.0)/7.7), muscle, why};   // ~1 kcal/g muscle tissue, ~7.7 kcal/g fat tissue
+  for(const x of foods){
+    const p=+x.protein_g||0, cc=+x.carbs_g||0, f=+x.fat_g||0, fib=+x.fiber_g||0, a=+x.alcohol_g||0;
+    const k = p*SCI.atw.p + cc*SCI.atw.c + f*SCI.atw.f + fib*SCI.atw.fib + a*SCI.atw.a;
+    x._kcal=k;
+    T.kcal+=k; T.p+=p; T.c+=cc; T.f+=f; T.fib+=fib; T.a+=a; T.sug+=+x.free_sugar_g||0; T.sat+=+x.sat_fat_g||0;
+    T.tef += p*4*SCI.tef.p + cc*4*SCI.tef.c + f*9*SCI.tef.f + a*7*SCI.tef.a;
+    T.varK += (k*(SCI.unc[x.confidence]||SCI.unc.medium))**2;
+  }
+  return T;
+}
+function activityList(r, c){
+  const out=[], legacy = !('steps' in r) && (r.activities||[]).some(a=>'kcal' in a);
+  if(legacy){ (r.activities||[]).forEach(a=>out.push({name:a.name,detail:a.detail,kcal:+a.kcal||0})); return {items:out, steps:null}; }
+  const given = r.steps!=null && isFinite(+r.steps) && +r.steps>0;
+  const steps = given ? +r.steps : SCI.defaultSteps;
+  out.push({name:t(given?'act_steps':'act_daily_est'), detail:nf(steps)+' · '+(steps*strideOf(c)/1000).toLocaleString(locale(),{maximumFractionDigits:1})+' km', kcal:steps*perStepOf(c)});
+  const g = c.age>=60 ? SCI.metKcal60 : SCI.metKcal, rest = c.b/1440;
+  for(const a of (r.activities||[])){
+    const met=+a.met||0, min=+a.minutes||0;
+    const k = (met && min) ? Math.max(0, met*g*c.w - rest)*min : (+a.kcal||0);   // gross MET cost minus resting burn
+    out.push({name:a.name, detail:(a.detail||'')+(met&&min?` · ${met} MET · ${Math.round(min)} min`:''), kcal:k});
+  }
+  return {items:out, steps:given?steps:null};
 }
 function compute(r, c){
-  const tt=r.totals||{}, intake=Math.round(tt.kcal||0), acts=r.activities||[];
-  const actK=Math.round(acts.reduce((s,a)=>s+(+a.kcal||0),0)), tef=Math.round(intake*0.1);
+  const T=foodTotals(r), A=activityList(r,c);
+  const intake=Math.round(T.kcal), actK=Math.round(A.items.reduce((s,a)=>s+a.kcal,0)), tef=Math.round(T.tef);
   const out=c.b+tef+actK, bal=intake-out;
-  const bc=bodyChange(bal, +tt.protein_g||0, c.w, !!r.strength_training);
+  // 1-SD uncertainty: food portions + BMR equation (±10 %) + activity (±20 %) + TEF (±30 %)
+  const sdIn=Math.sqrt(T.varK), sdOut=Math.sqrt((0.10*c.b)**2+(0.20*actK)**2+(0.30*tef)**2), sd=Math.sqrt(sdIn**2+sdOut**2);
+  const strength=!!r.strength_training;
+  const bc=bodyChange(bal,c,T.p,strength), lo=bodyChange(bal-sd,c,T.p,strength), hi=bodyChange(bal+sd,c,T.p,strength);
   const score=Math.max(0,Math.min(100,Math.round(+((r.feedback||{}).score)||0)));
-  return {tt,intake,acts,actK,tef,out,bal,bc,score,sum:{in:intake,out,bal,fat:bc.fat,mus:bc.muscle,score}};
+  return {T,A,intake,actK,tef,out,bal,sd,sdIn,bc,fatLo:lo.fat,fatHi:hi.fat,score,sum:{in:intake,out,bal,fat:bc.fat,mus:bc.muscle,score}};
 }
 const fmtSign = (n,u) => (n>0?'+':n<0?'−':'±')+nf(Math.abs(n))+(u||'');
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -665,39 +789,45 @@ const scoreCol = sc => sc>=75?'var(--accent)':sc>=50?'var(--warn)':'var(--bad)';
 
 function showResult(){
   if(!current) return;
-  const r=current.result, c=current.ctx, X=compute(r,c), tt=X.tt;
+  const r=current.result, c=current.ctx, X=compute(r,c), T=X.T;
   $('dateLbl').textContent=fmtDate(current.date);
   $('rIn').textContent=nf(X.intake); $('rOut').textContent=nf(X.out);
   $('rBal').textContent=fmtSign(X.bal); $('rBal').className='v '+(X.bal>0?'pos':'neg');
   $('rBalL').textContent=t(X.bal>0?'surplus':'deficit');
+  $('rangeNote').textContent = t('rng_eaten',{a:nf(X.intake-X.sdIn),b:nf(X.intake+X.sdIn)})+' · '+t('rng_bal',{a:fmtSign(X.bal-X.sd),b:fmtSign(X.bal+X.sd)});
   $('burnBreak').textContent=t('burn_formula',{b:nf(c.b),t:nf(X.tef),a:nf(X.actK),o:nf(X.out)});
   $('fatV').textContent=fmtSign(X.bc.fat,' g'); $('tmFat').className='tm fat'+(X.bc.fat<=0?' down':'');
-  $('fatD').textContent=t(X.bal>0?'from_surplus':'from_deficit',{n:nf(Math.abs(X.bal))});
+  $('fatD').textContent=t(X.bal>0?'from_surplus':'from_deficit',{n:nf(Math.abs(X.bal))})+' · '+t('rng_fat',{a:fmtSign(X.fatLo),b:fmtSign(X.fatHi)});
   $('musV').textContent=fmtSign(X.bc.muscle,' g'); $('tmMus').className='tm mus'+(X.bc.muscle<0?' down':'');
   $('musD').textContent=X.bc.why;
 
   // steps to walk off the fat stored that day
-  const kcal=Math.max(0,X.bc.fat)*7.7, per=perStepOf(c);
+  const kcal=Math.max(0,X.bc.fat)*SCI.rhoFat, per=perStepOf(c);
   const steps=per? Math.ceil(kcal/per/100)*100 : 0;
   if(steps>0){
     $('walk').className='walk'; $('walk').querySelector('.ico').textContent='👟';
     $('walkV').textContent=t('steps_need',{n:nf(steps)});
     $('walkD').textContent=t('steps_sub',{km:(steps*strideOf(c)/1000).toLocaleString(locale(),{maximumFractionDigits:1}),min:nf(steps/100),kcal:nf(kcal)})+' · '+t('steps_alt',{run:nf(kcal/(0.12*c.w))});
-    const m=(current.act||'').replace(/[.,'\s](?=\d{3}\b)/g,'').match(/(\d{3,6})\s*(steps|schritte|adım|pasos|pas|passi|passos|stappen|kroków|kroki|шаг|крок|خطوة|कदम|步|歩|걸음)/i);
-    const done=m?+m[1]:0;
+    let done=X.A.steps||0;
+    if(!done){ const m=(current.act||'').replace(/[.,'\s](?=\d{3}\b)/g,'').match(/(\d{3,6})\s*(steps|schritte|adım|pasos|pas|passi|passos|stappen|kroków|kroki|шаг|крок|خطوة|कदम|步|歩|걸음)/i); done=m?+m[1]:0; }
     $('walkProg').innerHTML = done ? `<div class="prog"><i style="width:${done/(done+steps)*100}%;background:var(--accent)"></i><i style="width:${steps/(done+steps)*100}%;background:var(--warn)"></i></div><div class="progl"><span>${nf(done)}</span><span>${nf(done+steps)}</span></div>` : '';
   } else {
     $('walk').className='walk ok'; $('walk').querySelector('.ico').textContent='✅';
     $('walkV').textContent='0'; $('walkD').textContent=t('steps_ok'); $('walkProg').innerHTML='';
   }
 
-  const pt=protTOf(c), fatT=Math.round(c.w*0.9), carbT=Math.max(0,Math.round((X.out-pt*4-fatT*9)/4));
-  const rows=[['protein',tt.protein_g,pt,'var(--blue)'],['carbs',tt.carbs_g,carbT,'var(--warn)'],['fat',tt.fat_g,fatT,'#b07cd8'],['fiber',tt.fiber_g,30,'var(--accent)'],['sugar',tt.sugar_g,50,'var(--bad)',1]];
-  if(tt.alcohol_g>0) rows.push(['alcohol',tt.alcohol_g,0,'var(--muted)',1]);
+  // targets: protein by goal; fat ≤30 % and saturated fat <10 % of energy, free sugars <10 % (WHO); fibre 14 g per 1000 kcal
+  const ref=Math.max(X.out,1200);
+  const pt=protTOf(c), fatMax=Math.round(ref*0.30/9), satMax=Math.round(ref*0.10/9), sugMax=Math.round(ref*0.10/4), fibT=Math.round(ref/1000*14);
+  const carbT=Math.max(0,Math.round((X.out-pt*4-fatMax*9)/4));
+  const rows=[['protein',T.p,pt,'var(--blue)'],['carbs',T.c,carbT,'var(--warn)'],['fat',T.f,fatMax,'#b07cd8',1],['fiber',T.fib,fibT,'var(--accent)']];
+  if(!T.legacy){ rows.push(['sat_fat',T.sat,satMax,'#9a6fbf',1]); rows.push(['free_sugar',T.sug,sugMax,'var(--bad)',1]); }
+  else rows.push(['sugar',T.sug,50,'var(--bad)',1]);
+  if(T.a>0) rows.push(['alcohol',T.a,0,'var(--muted)',1]);
   $('macros').innerHTML=rows.map(([n,v,tg,col,lim])=>{
     v=Math.round(+v||0); const pct=tg?Math.min(100,v/tg*100):100;
     const label=lim?(tg?`${v} g · ${t('keep_under',{n:tg})}`:`${v} g`):`${v} / ${tg} g`;
-    return `<div class="macro"><div class="top"><span>${esc(t(n))}</span><span>${esc(label)}</span></div><div class="bar"><i style="width:${pct}%;background:${col}"></i></div></div>`;
+    return `<div class="macro"><div class="top"><span>${esc(t(n))}</span><span>${esc(label)}</span></div><div class="bar"><i style="width:${pct}%;background:${lim&&v>tg&&tg?'var(--bad)':col}"></i></div></div>`;
   }).join('');
 
   const f=r.feedback||{}, sc=X.score, col=scoreCol(sc), C=2*Math.PI*28;
@@ -708,9 +838,10 @@ function showResult(){
     (f.good&&f.good.length?`<div class="fbh">${esc(t('fb_good'))}</div><ul class="fb">${list(f.good,'g','✓')}</ul>`:'')+
     (f.improve&&f.improve.length?`<div class="fbh">${esc(t('fb_improve'))}</div><ul class="fb">${list(f.improve,'i','!')}</ul>`:'')+
     (f.tomorrow&&f.tomorrow.length?`<div class="fbh">${esc(t('fb_tomorrow'))}</div><ul class="fb">${list(f.tomorrow,'t','→')}</ul>`:'');
-  $('foodT').innerHTML=(r.foods||[]).map(x=>`<tr><td>${esc(x.name)}<small>${esc(x.amount||'')}</small></td><td class="n">${nf(+x.kcal||0)}</td><td class="n">${Math.round(+x.protein_g||0)}</td><td class="n">${Math.round(+x.carbs_g||0)}</td><td class="n">${Math.round(+x.fat_g||0)}</td></tr>`).join('')
-    +`<tr><td><b>${esc(t('total'))}</b></td><td class="n"><b>${nf(X.intake)}</b></td><td class="n"><b>${Math.round(+tt.protein_g||0)}</b></td><td class="n"><b>${Math.round(+tt.carbs_g||0)}</b></td><td class="n"><b>${Math.round(+tt.fat_g||0)}</b></td></tr>`;
-  $('actT').innerHTML=X.acts.map(a=>`<tr><td>${esc(a.name)}<small>${esc(a.detail||'')}</small></td><td class="n">${nf(+a.kcal||0)}</td></tr>`).join('')
+  const dot=cf=>cf==='high'?'🟢':cf==='low'?'🟠':cf==='medium'?'🟡':'';
+  $('foodT').innerHTML=(r.foods||[]).map(x=>`<tr><td>${esc(x.name)}<small>${dot(x.confidence)} ${esc(x.amount||'')}${x.grams?' · '+Math.round(+x.grams)+' g':''}</small></td><td class="n">${nf(x._kcal||0)}</td><td class="n">${Math.round(+x.protein_g||0)}</td><td class="n">${Math.round(+x.carbs_g||0)}</td><td class="n">${Math.round(+x.fat_g||0)}</td></tr>`).join('')
+    +`<tr><td><b>${esc(t('total'))}</b></td><td class="n"><b>${nf(X.intake)}</b></td><td class="n"><b>${Math.round(T.p)}</b></td><td class="n"><b>${Math.round(T.c)}</b></td><td class="n"><b>${Math.round(T.f)}</b></td></tr>`;
+  $('actT').innerHTML=X.A.items.map(a=>`<tr><td>${esc(a.name)}<small>${esc(a.detail||'')}</small></td><td class="n">${nf(a.kcal)}</td></tr>`).join('')
     +`<tr><td><b>${esc(t('total_act'))}</b><small>${esc(t('on_top'))}</small></td><td class="n"><b>${nf(X.actK)}</b></td></tr>`;
   $('assump').innerHTML=(r.assumptions||[]).filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join('')||`<li>${esc(t('none'))}</li>`;
   $('results').style.display='block';

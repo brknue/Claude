@@ -31,17 +31,26 @@ Open `index.html` in a browser (or host the folder on GitHub Pages). No build st
 
 **AI:** inside claude.ai the page uses Claude directly. Anywhere else, it shows a box for your own [Anthropic API key](https://console.anthropic.com/). The key is stored only in your browser's localStorage and is sent only to `api.anthropic.com`.
 
-## How the numbers are calculated
+## How the numbers are calculated (research-based)
 
-- **BMR:** Mifflin–St Jeor formula.
-- **Burned:** BMR + 10 % of food eaten (digestion) + activity above rest (AI estimate).
-- **Steps:** about 0.55 kcal per kg per km of walking, stride ≈ 41.5 % of height.
-- **Fat change:** (surplus − energy put into muscle) ÷ 7.7 kcal per gram of fat tissue.
-- **Muscle change:** simple rule. It only goes up on strength-training days (more with ≥ 1.6 g protein per kg) and goes down with big deficits and low protein.
+The AI only turns your text into **grams, nutrients, step count and activities (MET + minutes)**. All energy maths is done by the app with published formulas:
+
+| What | Method | Source |
+|---|---|---|
+| BMR | Mifflin–St Jeor (most reliable general equation, ±10 % for most people). With body fat entered and 1+ years of training: Cunningham, 500 + 22 × lean mass | Frankenfield 2005; O'Neill 2023; ten Haaf 2014 |
+| Body fat (if not entered) | Deurenberg: 1.2 × BMI + 0.23 × age − 10.8 × sex − 5.4 | Deurenberg 1991 |
+| Food energy | 4 kcal/g protein & available carbs, 9 fat, 7 alcohol, 2 fibre | FAO 2003, EU 1169/2011 |
+| Digestion (TEF) | protein 25 %, carbs 7.5 %, fat 2 %, alcohol 15 % | Westerterp 2004 |
+| Activities | 2024 Adult Compendium MET × 0.0175 kcal/kg/min × weight, minus resting burn (60+: Older Adult Compendium, 0.0135) | Herrmann 2024 |
+| Steps | ≈0.6 kcal per kg per km, stride 41.5 % (men) / 41.3 % (women) of height; 5,000 steps assumed if none given | Schantz 2022 |
+| Fat vs lean change | Forbes partition: lean share = 10.4 / (10.4 + fat mass), 9.44 kcal/g fat and 1.816 kcal/g lean | Forbes 1987; Hall 2007, 2008 |
+| Muscle on training days | ≈33 g per session for novices (halving with experience), reduced below 1.6 g/kg protein and in big deficits; high protein limits lean loss in a deficit | Morton 2018; Longland 2016; Helms 2014 |
+| Targets | protein 1.4 / 1.6 / 2.0 g/kg (maintain / build / lose fat); fat ≤ 30 % and saturated fat < 10 % of energy; free sugars < 10 %; fibre 14 g per 1000 kcal | WHO; Morton 2018; Helms 2014 |
+| Uncertainty | each food gets a confidence (±10/20/35 %); BMR ±10 %, activity ±20 %; the app shows the likely range of intake, balance and fat change | CALERIE 2 (people under-report ~15 %) |
 
 These are estimates for general guidance, not medical advice. The scale also moves ±0.5–1 kg a day from water, salt and carbs.
 
 ## Files
 
 - `index.html`: the app
-- `i18n.js`, `i18n-more.js`: translations
+- `i18n.js`, `i18n-more.js`, `i18n-sci.js`: translations
