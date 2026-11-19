@@ -17,13 +17,26 @@
   const norm = s => String(s || '').toLowerCase().replace(/ı/g, 'i').replace(/ß/g, 'ss').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
   const num = x => { x = parseFloat(x); return isFinite(x) && x >= 0 ? x : null; };
 
-  function canSearch() {
-    if (runCount >= PER_RUN) return false;
+  function canSearch(retry) {
+    if (!retry && runCount >= PER_RUN) return false;
     const now = Date.now(), ts = (ls.get('fc_off_ts') || []).filter(t => now - t < 60000);
     return ts.length < PER_MIN;
   }
-  function noteSearch() { const now = Date.now(), ts = (ls.get('fc_off_ts') || []).filter(t => now - t < 60000); ts.push(now); ls.set('fc_off_ts', ts); runCount++; }
-  async function getJSON(url) {
+  function noteSearch(retry) { const now = Date.now(), ts = (ls.get('fc_off_ts') || []).filter(t => now - t < 60000); ts.push(now); ls.set('fc_off_ts', ts); if (!retry) runCount++; }
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  // Open Food Facts sometimes answers busy/overloaded without CORS headers, which the browser reports as
+  // "Failed to fetch". Seen in live tests: the same request works a few seconds later. So retry twice.
+  async function getJSON(url, isSearch) {
+    for (let attempt = 0; ; attempt++) {
+      try { return await getOnce(url); }
+      catch (e) {
+        if (attempt >= 2) throw e;
+        if (isSearch) { if (!canSearch(true)) throw new Error('budget'); noteSearch(true); }
+        await wait(attempt ? 6000 : 2500);
+      }
+    }
+  }
+  async function getOnce(url) {
     const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timer = ctl && setTimeout(() => ctl.abort(), 15000);
     try { const r = await fetch(url, { referrerPolicy: 'no-referrer', signal: ctl && ctl.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }
@@ -54,7 +67,7 @@
     const c = cacheGet(key); if (c !== undefined) return c;
     if (!canSearch()) throw new Error('budget');
     noteSearch();
-    const j = await getJSON(BASE + '/cgi/search.pl?' + new URLSearchParams({ search_terms: q, json: '1', page_size: '20', fields: FIELDS }));
+    const j = await getJSON(BASE + '/cgi/search.pl?' + new URLSearchParams({ search_terms: q, json: '1', page_size: '20', fields: FIELDS }), true);
     const qt = q.split(' ').filter(x => x.length > 1), must = norm(mustWords || '').split(' ').filter(x => x.length > 1);
     const cands = [];
     for (const h of (j.products || [])) {
@@ -92,7 +105,8 @@
 
   const PACK = /\b(pack|packs|packet|packung|packchen|paket|tafel|tafeln|tablet|bag|tute|poset|can|dose|kutu|bottle|flasche|sise|tub|becher|jar|glas)\b/;
   function gramsFor(rec, hit, fallback) {
-    const a = FuelLocal.amount(rec.raw), seg = norm(rec.raw);
+    const raw = rec.barcode ? rec.raw.replace(rec.barcode, ' ') : rec.raw;
+    const a = FuelLocal.amount(raw), seg = norm(raw);
     if (a.grams) return { g: a.grams, conf: 'high' };
     if (PACK.test(seg) && hit.pack) return { g: a.qty * hit.pack, conf: 'medium' };
     if (/\b(bar|bars|riegel|riegels)\b/.test(seg) && hit.pack && hit.pack <= 150) return { g: a.qty * hit.pack, conf: 'medium' };
@@ -117,9 +131,9 @@
     jobs.sort((a, b) => a[0] - b[0]);
     if (!jobs.length) return r;
     onStatus && onStatus(tr('ol_searching'));
-    const used = []; let busy = false, failed = false;
+    const used = []; let busy = false, failed = false, fails = 0;
     for (const [kind, s] of jobs) {
-      if (failed) break;
+      if (fails >= 2) break;
       try {
         if (kind === 0) {
           const hit = await barcode(s.barcode);
@@ -133,7 +147,7 @@
         }
       } catch (e) {
         if (e && e.message === 'budget') { busy = true; continue; }
-        failed = true;
+        failed = true; fails++;
       }
     }
     r.foods = segs.flatMap(s => s.items);
