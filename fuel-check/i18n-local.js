@@ -352,3 +352,4 @@
   };
   for (const l in X) { if (window.I18N && window.I18N[l]) Object.assign(window.I18N[l], { priv_2: X[l][0], meth_3: X[l][1], ol_busy: X[l][2] }); }
 })();
+(function(){const E={"en": "Something went wrong. Please try again.", "de": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.", "tr": "Bir şeyler ters gitti. Lütfen tekrar dene.", "es": "Algo salió mal. Inténtalo de nuevo.", "fr": "Un problème est survenu. Réessayez.", "it": "Qualcosa è andato storto. Riprova.", "pt": "Algo deu errado. Tente novamente.", "nl": "Er ging iets mis. Probeer het opnieuw.", "pl": "Coś poszło nie tak. Spróbuj ponownie.", "ru": "Что-то пошло не так. Попробуйте ещё раз.", "uk": "Щось пішло не так. Спробуйте ще раз.", "ar": "حدث خطأ ما. حاول مرة أخرى.", "hi": "कुछ गड़बड़ हो गई। फिर से कोशिश करें।", "zh": "出了点问题，请重试。", "ja": "問題が発生しました。もう一度お試しください。", "ko": "문제가 발생했습니다. 다시 시도하세요."};for(const l in E){if(window.I18N&&window.I18N[l])window.I18N[l].lf_err=E[l];}})();

@@ -11,3 +11,7 @@ This repo holds CRB's projects, one folder each. The repo root `index.html` is *
 5. Commit and push to `main`; check the "pages build and deployment" run with `gh api repos/brknue/claude/actions/runs --jq '.workflow_runs[0]'`.
 
 Full details: `plain/README.md`.
+
+## Updating a project's scripts
+
+GitHub Pages and browsers cache files for a while. When a project's `.js` files change, bump the `?v=` on its `<script src>` tags (Fuel Check does this) so visitors never get a new page with old scripts. `node plain/build.mjs` does it automatically for plain itself.

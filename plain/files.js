@@ -101,7 +101,7 @@ window.PLAIN_FILES = {
    "fuel-check/index.html",
    "fuel-check/local-engine.js"
   ],
-  "bytes": 396434
+  "bytes": 397616
  },
  "plain-wiki": {
   "files": [

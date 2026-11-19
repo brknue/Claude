@@ -385,12 +385,12 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
   </div>
 </div>
 
-<script src="i18n.js"></script>
-<script src="i18n-more.js"></script>
-<script src="i18n-sci.js"></script>
-<script src="i18n-local.js"></script>
-<script src="local-engine.js"></script>
-<script src="food-online.js"></script>
+<script src="i18n.js?v=20261119b"></script>
+<script src="i18n-more.js?v=20261119b"></script>
+<script src="i18n-sci.js?v=20261119b"></script>
+<script src="i18n-local.js?v=20261119b"></script>
+<script src="local-engine.js?v=20261119b"></script>
+<script src="food-online.js?v=20261119b"></script>
 <script>
 (function(){
 'use strict';
@@ -576,7 +576,7 @@ $('actChips').addEventListener('click',e=>{
 function todayStr(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
 const fmtDate = (s,opt) => new Date(s+'T12:00:00').toLocaleDateString(locale(), opt||{weekday:'long',day:'numeric',month:'short'});
 
-function errText(e){ const c=e&&e.code; return c==='local_none'?t('lf_nothing'):c==='no_ai'?t('e_noai'):c==='not_granted'?t('e_denied'):c==='rate_limited'?t('e_rate'):c==='bad_key'?t('e_key'):t('e_parse'); }
+function errText(e){ const c=e&&e.code; return c==='local_none'?t('lf_nothing'):!c?t('lf_err'):c==='no_ai'?t('e_noai'):c==='not_granted'?t('e_denied'):c==='rate_limited'?t('e_rate'):c==='bad_key'?t('e_key'):t('e_parse'); }
 function showErr(m){ $('err').textContent=m; $('err').style.display=m?'block':'none'; }
 function parseJSON(x){ if(typeof x!=='string') return x; x=x.replace(/```json|```/g,'').trim(); const s=x.indexOf('{'), e=x.lastIndexOf('}'); return JSON.parse(x.slice(s,e+1)); }
 
@@ -609,7 +609,7 @@ $('go').addEventListener('click', async ()=>{
     current={date:$('dayDate').value||todayStr(), food:$('food').value, act:$('act').value, result:data, ctx:c, dirty:true};
     showResult();
     setTimeout(()=>$('results').scrollIntoView({behavior:'smooth',block:'start'}),50);
-  }catch(e){ showErr(errText(e)); }
+  }catch(e){ if(!(e&&e.code)) console.error('Fuel Check:', e); showErr(errText(e)); }
   finally{ clearInterval(msgTimer); $('loading').style.display='none'; $('go').disabled=false; }
 });
 
