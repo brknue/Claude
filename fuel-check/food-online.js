@@ -57,7 +57,7 @@
   const median = a => { a = a.slice().sort((x, y) => x - y); const m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; };
   const nameOf = h => h.product_name || h.product_name_en || h.generic_name || '';
   // a word matches if equal, or the same word with a short ending (schokolade/schokoladen, egg/eggs) — not "choco" vs "chocolate"
-  function same(x, w) { if (x === w) return true; const a = x.length < w.length ? x : w, b = a === x ? w : x; return a.length >= 4 && b.length - a.length <= 3 && b.startsWith(a) && (b.length - a.length <= 2 || a.length >= 6); }
+  function same(x, w) { if (x === w) return true; const a = x.length < w.length ? x : w, b = a === x ? w : x; return a.length >= 5 && b.length - a.length <= 3 && b.startsWith(a) && (b.length - a.length <= 2 || a.length >= 6); }
   function wordsHit(qt, hay) { const hw = hay.split(' '); return qt.filter(x => hw.some(w => same(x, w))).length; }
 
   /* search(words, mustWords) -> {name, brand, url, per100, serving, pack, branded, n} | null
@@ -73,13 +73,14 @@
     noteSearch(); lastSearch = Date.now();
     const j = await getJSON(BASE + '/cgi/search.pl?' + new URLSearchParams({ search_terms: q, json: '1', page_size: '20', fields: FIELDS }), true);
     const qt = q.split(' ').filter(x => x.length > 1), must = norm(mustWords || '').split(' ').filter(x => x.length > 1);
+    const kindsUse = kinds.filter(k => !must.some(m => same(k, m) || m.startsWith(k)));
     const cands = [];
     for (const h of (j.products || [])) {
       const v = per100(h); if (!v) continue;
       const hay = norm(nameOf(h) + ' ' + (h.brands || ''));
       if (must.length && wordsHit(must, hay) < must.length) continue;
-      const kindHit = kinds.length && wordsHit(kinds, hay) > 0;
-      if (kinds.length && !kindHit) continue;                     // a "Milka chocolate" must be a chocolate, not a Milka cake
+      const kindHit = kindsUse.length && wordsHit(kindsUse, hay) > 0;
+      if (kindsUse.length && !kindHit) continue;                     // a "Milka chocolate" must be a chocolate, not a Milka cake
       const score = Math.min(1, (qt.length ? wordsHit(qt, hay) / qt.length : 0) + (kindHit ? 0.5 : 0));
       if (score >= (must.length ? 0.6 : 0.5)) cands.push({ h, v, score, name: nameOf(h) });
     }
