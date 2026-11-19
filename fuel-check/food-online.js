@@ -150,7 +150,9 @@
           const hit = await search(FuelLocal.cleanQuery(s.raw) || FuelLocal.foodWords(s.raw));
           if (hit) { s.items = [makeItem(s, hit)]; s.unknown = false; used.push(s.raw); }
         } else {
-          const kinds = (s.keys || []).flatMap(k => FuelLocal.aliasesOf(k));
+          let kinds = (s.keys || []).flatMap(k => FuelLocal.aliasesOf(k));
+          // "Snickers", "Monster", "Red Bull" are themselves the food: don't also require a word like "chocolate"
+          if (s.extra.split(' ').every(w => kinds.includes(w) || w === 'red' || w === 'bull')) kinds = [];
           const hit = await search(s.extra + ' ' + (s.keys && s.keys[0] || ''), s.extra, kinds);
           if (hit) { const old = s.items.reduce((t, x) => t + (x.grams || 0), 0); s.items = [makeItem(s, hit, old || null)]; used.push(s.raw); }
         }

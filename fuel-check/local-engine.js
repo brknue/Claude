@@ -262,10 +262,14 @@
     'buyuk kucuk kizarmis haslanmis firinda izgara taze ev yapimi porsiyon tabak bardak kase dilim paket adet tane ' +
     'grande pequeno frito cocido asado casero plato vaso taza lata botella rebanada petit gros cuit maison assiette verre tasse ' +
     'breakfast lunch dinner snack fruhstuck mittag mittagessen abend abendessen abends morgens kahvalti ogle aksam ara ogun desayuno almuerzo cena').split(' '));
+  // brand names that the table maps to a generic food; their real label values are better
+  const BRANDS = new Set('snickers mars twix kitkat bounty kinder oreo haribo nutella milka ritter monster redbull coca cola coke pepsi fanta sprite whopper subway nocilla ulker albeni lindt toblerone pringles doritos lays chio activia danone alpro ehrmann muller mueller barilla nesquik nescafe starbucks skittles mms'.split(' '));
   function extraWords(seg, hits) {
+    const brands = seg.split(/[^\p{L}]+/u).filter(w => BRANDS.has(w) || (w === 'red' && /red bull/.test(seg)));
     let rest = seg;
     hits.forEach(h => { rest = rest.slice(0, h.start) + ' '.repeat(h.end - h.start) + rest.slice(h.end); });
-    return foodWords(rest).split(' ').filter(w => w.length >= 3 && !GENERIC.has(w) && !STOPW.has(w) && !known(w)).join(' ');
+    const words = foodWords(rest).split(' ').filter(w => w.length >= 3 && !GENERIC.has(w) && !STOPW.has(w) && !known(w) && !brands.includes(w));
+    return [...new Set(brands.map(b => b === 'red' ? 'red bull' : b).concat(words))].join(' ').replace('red bull bull', 'red bull');
   }
   let VOCAB = null;
   function known(w) {
