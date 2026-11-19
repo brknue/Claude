@@ -16,6 +16,32 @@
  */
 window.PLAIN_PROJECTS = [
   {
+    id: 'rookstorm', name: 'Rookstorm', entry: 'rookstorm/index.html', open: 'rookstorm/',
+    tags: ['learning', 'explore'], lang: '', notes: ['external'],
+    desc: {
+      en: 'Chess: play Stockfish at any Elo, friends or online players, review games, learn openings and solve endless puzzles; works offline.',
+      de: 'Schach: gegen Stockfish mit jeder Elo, gegen Freunde oder online spielen, Partien analysieren, Eröffnungen lernen, endlos Puzzles; offline nutzbar.',
+      tr: 'Satranç: Stockfish’e her Elo’da, arkadaşlara veya çevrimiçi oyna, oyunları analiz et, açılışları öğren, sonsuz bulmaca çöz; çevrimdışı çalışır.',
+      es: 'Ajedrez: juega contra Stockfish con cualquier Elo, con amigos u online, analiza partidas, aprende aperturas y resuelve puzzles sin fin; funciona sin conexión.',
+      fr: 'Échecs : jouez contre Stockfish à tout Elo, contre des amis ou en ligne, analysez vos parties, apprenez les ouvertures, puzzles sans fin ; hors ligne.',
+      it: 'Scacchi: gioca contro Stockfish a qualsiasi Elo, con amici o online, analizza le partite, impara le aperture e risolvi infiniti puzzle; funziona offline.',
+      pt: 'Xadrez: jogue contra o Stockfish em qualquer Elo, com amigos ou online, analise partidas, aprenda aberturas e resolva puzzles sem fim; funciona offline.',
+      nl: 'Schaken: speel tegen Stockfish op elke Elo, tegen vrienden of online, analyseer partijen, leer openingen en los eindeloos puzzels op; werkt offline.',
+      pl: 'Szachy: graj ze Stockfishem na dowolnym Elo, z przyjaciółmi lub online, analizuj partie, ucz się debiutów i rozwiązuj zadania bez końca; działa offline.',
+      ru: 'Шахматы: играйте со Stockfish на любом Эло, с друзьями или онлайн, разбирайте партии, учите дебюты и решайте бесконечные задачи; работает офлайн.',
+      uk: 'Шахи: грайте зі Stockfish на будь-якому Ело, з друзями чи онлайн, аналізуйте партії, вчіть дебюти й розв’язуйте нескінченні задачі; працює офлайн.',
+      ar: 'شطرنج: العب ضد Stockfish بأي تصنيف إيلو، مع الأصدقاء أو عبر الإنترنت، حلّل مبارياتك، تعلّم الافتتاحيات وحلّ ألغازًا بلا نهاية؛ يعمل دون اتصال.',
+      fa: 'شطرنج: با Stockfish در هر ریتینگی، با دوستان یا آنلاین بازی کن، بازی‌ها را تحلیل کن، گشایش‌ها را یاد بگیر و معماهای بی‌پایان حل کن؛ آفلاین کار می‌کند.',
+      hi: 'शतरंज: किसी भी Elo पर Stockfish, दोस्तों या ऑनलाइन खिलाड़ियों से खेलें, खेलों का विश्लेषण करें, ओपनिंग सीखें और अनगिनत पहेलियाँ हल करें; ऑफ़लाइन चलता है।',
+      zh: '国际象棋：以任意等级分对战 Stockfish、与好友或在线玩家对弈，复盘对局，学习开局，解答无尽谜题；可离线使用。',
+      ja: 'チェス：任意のレーティングでStockfishと対局、友達やオンラインで対戦、棋譜解析、定跡学習、無限のパズル。オフラインでも動作。',
+      ko: '체스: 원하는 Elo로 Stockfish와 대국하고, 친구나 온라인 상대와 두고, 기보 분석, 오프닝 학습, 끝없는 퍼즐까지. 오프라인 지원.',
+      id: 'Catur: lawan Stockfish di Elo berapa pun, teman atau pemain online, analisis permainan, pelajari pembukaan dan pecahkan puzzle tanpa batas; bisa offline.',
+      vi: 'Cờ vua: đấu Stockfish ở mọi mức Elo, chơi với bạn bè hoặc online, phân tích ván cờ, học khai cuộc và giải câu đố vô tận; chạy ngoại tuyến.',
+      sv: 'Schack: spela mot Stockfish på valfri Elo, mot vänner eller online, analysera partier, lär dig öppningar och lös oändligt med problem; fungerar offline.'
+    }
+  },
+  {
     id: 'bio-genetik', name: 'Gene Guide', entry: 'bio-genetik/index.html', open: 'bio-genetik/',
     tags: ['science', 'learning'], lang: 'de', notes: ['german'],
     desc: {
