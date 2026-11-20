@@ -18,6 +18,8 @@ export class Board {
   cg: Api;
   pos: Position | null = null;
   movableColor: Color | 'both' | null = 'both';
+  /** colour allowed to premove while it is the opponent's turn (null = premoves off) */
+  premoveColor: Color | null = null;
   chess960 = false;
   antichess = false;
   private ro: ResizeObserver | null = null;
@@ -31,8 +33,8 @@ export class Board {
       coordinates: settings.coords,
       animation: { enabled: settings.animation, duration: 180 },
       viewOnly: opts.viewOnly,
-      movable: { free: false, showDests: true, events: { after: (o, d) => this.userMove(o, d) } },
-      premovable: { enabled: false },
+      movable: { free: false, showDests: true, events: { after: (o, d, meta) => this.userMove(o, d, !!meta?.premove) } },
+      premovable: { enabled: false, showDests: true, castle: true },
       draggable: { showGhost: true },
       highlight: { lastMove: true, check: true },
       drawable: { enabled: true, visible: true },
@@ -46,21 +48,28 @@ export class Board {
   destroy() { this.ro?.disconnect(); this.cg.destroy(); }
 
   /** Show a position. lastMove optional normalized move that led to it (needs previous position for castle display). */
-  setPosition(pos: Position, lastMove?: [string, string] | null, interactive = true) {
+  setPosition(pos: Position, lastMove?: [string, string] | null, interactive = true, premoveColor: Color | null = this.premoveColor) {
     this.pos = pos;
     const turn = pos.turn;
     const canMove = interactive && (this.movableColor === 'both' || this.movableColor === turn);
+    const premove = !canMove && !!premoveColor && premoveColor !== turn;
+    if (!premoveColor) this.cg.cancelPremove();
     this.cg.set({
       fen: fenOf(pos),
       turnColor: turn,
       check: pos.isCheck() ? turn : false,
       lastMove: (lastMove || undefined) as any,
+      premovable: { enabled: !!premoveColor },
       movable: {
-        color: canMove ? turn : undefined,
+        color: canMove ? turn : premove ? premoveColor! : undefined,
         dests: canMove ? dests(pos, this.chess960) : new Map(),
       },
     });
   }
+
+  /** Execute a queued premove (if any and legal). Returns true if one was played. */
+  playPremove(): boolean { return this.cg.playPremove(); }
+  cancelPremove() { this.cg.cancelPremove(); }
 
   setOrientation(c: Color) { this.cg.set({ orientation: c }); }
   flip() { this.cg.toggleOrientation(); }
@@ -68,12 +77,12 @@ export class Board {
 
   arrows(shapes: DrawShape[]) { this.cg.setAutoShapes(shapes); }
 
-  private async userMove(orig: string, dest: string) {
+  private async userMove(orig: string, dest: string, premove = false) {
     const pos = this.pos;
     if (!pos) return;
     let promo: Role | undefined;
     if (isPromotion(pos, sq(orig), sq(dest))) {
-      promo = await this.askPromotion(pos.turn, dest);
+      promo = premove ? 'queen' : await this.askPromotion(pos.turn, dest);
       if (!promo) { this.setPosition(pos, null); return; }
     }
     const m = cgToMove(pos, orig, dest, promo);

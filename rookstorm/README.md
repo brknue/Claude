@@ -10,8 +10,9 @@ Chess website: play Stockfish 17 at any Elo, play friends and strangers online, 
 - **Time controls:** bullet, blitz, rapid, classical, unlimited or any custom minutes + increment.
 - **Variants:** Standard, Chess960, King of the Hill, Three-check, Atomic, Antichess, Horde, Racing Kings (all for human play; Standard and Chess960 vs the bot).
 - **Same device:** pass-and-play with automatic board flipping.
-- **Friend link:** create a game, send the link, play in real time with clocks, chat, draw offers and rematches.
-- **Online:** get paired with the next player searching the same variant and time control.
+- **Friend link:** create a game, send the link (message, AirDrop, anything) or a short game code, and play in real time with clocks, chat, draw offers, takeback requests and rematches. If a phone drops the connection (e.g. switching apps), the game reconnects.
+- **Online:** get paired with the next player searching the same variant and time control; takeback requests work here too.
+- **Premoves:** plan your next move while the opponent thinks; one switch under the move list turns them on or off.
 - **Game review:** accuracy per player and every move classified (Brilliant, Great, Best, Excellent, Good, Book, Inaccuracy, Mistake, Miss, Blunder), with the best move shown, an evaluation graph and an eval bar. Import any PGN or FEN.
 - **Board editor:** set up any position and get Stockfish's best move and top 3 lines.
 - **Openings:** all 3,865 named openings and variations from the Lichess database: search, browse families, explore book moves from any position, and drill lines as White or Black.
@@ -20,7 +21,7 @@ Chess website: play Stockfish 17 at any Elo, play friends and strangers online, 
 ## How it works
 
 - Static site, no server of its own. Hash routing, so any static host works.
-- Engine: Stockfish 17.1 lite, single-threaded WebAssembly (no special server headers needed).
+- Engine: Stockfish 17.1 lite, single-threaded WebAssembly (no special server headers needed). Browsers without WebAssembly SIMD (e.g. iPads before iOS 16.4) automatically get Stockfish's pure-JavaScript build (`engine/sf-asm.js`, downloaded only when needed).
 - Offline: a service worker caches everything (about 11 MB), including the engine and all puzzles.
 - Friend and online games run peer-to-peer over WebRTC through the free PeerJS signalling server (`0.peerjs.com`). That is the only external service, and it is contacted only when you start a friend or online game. Matchmaking needs no server either: players race to claim a lobby ID per variant and time control.
 - Settings, puzzle rating and recent games are stored only in this browser (`localStorage` keys start with `rs.`).

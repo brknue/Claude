@@ -19,7 +19,7 @@ const routes: Record<string, PageFn> = {
 
 const NAV = [
   ['play', 'Play', 'play'], ['puzzles', 'Puzzles', 'puzzle'], ['openings', 'Openings', 'book'],
-  ['analysis', 'Analysis', 'chart'], ['editor', 'Board editor', 'edit'],
+  ['analysis', 'Analysis', 'chart'], ['editor', 'Editor', 'edit'],
 ] as const;
 
 let cleanup: Cleanup;
@@ -133,7 +133,7 @@ function init() {
   applyTheme();
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
   document.body.append(header(), main,
-    h('nav.tabbar', null, [['', 'Home', 'home'], ...NAV.slice(0, 4)].map(([r, label, ic]) =>
+    h('nav.tabbar', null, [['', 'Home', 'home'], ...NAV].map(([r, label, ic]) =>
       h('a', { href: '#/' + r, 'data-r': r }, icon(ic), h('span', null, label.split(' ')[0])))));
   window.addEventListener('hashchange', route);
   window.addEventListener('beforeunload', (e) => { if (leaveGuard) { e.preventDefault(); e.returnValue = ''; } });

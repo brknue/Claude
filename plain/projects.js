@@ -19,8 +19,8 @@ window.PLAIN_PROJECTS = [
     id: 'rookstorm', name: 'Rookstorm', entry: 'rookstorm/index.html', open: 'rookstorm/',
     tags: ['learning', 'explore'], lang: '', notes: ['external'],
     desc: {
-      en: 'Chess: play Stockfish at any Elo, friends or online players, review games, learn openings and solve endless puzzles; works offline.',
-      de: 'Schach: gegen Stockfish mit jeder Elo, gegen Freunde oder online spielen, Partien analysieren, Eröffnungen lernen, endlos Puzzles; offline nutzbar.',
+      en: 'Chess: play Stockfish at any Elo, friends (by link or AirDrop) or online players with premoves and takebacks, review games, learn openings, endless puzzles; works offline.',
+      de: 'Schach: gegen Stockfish mit jeder Elo, gegen Freunde (per Link oder AirDrop) oder online mit Vorzügen und Zurücknahmen, Partien analysieren, Eröffnungen, endlos Puzzles; offline.',
       tr: 'Satranç: Stockfish’e her Elo’da, arkadaşlara veya çevrimiçi oyna, oyunları analiz et, açılışları öğren, sonsuz bulmaca çöz; çevrimdışı çalışır.',
       es: 'Ajedrez: juega contra Stockfish con cualquier Elo, con amigos u online, analiza partidas, aprende aperturas y resuelve puzzles sin fin; funciona sin conexión.',
       fr: 'Échecs : jouez contre Stockfish à tout Elo, contre des amis ou en ligne, analysez vos parties, apprenez les ouvertures, puzzles sans fin ; hors ligne.',

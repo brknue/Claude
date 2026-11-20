@@ -24,23 +24,33 @@ class Engine {
 
   private boot(): Promise<void> {
     if (this.readyP) return this.readyP;
-    this.readyP = new Promise((resolve, reject) => {
-      try {
-        const url = new URL('engine/sf.js', document.baseURI).href;
-        this.worker = new Worker(url);
-      } catch (e) { this.failed = true; reject(e); return; }
-      const w = this.worker;
+    this.readyP = this.start('engine/sf.js', 20000).catch(() => {
+      // Older browsers (e.g. iPads before iOS 16.4) lack WebAssembly SIMD: use the pure-JS build.
+      this.worker?.terminate(); this.worker = null;
+      this.lite = true;
+      return this.start('engine/sf-asm.js', 90000);
+    }).catch((e) => { this.failed = true; this.readyP = null; throw e; });
+    return this.readyP;
+  }
+
+  /** true when running the slower pure-JavaScript fallback engine */
+  lite = false;
+
+  private start(path: string, timeout: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let w: Worker;
+      try { w = new Worker(new URL(path, document.baseURI).href); } catch (e) { reject(e); return; }
+      this.worker = w;
       let stage = 0;
-      const t = setTimeout(() => { if (stage < 2) { this.failed = true; reject(new Error('Engine timeout')); } }, 30000);
-      w.onerror = (e) => { this.failed = true; clearTimeout(t); reject(e); };
+      const t = setTimeout(() => { if (stage < 2) reject(new Error('Engine timeout')); }, timeout);
+      w.onerror = (e) => { clearTimeout(t); e.preventDefault?.(); reject(new Error('Engine failed to load')); };
       w.onmessage = (e: MessageEvent) => {
         const line = String(e.data);
         if (stage === 0 && line === 'uciok') { stage = 1; this.send('setoption name Hash value 32'); this.send('isready'); }
         else if (stage === 1 && line === 'readyok') { stage = 2; clearTimeout(t); w.onmessage = (ev) => this.onLine(String(ev.data)); resolve(); }
       };
-      this.send('uci');
+      w.postMessage('uci');
     });
-    return this.readyP;
   }
 
   ready() { return this.boot(); }

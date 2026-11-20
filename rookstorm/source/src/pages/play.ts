@@ -3,7 +3,7 @@ import { VARIANTS, VariantKey, variantInfo, startFenFor, posFromFen, materialDif
 import { Game } from '../game';
 import { Board } from '../board';
 import { engine, botMove, MIN_ELO, MAX_ELO, whiteCp } from '../engine';
-import { Link, Msg } from '../net';
+import { Link, Msg, cleanCode } from '../net';
 import { go, setLeaveGuard } from '../main';
 import { setAnalysisInput } from './analysis';
 
@@ -107,7 +107,13 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
     if (mode === 'local') {
       body.append(h('label.check', null, h('input', { type: 'checkbox', checked: autoFlip, onchange: (e: any) => { autoFlip = e.target.checked; persist(); } }), 'Flip the board after every move'));
     }
-    if (mode === 'friend') body.append(h('p.muted', null, 'You get a link to send to your friend. The game starts as soon as they open it. Moves travel directly between your devices (peer-to-peer).'));
+    if (mode === 'friend') {
+      body.append(h('p.muted', null, 'You get a link to send to your friend (message, AirDrop, email…). The game starts as soon as they open it. Moves travel directly between your devices.'));
+      const codeIn = h('input', { placeholder: 'Got a code or link? Paste it here', 'aria-label': 'Game code', autocapitalize: 'off', autocomplete: 'off', spellcheck: false }) as HTMLInputElement;
+      const join = () => { const c = cleanCode(codeIn.value); if (c.length < 4) { toast('Enter the code your friend sent you'); return; } go('join/' + c); };
+      codeIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') join(); });
+      body.append(h('div.field', null, h('span.lbl', null, 'Join a friend'), h('div.row', null, codeIn, btn('Join', join))));
+    }
     if (mode === 'online') {
       body.append(h('label.field', null, h('span.lbl', null, 'Your name'), h('input', { value: settings.name, maxLength: 20, placeholder: 'Anonymous', oninput: (e: any) => { settings.name = e.target.value.slice(0, 20); saveSettings(); } })));
       body.append(h('p.muted', null, 'You are paired with the next player searching for the same variant and time control. Needs an internet connection.'));
@@ -126,7 +132,7 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
       startGame({ mode, variant, startFen, time, inc, myColor, elo, oppName: elo >= 3190 ? 'Stockfish 17' : `Stockfish · ${elo}` });
     } else if (mode === 'local') {
       startGame({ mode, variant, startFen, time, inc, myColor: 'white', oppName: 'Black', autoFlip });
-    } else if (mode === 'friend') hostFriend(variant, startFen, time, inc, myColor);
+    } else if (mode === 'friend') hostFriend({ variant, startFen, time, inc, myColor });
     else findOnline(variant, time, inc);
   }
 
@@ -134,25 +140,43 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
   root.append(h('section.setup.card', null, h('h1', null, 'New game'), tabs, body));
 }
 
-function hostFriend(variant: VariantKey, startFen: string, time: number, inc: number, myColor: Color) {
+const NO_RTC = 'This browser cannot make live peer-to-peer connections (WebRTC is turned off or missing). Try Safari, Chrome, Edge or Firefox, and turn off Lockdown Mode if it is on.';
+const noRtc = () => typeof (window as any).RTCPeerConnection === 'undefined';
+
+interface HostInfo { code?: string; variant: VariantKey; startFen: string; time: number; inc: number; myColor: Color }
+
+function hostFriend(info: HostInfo) {
   const link = new Link();
   const status = h('p.muted', null, 'Creating your game…');
   const linkBox = h('div.linkbox');
+  let started = false;
+  const cancel = () => {
+    link.destroy(); close();
+    try { sessionStorage.removeItem('rs.hosting'); } catch { /* */ }
+    if (location.hash.startsWith('#/join/')) go('play/friend');
+  };
   const close = modal(h('div', null, h('h2', null, 'Invite a friend'), status, linkBox,
-    h('div.row.end', null, btn('Cancel', () => { link.destroy(); close(); }))), { dismissable: false });
-  link.host().then(code => {
+    h('div.row.end', null, btn('Cancel', cancel))), { dismissable: false });
+  link.host(info.code).then(code => {
+    if (started) return;
     const url = location.href.split('#')[0] + '#/join/' + code;
-    status.textContent = 'Send this link to your friend. Waiting for them to join…';
-    linkBox.append(h('input.link-input', { value: url, readOnly: true, onclick: (e: any) => e.target.select() }),
-      h('div.row', null, btn(h('span', null, icon('copy'), 'Copy link'), () => copyText(url), 'primary'),
-        (navigator as any).share ? btn(h('span', null, icon('share'), 'Share'), () => (navigator as any).share({ title: 'Play chess with me on Rookstorm', url }).catch(() => {})) : null),
-      h('div.spinner-row', null, h('span.spinner'), 'Waiting…'));
-  }).catch(() => { status.textContent = 'Could not reach the connection server. Check your internet connection and try again.'; });
+    // Put the invite in the address bar too, so Safari's own Share / AirDrop button sends the right link.
+    try { sessionStorage.setItem('rs.hosting', JSON.stringify({ ...info, code })); } catch { /* */ }
+    history.replaceState(null, '', '#/join/' + code);
+    status.textContent = 'Send this link to your friend (message, AirDrop, anything). Keep this page open — the game starts when they open it.';
+    const share = (navigator as any).share ? btn(h('span', null, icon('share'), 'Share / AirDrop'), () => (navigator as any).share({ title: 'Play chess with me on Rookstorm', text: 'Play chess with me on Rookstorm:', url }).catch(() => {}), 'primary') : null;
+    linkBox.replaceChildren(h('input.link-input', { value: url, readOnly: true, onclick: (e: any) => e.target.select(), 'aria-label': 'Invite link' }),
+      h('div.row.wrap', null, share, btn(h('span', null, icon('copy'), 'Copy link'), () => copyText(url), share ? '' : 'primary')),
+      h('div.code-box', null, h('span.muted.small', null, 'Or they can enter this code under Play → Friend link:'), h('b.code', null, code)),
+      h('div.spinner-row', null, h('span.spinner'), 'Waiting for your friend…'));
+  }).catch(() => { status.textContent = noRtc() ? NO_RTC : 'Could not reach the connection server. Check your internet connection and try again.'; });
   link.onMsg = (m) => {
-    if (m.t === 'hello') {
-      link.send({ t: 'start', variant, fen: startFen, time, inc, hostColor: myColor, name: settings.name || 'Friend' });
+    if (m.t === 'hello' && !started) {
+      started = true;
+      try { sessionStorage.removeItem('rs.hosting'); } catch { /* */ }
+      link.send({ t: 'start', variant: info.variant, fen: info.startFen, time: info.time, inc: info.inc, hostColor: info.myColor, name: settings.name || 'Friend' });
       close();
-      startGame({ mode: 'friend', variant, startFen, time, inc, myColor, link, oppName: m.name || 'Friend', isHost: true });
+      startGame({ mode: 'friend', variant: info.variant, startFen: info.startFen, time: info.time, inc: info.inc, myColor: info.myColor, link, oppName: m.name || 'Friend', isHost: true });
     }
   };
 }
@@ -185,25 +209,42 @@ function findOnline(variant: VariantKey, time: number, inc: number) {
       };
       link.send({ t: 'hello', name: settings.name || 'Anonymous', v: 1 });
     }
-  }).catch((e) => { status.textContent = String(e?.message || 'Connection failed.'); });
+  }).catch((e) => { status.textContent = noRtc() ? NO_RTC : String(e?.message || 'Connection failed.'); });
 }
 
-export function joinPage(root: HTMLElement, code?: string) {
+export function joinPage(root: HTMLElement, raw?: string) {
+  const code = cleanCode(raw || '');
   if (!code) { go('play/friend'); return; }
+  // Is this the host's own tab (reloaded, or the link was opened on the same device)?
+  let hosting: HostInfo | null = null;
+  try { const h0 = JSON.parse(sessionStorage.getItem('rs.hosting') || 'null'); if (h0?.code === code) hosting = h0; } catch { /* */ }
+  if (hosting) {
+    root.append(h('section.card.setup.center', null, h('h1', null, 'Your game'), h('p.muted', null, 'Waiting for your friend to open the invite link.')));
+    hostFriend(hosting);
+    return;
+  }
   const status = h('p', null, 'Connecting to your friend…');
   root.append(h('section.card.setup.center', null, h('h1', null, 'Joining game'), h('div.spinner-row', null, h('span.spinner'), status),
-    h('a.btn', { href: '#/play' }, 'Back')));
+    h('p.muted.small', null, 'Game code: ', h('b', null, code)),
+    h('a.btn', { href: '#/play/friend' }, 'Back')));
   const link = new Link();
   let started = false;
+  let helloTimer: any = 0;
   link.onMsg = (m: Msg) => {
-    if (m.t === 'start') {
-      started = true;
+    if (m.t === 'start' && !started) {
+      started = true; clearInterval(helloTimer);
       startGame({ mode: 'friend', variant: m.variant as VariantKey, startFen: m.fen, time: m.time, inc: m.inc, myColor: m.hostColor === 'white' ? 'black' : 'white', link, oppName: m.name || 'Friend' });
-    } else if (m.t === 'busy') status.textContent = 'This game already has two players.';
+    } else if (m.t === 'busy') { status.textContent = 'This game already has two players. Ask your friend for a new link.'; clearInterval(helloTimer); }
   };
-  link.join(code).then(() => link.send({ t: 'hello', name: settings.name || 'Friend', v: 1 }))
-    .catch(() => { status.textContent = 'Could not connect. The link may have expired or your friend closed the page.'; });
-  return () => { if (!started) link.destroy(); };
+  link.join(code, (t) => { if (!started) status.textContent = t; }).then(() => {
+    status.textContent = 'Connected! Starting the game…';
+    const hello = () => link.send({ t: 'hello', name: settings.name || 'Friend', v: 1 });
+    hello();
+    helloTimer = setInterval(() => { if (!started) hello(); }, 3000);
+  }).catch((e) => {
+    status.textContent = noRtc() ? NO_RTC : e?.message && e.message !== 'timeout' ? e.message : 'Could not reach your friend. Ask them to keep the Rookstorm page open and send a new link.';
+  });
+  return () => { clearInterval(helloTimer); if (!started) link.destroy(); };
 }
 
 // ---------------- Clock ----------------
@@ -238,6 +279,8 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   let viewPly: number | null = null; // when browsing history
   let drawOffered = false;
   let rematchAsked = false;
+  let takebackPending = false;
+  let closeEndModal: (() => void) | null = null;
   const sessionId = Math.random();
   let gameToken = 0;
 
@@ -260,11 +303,17 @@ export function gamePage(root: HTMLElement): (() => void) | void {
 
   const side = h('aside.side.card', null,
     h('div.side-head', null, h('div', null, h('b', null, variantInfo(cfg.variant).name), h('span.muted', null, ' · ' + (cfg.time ? tcLabel(cfg.time, cfg.inc) : 'Unlimited') + ' · ' + modeName())), status),
-    moveList, nav, endBox, actions,
+    moveList, nav, endBox, actions, h('div.game-opts', null, premoveToggle()),
     net ? h('div.chat', null, chatLog, h('form.chat-form', { onsubmit: (e: Event) => { e.preventDefault(); const inp = (e.target as HTMLFormElement).querySelector('input')!; const text = inp.value.trim().slice(0, 140); if (!text) return; cfg.link!.send({ t: 'chat', text }); addChat('You', text); inp.value = ''; } },
       h('input', { placeholder: 'Say something nice…', maxLength: 140, 'aria-label': 'Chat message' }), btn('Send', () => {}, 'small'))) : null);
 
   root.append(h('div.game-layout', null, h('div.board-col', null, topStrip, board.el, botStrip), side));
+
+  function premoveToggle() {
+    if (cfg!.mode === 'local') return null;
+    const inp = h('input', { type: 'checkbox', checked: settings.premove, onchange: (e: any) => { settings.premove = e.target.checked; saveSettings(); if (!settings.premove) board.cancelPremove(); sync(); toast(settings.premove ? 'Premoves on' : 'Premoves off'); } });
+    return h('label.switch', { title: 'Plan your next move while your opponent is thinking' }, inp, h('span'), ' Premoves');
+  }
 
   function modeName() { return cfg!.mode === 'bot' ? 'vs computer' : cfg!.mode === 'local' ? 'same device' : cfg!.mode === 'friend' ? 'vs friend' : 'online'; }
   function addChat(who: string, text: string) { chatLog.append(h('div', null, h('b', null, who + ': '), text)); chatLog.scrollTop = chatLog.scrollHeight; }
@@ -274,12 +323,13 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     return c === cfg!.myColor ? (settings.name || 'You') : cfg!.oppName;
   }
 
-  const stripEls: Record<Color, { clock: HTMLElement; mat: HTMLElement; el: HTMLElement }> = {} as any;
+  const stripEls: Record<Color, { clock: HTMLElement; mat: HTMLElement; el: HTMLElement; name: HTMLElement }> = {} as any;
   function buildStrip(c: Color) {
     const clockEl = h('div.clock', { 'aria-label': c + ' clock' });
     const mat = h('div.mat.cg-wrap.pc');
-    const el = h('div.pinfo', null, h('span.cdot.' + c), h('div.pname', null, h('b', null, nameOf(c)), mat), clockEl);
-    stripEls[c] = { clock: clockEl, mat, el };
+    const name = h('b', null, nameOf(c));
+    const el = h('div.pinfo', null, h('span.cdot.' + c), h('div.pname', null, name, mat), clockEl);
+    stripEls[c] = { clock: clockEl, mat, el, name };
     return el;
   }
   const wStrip = buildStrip('white'), bStrip = buildStrip('black');
@@ -289,6 +339,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     botStrip.replaceChildren(top === 'white' ? bStrip : wStrip);
     const md = materialDiff(game.positions[viewPly ?? game.ply]);
     for (const c of ['white', 'black'] as Color[]) {
+      stripEls[c].name.textContent = nameOf(c);
       const roles = c === 'white' ? md.white : md.black;
       const adv = c === 'white' ? md.score : -md.score;
       stripEls[c].mat.replaceChildren(...roles.map(r => h('piece', { class: `${r} ${c === 'white' ? 'black' : 'white'}` })), adv > 0 ? h('span.adv', null, '+' + adv) : '');
@@ -363,6 +414,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     const idx = viewPly ?? game.ply;
     const pos = game.positions[idx];
     const last = idx > 0 ? moveSquares(game.positions[idx - 1], game.moves[idx - 1]) : null;
+    board.premoveColor = cfg!.mode !== 'local' && settings.premove && !game.result && viewPly === null ? cfg!.myColor : null;
     board.setPosition(pos, last, interactive());
     void animMove;
     renderStrips(); renderMoves(); renderStatus(); renderActions();
@@ -390,7 +442,8 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   function renderActions() {
     const a: HTMLElement[] = [];
     if (!game.result) {
-      if (cfg!.mode === 'bot' || cfg!.mode === 'local') a.push(btn(h('span', null, icon('undo'), 'Takeback'), takeback, '', 'Take back a move'));
+      if (cfg!.mode === 'bot' || cfg!.mode === 'local') a.push(btn(h('span', null, icon('undo'), 'Takeback'), takeback, game.ply ? '' : 'disabled', 'Take back a move'));
+      if (net) a.push(btn(h('span', null, icon('undo'), takebackPending ? 'Takeback sent…' : 'Takeback'), proposeTakeback, takebackPending || lastOwnTarget() < 0 ? 'disabled' : '', 'Ask your opponent to take back your last move'));
       if (cfg!.mode === 'bot' && game.pos.turn === cfg!.myColor && !botBusy) a.push(btn(h('span', null, icon('bulb'), 'Hint'), hint, '', 'Show a hint'));
       a.push(btn(h('span', null, icon('half'), drawOffered ? 'Draw offered' : 'Offer draw'), offerDraw, drawOffered ? 'disabled' : ''));
       a.push(btn(h('span', null, icon('flag'), 'Resign'), resign, 'danger'));
@@ -432,9 +485,66 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     botBusy = false;
     setLeaveGuard(null);
     sound.end();
+    board.cancelPremove();
     sync();
     renderEnd();
     saveHistory();
+    clearOffers();
+    showEndModal();
+  }
+
+  function showEndModal() {
+    closeEndModal?.();
+    const o = game.result!;
+    const youWon = cfg!.mode !== 'local' && o.winner === cfg!.myColor;
+    const youLost = cfg!.mode !== 'local' && !!o.winner && o.winner !== cfg!.myColor;
+    const title = cfg!.mode === 'local' ? (o.winner ? (o.winner === 'white' ? 'White' : 'Black') + ' wins' : 'Draw') : youWon ? 'You won!' : youLost ? 'You lost' : 'Draw';
+    const close = modal(h('div.end-modal', { class: youWon ? 'win' : youLost ? 'loss' : 'draw' },
+      h('div.end-score', null, o.winner === 'white' ? '1–0' : o.winner === 'black' ? '0–1' : '½–½'),
+      h('h2', null, title), h('p.muted', null, o.reason[0].toUpperCase() + o.reason.slice(1)),
+      h('div.end-actions', null,
+        variantInfo(cfg!.variant).bot && game.ply ? btn(h('span', null, icon('chart'), 'Game review'), () => { closeEndModal?.(); review(); }, 'primary') : null,
+        btn(h('span', null, icon('retry'), net ? 'Rematch' : 'Play again'), () => { closeEndModal?.(); rematch(); }),
+        h('a.btn', { href: '#/play', onclick: () => closeEndModal?.() }, 'New game'),
+        btn('View board', () => closeEndModal?.(), 'ghost'))), { onClose: () => { closeEndModal = null; } });
+    closeEndModal = () => { closeEndModal = null; close(); };
+  }
+
+  // ---- floating offer banners (visible on every screen size) ----
+  function offerBar(kind: string, text: string, buttons: HTMLElement[]) {
+    let wrap = document.getElementById('offers');
+    if (!wrap) { wrap = h('div', { id: 'offers' }); document.body.appendChild(wrap); }
+    wrap.querySelectorAll(`[data-kind="${kind}"]`).forEach(e => e.remove());
+    const el = h('div.offer', { 'data-kind': kind, role: 'alert' }, h('span', null, text), h('div.offer-btns', null, buttons));
+    wrap.appendChild(el);
+    sound.low();
+    return el;
+  }
+  function clearOffers(kind?: string) { document.querySelectorAll(kind ? `#offers [data-kind="${kind}"]` : '#offers .offer').forEach(e => e.remove()); }
+
+  function lastOwnTarget(): number {
+    for (let i = game.ply - 1; i >= 0; i--) if (game.positions[i].turn === cfg!.myColor) return i;
+    return -1;
+  }
+  function proposeTakeback() {
+    const target = lastOwnTarget();
+    if (game.result || takebackPending || target < 0) return;
+    takebackPending = true;
+    cfg!.link!.send({ t: 'takeback-offer', ply: target });
+    toast('Takeback request sent');
+    renderActions();
+  }
+  function applyTakeback(target: number) {
+    takebackPending = false;
+    if (game.result || target < 0 || target >= game.ply) { renderActions(); return; }
+    game.undo(game.ply - target);
+    viewPly = null; drawOffered = false;
+    board.cancelPremove();
+    clock.stop();
+    if (game.ply >= 1) clock.start(game.pos.turn);
+    clearOffers('takeback');
+    sync();
+    toast('Move taken back');
   }
 
   function saveHistory() {
@@ -493,14 +603,21 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     }
     const mover = pos.turn;
     game.play(m);
-    board.showMove(pos, m, game.pos, false);
+    board.showMove(pos, m, game.pos, interactive());
     afterMove(mover);
     sync();
+    tryPremove();
+  }
+
+  function tryPremove() {
+    if (!board.premoveColor || !interactive()) return;
+    setTimeout(() => { if (alive && interactive()) board.playPremove(); }, 30);
   }
 
   function takeback() {
     if (game.result || !game.ply) return;
     gameToken++; engine.stop(); botBusy = false;
+    board.cancelPremove();
     if (cfg!.mode === 'bot') {
       const n = game.pos.turn === cfg!.myColor ? 2 : 1;
       if (game.ply < n) { game.undo(game.ply); } else game.undo(n);
@@ -553,7 +670,8 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     game = new Game(cfg!.variant, cfg!.startFen);
     clock = new Clock(cfg!.time * 60000, cfg!.inc * 1000);
     lowWarned = { white: false, black: false };
-    viewPly = null; drawOffered = false; rematchAsked = false; botBusy = false;
+    viewPly = null; drawOffered = false; rematchAsked = false; botBusy = false; takebackPending = false;
+    closeEndModal?.(); clearOffers(); board.cancelPremove();
     board.movableColor = cfg!.mode === 'local' ? 'both' : cfg!.myColor;
     board.setOrientation(cfg!.mode === 'local' ? 'white' : cfg!.myColor);
     board.arrows([]);
@@ -590,16 +708,34 @@ export function gamePage(root: HTMLElement): (() => void) | void {
           else playSoundOnly();
           afterMove(mover, m.clock);
           sync();
+          tryPremove();
           break;
         }
+        case 'resume': {
+          const theirs = Array.isArray(m.ucis) ? m.ucis : [];
+          if (theirs.length > game.ply && theirs.slice(0, game.ply).join(' ') === game.ucis.join(' ')) {
+            for (const u of theirs.slice(game.ply)) { const mover = game.pos.turn; if (!game.playUci(u)) break; afterMove(mover); }
+            sync();
+          }
+          if (!m.reply) link.send({ t: 'resume', ucis: game.ucis.slice(), reply: true });
+          toast('Reconnected');
+          break;
+        }
+        case 'takeback-offer':
+          if (game.result || m.ply < 0 || m.ply >= game.ply) return;
+          offerBar('takeback', `${cfg.oppName} asks to take back a move.`, [
+            btn('Accept', () => { link.send({ t: 'takeback-accept', ply: m.ply }); applyTakeback(m.ply); }, 'primary small'),
+            btn('Decline', () => { link.send({ t: 'takeback-decline' }); clearOffers('takeback'); }, 'small')]);
+          break;
+        case 'takeback-accept': if (takebackPending) applyTakeback(m.ply); break;
+        case 'takeback-decline': takebackPending = false; toast('Takeback declined'); renderActions(); break;
         case 'resign': finish({ winner: cfg.myColor, reason: nameOf(cfg.myColor === 'white' ? 'black' : 'white') + ' resigned' }); break;
         case 'flag': if (!game.result) { clock.t[m.color] = 0; finish({ winner: m.color === 'white' ? 'black' : 'white', reason: 'time out' }); } break;
         case 'draw-offer':
           if (game.result) return;
-          { const box = h('div.offer', null, `${cfg.oppName} offers a draw.`,
-            btn('Accept', () => { link.send({ t: 'draw-accept' }); finish({ reason: 'agreement' }); box.remove(); }, 'primary small'),
-            btn('Decline', () => { link.send({ t: 'draw-decline' }); box.remove(); }, 'small'));
-          endBox.before(box); }
+          offerBar('draw', `${cfg.oppName} offers a draw.`, [
+            btn('Accept', () => { link.send({ t: 'draw-accept' }); clearOffers('draw'); finish({ reason: 'agreement' }); }, 'primary small'),
+            btn('Decline', () => { link.send({ t: 'draw-decline' }); clearOffers('draw'); }, 'small')]);
           break;
         case 'draw-accept': if (drawOffered) finish({ reason: 'agreement' }); break;
         case 'draw-decline': drawOffered = false; toast('Draw declined'); renderActions(); break;
@@ -608,16 +744,26 @@ export function gamePage(root: HTMLElement): (() => void) | void {
           if (!game.result) return;
           if (rematchAsked) { /* both asked */ doRematch(); link.send({ t: 'rematch-accept' }); }
           else {
-            const box = h('div.offer', null, `${cfg.oppName} wants a rematch.`,
-              btn('Accept', () => { link.send({ t: 'rematch-accept' }); box.remove(); doRematch(); }, 'primary small'));
-            endBox.before(box);
+            offerBar('rematch', `${cfg.oppName} wants a rematch.`, [
+              btn('Accept', () => { link.send({ t: 'rematch-accept' }); clearOffers('rematch'); doRematch(); }, 'primary small'),
+              btn('No thanks', () => clearOffers('rematch'), 'small')]);
           }
           break;
         case 'rematch-accept': if (game.result) doRematch(); break;
         case 'leave': if (!game.result) { toast(`${cfg.oppName} left the game.`); finish({ winner: cfg.myColor, reason: 'opponent left' }); } else toast(`${cfg.oppName} left.`); break;
       }
     };
-    link.onClose = () => { if (alive && !game.result) { toast('Connection lost.'); finish({ winner: cfg.myColor, reason: 'opponent disconnected' }); } };
+    link.onClose = () => {
+      if (!alive || game.result) return;
+      if (cfg.mode === 'friend') {
+        toast('Connection lost — reconnecting…');
+        // The guest dials the host again; the host simply waits for the new connection.
+        if (!cfg.isHost) link.rejoin().then(() => link.send({ t: 'resume', ucis: game.ucis.slice() })).catch(() => {});
+        return; // the heartbeat ends the game if the friend never comes back
+      }
+      toast('Connection lost.');
+      finish({ winner: cfg.myColor, reason: 'opponent disconnected' });
+    };
     // Heartbeat: detect a silently closed tab or dropped network.
     const inner = link.onMsg;
     link.onMsg = (m: Msg) => { lastSeen = Date.now(); if (m.t !== 'ping') inner(m); };
@@ -637,7 +783,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     const newColor: Color = cfg!.myColor === 'white' ? 'black' : 'white';
     const fen = cfg!.variant === 'chess960' ? fixed960(rematchCount) : cfg!.startFen;
     resetGame({ myColor: newColor, startFen: fen });
-    document.querySelectorAll('.offer').forEach(e => e.remove());
+    clearOffers();
   }
   function fixed960(n: number) {
     // Both peers must agree on the same 960 position without extra messages: derive from the original fen + count.
@@ -667,6 +813,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     engine.stop();
     document.removeEventListener('keydown', keys);
     setLeaveGuard(null);
+    clearOffers(); closeEndModal?.();
     if (net) { clearInterval(heartbeat); window.removeEventListener('pagehide', onHide); cfg.link!.destroy(); }
     board.destroy();
   };

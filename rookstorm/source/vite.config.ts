@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [VitePWA({
     registerType: 'autoUpdate',
     injectRegister: 'auto',
-    includeAssets: ['icon.svg', 'engine/*', 'data/**/*'],
+    includeAssets: ['icon.svg'],
     manifest: {
       name: 'Rookstorm Chess', short_name: 'Rookstorm',
       description: 'Play chess vs Stockfish at any Elo, analyze games, learn openings and solve puzzles. Works offline.',
@@ -15,6 +15,8 @@ export default defineConfig({
     },
     workbox: {
       globPatterns: ['**/*.{js,css,html,svg,wasm,json,txt}'],
+      globIgnores: ['**/engine/sf-asm.js'],
+      runtimeCaching: [{ urlPattern: /engine\/sf-asm\.js$/, handler: 'CacheFirst', options: { cacheName: 'rs-engine-fallback' } }],
       maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
       navigateFallback: 'index.html',
       cleanupOutdatedCaches: true

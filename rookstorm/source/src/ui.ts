@@ -31,9 +31,9 @@ export const $ = (sel: string, root: ParentNode = document) => root.querySelecto
 // ---------- Settings ----------
 export interface Settings {
   theme: 'system' | 'light' | 'dark'; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
-  name: string; lastElo: number; animation: boolean;
+  name: string; lastElo: number; animation: boolean; premove: boolean;
 }
-const DEFAULTS: Settings = { theme: 'system', board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true };
+const DEFAULTS: Settings = { theme: 'system', board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true, premove: true };
 
 export function load<T>(key: string, def: T): T {
   try { const v = localStorage.getItem('rs.' + key); return v ? { ...def as any, ...JSON.parse(v) } : def; } catch { return def; }

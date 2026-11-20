@@ -12,9 +12,24 @@ export type Msg =
   | { t: 'move'; uci: string; clock?: number; ply: number }
   | { t: 'resign' } | { t: 'draw-offer' } | { t: 'draw-accept' } | { t: 'draw-decline' }
   | { t: 'flag'; color: 'white' | 'black' } | { t: 'rematch' } | { t: 'rematch-accept' }
+  | { t: 'takeback-offer'; ply: number } | { t: 'takeback-accept'; ply: number } | { t: 'takeback-decline' }
+  | { t: 'resume'; ucis: string[]; reply?: boolean }
   | { t: 'chat'; text: string } | { t: 'busy' } | { t: 'ping' } | { t: 'leave' };
 
 const PREFIX = 'rookstorm-v1-';
+/** Several STUN servers plus PeerJS's TURN relay, so phones on mobile data / strict Wi-Fi can still connect. */
+const PEER_OPTS = {
+  debug: 0,
+  config: {
+    iceServers: [
+      { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
+      { urls: 'stun:stun.cloudflare.com:3478' },
+      { urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478'], username: 'peerjs', credential: 'peerjsp' },
+    ],
+  },
+};
+const CONN_OPTS = { reliable: true, serialization: 'json' as const };
+export const cleanCode = (c: string) => c.trim().toLowerCase().replace(/^.*#\/join\//, '').replace(/[^a-z0-9]/g, '').slice(0, 16);
 const rid = () => Math.random().toString(36).slice(2, 10);
 
 export class Link {
@@ -28,8 +43,8 @@ export class Link {
   private bind(conn: DataConnection) {
     this.conn = conn;
     conn.on('data', (d: any) => { if (d && typeof d === 'object' && typeof d.t === 'string') this.onMsg(d as Msg); });
-    conn.on('close', () => { if (!this.closed) this.onClose(); });
-    conn.on('error', () => { if (!this.closed) this.onClose(); });
+    conn.on('close', () => { if (!this.closed && this.conn === conn) this.onClose(); });
+    conn.on('error', () => { if (!this.closed && this.conn === conn) this.onClose(); });
     if (conn.open) this.onOpen(); else conn.on('open', () => this.onOpen());
   }
 
@@ -37,39 +52,100 @@ export class Link {
 
   destroy() {
     this.closed = true;
+    this.cleanupFns.forEach(f => f()); this.cleanupFns = [];
     try { this.send({ t: 'leave' }); } catch { /* */ }
     setTimeout(() => { try { this.conn?.close(); this.peer?.destroy(); } catch { /* */ } }, 50);
   }
 
-  /** Host a private game. Resolves with the shareable code once registered. */
-  host(): Promise<string> {
+  /** Keep the signalling connection alive: iOS/Android drop it when the browser goes to the background. */
+  private keepAlive(peer: Peer) {
+    const revive = () => { if (!this.closed && !peer.destroyed && peer.disconnected) { try { peer.reconnect(); } catch { /* retry later */ } } };
+    peer.on('disconnected', () => setTimeout(revive, 800));
+    const onVis = () => { if (document.visibilityState === 'visible') revive(); };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('online', revive);
+    window.addEventListener('focus', revive);
+    const iv = setInterval(revive, 5000);
+    const prevDestroy = this.cleanupFns;
+    prevDestroy.push(() => { document.removeEventListener('visibilitychange', onVis); window.removeEventListener('online', revive); window.removeEventListener('focus', revive); clearInterval(iv); });
+  }
+  private cleanupFns: (() => void)[] = [];
+  private target = '';
+
+  /** Host a private game. Resolves with the shareable code once registered. Pass a code to re-host after a reload. */
+  host(existing?: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const code = rid();
-      const peer = new Peer(PREFIX + 'g-' + code);
+      const code = existing || rid();
+      let opened = false;
+      const peer = new Peer(PREFIX + 'g-' + code, PEER_OPTS);
       this.peer = peer;
-      peer.on('open', () => resolve(code));
-      peer.on('error', (e: any) => { if (!this.conn) reject(e); });
+      this.keepAlive(peer);
+      peer.on('open', () => { if (!opened) { opened = true; resolve(code); } });
+      peer.on('error', (e: any) => {
+        if (opened) return; // later errors (network blips) are handled by keepAlive
+        if (e?.type === 'unavailable-id' && existing) { setTimeout(() => { try { peer.reconnect(); } catch { /* */ } }, 2500); return; }
+        reject(e);
+      });
       peer.on('connection', (c) => {
-        if (this.conn) { c.on('open', () => { c.send({ t: 'busy' }); setTimeout(() => c.close(), 200); }); return; }
+        // Accept a reconnecting friend if the previous channel is gone.
+        if (this.conn && this.conn.open) { c.on('open', () => { c.send({ t: 'busy' }); setTimeout(() => c.close(), 300); }); return; }
         this.bind(c);
       });
     });
   }
 
-  /** Join a friend's game by code. */
-  join(code: string): Promise<void> {
+  /** Join a friend's game by code. Keeps retrying (the host's device may be busy sharing the link). */
+  join(code: string, onStatus: (s: string) => void = () => {}, maxMs = 120000): Promise<void> {
+    this.target = PREFIX + 'g-' + code;
     return new Promise((resolve, reject) => {
-      const peer = new Peer();
+      const peer = new Peer(PEER_OPTS);
       this.peer = peer;
+      this.keepAlive(peer);
+      const t0 = Date.now();
       let done = false;
-      const t = setTimeout(() => { if (!done) { done = true; reject(new Error('timeout')); } }, 20000);
-      peer.on('open', () => {
-        const c = peer.connect(PREFIX + 'g-' + code, { reliable: true });
-        const prevOpen = this.onOpen;
-        this.onOpen = () => { if (!done) { done = true; clearTimeout(t); resolve(); } prevOpen(); this.onOpen = prevOpen; };
-        this.bind(c);
+      const fail = (msg: string) => { if (!done) { done = true; reject(new Error(msg)); } };
+      const attempt = () => {
+        if (done || this.closed) return;
+        if (Date.now() - t0 > maxMs) { fail('timeout'); return; }
+        if (peer.disconnected) { setTimeout(attempt, 1500); return; }
+        const c = peer.connect(this.target, CONN_OPTS);
+        let ok = false;
+        const to = setTimeout(() => { if (!ok) { try { c.close(); } catch { /* */ } onStatus('Waiting for your friend’s device…'); setTimeout(attempt, 1000); } }, 9000);
+        c.on('open', () => {
+          ok = true; clearTimeout(to);
+          if (done) return;
+          done = true;
+          this.bind(c);
+          resolve();
+        });
+      };
+      peer.on('open', () => attempt());
+      peer.on('error', (e: any) => {
+        if (done) return;
+        if (e?.type === 'peer-unavailable') { onStatus('Waiting for your friend’s device… (keep their Rookstorm tab open)'); setTimeout(attempt, 2500); }
+        else if (['network', 'server-error', 'socket-error', 'socket-closed', 'disconnected'].includes(e?.type)) { onStatus('Connection problem, retrying…'); setTimeout(attempt, 3000); }
+        else if (e?.type === 'browser-incompatible') fail('This browser does not support peer-to-peer connections.');
+        else { setTimeout(attempt, 3000); }
       });
-      peer.on('error', (e: any) => { if (!done) { done = true; clearTimeout(t); reject(e); } });
+    });
+  }
+
+  /** Guest: reconnect to the same host after the channel dropped. */
+  rejoin(maxMs = 40000): Promise<void> {
+    const peer = this.peer;
+    if (!peer || !this.target) return Promise.reject(new Error('no target'));
+    return new Promise((resolve, reject) => {
+      const t0 = Date.now();
+      const attempt = () => {
+        if (this.closed) return;
+        if (Date.now() - t0 > maxMs) { reject(new Error('timeout')); return; }
+        if (peer.disconnected) { try { peer.reconnect(); } catch { /* */ } setTimeout(attempt, 1500); return; }
+        const c = peer.connect(this.target, CONN_OPTS);
+        let ok = false;
+        const to = setTimeout(() => { if (!ok) { try { c.close(); } catch { /* */ } attempt(); } }, 6000);
+        c.on('open', () => { ok = true; clearTimeout(to); this.bind(c); resolve(); });
+      };
+      attempt();
     });
   }
 
@@ -82,7 +158,7 @@ export class Link {
         if (this.closed || finished) return;
         if (n > 12) { reject(new Error('Could not reach the matchmaking server.')); return; }
         onStatus('Looking for an opponent…');
-        const p = new Peer(lobby);
+        const p = new Peer(lobby, PEER_OPTS);
         this.peer = p;
         p.on('open', () => {
           onStatus('Waiting for an opponent to join…');
@@ -99,10 +175,10 @@ export class Link {
           if (finished) return;
           if (e?.type === 'unavailable-id') {
             p.destroy();
-            const g = new Peer();
+            const g = new Peer(PEER_OPTS);
             this.peer = g;
             g.on('open', () => {
-              const c = g.connect(lobby, { reliable: true });
+              const c = g.connect(lobby, CONN_OPTS);
               let opened = false;
               const to = setTimeout(() => { if (!opened && !finished) { this.conn = null; try { g.destroy(); } catch { /* */ } attempt(n + 1); } }, 8000);
               c.on('open', () => { opened = true; clearTimeout(to); });

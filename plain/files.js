@@ -3,8 +3,8 @@ window.PLAIN_FILES = {
  "rookstorm": {
   "files": [
    "rookstorm/README.md",
-   "rookstorm/assets/index-C-A6hiz4.css",
-   "rookstorm/assets/index-Cyycb4tb.js",
+   "rookstorm/assets/index-CzhNzrBb.css",
+   "rookstorm/assets/index-RqmWqfjg.js",
    "rookstorm/data/openings.json",
    "rookstorm/data/puzzles/index.json",
    "rookstorm/data/puzzles/r1000.json",
@@ -35,6 +35,7 @@ window.PLAIN_FILES = {
    "rookstorm/data/puzzles/r800.json",
    "rookstorm/data/puzzles/r900.json",
    "rookstorm/engine/COPYING.txt",
+   "rookstorm/engine/sf-asm.js",
    "rookstorm/engine/sf.js",
    "rookstorm/engine/sf.wasm",
    "rookstorm/icon.svg",
@@ -65,9 +66,9 @@ window.PLAIN_FILES = {
    "rookstorm/source/tsconfig.json",
    "rookstorm/source/vite.config.ts",
    "rookstorm/sw.js",
-   "rookstorm/workbox-9c191d2f.js"
+   "rookstorm/workbox-ebea30cf.js"
   ],
-  "bytes": 11707831
+  "bytes": 22211720
  },
  "bio-genetik": {
   "files": [
@@ -88,7 +89,7 @@ window.PLAIN_FILES = {
    "bio-genetik/styles.css",
    "bio-genetik/tests.mjs"
   ],
-  "bytes": 553890
+  "bytes": 557665
  },
  "fuel-check": {
   "files": [
@@ -103,7 +104,7 @@ window.PLAIN_FILES = {
    "fuel-check/local-engine.js",
    "fuel-check/tools/build-stores.mjs"
   ],
-  "bytes": 709955
+  "bytes": 713785
  },
  "plain-wiki": {
   "files": [
@@ -112,7 +113,7 @@ window.PLAIN_FILES = {
    "plain-wiki/vendor/marked-LICENSE.md",
    "plain-wiki/vendor/marked.min.js"
   ],
-  "bytes": 142824
+  "bytes": 143388
  },
  "mathe-klar": {
   "files": [
@@ -126,7 +127,7 @@ window.PLAIN_FILES = {
    "mathe-klar/tests.mjs",
    "mathe-klar/visuals.js"
   ],
-  "bytes": 209808
+  "bytes": 213701
  },
  "lingua-local": {
   "files": [
@@ -140,7 +141,7 @@ window.PLAIN_FILES = {
    "lingua-local/sw.js",
    "lingua-local/upstream-swadesh.json"
   ],
-  "bytes": 253042
+  "bytes": 263004
  },
  "der-die-das": {
   "files": [
@@ -162,7 +163,7 @@ window.PLAIN_FILES = {
    "der-die-das/sw.js",
    "der-die-das/template.html"
   ],
-  "bytes": 292987
+  "bytes": 293969
  },
  "fluent-path": {
   "files": [
@@ -193,7 +194,7 @@ window.PLAIN_FILES = {
    "fluent-path/tests.mjs",
    "fluent-path/tools/build_tatoeba.py"
   ],
-  "bytes": 1188641
+  "bytes": 1195500
  },
  "youtube-to-pdf": {
   "files": [
@@ -216,14 +217,14 @@ window.PLAIN_FILES = {
    "youtube-to-pdf/server.mjs",
    "youtube-to-pdf/test/youtube.test.mjs"
   ],
-  "bytes": 51722
+  "bytes": 52669
  },
  "molecule-lab": {
   "files": [
    "molecule-lab/README.md",
    "molecule-lab/index.html"
   ],
-  "bytes": 3283098
+  "bytes": 3284690
  },
  "physica": {
   "files": [
@@ -253,7 +254,7 @@ window.PLAIN_FILES = {
    "physica/js/thumbs.js",
    "physica/manifest.webmanifest"
   ],
-  "bytes": 797396
+  "bytes": 804636
  },
  "verity": {
   "files": [
@@ -272,7 +273,7 @@ window.PLAIN_FILES = {
    "verity/verity-local.js",
    "verity/worker.mjs"
   ],
-  "bytes": 111909
+  "bytes": 112713
  },
  "citypulse": {
   "files": [
@@ -281,6 +282,6 @@ window.PLAIN_FILES = {
    "citypulse/index.html",
    "citypulse/track.html"
   ],
-  "bytes": 22437
+  "bytes": 22609
  }
 };
