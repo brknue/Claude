@@ -13,7 +13,7 @@
     { k: 'fried egg', n: [13.6, 0.8, 14.8, 0, 4.3, 0, 0], por: 100, pc: 50, a: 'fried egg,fried eggs,scrambled egg,scrambled eggs,omelette,omelet,spiegelei,spiegeleier,ruhrei,omelett,sahanda yumurta,omlet,menemen,huevo frito,huevos revueltos,tortilla francesa,oeuf au plat,oeufs brouilles,uova strapazzate,frittata,ovo frito,ovos mexidos,omelete,roerei,jajecznica,омлет,яичница' },
     { k: 'milk', n: [3.3, 4.8, 3.4, 0, 2.1, 0, 0], por: 250, a: 'milk,whole milk,milch,vollmilch,sut,leche,lait,latte intero,leite,melk,mleko,молоко' },
     { k: 'low-fat milk', n: [3.4, 5, 1.5, 0, 1, 0, 0], por: 250, a: 'skim milk,low fat milk,semi skimmed milk,fettarme milch,magermilch,yagsiz sut,leche desnatada,lait ecreme,latte scremato,leite desnatado,magere melk,mleko odtluszczone' },
-    { k: 'plant milk', n: [1, 3, 1.5, 0.3, 0.2, 2, 0], por: 250, a: 'oat milk,soy milk,almond milk,hafermilch,sojamilch,mandelmilch,yulaf sutu,soya sutu,badem sutu,leche de avena,leche de soja,lait d avoine,lait de soja' },
+    { k: 'plant milk', n: [1, 3, 1.5, 0.3, 0.2, 2, 0], por: 250, a: 'oat milk,soy milk,almond milk,hafermilch,sojamilch,mandelmilch,haferdrink,sojadrink,mandeldrink,oat drink,barista,yulaf sutu,soya sutu,badem sutu,leche de avena,leche de soja,lait d avoine,lait de soja' },
     { k: 'yogurt', n: [3.5, 4.7, 3.3, 0, 2.1, 0, 0], por: 150, a: 'yogurt,yoghurt,joghurt,yogurt naturale,yogur,yaourt,iogurte,jogurt,йогурт,yogurt,yoğurt,yogurt plain' },
     { k: 'ayran', n: [1.7, 2, 1.7, 0, 1.1, 0, 0], por: 250, a: 'ayran,kefir,buttermilk,buttermilch,dugh,lassi' },
     { k: 'greek yogurt', n: [9, 4, 5, 0, 3.2, 0, 0], por: 170, a: 'greek yogurt,greek yoghurt,griechischer joghurt,suzme yogurt,yogur griego,yaourt grec,yogurt greco,iogurte grego' },

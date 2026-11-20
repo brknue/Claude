@@ -122,7 +122,12 @@
     return STORE;
   }
   // German compounds: "proteinpudding" ~ "protein pudding", "vollkorntoast" ~ "toast"
-  function hitC(x, hw) { return hw.some(w => same(x, w) || (x.length >= 8 && w.length >= 4 && (x.startsWith(w) || x.endsWith(w))) || (w.length >= 8 && x.length >= 5 && (w.startsWith(x) || w.endsWith(x)))); }
+  // a typed compound counts only if BOTH halves are in the product name ("haferdrink" needs "hafer" and "drink", not just "drink")
+  function hitC(x, hw) {
+    if (hw.some(w => same(x, w) || (w.length >= 8 && x.length >= 5 && (w.startsWith(x) || w.endsWith(x))))) return true;
+    if (x.length < 8) return false;
+    return hw.some(a => a.length >= 3 && x.startsWith(a) && x.length - a.length >= 3 && hw.some(b => b !== a && (b === x.slice(a.length) || same(b, x.slice(a.length)))));
+  }
   async function storeMatch(words, mustWords, kindWords) {
     const db = await storeDB(); if (!db) return null;
     const qt = norm(words).split(' ').filter(x => x.length > 1).slice(0, 8);
