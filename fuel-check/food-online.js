@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   const BASE = 'https://world.openfoodfacts.org';
-  const FIELDS = 'code,product_name,product_name_en,generic_name,brands,nutriments,serving_quantity,product_quantity';
+  const FIELDS = 'code,product_name,product_name_en,generic_name,brands,nutriments,serving_quantity,product_quantity,countries_tags';
   const PER_RUN = 5, PER_MIN = 8, TTL = 30 * 864e5;
   let runCount = 0, lastSearch = 0;
   const ls = { get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
@@ -82,7 +82,8 @@
       const kindHit = kindsUse.length && wordsHit(kindsUse, hay) > 0;
       if (kindsUse.length && !kindHit) continue;                     // a "Milka chocolate" must be a chocolate, not a Milka cake
       const score = Math.min(1, (qt.length ? wordsHit(qt, hay) / qt.length : 0) + (kindHit ? 0.5 : 0));
-      if (score >= 0.5) cands.push({ h, v, score, name: nameOf(h) });
+      const de = Array.isArray(h.countries_tags) && h.countries_tags.includes('en:germany') ? 0.1 : 0;   // prefer products sold in Germany
+      if (score >= 0.5) cands.push({ h, v, score: score + de, name: nameOf(h) });
     }
     let res = null;
     if (cands.length) {
@@ -102,7 +103,57 @@
     cacheSet(key, res);
     return res;
   }
+  /* ---------- German store products (built monthly from Open Food Facts by .github/workflows/fuel-stores.yml) ---------- */
+  let STORE = null;                       // null = not loaded yet, false = unavailable
+  async function storeDB() {
+    if (STORE !== null) return STORE;
+    try {
+      const r = await fetch('data/de-stores.json?v=' + (window.FC_DATA_V || '1'));
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json(), idx = new Map(), items = [], codes = new Map();
+      j.rows.forEach((x, i) => {
+        const it = { name: x[0], brand: x[1], stores: x[2], v: { p: x[3], c: x[4], f: x[5], fib: x[6], sat: x[7], sug: x[8], alc: x[9] }, serving: x[10] || null, pack: x[11] || null, code: x[12], rank: i };
+        it.hay = norm(it.name + ' ' + it.brand + ' ' + it.stores);
+        items.push(it); if (it.code) codes.set(String(it.code), it);
+        new Set(it.hay.split(' ')).forEach(w => { if (w.length < 3) return; for (const k of [w, w.slice(0, 5)]) { let a = idx.get(k); if (!a) idx.set(k, a = []); a.push(i); } });
+      });
+      STORE = { items, idx, codes, built: j.built };
+    } catch (e) { STORE = false; }
+    return STORE;
+  }
+  // German compounds: "proteinpudding" ~ "protein pudding", "vollkorntoast" ~ "toast"
+  function hitC(x, hw) { return hw.some(w => same(x, w) || (x.length >= 8 && w.length >= 4 && (x.startsWith(w) || x.endsWith(w))) || (w.length >= 8 && x.length >= 5 && (w.startsWith(x) || w.endsWith(x)))); }
+  async function storeMatch(words, mustWords, kindWords) {
+    const db = await storeDB(); if (!db) return null;
+    const qt = norm(words).split(' ').filter(x => x.length > 1).slice(0, 8);
+    if (!qt.length) return null;
+    const must = norm(mustWords || '').split(' ').filter(x => x.length > 1);
+    const kinds = (kindWords || []).map(norm).filter(k => k && !must.some(m => same(k, m) || m.startsWith(k)));
+    const cand = new Set();
+    qt.forEach(x => { for (const k of [x, x.slice(0, 5)]) (db.idx.get(k) || []).forEach(i => cand.add(i)); });
+    const scored = [];
+    for (const i of cand) {
+      const it = db.items[i], hw = it.hay.split(' ');
+      if (must.length && !must.every(m => hitC(m, hw))) continue;
+      if (kinds.length && !kinds.some(k => hitC(k, hw))) continue;
+      const nameW = norm(it.name + ' ' + it.brand).split(' ');
+      const hit = qt.filter(x => hitC(x, hw)).length, nameHit = qt.filter(x => hitC(x, nameW)).length;
+      if (!nameHit) continue;                              // the store name alone is not enough
+      const score = hit / qt.length;
+      if (score >= 0.75) scored.push({ it, score });
+    }
+    if (!scored.length) return null;
+    scored.sort((a, b) => b.score - a.score || a.it.rank - b.it.rank);
+    const top = scored.filter(x => x.score === scored[0].score).slice(0, 3), best = top[0].it;
+    const pick = k => median(top.map(x => x.it.v[k]));
+    return { name: best.name, brand: best.brand, url: best.code ? BASE + '/product/' + best.code : BASE, branded: true, n: top.length, store: best.stores,
+      per100: top.length === 1 ? best.v : { p: pick('p'), c: pick('c'), f: pick('f'), fib: pick('fib'), sat: pick('sat'), sug: pick('sug'), alc: pick('alc') },
+      serving: best.serving, pack: best.pack };
+  }
+
   async function barcode(code) {
+    const db = await storeDB();
+    if (db && db.codes.has(String(code))) { const it = db.codes.get(String(code)); return { name: it.name, brand: it.brand, url: BASE + '/product/' + code, per100: it.v, serving: it.serving, pack: it.pack, branded: true, n: 1 }; }
     const c = cacheGet('bc:' + code); if (c !== undefined) return c;
     const j = await getJSON(BASE + '/api/v2/product/' + encodeURIComponent(code) + '.json?fields=' + FIELDS);
     const h = j && j.product; let res = null;
@@ -127,7 +178,7 @@
     const { g, conf } = gramsFor(rec, hit, fallbackGrams);
     const it = FuelLocal.custom(rec.raw, g, hit.per100);
     it.confidence = conf;
-    it.amount = '🌐 ' + ((hit.brand && hit.brand.length <= 15 && !norm(hit.name).includes(norm(hit.brand)) ? hit.brand + ' ' : '') + (hit.name || '')).trim().slice(0, 48);
+    it.amount = (hit.store ? '🛒 ' + hit.store.split('/')[0] + ' · ' : '🌐 ') + ((hit.brand && hit.brand.length <= 15 && !norm(hit.name).includes(norm(hit.brand)) ? hit.brand + ' ' : '') + (hit.name || '')).trim().slice(0, 48);
     return it;
   }
 
@@ -140,7 +191,7 @@
     jobs.sort((a, b) => a[0] - b[0]);
     if (!jobs.length) return r;
     onStatus && onStatus(tr('ol_searching'));
-    const used = []; let busy = false, failed = false, fails = 0;
+    const used = [], usedStore = []; let busy = false, failed = false, fails = 0;
     for (const [kind, s] of jobs) {
       if (fails >= 2) break;
       try {
@@ -148,14 +199,16 @@
           const hit = await barcode(s.barcode);
           if (hit) { s.items = [makeItem(s, hit, s.items[0] && s.items[0].grams)]; s.unknown = false; used.push(s.raw); }
         } else if (kind === 1) {
-          const hit = await search(FuelLocal.cleanQuery(s.raw) || FuelLocal.foodWords(s.raw));
-          if (hit) { s.items = [makeItem(s, hit)]; s.unknown = false; used.push(s.raw); }
+          const q = FuelLocal.cleanQuery(s.raw) || FuelLocal.foodWords(s.raw);
+          const hit = (await storeMatch(q)) || await search(q);
+          if (hit) { s.items = [makeItem(s, hit)]; s.unknown = false; (hit.store ? usedStore : used).push(s.raw); }
         } else {
           let kinds = (s.keys || []).flatMap(k => FuelLocal.aliasesOf(k));
           // "Snickers", "Monster", "Red Bull" are themselves the food: don't also require a word like "chocolate"
           if (s.extra.split(' ').every(w => kinds.includes(w) || w === 'red' || w === 'bull')) kinds = [];
-          const hit = await search(s.extra + ' ' + (s.keys && s.keys[0] || ''), s.extra, kinds);
-          if (hit) { const old = s.items.reduce((t, x) => t + (x.grams || 0), 0); s.items = [makeItem(s, hit, old || null)]; used.push(s.raw); }
+          const local = FuelLocal.cleanQuery(s.raw) || FuelLocal.foodWords(s.raw);
+          const hit = (await storeMatch(local, s.extra, kinds)) || await search(s.extra + ' ' + (s.keys && s.keys[0] || ''), s.extra, kinds);
+          if (hit) { const old = s.items.reduce((t, x) => t + (x.grams || 0), 0); s.items = [makeItem(s, hit, old || null)]; (hit.store ? usedStore : used).push(s.raw); }
         }
       } catch (e) {
         if (e && e.message === 'budget') { busy = true; continue; }
@@ -164,13 +217,14 @@
       }
     }
     r.foods = segs.flatMap(s => s.items);
-    const found = new Set(used);
-    r.assumptions = r.assumptions.filter(a => !segs.some(s => found.has(s.raw) && a === tr('lf_a_unknown', { x: s.raw })));
+    const found2 = new Set(used.concat(usedStore));
+    r.assumptions = r.assumptions.filter(a => !segs.some(s => found2.has(s.raw) && a === tr('lf_a_unknown', { x: s.raw })));
+    if (usedStore.length) r.assumptions.push(tr('ol_store', { x: usedStore.join(', ') }));
     if (used.length) r.assumptions.push(tr('ol_used', { x: used.join(', ') }));
     if (busy && typeof navigator !== 'undefined' && navigator.onLine === false) { failed = true; busy = false; }
     if (failed) r.assumptions.push(tr('ol_fail'));
     else if (busy) r.assumptions.push(tr('ol_busy'));
     return r;
   }
-  window.FuelOnline = { search, barcode, improve };
+  window.FuelOnline = { search, barcode, improve, storeMatch, storeDB };
 })();
