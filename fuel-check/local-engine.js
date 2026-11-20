@@ -28,7 +28,7 @@
     { k: 'cream', n: [2.4, 3.2, 30, 0, 19, 0, 0], por: 30, a: 'cream,sahne,schlagsahne,krema,nata,creme fraiche,panna,smetana' },
     // bread, cereals
     { k: 'bread', n: [9, 47, 3.2, 2.7, 0.7, 4, 0], por: 60, sl: 30, pc: 30, a: 'bread,white bread,toast,toastbrot,weissbrot,brot,ekmek,beyaz ekmek,pan,pan blanco,pain,pane,pao,brood,chleb,хлеб,baguette,ciabatta' },
-    { k: 'wholegrain bread', n: [12, 38, 3.5, 7, 0.7, 3, 0], por: 64, sl: 32, pc: 32, a: 'wholegrain bread,whole wheat bread,brown bread,rye bread,vollkornbrot,roggenbrot,schwarzbrot,graubrot,tam bugday ekmegi,cavdar ekmegi,pan integral,pain complet,pane integrale,pao integral,volkorenbrood,chleb razowy,pumpernickel' },
+    { k: 'wholegrain bread', n: [12, 38, 3.5, 7, 0.7, 3, 0], por: 64, sl: 32, pc: 32, a: 'wholegrain bread,whole wheat bread,brown bread,rye bread,vollkornbrot,vollkorntoast,dinkelbrot,dinkeltoast,mehrkornbrot,roggenbrot,schwarzbrot,graubrot,tam bugday ekmegi,cavdar ekmegi,pan integral,pain complet,pane integrale,pao integral,volkorenbrood,chleb razowy,pumpernickel' },
     { k: 'bread roll', n: [9, 52, 2, 2.5, 0.4, 2, 0], por: 60, pc: 60, a: 'bread roll,roll,bun,brotchen,semmel,schrippe,weckle,kaiserbrotchen,pogaca,panecillo,petit pain,panino,pao frances,broodje,bulka' },
     { k: 'pretzel', n: [9, 55, 3, 2.4, 0.6, 1, 0], por: 90, pc: 90, a: 'pretzel,brezel,breze' },
     { k: 'croissant', n: [8.2, 43, 21, 2.6, 11.7, 11, 0], por: 60, pc: 60, a: 'croissant,cornetto,mini croissant,gipfeli,hornchen' },
@@ -285,10 +285,10 @@
     for (let i = 1; i <= a.length; i++) { const cur = [i]; for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; }
     return prev[b.length];
   }
-  const SINGLE = FIDX.filter(([al]) => !al.includes(' ') && al.length >= 4);
+  const SINGLE = FIDX.filter(([al]) => !al.includes(' ') && al.length >= 5);
   function fuzzy(seg) {
     let best = null;
-    seg.split(/[^\p{L}]+/u).filter(w => w.length >= 4).forEach((w, idx, arr) => {
+    seg.split(/[^\p{L}]+/u).filter(w => w.length >= 5 && !BRANDS.has(w)).forEach((w, idx, arr) => {
       for (const [al, item] of SINGLE) {
         const lim = al.length >= 8 ? 2 : 1, d = lev(w, al);
         if (d <= lim && (!best || d < best.d)) { const start = seg.indexOf(w); best = { item, start, end: start + w.length, d }; }
@@ -376,6 +376,7 @@
             if (unit === 'cup' && (item.k === 'oats' || item.k === 'muesli' || item.k === 'cereal')) per = 85;
           } else per = item.pc && /\d|^(a|an|ein|eine|einen|bir|un|una|une|uno)\b/.test(zone) ? item.pc : item.por;
           grams = qty * per;
+          if (item.por <= 20 && unit && unit !== 'tbsp' && unit !== 'tsp') grams = item.por;   // "2 slices of toast with butter": the slices are the toast
           if (!unit && !/\d/.test(zone) && parseNumber(words[0]) == null) conf = 'low';
           amount = (qty !== 1 || unit ? String(Math.round(qty * 100) / 100) : '') + (unit ? ' × ' + unit : '');
         }
