@@ -93,6 +93,7 @@ window.PLAIN_FILES = {
  "fuel-check": {
   "files": [
    "fuel-check/README.md",
+   "fuel-check/data/de-stores.json",
    "fuel-check/food-online.js",
    "fuel-check/i18n-local.js",
    "fuel-check/i18n-more.js",
@@ -102,7 +103,7 @@ window.PLAIN_FILES = {
    "fuel-check/local-engine.js",
    "fuel-check/tools/build-stores.mjs"
   ],
-  "bytes": 418309
+  "bytes": 709955
  },
  "plain-wiki": {
   "files": [
