@@ -207,7 +207,7 @@
           // "Snickers", "Monster", "Red Bull" are themselves the food: don't also require a word like "chocolate"
           if (s.extra.split(' ').every(w => kinds.includes(w) || w === 'red' || w === 'bull')) kinds = [];
           const local = FuelLocal.cleanQuery(s.raw) || FuelLocal.foodWords(s.raw);
-          const hit = (await storeMatch(local, s.extra, kinds)) || await search(s.extra + ' ' + (s.keys && s.keys[0] || ''), s.extra, kinds);
+          const hit = (await storeMatch(local, s.extra, kinds)) || await search(local, s.extra, kinds);
           if (hit) { const old = s.items.reduce((t, x) => t + (x.grams || 0), 0); s.items = [makeItem(s, hit, old || null)]; (hit.store ? usedStore : used).push(s.raw); }
         }
       } catch (e) {
