@@ -147,7 +147,7 @@
     const top = scored.filter(x => x.score === scored[0].score).slice(0, 3), best = top[0].it;
     const pick = k => median(top.map(x => x.it.v[k]));
     return { name: best.name, brand: best.brand, url: best.code ? BASE + '/product/' + best.code : BASE, branded: true, n: top.length, store: best.stores,
-      per100: top.length === 1 ? best.v : { p: pick('p'), c: pick('c'), f: pick('f'), fib: pick('fib'), sat: pick('sat'), sug: pick('sug'), alc: pick('alc') },
+      per100: best.v,      // one real product (the most scanned of the best matches), not an average of e.g. Coke and Coke Zero
       serving: best.serving, pack: best.pack };
   }
 
