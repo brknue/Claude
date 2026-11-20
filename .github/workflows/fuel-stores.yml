@@ -1,0 +1,26 @@
+name: Fuel Check — German store products
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 2 * *'      # monthly, 2nd day 03:17 UTC
+  push:
+    branches: [main]
+    paths: ['fuel-check/tools/build-stores.mjs', '.github/workflows/fuel-stores.yml']
+permissions:
+  contents: write
+concurrency: { group: fuel-stores, cancel-in-progress: false }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node fuel-check/tools/build-stores.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fuel-check/data/de-stores.json
+          git diff --cached --quiet || (git commit -m "Fuel Check: refresh German store products from Open Food Facts" && git pull --rebase && git push)
