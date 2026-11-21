@@ -170,7 +170,9 @@ export function puzzlesPage(root: HTMLElement) {
       if (state.mode === 'streak') { streakRun++; state.bestRun = Math.max(state.bestRun, streakRun); persist(); }
     }
     sync(); render();
-    if (state.autoNext && !failed) setTimeout(() => { if (alive && done) next(); }, 1100);
+    // solved after a mistake or hint: stay a few seconds so the player can see it, then move on
+    const p = pz;
+    if (state.autoNext && (!failed || state.mode === 'rated')) setTimeout(() => { if (alive && done && pz === p && !solutionShown) next(); }, failed ? 3000 : 1100);
   }
 
   function finishRating(win: boolean) {
