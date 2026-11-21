@@ -53,9 +53,22 @@ export function editorPage(root: HTMLElement, arg?: string) {
   const ROLES: Role[] = ['king', 'queen', 'rook', 'bishop', 'knight', 'pawn'];
   const palette = (color: Color) => h('div.palette.cg-wrap.pc', null, ROLES.map(r => {
     const b = h('button.pal', { type: 'button', 'aria-label': t(r), title: t('Click to select, or drag onto the board') }, h('piece', { class: `${r} ${color}` }));
-    b.addEventListener('click', () => { tool = typeof tool === 'object' && tool.role === r && tool.color === color ? 'hand' : { role: r, color }; renderTools(); });
+    const pick = () => { tool = typeof tool === 'object' && tool.role === r && tool.color === color ? 'hand' : { role: r, color }; renderTools(); };
+    // Touch: the board library cancels the tap's click when the touch ends, so a short tap is detected here.
+    let touchAt: { x: number; y: number } | null = null, lastTouch = 0;
+    b.addEventListener('click', () => { if (Date.now() - lastTouch > 700) pick(); });
     b.addEventListener('mousedown', (e) => { if (e.button === 0) cg.dragNewPiece({ role: r, color }, e as any, true); });
-    b.addEventListener('touchstart', (e) => { cg.dragNewPiece({ role: r, color }, e as any, true); }, { passive: false });
+    b.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 1) return;
+      e.preventDefault(); // no page scroll while dragging a new piece
+      touchAt = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      cg.dragNewPiece({ role: r, color }, e as any, true);
+    }, { passive: false });
+    b.addEventListener('touchend', (e) => {
+      const p = e.changedTouches[0];
+      if (touchAt && p && Math.hypot(p.clientX - touchAt.x, p.clientY - touchAt.y) < 12) { lastTouch = Date.now(); pick(); }
+      touchAt = null;
+    });
     return b;
   }));
   const palTop = palette('black'), palBot = palette('white');
@@ -181,7 +194,7 @@ export function editorPage(root: HTMLElement, arg?: string) {
   }
 
   root.append(h('div.game-layout.editor', null,
-    h('div.board-col', null, palTop, wrap, palBot, toolRow),
+    h('div.board-col', null, palTop, wrap, palBot, toolRow, h('p.muted.small.ed-hint', null, t('Click to select, or drag onto the board'))),
     h('aside.side.card', null, h('h2', null, t('Board editor')), h('p.muted.small', null, t('Drag pieces from the trays, or pick one and tap squares. Drag a piece off the board to remove it. Then let Stockfish find the best move.')), controls, err, result)));
   renderTools(); renderControls(); changed();
 
