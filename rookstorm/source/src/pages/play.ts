@@ -10,8 +10,9 @@ import { go, setLeaveGuard } from '../main';
 import { setAnalysisInput } from './analysis';
 import { me, ratingMode, ratingIn, rpc, niceError, refreshMe, accountsEnabled } from '../account';
 import { Recorder, FinishInfo } from '../record';
+import { partySetup } from './party';
 
-type Mode = 'bot' | 'local' | 'friend' | 'online';
+type Mode = 'bot' | 'local' | 'friend' | 'online' | 'party';
 
 export interface GameConfig {
   mode: Mode; variant: VariantKey; startFen: string; time: number; inc: number;
@@ -48,7 +49,7 @@ export const modeLabel = (m: string) => ({ bullet: 'Bullet', blitz: 'Blitz', rap
 // ---------------- Setup page ----------------
 export function playSetupPage(root: HTMLElement, arg?: string) {
   const saved = loadRaw('setup', { mode: 'bot', variant: 'standard', time: 10, inc: 0, color: 'random', autoFlip: true, rated: false }) as any;
-  let mode: Mode = (['bot', 'local', 'friend', 'online'].includes(arg || '') ? arg : saved.mode) as Mode;
+  let mode: Mode = (['bot', 'local', 'friend', 'online', 'party'].includes(arg || '') ? arg : saved.mode) as Mode;
   let variant: VariantKey = VARIANTS.some(v => v.key === saved.variant) ? saved.variant : 'standard';
   let time = saved.time, inc = saved.inc;
   let color: 'white' | 'black' | 'random' = saved.color;
@@ -58,7 +59,7 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
 
   const body = h('div.setup-body');
   const tabs = h('div.seg.mode-tabs', { role: 'tablist' });
-  const modes: [Mode, string, string][] = [['bot', 'Computer', 'cpu'], ['local', 'Same device', 'users'], ['friend', 'Friend link', 'link'], ['online', 'Online', 'globe']];
+  const modes: [Mode, string, string][] = [['bot', 'Computer', 'cpu'], ['local', 'Same device', 'users'], ['friend', 'Friend link', 'link'], ['online', 'Online', 'globe'], ['party', 'Party', 'party']];
 
   const persist = () => save('setup', { mode, variant, time, inc, color, autoFlip, rated });
 
@@ -68,6 +69,7 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
       onclick: () => { mode = m; persist(); render(); },
     }, icon(ic), h('span', null, t(label)))));
     body.replaceChildren();
+    if (mode === 'party') { partySetup(body); return; }
     const sf = variantInfo(variant).sf;
 
     if (mode === 'bot') {

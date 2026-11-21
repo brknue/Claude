@@ -7,6 +7,7 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 ## Features
 
 - **Bot at any Elo (100–3200).** Type a rating. From 1320 up, Stockfish's calibrated `UCI_Elo` limiter is used; below that, a human-like error model picks among Stockfish's top lines. 3200 is full strength. Standard and Chess960.
+- **Party variants (17 more):** 4-Player Chess, 4-Player Teams, 4-Player Kung Fu Chess, Kung Fu Chess (real time, three speeds), Fog of War, Duck Chess, Dice Chess, Double-Move, Progressive, Monster, Knightmate, Extinction, Capture the King, Pawn Wars, Torpedo, Mini Chess 5×5 and Los Alamos 6×6. Play them against the computer or at a **party table**: share one link, up to 4 friends open it and pick their seat, empty seats can be given to the computer. The host's browser runs the game (`source/src/arcade/`), so no server is needed.
 - **Time controls:** bullet, blitz, rapid, classical, unlimited or any custom minutes + increment.
 - **Variants:** Standard, Chess960, Crazyhouse, King of the Hill, Three-check, Atomic, Antichess, Horde, Racing Kings — all playable against the computer, a friend or online. Stockfish plays Standard and Chess960; the others use Rookstorm's own variant engine (`src/vsearch.ts`, approximate strength).
 - **Same device:** pass-and-play with automatic board flipping.

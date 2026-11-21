@@ -18,9 +18,9 @@ export type Msg =
   | { t: 'resume'; ucis: string[]; reply?: boolean }
   | { t: 'chat'; text: string } | { t: 'busy' } | { t: 'ping' } | { t: 'leave' };
 
-const PREFIX = 'rookstorm-v1-';
+export const PREFIX = 'rookstorm-v1-';
 /** Several STUN servers plus PeerJS's TURN relay, so phones on mobile data / strict Wi-Fi can still connect. */
-const PEER_OPTS = {
+export const PEER_OPTS = {
   debug: 0,
   config: {
     iceServers: [
@@ -30,7 +30,7 @@ const PEER_OPTS = {
     ],
   },
 };
-const CONN_OPTS = { reliable: true, serialization: 'json' as const };
+export const CONN_OPTS = { reliable: true, serialization: 'json' as const };
 export const cleanCode = (c: string) => c.trim().toLowerCase().replace(/^.*#\/join\//, '').replace(/[^a-z0-9]/g, '').slice(0, 16);
 const rid = () => Math.random().toString(36).slice(2, 10);
 

@@ -7,6 +7,7 @@ import { accountPage, profilePage, friendsPage, watchPage, legalPage } from './p
 import { me, initAccount, onAccount, onChallenges, accountsEnabled, rpc, niceError, Challenge } from './account';
 import { variantName } from './chess';
 import { tcLabel } from './pages/play';
+import { tablePage } from './pages/party';
 import { playSetupPage, gamePage, joinPage } from './pages/play';
 import { analysisPage } from './pages/analysis';
 import { editorPage } from './pages/editor';
@@ -20,6 +21,7 @@ type PageFn = (root: HTMLElement, arg?: string) => Cleanup;
 const routes: Record<string, PageFn> = {
   '': homePage, play: playSetupPage, game: gamePage, join: joinPage,
   analysis: analysisPage, editor: editorPage, openings: openingsPage, puzzles: puzzlesPage,
+  table: tablePage,
   account: accountPage, profile: profilePage, friends: friendsPage, watch: watchPage,
   privacy: (r) => legalPage(r, 'privacy'), terms: (r) => legalPage(r, 'terms'),
 };
@@ -49,7 +51,7 @@ function route() {
   cleanup = undefined;
   main.innerHTML = '';
   main.className = 'page-' + (name || 'home');
-  const navName = name === 'game' || name === 'join' ? 'play' : name === 'profile' ? 'account' : name === 'watch' ? 'friends' : name;
+  const navName = name === 'game' || name === 'join' || name === 'table' ? 'play' : name === 'profile' ? 'account' : name === 'watch' ? 'friends' : name;
   document.querySelectorAll('.nav a, .tabbar a, .top-actions a').forEach(a => a.classList.toggle('active', a.getAttribute('data-r') === navName));
   document.body.classList.remove('nav-open');
   window.scrollTo(0, 0);
