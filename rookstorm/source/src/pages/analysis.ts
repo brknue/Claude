@@ -307,10 +307,11 @@ export function analysisPage(root: HTMLElement): () => void {
       else if (isBest && second !== null && before - second >= 18 && before < 92 && after > 35) res.cls = 'great';
       return res;
     }
-    if (loss < 2.5) res.cls = 'excellent';
-    else if (loss < 6) res.cls = 'good';
-    else if (loss < 12) res.cls = 'inaccuracy';
-    else if (loss < 22) res.cls = 'mistake';
+    // same cut-offs as chess.com (expected points lost, in %)
+    if (loss < 2) res.cls = 'excellent';
+    else if (loss < 5) res.cls = 'good';
+    else if (loss < 10) res.cls = 'inaccuracy';
+    else if (loss < 20) res.cls = 'mistake';
     else res.cls = 'blunder';
     if ((prevCls === 'mistake' || prevCls === 'blunder') && loss >= 8 && before >= 60 && res.cls !== 'blunder') res.cls = 'miss';
     void played;
@@ -344,11 +345,11 @@ export function analysisPage(root: HTMLElement): () => void {
       const idx = reviews.map((r, i) => ({ r, i })).filter(({ i }) => main.positions[i].turn === color);
       const accs = idx.map(({ r }) => r!.acc);
       const acc = accs.length ? accs.reduce((a, b) => a + b, 0) / accs.length : 0;
-      const cpl = idx.map(({ i }) => cpLoss(i));
-      const acpl = cpl.length ? cpl.reduce((a, b) => a + b, 0) / cpl.length : 0;
       const counts: Partial<Record<Cls, number>> = {};
       idx.forEach(({ r }) => { const k = r!.cls === 'forced' ? 'best' : r!.cls; counts[k] = (counts[k] || 0) + 1; });
-      return { acc, counts, elo: gameElo(acc, acpl, accs.length) };
+      // like chess.com: book and forced moves say nothing about strength
+      const rated = idx.filter(({ r }) => r!.cls !== 'book' && r!.cls !== 'forced');
+      return { acc, counts, elo: gameElo(rated.map(({ r, i }) => ({ loss: r!.loss, cpl: cpLoss(i), ply: i }))) };
     };
     const w = stats('white'), b = stats('black');
     summary.append(h('div.sum-card', null,
@@ -371,21 +372,21 @@ export function analysisPage(root: HTMLElement): () => void {
   }
 
   /**
-   * Performance rating estimate from accuracy and average centipawn loss (like chess.com's "Game Rating").
-   * Calibrated on games between the site's own Stockfish bots: a bot of level X gets about X.
+   * Game rating: performance estimate from how often the player made each kind of move
+   * (best/excellent, inaccuracy, mistake, blunder) and the average centipawn loss, without book and forced moves.
+   * Fitted on games between the site's Stockfish bots, full games and short ones; it knows that
+   * opening moves are easier than later ones, so short games are not over-rated.
    */
-  function gameElo(acc: number, acpl: number, moves: number): number {
-    if (moves < 5) return 0;
-    const interp = (x: number, pts: [number, number][]) => {
-      if (x <= pts[0][0]) return pts[0][1];
-      for (let k = 1; k < pts.length; k++) if (x <= pts[k][0]) { const [a0, e0] = pts[k - 1], [a1, e1] = pts[k]; return e0 + (e1 - e0) * (x - a0) / (a1 - a0); }
-      return pts[pts.length - 1][1];
-    };
-    const fromCpl = interp(-acpl, [[-250, 100], [-130, 400], [-78, 800], [-60, 1200], [-48, 1400], [-39, 1650], [-33, 2000], [-27, 2400], [-18, 2800], [-8, 3200]]);
-    const fromAcc = interp(acc, [[50, 100], [78, 400], [84.5, 800], [87, 1200], [89.5, 1450], [90.3, 1650], [91.4, 2000], [92.5, 2400], [93.9, 2800], [97, 3200]]);
-    // Short games say little: pull them toward an average player.
-    const conf = Math.min(1, moves / 25);
-    const est = (fromCpl * 0.5 + fromAcc * 0.5) * conf + 1500 * (1 - conf);
+  function gameElo(mv: { loss: number; cpl: number; ply: number }[]): number {
+    const n = mv.length;
+    if (n < 5) return 0;
+    const rate = (f: (l: number) => boolean) => mv.filter(m => f(m.loss)).length / n;
+    const la = Math.log(mv.reduce((a, m) => a + m.cpl, 0) / n + 5);
+    const bl = rate(l => l >= 20), mi = rate(l => l >= 10 && l < 20), ia = rate(l => l >= 5 && l < 10), top = rate(l => l < 2);
+    const early = mv.filter(m => m.ply < 24).length / n;
+    const W = [4023.77, -764.72, 497.39, -263.13, -40.73, 935.73, -1318.4, 315.84, -253.93];
+    const lin = W[0] + W[1] * la + W[2] * bl + W[3] * mi + W[4] * ia + W[5] * top + W[6] * early + W[7] * early * la + W[8] * early * top;
+    const est = 1469 + 1.3 * (lin - 1469);
     return Math.round(Math.max(100, Math.min(3200, est)) / 10) * 10;
   }
 
