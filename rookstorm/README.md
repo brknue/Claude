@@ -22,6 +22,7 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 - **Board editor:** set up any position and get Stockfish's best move and top 3 lines.
 - **Openings:** all 3,865 named openings and variations from the Lichess database: search, browse families, explore book moves from any position, and drill lines as White or Black.
 - **Puzzles:** 27,000 rated Lichess puzzles from 400 to 3000, picked near your puzzle rating, which goes up and down as you solve. 30 themes and a Streak mode.
+- **Daily and weekly puzzles:** a new ultra-hard daily puzzle every day (rated 2750+) and the hardest puzzles in the collection every week (about 2900–3000, long lines, one try). No hints; only the first try on the puzzle's own day/week counts and shows on the profile. A calendar lets you replay past puzzles as practice, with the solution.
 
 ## How it works
 
@@ -60,7 +61,7 @@ Because it bundles GPL code, Rookstorm is released under GPLv3.
 Sign up with a username and password (no e-mail; a recovery code resets a forgotten password). Accounts give saved ratings (everyone starts at 1500 in every mode), friends, rated friend games (tick "Rated game"), challenges, watching friends' live games, friends' game history with analysis, **chat with friends** (send games you played; they open in the analysis board), **daily games** (1–14 days per move, their own Daily rating, timeouts handled on the server) and **notifications** for messages, challenges and daily moves (in-page, browser notifications while a tab is open, and native ones in the Android app). The live site uses its own Supabase project; to run your own copy:
 
 1. Create a free Supabase project (region Central EU / Frankfurt).
-2. Run [`source/supabase/schema.sql`](source/supabase/schema.sql) in the SQL editor, then the add-ons [`add-brilliants.sql`](source/supabase/add-brilliants.sql), [`add-social.sql`](source/supabase/add-social.sql) (chat, daily games, notifications) and [`add-rating-privacy.sql`](source/supabase/add-rating-privacy.sql) (ratings public by default, each player can limit them to friends or nobody).
+2. Run [`source/supabase/schema.sql`](source/supabase/schema.sql) in the SQL editor, then the add-ons [`add-brilliants.sql`](source/supabase/add-brilliants.sql), [`add-social.sql`](source/supabase/add-social.sql) (chat, daily games, notifications) [`add-rating-privacy.sql`](source/supabase/add-rating-privacy.sql) (ratings public by default, each player can limit them to friends or nobody) and [`add-daily-puzzles.sql`](source/supabase/add-daily-puzzles.sql) (daily/weekly puzzle results on profiles).
 3. Authentication → Email: turn off "Confirm email" (accounts use username + password and a recovery code; no e-mail addresses are collected).
 4. Put the project URL and anon key into `source/src/config.ts` and rebuild.
 

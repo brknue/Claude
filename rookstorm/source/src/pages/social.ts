@@ -13,6 +13,7 @@ import { setAnalysisInput } from './analysis';
 import { hostFriend, tcLabel, TIME_PRESETS, modeLabel, premoveBox } from './play';
 import { OPERATOR_NAME, OPERATOR_CONTACT, POLICY_DATE, POLICY_VERSION } from '../config';
 import { newDailyDialog } from './daily';
+import { puzzleDaysCard } from './dailypuzzle';
 import { reviewBacklog, onReviewsSaved, reviewsRunning, brilliantsAvailable, noteMissing } from '../review';
 
 const notReady = (root: HTMLElement) => root.append(h('section.card.setup', null, h('h1', null, t('Accounts')),
@@ -153,6 +154,7 @@ export function profilePage(root: HTMLElement, username?: string) {
           h('div.muted.small', null, t('Member since {0}', fmtDate(p.created_at)), p.last_seen ? ' · ' : '', p.last_seen ? h('span', { class: online(p.last_seen) ? 'online' : '' }, lastSeenText(p.last_seen)) : null)),
         h('div.row.wrap.profile-actions', null, actions)),
       brilliantCard(p.username, self),
+      puzzleDaysCard(p.username),
       p.ratings ? h('section.card', null, h('h2', null, t('Ratings')), ratingGrid(p.ratings), self ? ratingPrivacy(p.rating_visibility) : null)
         : h('section.card', null, h('p.muted', null, t('This player keeps their ratings private.'))),
       !self && !friend ? h('section.card', null, h('p.muted', null, t('Games are visible to friends only.'))) : '',
@@ -275,7 +277,8 @@ function settingsCard() {
       btn(t('New recovery code'), async () => { if (!confirm(t('Your old recovery code will stop working. Continue?'))) return; try { showRecovery(await newRecoveryCode(), false); } catch (e) { toast(niceError(e)); } }),
       btn(h('span', null, icon('copy'), t('Download my data')), async () => {
         try {
-          const data = await rpc('export_my_data');
+          const data: any = await rpc('export_my_data');
+          try { data.puzzle_days = await rpc('export_puzzle_days'); } catch { /* add-on not installed */ }
           const name = `rookstorm-${me!.username}.json`, json = JSON.stringify(data, null, 2);
           if (appBridge?.saveFile(name, 'application/json', json)) { toast(t('Saved to Downloads')); return; }
           const a = h('a', { href: URL.createObjectURL(new Blob([json], { type: 'application/json' })), download: name }) as HTMLAnchorElement;
@@ -474,6 +477,7 @@ export function legalPage(root: HTMLElement, which: 'privacy' | 'terms') {
     H('With an account'),
     P('We store: your username, a password hash (never the password itself), a hashed recovery code, the date you agreed to these terms, when you were last online, your ratings, your friend list, challenges, and the games you play while signed in (moves, result, players, date).'),
     P('We do not collect your e-mail address, real name, location or any other personal details.'),
+    P('If you play the daily or weekly puzzle while signed in, your result for it (solved or not, and how long it took) is stored and shown on your profile.'),
     P('If you use chat, your messages are stored on the account server so you and your friend can read them. They are deleted when either of you deletes the account. With notifications turned on, the Android app checks for news about every 15 minutes using a random device key; signing out deletes the key.'),
     P('Purpose and legal basis: providing the account features you asked for (GDPR Art. 6(1)(b)), and protecting the service against abuse (Art. 6(1)(f)).'),
     P('Who can see what: everyone signed in can find your username and, unless you change it on your profile, your ratings. Your online status and games are visible only to you and your friends. Your opponents see your username in games against them.'),

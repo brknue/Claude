@@ -1,6 +1,6 @@
 /** Chat with friends and send them games. */
 import { h, icon, btn, toast, modal } from '../ui';
-import { t, fmtDate } from '../i18n';
+import { t, fmtDate, lang } from '../i18n';
 import { me, accountsEnabled, rpc, niceError, onAccount } from '../account';
 import { variantName, VariantKey } from '../chess';
 import { go } from '../main';
@@ -9,7 +9,7 @@ import { challengeDialog, online, lastSeenText } from './social';
 import { newDailyDialog } from './daily';
 import { onMessage, pollAlerts, setFocus, notifyBanner, missingSocial, socialAvailable } from '../notify';
 
-const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const time = (iso: string) => new Date(iso).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
 const sameDay = (a: string, b: string) => new Date(a).toDateString() === new Date(b).toDateString();
 const shortWhen = (iso: string) => sameDay(iso, new Date().toISOString()) ? time(iso) : fmtDate(iso);
 

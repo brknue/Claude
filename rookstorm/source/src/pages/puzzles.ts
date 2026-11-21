@@ -5,9 +5,10 @@ import { posFromFen, uciToMove, fenOf, moveSquares, Position, Move, Color } from
 import { setAnalysisInput } from './analysis';
 import { go } from '../main';
 import { t } from '../i18n';
+import { resultOf, currentPeriod, msLeft, countdown, Kind } from './dailypuzzle';
 
 type Raw = [string, string, string, number, string];
-interface Puzzle { id: string; fen: string; moves: string[]; rating: number; themes: string[] }
+export interface Puzzle { id: string; fen: string; moves: string[]; rating: number; themes: string[] }
 interface PState {
   rating: number; games: number; wins: number; streak: number; bestStreak: number; bestRun: number;
   seen: string[]; hist: { id: string; r: number; win: boolean; d: number; pr: number }[]; theme: string; mode: 'rated' | 'streak'; autoNext: boolean;
@@ -33,7 +34,7 @@ function getIndex() {
   if (!bandIndex) { bandIndex = fetch(new URL('data/puzzles/index.json', document.baseURI).href).then(r => r.json()); bandIndex.catch(() => { bandIndex = null; }); }
   return bandIndex;
 }
-function getBand(b: number): Promise<Puzzle[]> {
+export function getBand(b: number): Promise<Puzzle[]> {
   if (!bands.has(b)) {
     const p = fetch(new URL(`data/puzzles/r${b}.json`, document.baseURI).href).then(r => r.json())
       .then((rows: Raw[]) => rows.map(([id, fen, moves, rating, themes]) => ({ id, fen, moves: moves.split(' '), rating, themes: themes ? themes.split(' ') : [] })));
@@ -77,6 +78,14 @@ export function puzzlesPage(root: HTMLElement) {
   const stats = h('div.pz-stats');
   const topBar = h('div.pz-top');
 
+  const dayLink = (k: Kind) => {
+    const r = resultOf(k, currentPeriod(k));
+    return h('a.pday-link', { href: k === 'daily' ? '#/dpuzzle' : '#/wpuzzle', class: k },
+      h('span.pday-badge', { class: k }, k === 'daily' ? '☀' : '★'),
+      h('span', null, h('b', null, k === 'daily' ? t('Daily puzzle') : t('Weekly puzzle')),
+        h('span.muted.small.block', null, r ? (r.solved ? '✓ ' + t('Solved') : '✕ ' + t('Missed')) + ' · ' + t('next in {0}', countdown(msLeft(k))) : k === 'daily' ? t('Ultra hard · no hints') : t('The hardest · one try'))));
+  };
+  root.append(h('div.pday-strip', null, dayLink('daily'), dayLink('weekly'), h('a.pday-link.cal', { href: '#/pcalendar' }, icon('calendar'), h('b', null, t('Calendar')))));
   root.append(h('div.game-layout.puzzles', null,
     h('div.board-col', null, topBar, board.el),
     h('aside.side.card', null, stats, info, feedback, controls,

@@ -16,6 +16,7 @@ import { puzzlesPage } from './pages/puzzles';
 import { puzzleRating } from './pages/puzzles';
 import { chatListPage } from './pages/chat';
 import { dailyPage } from './pages/daily';
+import { puzzleDayPage, puzzleCalendarPage, resultOf, currentPeriod, msLeft, countdown } from './pages/dailypuzzle';
 import { initNotify, onCounts, setPopup, setNotify, notifyOn, webNotifySupported } from './notify';
 
 export type Cleanup = (() => void) | void;
@@ -25,6 +26,7 @@ const routes: Record<string, PageFn> = {
   '': homePage, play: playSetupPage, game: gamePage, join: joinPage,
   analysis: analysisPage, editor: editorPage, openings: openingsPage, puzzles: puzzlesPage,
   table: tablePage, chat: chatListPage, daily: dailyPage, app: appPage,
+  dpuzzle: (r, a) => puzzleDayPage('daily', r, a), wpuzzle: (r, a) => puzzleDayPage('weekly', r, a), pcalendar: puzzleCalendarPage,
   account: accountPage, profile: profilePage, friends: friendsPage, watch: watchPage,
   privacy: (r) => legalPage(r, 'privacy'), terms: (r) => legalPage(r, 'terms'),
 };
@@ -54,7 +56,7 @@ function route() {
   cleanup = undefined;
   main.innerHTML = '';
   main.className = 'page-' + (name || 'home');
-  const navName = name === 'game' || name === 'join' || name === 'table' || name === 'daily' ? 'play' : name === 'profile' ? 'account' : name === 'watch' ? 'friends' : name;
+  const navName = name === 'dpuzzle' || name === 'wpuzzle' || name === 'pcalendar' ? 'puzzles' : name === 'game' || name === 'join' || name === 'table' || name === 'daily' ? 'play' : name === 'profile' ? 'account' : name === 'watch' ? 'friends' : name;
   document.querySelectorAll('.nav a, .tabbar a, .top-actions a').forEach(a => a.classList.toggle('active', a.getAttribute('data-r') === navName));
   document.body.classList.remove('nav-open');
   window.scrollTo(0, 0);
@@ -192,6 +194,7 @@ function homePage(root: HTMLElement) {
       card('play/friend', 'link', t('Play a friend'), t('Send a link and play in real time, or pass-and-play on one device with auto-flip.')),
       card('play/online', 'globe', t('Online arena'), t('Get matched with another player in your chosen time control.')),
       accountsEnabled() ? card(me ? 'friends' : 'account/new', 'users', t('Accounts and friends'), t('Keep your ratings (everyone starts at 1500), add friends, challenge them and watch their games live.')) : null,
+      card('dpuzzle', 'calendar', t('Daily and weekly puzzles'), dailyCardText()),
       card('puzzles', 'puzzle', t('Infinite puzzles'), t('Rated puzzles that adapt to you. Your rating: {0}.', Math.round(puzzleRating()))),
       card('openings', 'book', t('Opening library'), t('All 3,800+ named openings and variations. Browse, explore and drill them.')),
       card('analysis', 'chart', t('Game review'), t('Accuracy, game rating, blunders, mistakes, brilliant moves and the best alternatives.')),
@@ -237,6 +240,12 @@ function appPage(root: HTMLElement) {
     h('p.lead.muted', null, t('Rookstorm works on every device. App, website and Android players all play each other.')), ...cards));
 }
 const APK = 'rookstorm.apk';
+
+function dailyCardText(): string {
+  const r = resultOf('daily', currentPeriod('daily'));
+  const state = r ? (r.solved ? '✓ ' + t('Solved today') : '✕ ' + t('Missed today')) : t('New puzzle in {0}', countdown(msLeft('daily')));
+  return t('One ultra-hard puzzle a day and a brutal one every week.') + ' ' + state;
+}
 
 function heroBoard(): string {
   const pos = 'r1bqk2r/pppp1Bpp/2n2n2/2b1p3/4P3/5N2/PPPP1PPP/RNBQK2R';
