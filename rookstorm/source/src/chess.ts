@@ -5,23 +5,28 @@ import { parseUci, makeUci, makeSquare, squareFile, squareRank } from 'chessops/
 import { makeSanAndPlay } from 'chessops/san';
 import { chessgroundDests } from 'chessops/compat';
 import type { Move, Rules, Color, Role, NormalMove } from 'chessops/types';
+import { t } from './i18n';
 
-export type VariantKey = 'standard' | 'chess960' | 'kingofthehill' | '3check' | 'atomic' | 'antichess' | 'horde' | 'racingkings';
+export type VariantKey = 'standard' | 'chess960' | 'crazyhouse' | 'kingofthehill' | '3check' | 'atomic' | 'antichess' | 'horde' | 'racingkings';
 
-export interface VariantInfo { key: VariantKey; name: string; rules: Rules; desc: string; bot: boolean }
+/** sf: Stockfish can play and analyse it; other variants use Rookstorm's own variant engine. */
+export interface VariantInfo { key: VariantKey; name: string; rules: Rules; desc: string; sf: boolean }
 
 export const VARIANTS: VariantInfo[] = [
-  { key: 'standard', name: 'Standard', rules: 'chess', desc: 'Classic chess.', bot: true },
-  { key: 'chess960', name: 'Chess960', rules: 'chess', desc: 'Random back rank (Fischer Random). 960 possible starts.', bot: true },
-  { key: 'kingofthehill', name: 'King of the Hill', rules: 'kingofthehill', desc: 'Bring your king to the 4 center squares to win.', bot: false },
-  { key: '3check', name: 'Three-check', rules: '3check', desc: 'Give check three times to win.', bot: false },
-  { key: 'atomic', name: 'Atomic', rules: 'atomic', desc: 'Captures explode all nearby pieces except pawns.', bot: false },
-  { key: 'antichess', name: 'Antichess', rules: 'antichess', desc: 'Lose all your pieces to win. Captures are forced.', bot: false },
-  { key: 'horde', name: 'Horde', rules: 'horde', desc: 'White has 36 pawns. Black must destroy the horde.', bot: false },
-  { key: 'racingkings', name: 'Racing Kings', rules: 'racingkings', desc: 'Race your king to the 8th rank. No checks allowed.', bot: false },
+  { key: 'standard', name: 'Standard', rules: 'chess', desc: 'Classic chess.', sf: true },
+  { key: 'chess960', name: 'Chess960', rules: 'chess', desc: 'Random back rank (Fischer Random). 960 possible starts.', sf: true },
+  { key: 'crazyhouse', name: 'Crazyhouse', rules: 'crazyhouse', desc: 'Captured pieces change sides: drop them back onto the board as your move.', sf: false },
+  { key: 'kingofthehill', name: 'King of the Hill', rules: 'kingofthehill', desc: 'Bring your king to the 4 center squares to win.', sf: false },
+  { key: '3check', name: 'Three-check', rules: '3check', desc: 'Give check three times to win.', sf: false },
+  { key: 'atomic', name: 'Atomic', rules: 'atomic', desc: 'Captures explode all nearby pieces except pawns.', sf: false },
+  { key: 'antichess', name: 'Antichess', rules: 'antichess', desc: 'Lose all your pieces to win. Captures are forced.', sf: false },
+  { key: 'horde', name: 'Horde', rules: 'horde', desc: 'White has 36 pawns. Black must destroy the horde.', sf: false },
+  { key: 'racingkings', name: 'Racing Kings', rules: 'racingkings', desc: 'Race your king to the 8th rank. No checks allowed.', sf: false },
 ];
 
 export const variantInfo = (k: VariantKey) => VARIANTS.find(v => v.key === k) || VARIANTS[0];
+export const variantName = (k: VariantKey) => t(variantInfo(k).name);
+export const variantDesc = (k: VariantKey) => t(variantInfo(k).desc);
 
 /** Random Chess960 back rank. */
 export function random960Fen(): string {
@@ -54,7 +59,7 @@ export function posFromFen(fen: string, v: VariantKey = 'standard'): Position | 
 
 export function positionError(fen: string, v: VariantKey = 'standard'): string | null {
   const setup = parseFen(fen.trim());
-  if (setup.isErr) return 'Invalid FEN: ' + setup.error.message;
+  if (setup.isErr) return t('Invalid FEN');
   const p = setupPosition(variantInfo(v).rules, setup.value);
   if (p.isErr) {
     const m = p.error.message;
@@ -63,7 +68,7 @@ export function positionError(fen: string, v: VariantKey = 'standard'): string |
       ERR_OPPOSITE_CHECK: 'The side not to move is in check.', ERR_PAWNS_ON_BACKRANK: 'Pawns cannot be on the first or last rank.',
       ERR_IMPOSSIBLE_CHECK: 'This check is impossible.', ERR_VARIANT: 'Invalid position for this variant.',
     };
-    return map[m] || m;
+    return t(map[m] || 'Invalid position for this variant.');
   }
   return null;
 }
@@ -123,7 +128,7 @@ export function uciToMove(pos: Position, uci: string): Move | undefined {
 
 /** chessground [orig, dest] for highlighting/arrows from a normalized move */
 export function moveSquares(pos: Position, m: Move): [string, string] | null {
-  if (!('from' in m)) return null;
+  if (!('from' in m)) return [makeSquare(m.to), makeSquare(m.to)]; // drop
   if (isCastle(pos, m)) {
     const toFile = squareFile(m.to) > squareFile(m.from) ? 6 : 2;
     return [makeSquare(m.from), makeSquare(squareRank(m.from) * 8 + toFile)];
@@ -167,9 +172,10 @@ export function materialDiff(pos: Position): { white: Role[]; black: Role[]; sco
 
 export type Outcome = { winner?: Color; reason: string };
 
+export const reasonText = (r: string) => { const s = t(r); return s.charAt(0).toUpperCase() + s.slice(1); };
 export function outcomeText(o: Outcome): string {
-  if (!o.winner) return 'Draw · ' + o.reason;
-  return (o.winner === 'white' ? 'White' : 'Black') + ' wins · ' + o.reason;
+  if (!o.winner) return t('Draw') + ' · ' + t(o.reason);
+  return (o.winner === 'white' ? t('White wins') : t('Black wins')) + ' · ' + t(o.reason);
 }
 
 export type { Position, Move, Color, Role };

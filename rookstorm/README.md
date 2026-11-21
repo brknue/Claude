@@ -1,6 +1,6 @@
 # Rookstorm
 
-Chess website: play Stockfish 17 at any Elo, play friends and strangers online, review games, learn openings and solve endless puzzles. Works on phone, tablet and computer, has dark and light mode, and installs as an app that works offline.
+Chess website in 20 languages: play Stockfish 17 at any Elo and every chess variant, play friends and strangers online, review games, learn openings and solve endless puzzles. Works on phone, tablet and computer, has dark and light mode, and installs as an app that works offline.
 
 **Play:** https://brknue.github.io/Claude/rookstorm/
 
@@ -8,12 +8,14 @@ Chess website: play Stockfish 17 at any Elo, play friends and strangers online, 
 
 - **Bot at any Elo (100–3200).** Type a rating. From 1320 up, Stockfish's calibrated `UCI_Elo` limiter is used; below that, a human-like error model picks among Stockfish's top lines. 3200 is full strength. Standard and Chess960.
 - **Time controls:** bullet, blitz, rapid, classical, unlimited or any custom minutes + increment.
-- **Variants:** Standard, Chess960, King of the Hill, Three-check, Atomic, Antichess, Horde, Racing Kings (all for human play; Standard and Chess960 vs the bot).
+- **Variants:** Standard, Chess960, Crazyhouse, King of the Hill, Three-check, Atomic, Antichess, Horde, Racing Kings — all playable against the computer, a friend or online. Stockfish plays Standard and Chess960; the others use Rookstorm's own variant engine (`src/vsearch.ts`, approximate strength).
 - **Same device:** pass-and-play with automatic board flipping.
 - **Friend link:** create a game, send the link (message, AirDrop, anything) or a short game code, and play in real time with clocks, chat, draw offers, takeback requests and rematches. If a phone drops the connection (e.g. switching apps), the game reconnects.
 - **Online:** get paired with the next player searching the same variant and time control; takeback requests work here too.
 - **Premoves:** plan your next move while the opponent thinks; one switch under the move list turns them on or off.
-- **Game review:** accuracy per player and every move classified (Brilliant, Great, Best, Excellent, Good, Book, Inaccuracy, Mistake, Miss, Blunder), with the best move shown, an evaluation graph and an eval bar. Import any PGN or FEN.
+- **Capture points:** optional (Settings → Game): taking a piece pops up +3 / +5 …, losing one shows −3.
+- **20 languages:** English, Deutsch, Türkçe, Español, Français, Italiano, Português, Nederlands, Polski, Svenska, Русский, Українська, العربية, فارسی, हिन्दी, 中文, 日本語, 한국어, Bahasa Indonesia, Tiếng Việt (Settings → Language; Arabic and Persian right-to-left).
+- **Game review:** accuracy per player and every move classified (Brilliant, Great, Best, Excellent, Good, Book, Inaccuracy, Mistake, Miss, Blunder), with the best move shown, a badge on the piece that moved, an estimated game rating per player, an evaluation graph and an eval bar. Import any PGN or FEN.
 - **Board editor:** set up any position and get Stockfish's best move and top 3 lines.
 - **Openings:** all 3,865 named openings and variations from the Lichess database: search, browse families, explore book moves from any position, and drill lines as White or Black.
 - **Puzzles:** 27,000 rated Lichess puzzles from 400 to 3000, picked near your puzzle rating, which goes up and down as you solve. 30 themes and a Streak mode.
@@ -47,3 +49,14 @@ npm run build    # writes source/dist; copy its contents to rookstorm/ to publis
 - Puzzles: [Lichess puzzle database](https://database.lichess.org/#puzzles), CC0
 
 Because it bundles GPL code, Rookstorm is released under GPLv3.
+
+## Accounts (optional)
+
+Accounts — saved ratings (everyone starts at 1500 in every mode), friends, rated friend games (tick "Rated game"), challenges, watching friends' live games and reviewing their games — are built in and stay hidden until a database is connected:
+
+1. Create a free Supabase project (region Central EU / Frankfurt).
+2. Run [`source/supabase/schema.sql`](source/supabase/schema.sql) in the SQL editor.
+3. Authentication → Email: turn off "Confirm email" (accounts use username + password and a recovery code; no e-mail addresses are collected).
+4. Put the project URL and anon key into `source/src/config.ts` and rebuild.
+
+Ratings are computed on the server; every table has row-level security and the browser can only call the functions in the schema. Players can download and delete their data from their profile. The privacy policy and terms are at `#/privacy` and `#/terms`.

@@ -5,6 +5,7 @@ import { moveSquares, fenOf, Color, startFenFor, Move } from '../chess';
 import { loadOpenings, openingIndex, Opening } from '../openings-db';
 import { setAnalysisInput } from './analysis';
 import { go } from '../main';
+import { t } from '../i18n';
 
 export function openingsPage(root: HTMLElement) {
   let all: Opening[] = [];
@@ -26,11 +27,11 @@ export function openingsPage(root: HTMLElement) {
   const bookEl = h('div.op-book');
   const listEl = h('div.op-list');
   const practiceEl = h('div.op-practice');
-  const search = h('input.search', { type: 'search', placeholder: 'Search 3,800+ openings, e.g. "Sicilian Najdorf" or "B90"', 'aria-label': 'Search openings' }) as HTMLInputElement;
+  const search = h('input.search', { type: 'search', placeholder: t('Search 3,800+ openings, e.g. "Sicilian Najdorf" or "B90"'), 'aria-label': t('Search openings') }) as HTMLInputElement;
   search.addEventListener('input', debounce(() => { query = search.value.trim().toLowerCase(); renderList(); }, 150));
 
   const sideTop = h('div.card.op-panel', null, nameEl, movesEl,
-    h('div.navrow', null, iconBtn('first', 'Start', () => setPly(0)), iconBtn('prev', 'Back', () => setPly(ply - 1)), iconBtn('next', 'Forward', () => setPly(ply + 1)), iconBtn('last', 'End', () => setPly(line.length)), iconBtn('flip', 'Flip', () => board.flip())),
+    h('div.navrow', null, iconBtn('first', t('Start'), () => setPly(0)), iconBtn('prev', t('Back'), () => setPly(ply - 1)), iconBtn('next', t('Forward'), () => setPly(ply + 1)), iconBtn('last', t('End'), () => setPly(line.length)), iconBtn('flip', t('Flip'), () => board.flip())),
     practiceEl, bookEl);
   const sideList = h('div.card.op-panel', null, h('div.search-wrap', null, icon('search'), search), listEl);
 
@@ -65,7 +66,7 @@ export function openingsPage(root: HTMLElement) {
     let named: Opening | null = null;
     for (let i = 0; i <= ply; i++) { const o = idx.get(fenOf(game.positions[i]).split(' ').slice(0, 4).join(' ')); if (o) named = o; }
     const exact = selected && selected.ucis.join(' ') === line.slice(0, ply).join(' ') ? selected : named;
-    nameEl.replaceChildren(exact ? h('div', null, h('span.eco', null, exact.eco), h('h2', null, exact.family), exact.variation ? h('div.var', null, exact.variation) : null) : h('div', null, h('h2', null, ply ? 'Unnamed position' : 'Starting position'), h('div.muted.small', null, ply ? 'This exact position is not a named opening line.' : 'Play a move or pick an opening below.')));
+    nameEl.replaceChildren(exact ? h('div', null, h('span.eco', null, exact.eco), h('h2', null, exact.family), exact.variation ? h('div.var', null, exact.variation) : null) : h('div', null, h('h2', null, ply ? t('Unnamed position') : t('Starting position')), h('div.muted.small', null, ply ? t('This exact position is not a named opening line.') : t('Play a move or pick an opening below.'))));
     // moves
     const items: HTMLElement[] = [];
     game.sans.forEach((san, i) => {
@@ -74,7 +75,7 @@ export function openingsPage(root: HTMLElement) {
       items.push(h('button.mv', { type: 'button', class: i + 1 === ply ? 'cur' : '', onclick: () => setPly(i + 1) }, san));
     });
     movesEl.replaceChildren(...items);
-    if (!items.length) movesEl.append(h('span.muted.small', null, 'No moves yet'));
+    if (!items.length) movesEl.append(h('span.muted.small', null, t('No moves yet')));
     renderBook();
     renderPractice();
     const shapes: any[] = [];
@@ -100,14 +101,14 @@ export function openingsPage(root: HTMLElement) {
       children.set(u, c);
     }
     const list = [...children.values()].sort((a, b) => b.count - a.count);
-    if (!list.length) { bookEl.append(h('p.muted.small', null, ply ? 'End of known theory for this line.' : '')); return; }
+    if (!list.length) { bookEl.append(h('p.muted.small', null, ply ? t('End of known theory for this line.') : '')); return; }
     const pos = game.positions[ply];
-    bookEl.append(h('div.lbl', null, 'Book moves from here'), h('div.book-list', null, list.slice(0, 30).map(c => h('button.book-move', {
+    bookEl.append(h('div.lbl', null, t('Book moves from here')), h('div.book-list', null, list.slice(0, 30).map(c => h('button.book-move', {
       type: 'button',
       onclick: () => { line = line.slice(0, ply).concat(c.uci); ply++; selected = null; rebuild(); render(); },
       onmouseenter: () => { const a = arrowFor(pos, c.uci, 'blue'); board.arrows(a ? [a] : []); },
       onmouseleave: () => board.arrows([]),
-    }, h('b', null, c.san), h('span.bm-name', null, c.best ? (c.best.ucis.length === ply + 1 ? c.best.name : c.best.family) : ''), h('span.bm-count', null, c.count + (c.count === 1 ? ' line' : ' lines'))))));
+    }, h('b', null, c.san), h('span.bm-name', null, c.best ? (c.best.ucis.length === ply + 1 ? c.best.name : c.best.family) : ''), h('span.bm-count', null, t('{0} lines', c.count))))));
   }
 
   function renderPractice() {
@@ -115,19 +116,19 @@ export function openingsPage(root: HTMLElement) {
     const op = practice?.op || selected;
     if (!practice) {
       if (selected) practiceEl.append(h('div.row.wrap', null,
-        btn(h('span', null, icon('play'), 'Drill as White'), () => startPractice(selected!, 'white'), 'primary small'),
-        btn('Drill as Black', () => startPractice(selected!, 'black'), 'small'),
-        btn(h('span', null, icon('chart'), 'Analyze'), () => { setAnalysisInput({ variant: 'standard', startFen: startFenFor('standard'), ucis: line.slice(), orientation: board.orientation }); go('analysis'); }, 'small')));
+        btn(h('span', null, icon('play'), t('Drill as White')), () => startPractice(selected!, 'white'), 'primary small'),
+        btn(t('Drill as Black'), () => startPractice(selected!, 'black'), 'small'),
+        btn(h('span', null, icon('chart'), t('Analyze')), () => { setAnalysisInput({ variant: 'standard', startFen: startFenFor('standard'), ucis: line.slice(), orientation: board.orientation }); go('analysis'); }, 'small')));
       return;
     }
     const done = ply >= op!.ucis.length;
     practiceEl.append(h('div.practice-box', { class: done ? 'done' : '' },
-      h('b', null, done ? '✓ Line complete!' : `Drilling as ${practice.color}`),
-      h('div.muted.small', null, done ? `${practice.mistakes} mistake${practice.mistakes === 1 ? '' : 's'}.` : 'Play the book move. After two mistakes a hint arrow appears.'),
+      h('b', null, done ? '✓ ' + t('Line complete!') : (practice.color === 'white' ? t('Drilling as White') : t('Drilling as Black'))),
+      h('div.muted.small', null, done ? t('Mistakes: {0}', practice.mistakes) : t('Play the book move. After two mistakes a hint arrow appears.')),
       h('div.row.wrap', null,
-        done ? btn('Again', () => startPractice(op!, practice!.color), 'primary small') : null,
-        btn('Random line in this family', () => { const fam = all.filter(o => o.family === op!.family && o.ucis.length >= 3); startPractice(fam[Math.floor(Math.random() * fam.length)] || op!, practice!.color); }, 'small'),
-        btn('Stop drill', () => { practice = null; render(); }, 'small'))));
+        done ? btn(t('Again'), () => startPractice(op!, practice!.color), 'primary small') : null,
+        btn(t('Random line in this family'), () => { const fam = all.filter(o => o.family === op!.family && o.ucis.length >= 3); startPractice(fam[Math.floor(Math.random() * fam.length)] || op!, practice!.color); }, 'small'),
+        btn(t('Stop drill'), () => { practice = null; render(); }, 'small'))));
   }
 
   function startPractice(op: Opening, color: Color) {
@@ -143,11 +144,11 @@ export function openingsPage(root: HTMLElement) {
   function practiceMove(u: string) {
     const p = practice!;
     const expected = p.op.ucis[ply];
-    if (ply >= p.op.ucis.length) { toast('Line complete — press Again or pick another.'); render(); return; }
+    if (ply >= p.op.ucis.length) { toast(t('Line complete — press Again or pick another.')); render(); return; }
     if (u !== expected) {
       p.mistakes++;
       sound.bad();
-      toast(p.mistakes > 1 ? `Not the book move. Try ${p.op.sans[ply]}.` : 'Not the book move — try again.');
+      toast(p.mistakes > 1 ? t('Not the book move. Try {0}.', p.op.sans[ply]) : t('Not the book move — try again.'));
       render(); return;
     }
     const prev = game.positions[ply];
@@ -182,19 +183,19 @@ export function openingsPage(root: HTMLElement) {
 
   function renderList() {
     listEl.replaceChildren();
-    if (!all.length) { listEl.append(h('div.spinner-row', null, h('span.spinner'), 'Loading openings…')); return; }
+    if (!all.length) { listEl.append(h('div.spinner-row', null, h('span.spinner'), t('Loading openings…'))); return; }
     if (query) {
       const words = query.split(/\s+/);
       const res = all.filter(o => { const t = (o.eco + ' ' + o.name).toLowerCase(); return words.every(w => t.includes(w)); }).sort((a, b) => a.name.length - b.name.length || a.ucis.length - b.ucis.length);
-      listEl.append(h('div.muted.small', null, `${res.length} result${res.length === 1 ? '' : 's'}`));
+      listEl.append(h('div.muted.small', null, t('Results: {0}', res.length)));
       res.slice(0, 150).forEach(o => listEl.append(opRow(o, true)));
-      if (res.length > 150) listEl.append(h('div.muted.small', null, 'Refine your search to see more.'));
+      if (res.length > 150) listEl.append(h('div.muted.small', null, t('Refine your search to see more.')));
       return;
     }
     const fams = new Map<string, Opening[]>();
     for (const o of all) { const a = fams.get(o.family) || []; a.push(o); fams.set(o.family, a); }
     const sorted = [...fams.entries()].sort((a, b) => b[1].length - a[1].length);
-    listEl.append(h('div.muted.small', null, `${all.length} lines in ${fams.size} opening families · sorted by number of variations`));
+    listEl.append(h('div.muted.small', null, t('{0} lines in {1} opening families · sorted by number of variations', all.length, fams.size)));
     for (const [fam, ops] of sorted) {
       const isOpen = openFamily === fam;
       const head = h('button.fam', { type: 'button', 'aria-expanded': String(isOpen), onclick: () => { openFamily = isOpen ? null : fam; renderList(); if (!isOpen) select(ops.slice().sort((a, b) => a.ucis.length - b.ucis.length)[0]); } },
@@ -216,7 +217,7 @@ export function openingsPage(root: HTMLElement) {
 
   renderList(); render();
   Promise.all([loadOpenings(), openingIndex()]).then(([a, i]) => { if (!alive) return; all = a; idx = i; renderList(); render(); })
-    .catch(() => { listEl.replaceChildren(h('p.err', null, 'Could not load the opening database.')); });
+    .catch(() => { listEl.replaceChildren(h('p.err', null, t('Could not load the opening database.'))); });
 
   return () => { alive = false; board.destroy(); };
 }

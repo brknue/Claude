@@ -13,6 +13,7 @@
   "license": "GPL-3.0-or-later",
   "type": "module",
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.2",
     "chessground": "^9.2.1",
     "chessops": "^0.15.1",
     "peerjs": "^1.5.5",

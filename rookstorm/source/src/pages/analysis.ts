@@ -1,6 +1,7 @@
 import { parsePgn, startingPosition } from 'chessops/pgn';
 import { parseSan } from 'chessops/san';
 import { makeFen } from 'chessops/fen';
+import { makeSquare } from 'chessops/util';
 import { h, icon, btn, iconBtn, toast, copyText, loadRaw, debounce } from '../ui';
 import { VariantKey, variantInfo, posFromFen, fenOf, uciToMove, moveSquares, pvToSan, PIECE_VALUE, Position, Move, Color, startFenFor, positionError } from '../chess';
 import { Game } from '../game';
@@ -8,6 +9,7 @@ import { Board, arrowFor } from '../board';
 import { engine, Line, whiteCp, fmtScore, winPct } from '../engine';
 import { openingIndex, Opening } from '../openings-db';
 import { go } from '../main';
+import { t } from '../i18n';
 
 export interface AnalysisInput {
   variant: VariantKey; startFen: string; ucis: string[]; orientation?: Color; white?: string; black?: string; autoReview?: boolean; ply?: number;
@@ -18,17 +20,17 @@ export function setAnalysisInput(a: AnalysisInput) { pending = a; }
 
 type Cls = 'brilliant' | 'great' | 'best' | 'excellent' | 'good' | 'book' | 'inaccuracy' | 'mistake' | 'miss' | 'blunder' | 'forced';
 export const CLS: Record<Cls, { label: string; sym: string; color: string }> = {
-  brilliant: { label: 'Brilliant', sym: '!!', color: '#1baca6' },
-  great: { label: 'Great move', sym: '!', color: '#5c8bb0' },
-  best: { label: 'Best move', sym: '★', color: '#81b64c' },
-  excellent: { label: 'Excellent', sym: '👍', color: '#98bc4b' },
-  good: { label: 'Good', sym: '✓', color: '#97af8b' },
-  book: { label: 'Book', sym: '📖', color: '#a88865' },
-  forced: { label: 'Forced', sym: '→', color: '#97af8b' },
-  inaccuracy: { label: 'Inaccuracy', sym: '?!', color: '#e6b833' },
-  mistake: { label: 'Mistake', sym: '?', color: '#e58f2a' },
-  miss: { label: 'Miss', sym: '✕', color: '#ee6b55' },
-  blunder: { label: 'Blunder', sym: '??', color: '#ca3431' },
+  brilliant: { label: t('Brilliant'), sym: '!!', color: '#1baca6' },
+  great: { label: t('Great move'), sym: '!', color: '#5c8bb0' },
+  best: { label: t('Best move'), sym: '★', color: '#81b64c' },
+  excellent: { label: t('Excellent'), sym: '👍', color: '#98bc4b' },
+  good: { label: t('Good'), sym: '✓', color: '#97af8b' },
+  book: { label: t('Book'), sym: '📖', color: '#a88865' },
+  forced: { label: t('Forced'), sym: '→', color: '#97af8b' },
+  inaccuracy: { label: t('Inaccuracy'), sym: '?!', color: '#e6b833' },
+  mistake: { label: t('Mistake'), sym: '?', color: '#e58f2a' },
+  miss: { label: t('Miss'), sym: '✕', color: '#ee6b55' },
+  blunder: { label: t('Blunder'), sym: '??', color: '#ca3431' },
 };
 const SUMMARY_ORDER: Cls[] = ['brilliant', 'great', 'best', 'excellent', 'good', 'book', 'inaccuracy', 'mistake', 'miss', 'blunder'];
 
@@ -43,7 +45,7 @@ export function analysisPage(root: HTMLElement): () => void {
   let main: Game = buildGame(input);
   let vari: { from: number; game: Game } | null = null;
   let cur = { inVar: false, ply: Math.min(input.ply ?? (input.autoReview ? 0 : main.ply), main.ply) };
-  let engineOn = variantInfo(main.variant).bot;
+  let engineOn = variantInfo(main.variant).sf;
   let liveLines: Line[] = [];
   let liveDepth = 0;
   let evals: (Eval | null)[] = [];
@@ -52,7 +54,7 @@ export function analysisPage(root: HTMLElement): () => void {
   let reviewed = false;
   let alive = true;
   let openingName = '';
-  const names = { white: input.white || 'White', black: input.black || 'Black' };
+  const names = { white: input.white || t('White'), black: input.black || t('Black') };
 
   const board = new Board({ orientation: input.orientation || 'white', onMove: (m) => userMove(m) });
   board.chess960 = main.variant === 'chess960';
@@ -71,9 +73,9 @@ export function analysisPage(root: HTMLElement): () => void {
 
   const side = h('aside.side.card', null, engineHead, linesBox, graph, explain, openingEl, moveList, varBox,
     h('div.navrow', null,
-      iconBtn('first', 'First', () => goto(0)), iconBtn('prev', 'Previous', () => step(-1)),
-      iconBtn('next', 'Next', () => step(1)), iconBtn('last', 'Last', () => goto(Infinity)),
-      iconBtn('flip', 'Flip board', () => { board.flip(); renderEngine(); })),
+      iconBtn('first', t('First'), () => goto(0)), iconBtn('prev', t('Previous'), () => step(-1)),
+      iconBtn('next', t('Next'), () => step(1)), iconBtn('last', t('Last'), () => goto(Infinity)),
+      iconBtn('flip', t('Flip board'), () => { board.flip(); renderEngine(); })),
     summary, toolsBox);
   root.append(h('div.game-layout.analysis', null, h('div.board-col', null, h('div.board-eval', null, evalBar, board.el)), side));
 
@@ -151,10 +153,10 @@ export function analysisPage(root: HTMLElement): () => void {
 
   function renderEngine() {
     const pos = curPos();
-    const supported = variantInfo(main.variant).bot;
+    const supported = variantInfo(main.variant).sf;
     engineHead.replaceChildren(
       h('label.switch', null, h('input', { type: 'checkbox', checked: engineOn, disabled: !supported, onchange: (e: any) => { engineOn = e.target.checked; if (!engineOn) { engine.stop(); liveLines = []; } update(); } }), h('span'), ' Stockfish 17'),
-      h('span.muted.small', null, !supported ? 'Not available for this variant' : reviewing ? 'Reviewing game…' : engineOn ? (liveDepth ? `depth ${liveDepth}` : 'thinking…') : 'off'));
+      h('span.muted.small', null, !supported ? t('Not available for this variant') : reviewing ? t('Reviewing game…') : engineOn ? (liveDepth ? t('depth {0}', liveDepth) : t('thinking…')) : t('off')));
     linesBox.replaceChildren();
     let cp: number | null = null;
     let txt = '';
@@ -180,6 +182,12 @@ export function analysisPage(root: HTMLElement): () => void {
     }
     if (engineOn && liveLines[0] && !term) { const a = arrowFor(pos, liveLines[0].pv[0], 'blue'); if (a) shapes.push(a); }
     board.arrows(shapes);
+    // classification badge on the piece that just moved (like chess.com)
+    if (rv && cm) {
+      const sqs = moveSquares(cm.prev, cm.m);
+      const dest = sqs ? sqs[1] : 'to' in cm.m ? makeSquare(cm.m.to) : null;
+      board.setBadge(dest, CLS[rv.cls].sym, CLS[rv.cls].color, t(CLS[rv.cls].label));
+    } else board.setBadge(null);
   }
 
   function setBar(cp: number | null, txt: string) {
@@ -208,11 +216,11 @@ export function analysisPage(root: HTMLElement): () => void {
       const c = rv ? CLS[rv.cls] : null;
       row.append(h('button.mv', {
         type: 'button', class: !cur.inVar && cur.ply === i + 1 ? 'cur' : '', onclick: () => { cur = { inVar: false, ply: i + 1 }; update(); },
-        title: c ? c.label : undefined,
+        title: c ? t(c.label) : undefined,
       }, san, c && !['best', 'excellent', 'good'].includes(rv!.cls) ? h('span.badge', { style: { background: c.color } }, c.sym) : null));
     });
     moveList.replaceChildren(...rows);
-    if (!rows.length) moveList.append(h('p.muted.small.empty-moves', null, 'Play moves on the board, paste a PGN or FEN below, or finish a game and press Game review.'));
+    if (!rows.length) moveList.append(h('p.muted.small.empty-moves', null, t('Play moves on the board, paste a PGN or FEN below, or finish a game and press Game review.')));
     moveList.querySelector('.cur')?.scrollIntoView({ block: 'nearest' });
     varBox.replaceChildren();
     if (vari) {
@@ -223,20 +231,20 @@ export function analysisPage(root: HTMLElement): () => void {
         if (white || i === 0) items.push(h('span.mnum', null, num + (white ? '.' : '…')));
         items.push(h('button.mv', { type: 'button', class: cur.inVar && cur.ply === i + 1 ? 'cur' : '', onclick: () => { cur = { inVar: true, ply: i + 1 }; update(); } }, san));
       });
-      varBox.append(h('div.var-head', null, h('b', null, 'Variation'), btn('Back to game', () => { cur = { inVar: false, ply: vari!.from }; vari = null; update(); }, 'small')), h('div.var-moves', null, items));
+      varBox.append(h('div.var-head', null, h('b', null, t('Variation')), btn(t('Back to game'), () => { cur = { inVar: false, ply: vari!.from }; vari = null; update(); }, 'small')), h('div.var-moves', null, items));
     }
   }
 
   // ----- review -----
   async function runReview(depth: number) {
-    if (reviewing || !variantInfo(main.variant).bot) return;
-    if (!main.ply) { toast('No moves to review yet.'); return; }
+    if (reviewing || !variantInfo(main.variant).sf) return;
+    if (!main.ply) { toast(t('No moves to review yet.')); return; }
     reviewing = true; engine.stop();
     vari = null; cur.inVar = false;
     const n = main.ply;
     evals = []; reviews = [];
     const bar = h('div.progress', null, h('div'));
-    summary.replaceChildren(h('div.review-progress', null, h('b', null, 'Reviewing game'), bar, btn('Cancel', () => { reviewing = false; engine.stop(); }, 'small')));
+    summary.replaceChildren(h('div.review-progress', null, h('b', null, t('Reviewing game')), bar, btn(t('Cancel'), () => { reviewing = false; engine.stop(); }, 'small')));
     renderEngine();
     const book = await openingIndex().catch(() => new Map<string, Opening>());
     for (let i = 0; i <= n; i++) {
@@ -255,7 +263,7 @@ export function analysisPage(root: HTMLElement): () => void {
     const complete = reviewing && alive && evals.length === n + 1;
     reviewing = false;
     if (!alive) return;
-    if (!complete) { summary.replaceChildren(); evals = []; update(); toast('Review cancelled'); return; }
+    if (!complete) { summary.replaceChildren(); evals = []; update(); toast(t('Review cancelled')); return; }
     // classify
     for (let i = 0; i < n; i++) reviews[i] = classify(i, book);
     reviewed = true;
@@ -327,17 +335,43 @@ export function analysisPage(root: HTMLElement): () => void {
       const idx = reviews.map((r, i) => ({ r, i })).filter(({ i }) => main.positions[i].turn === color);
       const accs = idx.map(({ r }) => r!.acc);
       const acc = accs.length ? accs.reduce((a, b) => a + b, 0) / accs.length : 0;
+      const cpl = idx.map(({ i }) => cpLoss(i));
+      const acpl = cpl.length ? cpl.reduce((a, b) => a + b, 0) / cpl.length : 0;
       const counts: Partial<Record<Cls, number>> = {};
       idx.forEach(({ r }) => { const k = r!.cls === 'forced' ? 'best' : r!.cls; counts[k] = (counts[k] || 0) + 1; });
-      return { acc, counts };
+      return { acc, counts, elo: gameElo(acc, acpl, accs.length) };
     };
     const w = stats('white'), b = stats('black');
     summary.append(h('div.sum-card', null,
-      h('div.sum-head', null, h('div.acc', null, h('span.cdot.white'), h('b', null, names.white), h('div.accnum', null, w.acc.toFixed(1))), h('div.muted.small', null, 'Accuracy'), h('div.acc', null, h('span.cdot.black'), h('b', null, names.black), h('div.accnum', null, b.acc.toFixed(1)))),
+      h('div.sum-head', null, h('div.acc', null, h('span.cdot.white'), h('b', null, names.white), h('div.accnum', null, w.acc.toFixed(1))), h('div.muted.small', null, t('Accuracy')), h('div.acc', null, h('span.cdot.black'), h('b', null, names.black), h('div.accnum', null, b.acc.toFixed(1)))),
+      h('div.sum-elo', { title: t('Estimated from the accuracy of the moves played in this game') },
+        h('div.game-elo', null, h('b', null, w.elo ? String(w.elo) : '–')), h('div.muted.small', null, t('Game rating')), h('div.game-elo', null, h('b', null, b.elo ? String(b.elo) : '–'))),
       h('div.sum-table', null, SUMMARY_ORDER.map(k => h('div.sum-row', null,
         h('span.n', null, String(w.counts[k] || 0)),
-        h('span.lab', null, h('span.badge', { style: { background: CLS[k].color } }, CLS[k].sym), CLS[k].label),
+        h('span.lab', null, h('span.badge', { style: { background: CLS[k].color } }, CLS[k].sym), t(CLS[k].label)),
         h('span.n', null, String(b.counts[k] || 0)))))));
+  }
+
+  /** centipawn loss of move i from the mover's point of view, capped like Lichess */
+  function cpLoss(i: number): number {
+    const eb = evals[i], ea = evals[i + 1];
+    if (!eb || !ea) return 0;
+    const sign = main.positions[i].turn === 'white' ? 1 : -1;
+    const cap = (v: number) => Math.max(-1000, Math.min(1000, v));
+    return Math.max(0, cap(sign * eb.cp) - cap(sign * ea.cp));
+  }
+
+  /** Performance rating estimate from accuracy and average centipawn loss (like chess.com's "Game Rating"). */
+  function gameElo(acc: number, acpl: number, moves: number): number {
+    if (moves < 5) return 0;
+    const pts: [number, number][] = [[0, 100], [40, 250], [50, 400], [60, 700], [70, 1100], [80, 1600], [85, 1900], [90, 2250], [95, 2650], [98, 2900], [100, 3100]];
+    let fromAcc = 100;
+    for (let k = 1; k < pts.length; k++) if (acc <= pts[k][0]) { const [a0, e0] = pts[k - 1], [a1, e1] = pts[k]; fromAcc = e0 + (e1 - e0) * (acc - a0) / (a1 - a0); break; }
+    const fromCpl = 3100 * Math.exp(-0.0137 * acpl);
+    // Short games say little: pull them toward an average player.
+    const conf = Math.min(1, moves / 25);
+    const est = (fromAcc * 0.6 + fromCpl * 0.4) * conf + 1500 * (1 - conf);
+    return Math.round(Math.max(100, Math.min(3200, est)) / 10) * 10;
   }
 
   function renderGraph() {
@@ -355,8 +389,8 @@ export function analysisPage(root: HTMLElement): () => void {
       dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="${CLS[r.cls].color}" stroke="#000" stroke-opacity=".3"/>`;
     });
     const cx = (cur.inVar ? (vari?.from ?? 0) : cur.ply) / n * W;
-    const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Evaluation graph"><rect width="${W}" height="${H}" class="g-black"/><path d="${path}" class="g-white"/><line x1="0" x2="${W}" y1="${H / 2}" y2="${H / 2}" class="g-mid"/><line x1="${cx}" x2="${cx}" y1="0" y2="${H}" class="g-cur"/>${dots}</svg>`;
-    const el = h('div.graph-svg', { html: svg, title: 'Click to jump to a move' });
+    const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${t('Evaluation graph')}"><rect width="${W}" height="${H}" class="g-black"/><path d="${path}" class="g-white"/><line x1="0" x2="${W}" y1="${H / 2}" y2="${H / 2}" class="g-mid"/><line x1="${cx}" x2="${cx}" y1="0" y2="${H}" class="g-cur"/>${dots}</svg>`;
+    const el = h('div.graph-svg', { html: svg, title: t('Click to jump to a move') });
     el.addEventListener('click', (e) => {
       const r = el.getBoundingClientRect();
       const ply = Math.round((e.clientX - r.left) / r.width * n);
@@ -375,20 +409,21 @@ export function analysisPage(root: HTMLElement): () => void {
     const e = evals[cur.ply];
     let text = '';
     switch (rv.cls) {
-      case 'book': text = `${san} is a book move${rv.opening ? ' · ' + rv.opening : ''}.`; break;
-      case 'brilliant': text = `${san} is brilliant! A strong sacrifice.`; break;
-      case 'great': text = `${san} is a great move — the only good option here.`; break;
-      case 'best': text = `${san} is the best move.`; break;
-      case 'forced': text = `${san} was the only legal move.`; break;
-      case 'excellent': case 'good': text = `${san} is ${rv.cls === 'good' ? 'good' : 'excellent'}. Best was ${rv.bestSan}.`; break;
-      case 'miss': text = `${san} misses the chance to punish your opponent's error. Best was ${rv.bestSan}.`; break;
-      default: text = `${san} is ${rv.cls === 'inaccuracy' ? 'an inaccuracy' : 'a ' + rv.cls}. Best was ${rv.bestSan}.`;
+      case 'book': text = t('{0} is a book move.', san) + (rv.opening ? ' ' + rv.opening : ''); break;
+      case 'brilliant': text = t('{0} is brilliant! A strong sacrifice.', san); break;
+      case 'great': text = t('{0} is a great move — the only good option here.', san); break;
+      case 'best': text = t('{0} is the best move.', san); break;
+      case 'forced': text = t('{0} was the only legal move.', san); break;
+      case 'excellent': text = t('{0} is excellent. Best was {1}.', san, rv.bestSan || ''); break;
+      case 'good': text = t('{0} is good. Best was {1}.', san, rv.bestSan || ''); break;
+      case 'miss': text = t('{0} misses the chance to punish your opponent\'s error. Best was {1}.', san, rv.bestSan || ''); break;
+      default: text = rv.cls === 'inaccuracy' ? t('{0} is an inaccuracy. Best was {1}.', san, rv.bestSan || '') : rv.cls === 'mistake' ? t('{0} is a mistake. Best was {1}.', san, rv.bestSan || '') : t('{0} is a blunder. Best was {1}.', san, rv.bestSan || '');
     }
     explain.append(h('div.explain-card', { style: { borderColor: c.color } },
       h('span.badge.big', { style: { background: c.color } }, c.sym),
-      h('div', null, h('b', { style: { color: c.color } }, c.label), h('div', null, text)),
+      h('div', null, h('b', { style: { color: c.color } }, t(c.label)), h('div', null, text)),
       e ? h('span.score', null, scoreText(e.cp)) : null,
-      rv.bestUci && !['best', 'book', 'brilliant', 'great', 'forced'].includes(rv.cls) ? btn('Show best', () => {
+      rv.bestUci && !['best', 'book', 'brilliant', 'great', 'forced'].includes(rv.cls) ? btn(t('Show best'), () => {
         const prev = main.positions[cur.ply - 1];
         const m = uciToMove(prev, rv.bestUci!);
         if (m) { cur = { inVar: false, ply: cur.ply - 1 }; userMove(m); }
@@ -401,26 +436,26 @@ export function analysisPage(root: HTMLElement): () => void {
   }
 
   function renderTools() {
-    const pgnArea = h('textarea.pgn-in', { placeholder: 'Paste a PGN or FEN here…', rows: 3, 'aria-label': 'PGN or FEN' }) as HTMLTextAreaElement;
+    const pgnArea = h('textarea.pgn-in', { placeholder: t('Paste a PGN or FEN here…'), rows: 3, 'aria-label': t('PGN or FEN') }) as HTMLTextAreaElement;
     const hist = loadRaw('history', [] as any[]);
     toolsBox.replaceChildren(
-      variantInfo(main.variant).bot ? h('div.row.wrap', null,
-        btn(h('span', null, icon('chart'), reviewed ? 'Review again' : 'Game review'), () => runReview(14), 'primary'),
-        btn('Deep review', () => runReview(18), '', 'Slower, more accurate')) : '',
-      h('details.load', null, h('summary', null, 'Load PGN / FEN, export'),
+      variantInfo(main.variant).sf ? h('div.row.wrap', null,
+        btn(h('span', null, icon('chart'), reviewed ? t('Review again') : t('Game review')), () => runReview(14), 'primary'),
+        btn(t('Deep review'), () => runReview(18), '', t('Slower, more accurate'))) : '',
+      h('details.load', null, h('summary', null, t('Load PGN / FEN, export')),
         pgnArea,
         h('div.row.wrap', null,
-          btn('Load', () => loadText(pgnArea.value)),
-          btn(h('span', null, icon('copy'), 'Copy PGN'), () => copyText(main.pgn({ White: names.white, Black: names.black }))),
-          btn(h('span', null, icon('copy'), 'Copy FEN'), () => copyText(fenOf(curPos()))),
-          h('a.btn', { href: '#/editor/' + encodeURIComponent(fenOf(curPos())) }, icon('edit'), 'Edit position'))),
-      hist.length ? h('details.load', null, h('summary', null, 'Your recent games'),
+          btn(t('Load'), () => loadText(pgnArea.value)),
+          btn(h('span', null, icon('copy'), t('Copy PGN')), () => copyText(main.pgn({ White: names.white, Black: names.black }))),
+          btn(h('span', null, icon('copy'), t('Copy FEN')), () => copyText(fenOf(curPos()))),
+          h('a.btn', { href: '#/editor/' + encodeURIComponent(fenOf(curPos())) }, icon('edit'), t('Edit position')))),
+      hist.length ? h('details.load', null, h('summary', null, t('Your recent games')),
         h('div.hist', null, hist.map((g: any) => h('button.hist-item', {
           type: 'button', onclick: () => {
-            setAnalysisInput({ variant: g.variant, startFen: g.fen, ucis: g.ucis, white: g.w, black: g.b, orientation: g.b === 'You' ? 'black' : 'white' });
+            setAnalysisInput({ variant: g.variant, startFen: g.fen, ucis: g.ucis, white: g.w, black: g.b, orientation: g.my || 'white' });
             route();
           },
-        }, h('b', null, `${g.w} vs ${g.b}`), h('span.muted.small', null, ` ${variantInfo(g.variant).name} · ${g.r === 'draw' ? '½–½' : g.r === 'white' ? '1–0' : g.r === 'black' ? '0–1' : '*'} · ${Math.ceil(g.ucis.length / 2)} moves · ${new Date(g.d).toLocaleDateString()}`))))) : '');
+        }, h('b', null, `${g.w} – ${g.b}`), h('span.muted.small', null, ` ${t(variantInfo(g.variant).name)} · ${g.r === 'draw' ? '½–½' : g.r === 'white' ? '1–0' : g.r === 'black' ? '0–1' : '*'} · ${t('{0} moves', Math.ceil(g.ucis.length / 2))} · ${new Date(g.d).toLocaleDateString()}`))))) : '');
   }
 
   const route = () => go('analysis');
@@ -443,7 +478,7 @@ export function analysisPage(root: HTMLElement): () => void {
       if (!g) throw new Error('No game found');
       const variantH = (g.headers.get('Variant') || '').toLowerCase();
       const variant: VariantKey = variantH.includes('960') ? 'chess960' : 'standard';
-      if (variantH && !variantH.includes('960') && variantH !== 'standard' && variantH !== 'from position') { toast('Only standard and Chess960 games can be analyzed.'); return; }
+      if (variantH && !variantH.includes('960') && variantH !== 'standard' && variantH !== 'from position') { toast(t('Only standard and Chess960 games can be analyzed.')); return; }
       const sp = startingPosition(g.headers);
       if (sp.isErr) throw new Error('Bad starting position');
       const pos = sp.value;
@@ -459,7 +494,7 @@ export function analysisPage(root: HTMLElement): () => void {
       }
       setAnalysisInput({ variant, startFen, ucis, white: g.headers.get('White') || 'White', black: g.headers.get('Black') || 'Black' });
       route();
-    } catch (e: any) { toast('Could not read that PGN: ' + (e?.message || 'invalid')); }
+    } catch (e: any) { toast(t('Could not read that PGN: ') + (e?.message || 'invalid')); }
   }
 
   function update() {
@@ -507,6 +542,6 @@ export function analysisPage(root: HTMLElement): () => void {
 
   renderTools();
   update();
-  if (input.autoReview && variantInfo(main.variant).bot && main.ply) { input.autoReview = false; runReview(14); }
+  if (input.autoReview && variantInfo(main.variant).sf && main.ply) { input.autoReview = false; runReview(14); }
   return cleanup;
 }

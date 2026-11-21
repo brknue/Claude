@@ -4,6 +4,7 @@ import { Game } from '../game';
 import { posFromFen, uciToMove, fenOf, moveSquares, Position, Move, Color } from '../chess';
 import { setAnalysisInput } from './analysis';
 import { go } from '../main';
+import { t } from '../i18n';
 
 type Raw = [string, string, string, number, string];
 interface Puzzle { id: string; fen: string; moves: string[]; rating: number; themes: string[] }
@@ -11,7 +12,7 @@ interface PState {
   rating: number; games: number; wins: number; streak: number; bestStreak: number; bestRun: number;
   seen: string[]; hist: { id: string; r: number; win: boolean; d: number; pr: number }[]; theme: string; mode: 'rated' | 'streak'; autoNext: boolean;
 }
-const DEF: PState = { rating: 1000, games: 0, wins: 0, streak: 0, bestStreak: 0, bestRun: 0, seen: [], hist: [], theme: 'mix', mode: 'rated', autoNext: false };
+const DEF: PState = { rating: 1500, games: 0, wins: 0, streak: 0, bestStreak: 0, bestRun: 0, seen: [], hist: [], theme: 'mix', mode: 'rated', autoNext: false };
 const state: PState = { ...DEF, ...loadRaw('puzzle', DEF) };
 const persist = () => save('puzzle', state);
 export const puzzleRating = () => state.rating;
@@ -24,7 +25,7 @@ export const THEMES: [string, string][] = [
   ['promotion', 'Promotion'], ['advancedPawn', 'Advanced pawn'], ['endgame', 'Endgame'], ['rookEndgame', 'Rook endgame'], ['pawnEndgame', 'Pawn endgame'],
   ['queenEndgame', 'Queen endgame'], ['knightEndgame', 'Knight endgame'], ['bishopEndgame', 'Bishop endgame'], ['zugzwang', 'Zugzwang'], ['crushing', 'Crushing'], ['equality', 'Equalize'],
 ];
-const themeName = (t: string) => THEMES.find(x => x[0] === t)?.[1] || t.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase());
+const themeName = (k: string) => t(THEMES.find(x => x[0] === k)?.[1] || k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()));
 
 let bandIndex: Promise<Record<string, number>> | null = null;
 const bands = new Map<number, Promise<Puzzle[]>>();
@@ -62,7 +63,7 @@ export function puzzlesPage(root: HTMLElement) {
   let positions: Position[] = [];
   let moves: Move[] = [];
   let step = 0;             // index in pz.moves of the next expected move
-  let failed = false, done = false, rated = false, hintUsed = 0;
+  let failed = false, done = false, rated = false, hintUsed = 0, solutionShown = false;
   let viewPly: number | null = null;
   let alive = true;
   let streakRun = 0;
@@ -79,25 +80,25 @@ export function puzzlesPage(root: HTMLElement) {
   root.append(h('div.game-layout.puzzles', null,
     h('div.board-col', null, topBar, board.el),
     h('aside.side.card', null, stats, info, feedback, controls,
-      h('div.navrow', null, iconBtn('prev', 'Back', () => stepView(-1)), iconBtn('next', 'Forward', () => stepView(1)), iconBtn('flip', 'Flip', () => board.flip())))));
+      h('div.navrow', null, iconBtn('prev', t('Back'), () => stepView(-1)), iconBtn('next', t('Forward'), () => stepView(1)), iconBtn('flip', t('Flip'), () => board.flip())))));
 
   const userColor = (): Color => (positions[0] ? (positions[0].turn === 'white' ? 'black' : 'white') : 'white');
 
   async function next() {
     if (busy) return;
     busy = true;
-    feedback.replaceChildren(h('div.spinner-row', null, h('span.spinner'), 'Loading puzzle…'));
+    feedback.replaceChildren(h('div.spinner-row', null, h('span.spinner'), t('Loading puzzle…')));
     const target = state.mode === 'streak' ? 500 + streakRun * 60 : state.rating;
     let p: Puzzle | null = null;
     try { p = await pickPuzzle(target, state.mode === 'streak' ? 'mix' : state.theme, new Set(state.seen)); }
-    catch { feedback.replaceChildren(h('p.err', null, 'Could not load puzzles. If you are offline, open the site once while online so they can be saved.')); busy = false; return; }
+    catch { feedback.replaceChildren(h('p.err', null, t('Could not load puzzles. If you are offline, open the site once while online so they can be saved.'))); busy = false; return; }
     busy = false;
     if (!alive || !p) return;
     load(p);
   }
 
   function load(p: Puzzle) {
-    pz = p; failed = false; done = false; rated = false; hintUsed = 0; viewPly = null;
+    pz = p; failed = false; done = false; rated = false; hintUsed = 0; solutionShown = false; viewPly = null;
     const start = posFromFen(p.fen);
     if (!start) { next(); return; }
     positions = [start]; moves = []; step = 0;
@@ -145,7 +146,7 @@ export function puzzlesPage(root: HTMLElement) {
       board.showMove(pos, m, played, false);
       sound.bad();
       if (!failed) { failed = true; finishRating(false); }
-      feedback.replaceChildren(h('div.fb.bad', null, h('b', null, '✕ Not the move'), h('span', null, state.mode === 'streak' ? 'Streak over!' : 'Try again, or view the solution.')));
+      feedback.replaceChildren(h('div.fb.bad', null, h('b', null, t('✕ Not the move')), h('span', null, state.mode === 'streak' ? t('Streak over!') : t('Try again, or view the solution.'))));
       if (state.mode === 'streak') { streakOver = true; done = true; }
       setTimeout(() => { if (alive && pz) { sync(); render(); } }, 700);
       return;
@@ -153,7 +154,7 @@ export function puzzlesPage(root: HTMLElement) {
     positions.push(played); moves.push(m); step++;
     board.showMove(pos, m, played, false);
     if (step >= pz.moves.length || played.isCheckmate()) { solved(); return; }
-    feedback.replaceChildren(h('div.fb.good', null, h('b', null, '✓ Best move!'), h('span', null, 'Keep going…')));
+    feedback.replaceChildren(h('div.fb.good', null, h('b', null, t('✓ Best move!')), h('span', null, t('Keep going…'))));
     setTimeout(() => {
       if (!alive || pz === null || done) return;
       playSolutionMove();
@@ -207,7 +208,7 @@ export function puzzlesPage(root: HTMLElement) {
   function showSolution() {
     if (!pz) return;
     if (!failed) { failed = true; finishRating(false); }
-    done = true;
+    done = true; solutionShown = true;
     const run = () => {
       if (!alive || !pz || step >= pz.moves.length) { sync(); render(); return; }
       playSolutionMove(); sync(); render();
@@ -225,39 +226,44 @@ export function puzzlesPage(root: HTMLElement) {
     const spark = recent.length > 1 ? sparkline(recent.map(x => x.r)) : '';
     stats.replaceChildren(
       h('div.pz-mode.seg', null,
-        h('button', { type: 'button', class: state.mode === 'rated' ? 'on' : '', onclick: () => { if (state.mode !== 'rated') { state.mode = 'rated'; persist(); next(); } render(); } }, 'Rated'),
-        h('button', { type: 'button', class: state.mode === 'streak' ? 'on' : '', onclick: () => { if (state.mode !== 'streak') { state.mode = 'streak'; streakRun = 0; streakOver = false; persist(); next(); } render(); } }, icon('fire'), 'Streak')),
+        h('button', { type: 'button', class: state.mode === 'rated' ? 'on' : '', onclick: () => { if (state.mode !== 'rated') { state.mode = 'rated'; persist(); next(); } render(); } }, t('Rated')),
+        h('button', { type: 'button', class: state.mode === 'streak' ? 'on' : '', onclick: () => { if (state.mode !== 'streak') { state.mode = 'streak'; streakRun = 0; streakOver = false; persist(); next(); } render(); } }, icon('fire'), t('Streak'))),
       state.mode === 'rated'
         ? h('div.pz-rating', null,
-          h('div', null, h('div.muted.small', null, 'Puzzle rating'), h('div.rating-num', null, String(Math.round(state.rating)), rated && lastDelta ? h('span.delta', { class: lastDelta > 0 ? 'up' : 'down' }, (lastDelta > 0 ? '+' : '') + lastDelta) : null)),
+          h('div', null, h('div.muted.small', null, t('Puzzle rating')), h('div.rating-num', null, String(Math.round(state.rating)), rated && lastDelta ? h('span.delta', { class: lastDelta > 0 ? 'up' : 'down' }, (lastDelta > 0 ? '+' : '') + lastDelta) : null)),
           h('div.spark', { html: spark }),
-          h('div.mini-stats', null, h('div', null, h('b', null, String(state.games)), h('span', null, 'played')), h('div', null, h('b', null, state.games ? Math.round(state.wins / state.games * 100) + '%' : '–'), h('span', null, 'solved')), h('div', null, h('b', null, String(state.streak)), h('span', null, 'streak'))))
-        : h('div.pz-rating', null, h('div', null, h('div.muted.small', null, 'Current streak'), h('div.rating-num', null, String(streakRun))), h('div.mini-stats', null, h('div', null, h('b', null, String(state.bestRun)), h('span', null, 'best')))),
-      state.mode === 'rated' ? h('label.field', null, h('span.lbl', null, 'Theme'), h('select', { onchange: (e: any) => { state.theme = e.target.value; persist(); next(); } }, THEMES.map(([k, n]) => h('option', { value: k, selected: state.theme === k }, n)))) : '');
+          h('div.mini-stats', null, h('div', null, h('b', null, String(state.games)), h('span', null, t('played'))), h('div', null, h('b', null, state.games ? Math.round(state.wins / state.games * 100) + '%' : '–'), h('span', null, t('solved'))), h('div', null, h('b', null, String(state.streak)), h('span', null, t('streak')))))
+        : h('div.pz-rating', null, h('div', null, h('div.muted.small', null, t('Current streak')), h('div.rating-num', null, String(streakRun))), h('div.mini-stats', null, h('div', null, h('b', null, String(state.bestRun)), h('span', null, t('best'))))),
+      state.mode === 'rated' ? h('label.field', null, h('span.lbl', null, t('Theme')), h('select', { onchange: (e: any) => { state.theme = e.target.value; persist(); next(); } }, THEMES.map(([k, n]) => h('option', { value: k, selected: state.theme === k }, t(n))))) : '');
 
     if (!pz) { info.replaceChildren(); return; }
     const col = userColor();
-    topBar.replaceChildren(h('div.pz-turn', null, h('span.cdot.' + col), done ? (failed ? 'Puzzle failed' : 'Puzzle solved!') : `Find the best move for ${col}`));
+    topBar.replaceChildren(h('div.pz-turn', null, h('span.cdot.' + col), done ? (solutionShown || streakOver ? t('Puzzle failed') : t('Puzzle solved!')) : (col === 'white' ? t('Find the best move for White') : t('Find the best move for Black'))));
     info.replaceChildren(done || failed
-      ? h('div.pz-meta', null, h('div', null, 'Puzzle ', h('b', null, '#' + pz.id), ' · rated ', h('b', null, String(pz.rating))), h('div.tags', null, pz.themes.slice(0, 6).map(t => h('span.tag', null, themeName(t)))))
-      : h('div.pz-meta.muted.small', null, state.mode === 'rated' ? (state.theme === 'mix' ? 'Rated puzzle' : themeName(state.theme)) : `Streak puzzle ${streakRun + 1}`));
-    if (done) feedback.replaceChildren(h('div.fb', { class: failed ? 'bad' : 'good' }, h('b', null, failed ? (streakOver ? `Streak over · ${streakRun} solved` : 'Solution shown') : '✓ Solved!'), h('span', null, failed ? '' : 'Well played.')));
+      ? h('div.pz-meta', null, h('div', null, t('Puzzle') + ' ', h('b', null, '#' + pz.id), ' · ' + t('rated') + ' ', h('b', null, String(pz.rating))), h('div.tags', null, pz.themes.slice(0, 6).map(th => h('span.tag', null, themeName(th)))))
+      : h('div.pz-meta.muted.small', null, state.mode === 'rated' ? (state.theme === 'mix' ? t('Rated puzzle') : themeName(state.theme)) : t('Streak puzzle {0}', streakRun + 1)));
+    if (done) {
+      const bad = solutionShown || streakOver;
+      feedback.replaceChildren(h('div.fb', { class: bad ? 'bad' : 'good' },
+        h('b', null, streakOver ? t('Streak over · {0} solved', streakRun) : solutionShown ? t('Solution shown') : '✓ ' + t('Correct!')),
+        h('span', null, bad ? '' : failed ? t('Solved, but not on the first try, so it counts as a miss for your rating.') : t('Well played.'))));
+    }
     else if (!failed && step <= 1) feedback.replaceChildren();
     const c: HTMLElement[] = [];
     if (!done) {
-      c.push(btn(h('span', null, icon('bulb'), 'Hint'), hint, '', 'Hints count as a failed puzzle for rating'));
-      c.push(btn(h('span', null, icon('eye'), 'Solution'), showSolution));
+      c.push(btn(h('span', null, icon('bulb'), t('Hint')), hint, '', t('Hints count as a failed puzzle for rating')));
+      c.push(btn(h('span', null, icon('eye'), t('Solution')), showSolution));
     } else {
-      if (streakOver) c.push(btn(h('span', null, icon('fire'), 'New streak'), () => { streakRun = 0; streakOver = false; next(); }, 'primary'));
-      else c.push(btn(h('span', null, icon('next'), 'Next puzzle'), next, 'primary'));
-      if (!streakOver) c.push(btn(h('span', null, icon('retry'), 'Retry'), retry));
-      c.push(btn(h('span', null, icon('chart'), 'Analyze'), () => {
+      if (streakOver) c.push(btn(h('span', null, icon('fire'), t('New streak')), () => { streakRun = 0; streakOver = false; next(); }, 'primary'));
+      else c.push(btn(h('span', null, icon('next'), t('Next puzzle')), next, 'primary'));
+      if (!streakOver) c.push(btn(h('span', null, icon('retry'), t('Retry')), retry));
+      c.push(btn(h('span', null, icon('chart'), t('Analyze')), () => {
         const g = new Game('standard', pz!.fen); for (const u of pz!.moves) if (!g.playUci(u)) break;
         setAnalysisInput({ variant: 'standard', startFen: pz!.fen, ucis: g.ucis.slice(), orientation: userColor(), ply: 1 });
         go('analysis');
       }));
     }
-    if (state.mode === 'rated') c.push(h('label.check.small', null, h('input', { type: 'checkbox', checked: state.autoNext, onchange: (e: any) => { state.autoNext = e.target.checked; persist(); } }), 'Auto-next'));
+    if (state.mode === 'rated') c.push(h('label.check.small', null, h('input', { type: 'checkbox', checked: state.autoNext, onchange: (e: any) => { state.autoNext = e.target.checked; persist(); } }), t(t(t('Auto-next')))));
     controls.replaceChildren(...c);
   }
 

@@ -1,4 +1,5 @@
 /** Tiny DOM helpers, settings, toasts, modals and synthesized sounds. */
+import { t } from './i18n';
 
 type Child = Node | string | number | null | undefined | false | Child[];
 type Attrs = Record<string, any> | null;
@@ -31,9 +32,9 @@ export const $ = (sel: string, root: ParentNode = document) => root.querySelecto
 // ---------- Settings ----------
 export interface Settings {
   theme: 'system' | 'light' | 'dark'; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
-  name: string; lastElo: number; animation: boolean; premove: boolean;
+  name: string; lastElo: number; animation: boolean; premove: boolean; points: boolean; lang: string;
 }
-const DEFAULTS: Settings = { theme: 'system', board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true, premove: true };
+const DEFAULTS: Settings = { theme: 'system', board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true, premove: true, points: true, lang: '' };
 
 export function load<T>(key: string, def: T): T {
   try { const v = localStorage.getItem('rs.' + key); return v ? { ...def as any, ...JSON.parse(v) } : def; } catch { return def; }
@@ -76,14 +77,26 @@ export function modal(content: HTMLElement, opts: { onClose?: () => void; dismis
 }
 
 export async function copyText(text: string) {
-  try { await navigator.clipboard.writeText(text); toast('Copied to clipboard'); }
+  try { await navigator.clipboard.writeText(text); toast(t('Copied to clipboard')); }
   catch {
     const ta = h('textarea', { value: text, style: { position: 'fixed', opacity: '0' } }) as HTMLTextAreaElement;
     document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); toast('Copied to clipboard'); } catch { toast('Copy failed'); }
+    try { document.execCommand('copy'); toast(t('Copied to clipboard')); } catch { toast(t('Copy failed')); }
     ta.remove();
   }
 }
+
+/** Floating offer banners (draw / takeback / rematch / challenges), visible on every screen size. */
+export function offerBar(kind: string, text: string, buttons: HTMLElement[]) {
+  let wrap = document.getElementById('offers');
+  if (!wrap) { wrap = h('div', { id: 'offers' }); document.body.appendChild(wrap); }
+  wrap.querySelectorAll(`[data-kind="${kind}"]`).forEach(e => e.remove());
+  const el = h('div.offer', { 'data-kind': kind, role: 'alert' }, h('span', null, text), h('div.offer-btns', null, buttons));
+  wrap.appendChild(el);
+  sound.low();
+  return el;
+}
+export function clearOffers(kind?: string) { document.querySelectorAll(kind ? `#offers [data-kind="${kind}"]` : '#offers .offer').forEach(e => e.remove()); }
 
 // ---------- Sounds (WebAudio, no assets so it works offline) ----------
 let ctx: AudioContext | null = null;

@@ -5,10 +5,12 @@
  *   the one who gets it waits, the next one connects to it, then the lobby id is released.
  */
 import Peer, { DataConnection } from 'peerjs';
+import { t } from './i18n';
 
 export type Msg =
-  | { t: 'hello'; name: string; v: number }
-  | { t: 'start'; variant: string; fen: string; time: number; inc: number; hostColor: 'white' | 'black'; name: string }
+  | { t: 'hello'; name: string; v: number; uid?: string; rating?: number }
+  | { t: 'start'; variant: string; fen: string; time: number; inc: number; hostColor: 'white' | 'black'; name: string; uid?: string; rating?: number; rated?: boolean }
+  | { t: 'gid'; id: string } | { t: 'gid-ok'; rated: boolean }
   | { t: 'move'; uci: string; clock?: number; ply: number }
   | { t: 'resign' } | { t: 'draw-offer' } | { t: 'draw-accept' } | { t: 'draw-decline' }
   | { t: 'flag'; color: 'white' | 'black' } | { t: 'rematch' } | { t: 'rematch-accept' }
@@ -110,7 +112,7 @@ export class Link {
         if (peer.disconnected) { setTimeout(attempt, 1500); return; }
         const c = peer.connect(this.target, CONN_OPTS);
         let ok = false;
-        const to = setTimeout(() => { if (!ok) { try { c.close(); } catch { /* */ } onStatus('Waiting for your friend’s device…'); setTimeout(attempt, 1000); } }, 9000);
+        const to = setTimeout(() => { if (!ok) { try { c.close(); } catch { /* */ } onStatus(t('Waiting for your friend’s device…')); setTimeout(attempt, 1000); } }, 9000);
         c.on('open', () => {
           ok = true; clearTimeout(to);
           if (done) return;
@@ -122,9 +124,9 @@ export class Link {
       peer.on('open', () => attempt());
       peer.on('error', (e: any) => {
         if (done) return;
-        if (e?.type === 'peer-unavailable') { onStatus('Waiting for your friend’s device… (keep their Rookstorm tab open)'); setTimeout(attempt, 2500); }
-        else if (['network', 'server-error', 'socket-error', 'socket-closed', 'disconnected'].includes(e?.type)) { onStatus('Connection problem, retrying…'); setTimeout(attempt, 3000); }
-        else if (e?.type === 'browser-incompatible') fail('This browser does not support peer-to-peer connections.');
+        if (e?.type === 'peer-unavailable') { onStatus(t('Waiting for your friend’s device… (keep their Rookstorm tab open)')); setTimeout(attempt, 2500); }
+        else if (['network', 'server-error', 'socket-error', 'socket-closed', 'disconnected'].includes(e?.type)) { onStatus(t('Connection problem, retrying…')); setTimeout(attempt, 3000); }
+        else if (e?.type === 'browser-incompatible') fail(t('This browser does not support peer-to-peer connections.'));
         else { setTimeout(attempt, 3000); }
       });
     });
@@ -156,12 +158,12 @@ export class Link {
       let finished = false;
       const attempt = (n: number) => {
         if (this.closed || finished) return;
-        if (n > 12) { reject(new Error('Could not reach the matchmaking server.')); return; }
-        onStatus('Looking for an opponent…');
+        if (n > 12) { reject(new Error(t('Could not reach the matchmaking server.'))); return; }
+        onStatus(t('Looking for an opponent…'));
         const p = new Peer(lobby, PEER_OPTS);
         this.peer = p;
         p.on('open', () => {
-          onStatus('Waiting for an opponent to join…');
+          onStatus(t('Waiting for an opponent to join…'));
           p.on('connection', (c) => {
             if (this.conn || finished) { c.on('open', () => { c.send({ t: 'busy' }); setTimeout(() => c.close(), 200); }); return; }
             finished = true;
