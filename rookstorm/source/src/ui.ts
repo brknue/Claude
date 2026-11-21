@@ -150,6 +150,11 @@ export function fmtClock(ms: number): string {
   return (hr ? hr + ':' + String(m).padStart(2, '0') : m) + ':' + String(sec).padStart(2, '0');
 }
 
+/** Native helpers when running inside the Rookstorm Android app (null in a normal browser). */
+export const appBridge: { share(title: string, text: string, url: string): void; saveFile(name: string, mime: string, content: string): boolean } | null =
+  (window as any).RookstormAndroid || null;
+export const inApp = !!appBridge || /RookstormApp/.test(navigator.userAgent);
+
 export const icon = (name: string) => {
   const paths: Record<string, string> = {
     flip: 'M7 4v13l-3-3M17 20V7l3 3',
@@ -169,6 +174,7 @@ export const icon = (name: string) => {
     user: 'M12 3a4 4 0 100 8 4 4 0 000-8zM4 21v-1a7 7 0 0114 0v1',
     party: 'M12 2.5a2 2 0 100 4 2 2 0 000-4zM12 17.5a2 2 0 100 4 2 2 0 000-4zM2.5 12a2 2 0 104 0 2 2 0 00-4 0zM17.5 12a2 2 0 104 0 2 2 0 00-4 0zM8 8h8v8H8z',
     fire: 'M12 22a7 7 0 007-7c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-2 2-5 5-5 8a7 7 0 007 7z', check: 'M5 12l5 5L20 7',
+    phone: 'M7 2h10v20H7zM11 18h2',
   };
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic'); s.setAttribute('aria-hidden', 'true');

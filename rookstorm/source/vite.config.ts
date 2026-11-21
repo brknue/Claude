@@ -20,6 +20,7 @@ export default defineConfig({
       runtimeCaching: [{ urlPattern: /engine\/sf-asm\.js$/, handler: 'CacheFirst', options: { cacheName: 'rs-engine-fallback' } }],
       maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
       navigateFallback: 'index.html',
+      navigateFallbackDenylist: [/\.apk$/],
       cleanupOutdatedCaches: true
     }
   })]

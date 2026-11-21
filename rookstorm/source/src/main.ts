@@ -1,7 +1,7 @@
 import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.cburnett.css';
 import './style.css';
-import { h, icon, settings, saveSettings, applyTheme, modal, btn, offerBar, clearOffers, toast } from './ui';
+import { h, icon, settings, saveSettings, applyTheme, modal, btn, offerBar, clearOffers, toast, appBridge, inApp } from './ui';
 import { t, LANGS, setLang, detectLang } from './i18n';
 import { accountPage, profilePage, friendsPage, watchPage, legalPage } from './pages/social';
 import { me, initAccount, onAccount, onChallenges, accountsEnabled, rpc, niceError, Challenge } from './account';
@@ -130,7 +130,8 @@ function homePage(root: HTMLElement) {
         h('div.row.wrap', null,
           h('a.btn.primary.big', { href: '#/play' }, icon('cpu'), t('Play the bot')),
           h('a.btn.big', { href: '#/play/online' }, icon('globe'), t('Play online')),
-          h('a.btn.big', { href: '#/puzzles' }, icon('puzzle'), t('Puzzles')))),
+          h('a.btn.big', { href: '#/puzzles' }, icon('puzzle'), t('Puzzles')),
+          !inApp && /Android/i.test(navigator.userAgent) ? h('a.btn.big', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Android app')) : null)),
       h('div.hero-board', { 'aria-hidden': 'true', html: heroBoard() })),
     h('section.features', null,
       card('play', 'cpu', t('Bot at any Elo'), t('Type a rating from 100 to 3200. Stockfish adapts, from beginner to engine strength.')),
@@ -142,8 +143,10 @@ function homePage(root: HTMLElement) {
       card('analysis', 'chart', t('Game review'), t('Accuracy, game rating, blunders, mistakes, brilliant moves and the best alternatives.')),
       card('editor', 'edit', t('Board editor'), t('Set up any position and ask the engine for the best move.'))),
     h('p.footer-note', null, t('Engine: Stockfish 17.1 (GPLv3). Openings and puzzles: lichess.org open databases (CC0).'), ' ',
-      h('a', { href: '#/privacy' }, t('Privacy policy')), ' · ', h('a', { href: '#/terms' }, t('Terms'))));
+      h('a', { href: '#/privacy' }, t('Privacy policy')), ' · ', h('a', { href: '#/terms' }, t('Terms')),
+      inApp ? null : [' · ', h('a', { href: APK, download: 'rookstorm.apk' }, t('Android app'))]));
 }
+const APK = 'rookstorm.apk';
 
 function heroBoard(): string {
   const pos = 'r1bqk2r/pppp1Bpp/2n2n2/2b1p3/4P3/5N2/PPPP1PPP/RNBQK2R';
@@ -197,6 +200,11 @@ function showChallenges(list: Challenge[]) {
 }
 
 async function init() {
+  // Inside the Android app the WebView has no Web Share API: route it to Android's share sheet.
+  const bridge = appBridge;
+  if (bridge && !(navigator as any).share) {
+    (navigator as any).share = (d: { title?: string; text?: string; url?: string }) => { bridge.share(d.title || '', d.text || '', d.url || ''); return Promise.resolve(); };
+  }
   applyTheme();
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
   await setLang(detectLang(settings.lang));

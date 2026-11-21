@@ -4,6 +4,8 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 
 **Play:** https://brknue.github.io/Claude/rookstorm/
 
+**Android app:** [rookstorm.apk](https://brknue.github.io/Claude/rookstorm/rookstorm.apk) (free, not from the Play Store: Android asks you to allow installing it). It opens the live site full screen, so app players and website players are matched with each other and the app updates together with the site. On iPhone use Safari → Share → Add to Home Screen.
+
 ## Features
 
 - **Bot at any Elo (100–3200).** Type a rating. From 1320 up, Stockfish's calibrated `UCI_Elo` limiter is used; below that, a human-like error model picks among Stockfish's top lines. 3200 is full strength. Standard and Chess960.
@@ -27,6 +29,7 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 - Engine: Stockfish 17.1 lite, single-threaded WebAssembly (no special server headers needed). Browsers without WebAssembly SIMD (e.g. iPads before iOS 16.4) automatically get Stockfish's pure-JavaScript build (`engine/sf-asm.js`, downloaded only when needed).
 - Offline: a service worker caches everything (about 11 MB), including the engine and all puzzles.
 - Friend and online games run peer-to-peer over WebRTC through the free PeerJS signalling server (`0.peerjs.com`). That is the only external service, and it is contacted only when you start a friend or online game. Matchmaking needs no server either: players race to claim a lobby ID per variant and time control.
+- Android app (`source/android/`): a tiny WebView wrapper (about 20 KB) that loads the live site and adds Android's share sheet and saving to Downloads. Built without Android Studio by `source/android/build.sh` (needs a JDK and the Android build-tools + platform packages).
 - Settings, puzzle rating and recent games are stored only in this browser (`localStorage` keys start with `rs.`).
 
 ## Source and rebuilding

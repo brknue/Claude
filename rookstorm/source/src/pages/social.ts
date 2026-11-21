@@ -1,5 +1,5 @@
 /** Account, profile, friends, live watching and legal pages. */
-import { h, icon, btn, toast, modal, copyText } from '../ui';
+import { h, icon, btn, toast, modal, copyText, appBridge } from '../ui';
 import { t, fmtDate } from '../i18n';
 import {
   me, accountsEnabled, signIn, signUp, signOut, resetPassword, newRecoveryCode, changePassword, deleteAccount,
@@ -262,7 +262,9 @@ function settingsCard() {
       btn(h('span', null, icon('copy'), t('Download my data')), async () => {
         try {
           const data = await rpc('export_my_data');
-          const a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })), download: `rookstorm-${me!.username}.json` }) as HTMLAnchorElement;
+          const name = `rookstorm-${me!.username}.json`, json = JSON.stringify(data, null, 2);
+          if (appBridge?.saveFile(name, 'application/json', json)) { toast(t('Saved to Downloads')); return; }
+          const a = h('a', { href: URL.createObjectURL(new Blob([json], { type: 'application/json' })), download: name }) as HTMLAnchorElement;
           document.body.append(a); a.click(); a.remove();
         } catch (e) { toast(niceError(e)); }
       }),
