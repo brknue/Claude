@@ -13,7 +13,7 @@ window.PLAIN_FILES = {
    "rookstorm/assets/hi-C8Waits6.js",
    "rookstorm/assets/id-BU4SLLr-.js",
    "rookstorm/assets/index-CfSCdyoC.css",
-   "rookstorm/assets/index-DnQ8BKro.js",
+   "rookstorm/assets/index-DpFovxoT.js",
    "rookstorm/assets/it-BDqvfos8.js",
    "rookstorm/assets/ja-C9oz5mmg.js",
    "rookstorm/assets/ko-C4swbWLZ.js",
@@ -119,7 +119,7 @@ window.PLAIN_FILES = {
    "rookstorm/sw.js",
    "rookstorm/workbox-ebea30cf.js"
   ],
-  "bytes": 23632144
+  "bytes": 23635005
  },
  "bio-genetik": {
   "files": [

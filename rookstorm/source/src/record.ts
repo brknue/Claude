@@ -58,7 +58,7 @@ export class Recorder {
     try {
       let info = await rpc<FinishInfo>('finish_game', { p_id: this.id, p_result: result, p_reason: reason.slice(0, 80), p_moves: ucis.join(' ') });
       // Rated games settle when both players have reported: check back briefly for the rating change.
-      for (let i = 0; i < 4 && info?.status === 'live'; i++) {
+      for (let i = 0; i < 10 && info?.status === 'live'; i++) {
         await new Promise(r => setTimeout(r, 1500));
         const g = await rpc<any>('get_game', { p_id: this.id });
         if (g) info = { status: g.status, result: g.result, white_diff: g.white_diff, black_diff: g.black_diff, white_rating: g.white_rating, black_rating: g.black_rating };

@@ -50,9 +50,9 @@ npm run build    # writes source/dist; copy its contents to rookstorm/ to publis
 
 Because it bundles GPL code, Rookstorm is released under GPLv3.
 
-## Accounts (optional)
+## Accounts
 
-Accounts — saved ratings (everyone starts at 1500 in every mode), friends, rated friend games (tick "Rated game"), challenges, watching friends' live games and reviewing their games — are built in and stay hidden until a database is connected:
+Sign up with a username and password (no e-mail; a recovery code resets a forgotten password). Accounts give saved ratings (everyone starts at 1500 in every mode), friends, rated friend games (tick "Rated game"), challenges, watching friends' live games, and friends' game history with analysis. The live site uses its own Supabase project; to run your own copy:
 
 1. Create a free Supabase project (region Central EU / Frankfurt).
 2. Run [`source/supabase/schema.sql`](source/supabase/schema.sql) in the SQL editor.

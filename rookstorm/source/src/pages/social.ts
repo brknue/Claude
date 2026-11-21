@@ -291,8 +291,11 @@ export function friendsPage(root: HTMLElement) {
     list.replaceChildren(...out2);
   }
   load();
-  const iv = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 20000);
-  return () => { alive = false; clearInterval(iv); };
+  const iv = setInterval(() => { if (document.visibilityState === 'visible') load(); }, 15000);
+  const onVis = () => { if (document.visibilityState === 'visible') load(); };
+  document.addEventListener('visibilitychange', onVis);
+  window.addEventListener('focus', onVis);
+  return () => { alive = false; clearInterval(iv); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('focus', onVis); };
 }
 
 /** Pick game settings and send a challenge to a friend. */

@@ -122,7 +122,10 @@ export async function changePassword(password: string) {
 export async function deleteAccount() {
   await rpc('delete_account');
   const c = await sb();
-  await c.auth.signOut().catch(() => {});
+  // The account no longer exists on the server: just forget the session stored in this browser.
+  try { c.auth.stopAutoRefresh(); } catch { /* */ }
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* */ }
+  clientP = null;
   setMe(null);
   stopLive();
 }
