@@ -424,7 +424,7 @@ details.load[open] > *:not(summary) { margin-top: 8px; }
 @media (orientation: landscape) and (max-height: 540px) {
   .topbar { position: static; padding-top: 6px; padding-bottom: 6px; }
   .tabbar { display: none !important; }
-  main { padding: 10px 12px 16px !important; }
+  main { padding: 10px max(12px, env(safe-area-inset-right)) 16px max(12px, env(safe-area-inset-left)) !important; }
   #toasts { bottom: 16px !important; }
   .game-layout { grid-template-columns: auto minmax(240px, 1fr); gap: 12px; }
   .board-col, .page-game .board-col, .page-puzzles .board-col, .page-editor .board-col { width: calc(100vh - 40px); width: calc(100dvh - 40px); max-width: none; min-width: 0; }
@@ -738,3 +738,25 @@ html { scroll-padding-top: 76px; }
 .hint-badge { display: inline-flex; align-items: center; gap: 2px; padding: 1px 7px; border-radius: 9px; background: var(--gold-soft); color: var(--text); font-size: .75rem; font-weight: 700; white-space: nowrap; }
 .hist-item .hint-badge { margin-inline-start: 6px; }
 .rating-privacy { margin-top: 12px; max-width: 320px; }
+
+/* ---------- installed on iPhone (status bar overlays the page) and notch / rounded corners ---------- */
+.topbar { padding-top: max(10px, env(safe-area-inset-top)); padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+main { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+@media (max-width: 760px) {
+  .topbar { padding-top: max(8px, env(safe-area-inset-top)); padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  main { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+}
+@media (max-width: 440px) { .topbar { padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); } }
+.standalone body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+.standalone input, .standalone textarea, .standalone .chat-text, .standalone .fen-input, .standalone .link-input, .standalone .code { -webkit-user-select: text; user-select: text; }
+.ios-banner { margin-bottom: 16px; }
+.ios-banner .ic { width: 18px; height: 18px; vertical-align: -3px; }
+.app-page { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.app-page h1 { margin-bottom: 0; }
+.app-card h2 { margin-top: 0; }
+.app-steps { list-style: none; padding: 0; margin: 12px 0; display: flex; flex-direction: column; gap: 12px; }
+.app-step { display: flex; gap: 12px; align-items: flex-start; }
+.app-num { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; font-weight: 800; }
+.app-step .ic { width: 18px; height: 18px; vertical-align: -4px; stroke: var(--accent); }
+.app-done { color: var(--good); font-weight: 700; }
+.app-card .btn, .ios-banner .btn { white-space: normal; max-width: 100%; text-align: center; }

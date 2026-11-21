@@ -1,7 +1,7 @@
 import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.cburnett.css';
 import './style.css';
-import { h, icon, settings, saveSettings, applyTheme, modal, btn, offerBar, clearOffers, toast, appBridge, inApp } from './ui';
+import { h, icon, settings, saveSettings, applyTheme, modal, btn, offerBar, clearOffers, toast, appBridge, inApp, isIOS, isAndroid, installed, loadRaw, save } from './ui';
 import { t, LANGS, setLang, detectLang } from './i18n';
 import { accountPage, profilePage, friendsPage, watchPage, legalPage } from './pages/social';
 import { me, initAccount, onAccount, onChallenges, accountsEnabled, rpc, niceError, Challenge } from './account';
@@ -24,7 +24,7 @@ type PageFn = (root: HTMLElement, arg?: string) => Cleanup;
 const routes: Record<string, PageFn> = {
   '': homePage, play: playSetupPage, game: gamePage, join: joinPage,
   analysis: analysisPage, editor: editorPage, openings: openingsPage, puzzles: puzzlesPage,
-  table: tablePage, chat: chatListPage, daily: dailyPage,
+  table: tablePage, chat: chatListPage, daily: dailyPage, app: appPage,
   account: accountPage, profile: profilePage, friends: friendsPage, watch: watchPage,
   privacy: (r) => legalPage(r, 'privacy'), terms: (r) => legalPage(r, 'terms'),
 };
@@ -131,9 +131,10 @@ function openSettings() {
         h('span', null, t('Notify me about messages, challenges and daily games'), h('span.muted.small.block', null, appBridge ? t('Also when the app is closed (checked about every 15 minutes).') : t('While Rookstorm is open in a tab, even in the background.'))))
         : h('p.muted.small', null, t('This browser does not support notifications. On iPhone, add Rookstorm to the Home Screen first.'))] : null,
     inApp ? null : [
-      h('h3.set-h', null, t('Android app')),
-      /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-        ? h('p.muted.small', null, t('On iPhone or iPad: open this site in Safari, tap Share, then Add to Home Screen.'))
+      h('h3.set-h', null, isIOS ? t('iPhone app') : t('Android app')),
+      isIOS
+        ? (installed ? h('p.muted.small', null, t('Rookstorm is installed on this device.')) : [h('a.btn.block', { href: '#/app', onclick: () => close() }, icon('phone'), t('Install on iPhone or iPad')),
+          h('p.muted.small', null, t('Free, from Safari: Share, then Add to Home Screen.'))])
         : [h('a.btn.block', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Install the Android app')),
           h('p.muted.small', null, t('Free, about 20 KB. Plays with website players. When you open the file, Android asks you to allow installing it.'))]],
     h('div.row.end', null, btn(t('Done'), () => close(), 'primary'))));
@@ -151,7 +152,8 @@ function homePage(root: HTMLElement) {
           h('a.btn.primary.big', { href: '#/play' }, icon('cpu'), t('Play the bot')),
           h('a.btn.big', { href: '#/play/online' }, icon('globe'), t('Play online')),
           h('a.btn.big', { href: '#/puzzles' }, icon('puzzle'), t('Puzzles')),
-          !inApp && /Android/i.test(navigator.userAgent) ? h('a.btn.big', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Android app')) : null)),
+          !inApp && isAndroid ? h('a.btn.big', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Android app')) : null,
+          isIOS && !installed ? h('a.btn.big', { href: '#/app' }, icon('phone'), t('iPhone app')) : null)),
       h('div.hero-board', { 'aria-hidden': 'true', html: heroBoard() })),
     h('section.features', null,
       card('play', 'cpu', t('Bot at any Elo'), t('Type a rating from 100 to 3200. Stockfish adapts, from beginner to engine strength.')),
@@ -166,7 +168,43 @@ function homePage(root: HTMLElement) {
       card('editor', 'edit', t('Board editor'), t('Set up any position and ask the engine for the best move.'))),
     h('p.footer-note', null, t('Engine: Stockfish 17.1 (GPLv3). Openings and puzzles: lichess.org open databases (CC0).'), ' ',
       h('a', { href: '#/privacy' }, t('Privacy policy')), ' · ', h('a', { href: '#/terms' }, t('Terms')),
-      inApp ? null : [' · ', h('a', { href: APK, download: 'rookstorm.apk' }, t('Android app'))]));
+      installed ? null : [' · ', h('a', { href: '#/app' }, t('Get the app'))]));
+  if (isIOS && !installed && !loadRaw('iosBannerClosed', false)) {
+    const banner = h('div.notify-banner.ios-banner', null, h('span', null, icon('phone'), ' ', t('Get Rookstorm on your iPhone: free, full screen, works offline.')),
+      h('div.row', null, h('a.btn.small.primary', { href: '#/app' }, t('How to install')),
+        h('button.btn.small.ghost', { type: 'button', onclick: () => { save('iosBannerClosed', true); banner.remove(); } }, t('Not now'))));
+    root.prepend(banner);
+  }
+}
+
+/** How to get the app on every kind of device. */
+function appPage(root: HTMLElement) {
+  const shareIc = '<svg viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 11v10h14V11"/></svg>';
+  const addIc = '<svg viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M4 4h16v16H4zM12 8v8M8 12h8"/></svg>';
+  const step = (n: number, text: string, extra?: HTMLElement | string) => h('li.app-step', null, h('span.app-num', null, String(n)), h('div', null, h('b', null, text), extra ? h('div.muted.small', null, extra) : null));
+  // in-app browsers (Instagram, Facebook, …) cannot add to the Home Screen; Safari, Chrome and Edge can
+  const inAppBrowser = /Instagram|FBAN|FBAV|Line\//.test(navigator.userAgent);
+  const ios = h('section.card.app-card', { id: 'iphone' },
+    h('h2', null, t('iPhone and iPad')),
+    installed && isIOS ? h('p.app-done', null, '✓ ', t('Rookstorm is installed on this device.')) : null,
+    h('p.muted', null, t('Install Rookstorm from Safari in a few seconds. It is free, gets its own icon, opens full screen, works offline and always has the newest version.')),
+    h('ol.app-steps', null,
+      step(1, t('Open this page in Safari.'), inAppBrowser ? t('You are in another app: tap its menu and choose Open in Safari.') : t('Chrome and Edge on iPhone work too, through their Share menu.')),
+      step(2, t('Tap the Share button.'), h('span', { html: shareIc + ' ' + t('At the bottom of the screen (on iPad: at the top).') })),
+      step(3, t('Scroll down and tap Add to Home Screen.'), h('span', { html: addIc + ' ' + t('If you do not see it, tap Edit Actions and add it.') })),
+      step(4, t('Tap Add.'), t('Rookstorm now has its own icon on your Home Screen.'))),
+    h('p.muted.small', null, t('Notifications: open Rookstorm from the Home Screen icon, sign in, then turn on notifications in Settings (needs iOS 16.4 or newer).')));
+  const android = h('section.card.app-card', { id: 'android' },
+    h('h2', null, t('Android')),
+    inApp ? h('p.app-done', null, '✓ ', t('Rookstorm is installed on this device.')) : null,
+    h('p.muted', null, t('Free, about 30 KB. Plays with website players. When you open the file, Android asks you to allow installing it.')),
+    inApp ? null : h('a.btn.primary', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Install the Android app')));
+  const pc = h('section.card.app-card', { id: 'computer' },
+    h('h2', null, t('Computer')),
+    h('p.muted', null, t('In Chrome or Edge, click the install icon at the right end of the address bar. Rookstorm then opens in its own window and works offline.')));
+  const cards = isIOS ? [ios, android, pc] : isAndroid ? [android, ios, pc] : [pc, ios, android];
+  root.append(h('div.app-page', null, h('h1', null, t('Get the app')),
+    h('p.lead.muted', null, t('Rookstorm works on every device. App, website and Android players all play each other.')), ...cards));
 }
 const APK = 'rookstorm.apk';
 

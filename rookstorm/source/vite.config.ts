@@ -7,15 +7,20 @@ export default defineConfig({
   plugins: [VitePWA({
     registerType: 'autoUpdate',
     injectRegister: 'auto',
-    includeAssets: ['icon.svg'],
+    includeAssets: ['icon.svg', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
     manifest: {
       name: 'Rookstorm Chess', short_name: 'Rookstorm',
       description: 'Play chess vs Stockfish at any Elo, analyze games, learn openings and solve puzzles. Works offline.',
       theme_color: '#14161b', background_color: '#14161b', display: 'standalone', start_url: './', scope: './',
-      icons: [{ src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }]
+      icons: [
+        { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+        { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ]
     },
     workbox: {
-      globPatterns: ['**/*.{js,css,html,svg,wasm,json,txt}'],
+      globPatterns: ['**/*.{js,css,html,svg,wasm,json,txt,png}'],
       globIgnores: ['**/engine/sf-asm.js'],
       runtimeCaching: [{ urlPattern: /engine\/sf-asm\.js$/, handler: 'CacheFirst', options: { cacheName: 'rs-engine-fallback' } }],
       maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,

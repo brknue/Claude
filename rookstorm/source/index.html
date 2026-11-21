@@ -7,8 +7,15 @@
   <meta name="description" content="Play chess against Stockfish 17 at any Elo, review games with accuracy and blunder detection, learn 3,800+ openings and solve endless rated puzzles. Works offline." />
   <meta name="theme-color" content="#14161b" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <!-- iPhone / iPad: "Add to Home Screen" opens Rookstorm full screen like an app -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Rookstorm" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
   <script>
+    if (navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)) document.documentElement.classList.add('standalone');
     try { var s = JSON.parse(localStorage.getItem('rs.settings') || '{}'); if (s.theme && s.theme !== 'system') document.documentElement.setAttribute('data-theme', s.theme); if (s.board) document.documentElement.setAttribute('data-board', s.board); } catch (e) {}
   </script>
 </head>

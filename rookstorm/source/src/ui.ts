@@ -165,6 +165,11 @@ export interface AppBridge {
 export const appBridge: AppBridge | null =
   (window as any).RookstormAndroid || null;
 export const inApp = !!appBridge || /RookstormApp/.test(navigator.userAgent);
+/** iPhone / iPad (iPadOS reports itself as a Mac with touch) */
+export const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+export const isAndroid = /Android/i.test(navigator.userAgent);
+/** running as an installed app (Home Screen web app, installed PWA, or the Android app) */
+export const installed = inApp || !!(navigator as any).standalone || matchMedia('(display-mode: standalone)').matches;
 
 export const icon = (name: string) => {
   const paths: Record<string, string> = {
