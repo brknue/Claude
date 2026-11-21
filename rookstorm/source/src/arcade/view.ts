@@ -1,6 +1,6 @@
 /** Board for the party variants: any size, 2–4 players, rotates so your own army is at the bottom. Tap or drag. */
 import { h } from '../ui';
-import { Variant, State, Move, P, legalMoves, visibleSquares, onBoard, cooldownMs } from './rules';
+import { Variant, State, Move, P, legalMoves, visibleSquares, onBoard, cooldownMs, duckSquares } from './rules';
 
 const ROLE: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king', m: 'king', x: 'knight' };
 export const SEAT_COLORS_4 = ['red', 'blue', 'yellow', 'green'];
@@ -81,18 +81,21 @@ export class PartyBoard {
     const now = this.now();
     const cd = cooldownMs(st.speed);
     const duckMode = v.duck && st.duckPending && st.turn === this.seat && this.canAct;
+    const duckOk = duckMode ? new Set(duckSquares(v, st, this.seat!)) : null;
     for (let i = 0; i < this.cells.length; i++) {
       const c = this.cells[i];
       if (c.classList.contains('hole')) continue;
-      const p = st.board[i];
-      c.classList.toggle('fog', !!vis && !vis.has(i));
-      c.classList.toggle('last', !!st.last && (st.last.f === i || st.last.t === i));
+      const hidden = !!vis && !vis.has(i);
+      // Fog of War: never draw what is hidden (the host and games against the computer hold the full position)
+      const p = hidden ? null : st.board[i];
+      c.classList.toggle('fog', hidden);
+      c.classList.toggle('last', !hidden && !!st.last && (st.last.f === i || st.last.t === i));
       c.classList.toggle('sel', this.sel === i);
       c.classList.toggle('dest', this.targets.some(m => m.t === i));
       c.classList.toggle('cap', this.targets.some(m => m.t === i) && !!p);
-      c.classList.toggle('duckable', !!duckMode && !p && i !== st.duck);
+      c.classList.toggle('duckable', !!duckOk && duckOk.has(i));
       c.replaceChildren();
-      if (st.duck === i) c.appendChild(h('span.duck', { 'aria-label': 'duck' }, '🦆'));
+      if (st.duck === i && !hidden) c.appendChild(h('span.duck', { 'aria-label': 'duck' }, '🦆'));
       if (p && !(this.drag && this.drag.ghost && this.drag.from === i)) {
         const pe = pieceEl(v, p);
         c.appendChild(pe);
@@ -129,7 +132,7 @@ export class PartyBoard {
     const i = this.sqAt(e.clientX, e.clientY);
     if (i === null) return;
     e.preventDefault();
-    if (this.v.duck && st.duckPending && st.turn === this.seat) { if (!st.board[i] && i !== st.duck) this.onDuck(i); return; }
+    if (this.v.duck && st.duckPending && st.turn === this.seat) { if (duckSquares(this.v, st, this.seat).includes(i)) this.onDuck(i); return; }
     if (this.sel !== null && this.tryMove(i)) return;
     const p = st.board[i];
     if (p && p.o === this.seat) {

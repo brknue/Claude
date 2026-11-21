@@ -9,8 +9,11 @@ export class Recorder {
   rated = false;
   private ucis = '';
   private clocks: any = null;
+  /** hints used in a game against the computer (shown in the game history) */
+  private hints = 0;
   private timer: any = 0;
   private finished = false;
+  private finishing = false;
   private ready: Promise<void> = Promise.resolve();
 
   /** Create a game row. opp = opponent's account id (network games) or null. */
@@ -37,22 +40,30 @@ export class Recorder {
 
   /** Called after every move; uploads at most every 1.5 s. */
   push(ucis: string[], clocks?: { w: number; b: number } | null) {
-    if (this.finished) return;
+    if (this.finished || this.finishing) return;
     this.ucis = ucis.join(' ');
     this.clocks = clocks ? { ...clocks, at: Date.now() } : null;
     if (!this.timer) this.timer = setTimeout(() => this.flush(), 1500);
   }
-  private flush() {
+  /** A hint was used: saved with the game so the history shows it. */
+  markHint(n: number) {
+    this.hints = n;
+    if (!this.finished && !this.timer) this.timer = setTimeout(() => this.flush(), 300);
+  }
+  private payload() { return this.hints ? { ...(this.clocks || {}), hints: this.hints } : this.clocks; }
+  private flush(): Promise<void> {
     clearTimeout(this.timer); this.timer = 0;
-    if (!this.id || this.finished) return;
-    rpc('push_moves', { p_id: this.id, p_moves: this.ucis, p_clocks: this.clocks }).catch(() => {});
+    if (!this.id || this.finished) return Promise.resolve();
+    return rpc('push_moves', { p_id: this.id, p_moves: this.ucis, p_clocks: this.payload() }).then(() => {}, () => {});
   }
 
   async finish(winner: Color | undefined, reason: string, ucis: string[]): Promise<FinishInfo | null> {
-    if (this.finished) return null;
-    this.finished = true;
-    clearTimeout(this.timer);
+    if (this.finished || this.finishing) return null;
+    this.finishing = true;
+    clearTimeout(this.timer); this.timer = 0;
     await this.ready;
+    if (this.id && this.hints) await this.flush(); // make sure the hint count is saved before the game closes
+    this.finished = true;
     if (!this.id) return null;
     const result = winner === 'white' ? '1-0' : winner === 'black' ? '0-1' : '1/2-1/2';
     try {

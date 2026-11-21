@@ -359,6 +359,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   let closeEndModal: (() => void) | null = null;
   let gameToken = 0;
   let rec: Recorder | null = null;
+  let hintsUsed = 0;
   let ratingInfo: FinishInfo | null = null;
   let ratedNow = false;
   let shown = false;
@@ -680,7 +681,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   function saveHistory() {
     if (game.ply < 2) return;
     const hist = loadRaw('history', [] as any[]);
-    hist.unshift({ d: Date.now(), mode: cfg!.mode, variant: cfg!.variant, fen: game.startFen, ucis: game.ucis, w: nameOf('white'), b: nameOf('black'), r: game.result ? (game.result.winner || 'draw') : '*', reason: game.result?.reason, my: cfg!.mode === 'local' ? 'white' : cfg!.myColor });
+    hist.unshift({ d: Date.now(), mode: cfg!.mode, variant: cfg!.variant, fen: game.startFen, ucis: game.ucis, w: nameOf('white'), b: nameOf('black'), r: game.result ? (game.result.winner || 'draw') : '*', reason: game.result?.reason, my: cfg!.mode === 'local' ? 'white' : cfg!.myColor, hints: hintsUsed || undefined });
     save('history', hist.slice(0, 30));
   }
 
@@ -784,6 +785,8 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   async function hint() {
     const r = await bestMoveNow();
     if (!r?.uci || !alive) return;
+    hintsUsed++;
+    rec?.markHint(hintsUsed);
     const m = uciToMove(game.pos, r.uci);
     const s = m && moveSquares(game.pos, m);
     if (s) { board.arrows([{ orig: s[0] as any, brush: 'blue' }, { orig: s[0] as any, dest: s[1] as any, brush: 'blue' }]); setTimeout(() => board.arrows([]), 3500); }

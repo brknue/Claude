@@ -153,7 +153,9 @@ export function profilePage(root: HTMLElement, username?: string) {
           h('div.muted.small', null, t('Member since {0}', fmtDate(p.created_at)), p.last_seen ? ' · ' : '', p.last_seen ? h('span', { class: online(p.last_seen) ? 'online' : '' }, lastSeenText(p.last_seen)) : null)),
         h('div.row.wrap.profile-actions', null, actions)),
       brilliantCard(p.username, self),
-      self || friend ? h('section.card', null, h('h2', null, t('Ratings')), ratingGrid(p.ratings)) : h('section.card', null, h('p.muted', null, t('Ratings and games are visible to friends only.'))),
+      p.ratings ? h('section.card', null, h('h2', null, t('Ratings')), ratingGrid(p.ratings), self ? ratingPrivacy(p.rating_visibility) : null)
+        : h('section.card', null, h('p.muted', null, t('This player keeps their ratings private.'))),
+      !self && !friend ? h('section.card', null, h('p.muted', null, t('Games are visible to friends only.'))) : '',
       self || friend ? gamesCard(p.username, p.id) : '',
       self ? settingsCard() : '');
   }
@@ -244,7 +246,16 @@ function gameRow(g: any, uid: string) {
   },
   h('span.gr-res', null, label),
   h('span.gr-main', null, h('b', null, (white ? '○ ' : '● ') + t('vs {0}', opp)), h('span.muted.small', null, `${variantName(g.variant)} · ${g.kind === 'daily' ? t('Daily') : g.time_base ? tcLabel(g.time_base, g.time_inc) : '∞'}${g.rated ? ' · ' + t('Rated') : ''} · ${t('{0} moves', Math.ceil(n / 2))}`)),
-  h('span.gr-side', null, brill ? h('span.brill-badge', { title: t('Brilliant moves') }, '!! ×' + brill) : null, g.rated && diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, (diff >= 0 ? '+' : '') + diff) : null, h('span.muted.small', null, fmtDate(g.created_at))));
+  h('span.gr-side', null, g.clocks?.hints ? h('span.hint-badge', { title: t('Hints used: {0}', g.clocks.hints) }, '💡 ' + g.clocks.hints) : null, brill ? h('span.brill-badge', { title: t('Brilliant moves') }, '!! ×' + brill) : null, g.rated && diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, (diff >= 0 ? '+' : '') + diff) : null, h('span.muted.small', null, fmtDate(g.created_at))));
+}
+
+/** Who may see my ratings (needs supabase/add-rating-privacy.sql; hidden until it is installed). */
+function ratingPrivacy(vis?: string): HTMLElement | null {
+  if (!vis) return null;
+  const sel = h('select', { 'aria-label': t('Who can see your ratings'), onchange: async (e: any) => {
+    try { await rpc('set_rating_visibility', { p_vis: e.target.value }); toast(t('Saved')); } catch (err) { toast(niceError(err)); }
+  } }, [['everyone', t('Everyone')], ['friends', t('Friends only')], ['nobody', t('Only me')]].map(([v, l]) => h('option', { value: v, selected: v === vis }, l)));
+  return h('label.field.rating-privacy', null, h('span.lbl', null, t('Who can see your ratings')), sel);
 }
 
 function settingsCard() {
@@ -465,7 +476,7 @@ export function legalPage(root: HTMLElement, which: 'privacy' | 'terms') {
     P('We do not collect your e-mail address, real name, location or any other personal details.'),
     P('If you use chat, your messages are stored on the account server so you and your friend can read them. They are deleted when either of you deletes the account. With notifications turned on, the Android app checks for news about every 15 minutes using a random device key; signing out deletes the key.'),
     P('Purpose and legal basis: providing the account features you asked for (GDPR Art. 6(1)(b)), and protecting the service against abuse (Art. 6(1)(f)).'),
-    P('Who can see what: everyone signed in can find your username. Your ratings, online status and games are visible only to you and your friends. Your opponents see your username in games against them.'),
+    P('Who can see what: everyone signed in can find your username and, unless you change it on your profile, your ratings. Your online status and games are visible only to you and your friends. Your opponents see your username in games against them.'),
     P('Account data is stored with Supabase (Supabase Inc.) on servers in the EU (Frankfurt), under a data processing agreement. Supabase may use sub-processors outside the EU under EU Standard Contractual Clauses.'),
     P('Your session is kept in your browser\'s local storage so you stay signed in. This is strictly necessary for the service and needs no consent.'),
     H('How long we keep data'),

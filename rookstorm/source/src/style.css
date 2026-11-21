@@ -734,3 +734,7 @@ html { scroll-padding-top: 76px; }
 }
 
 .side .notify-banner { margin: 12px 0 0; }
+
+.hint-badge { display: inline-flex; align-items: center; gap: 2px; padding: 1px 7px; border-radius: 9px; background: var(--gold-soft); color: var(--text); font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.hist-item .hint-badge { margin-inline-start: 6px; }
+.rating-privacy { margin-top: 12px; max-width: 320px; }

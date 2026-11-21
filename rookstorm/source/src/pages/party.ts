@@ -1,7 +1,7 @@
 /** Party variants: setup inside Play, the table lobby (pick a seat) and the game itself. */
 import { h, icon, btn, toast, copyText, settings, loadRaw, save, sound } from '../ui';
 import { t } from '../i18n';
-import { PARTY_VARIANTS, partyVariant, SPEEDS, Variant, State } from '../arcade/rules';
+import { PARTY_VARIANTS, partyVariant, SPEEDS, Variant, State, inCheck } from '../arcade/rules';
 import { PartyBoard, seatColor } from '../arcade/view';
 import { TableHost, TableGuest, TableClient } from '../arcade/table';
 import { me } from '../account';
@@ -140,7 +140,8 @@ export function tablePage(root: HTMLElement, code?: string) {
     if (v.duck && st.duckPending) extra = st.turn === mine ? t('Now move the duck to an empty square.') : t('Placing the duck…');
     else if (st.movesLeft > 1) extra = t('{0} moves left this turn', st.movesLeft);
     if (v.dice && st.dice && !st.duckPending) extra = t('Dice: move a {0}', t(({ p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king', m: 'king', x: 'knight' } as any)[st.dice]));
-    return turnName + (extra ? ' · ' + extra : '');
+    const check = v.mate && !st.duckPending && inCheck(v, st, st.turn) ? t('Check!') + ' · ' : '';
+    return check + turnName + (extra ? ' · ' + extra : '');
   }
 
   function gameView(L: NonNullable<TableClient['lobby']>, st: State) {

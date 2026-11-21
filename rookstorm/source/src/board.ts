@@ -88,8 +88,14 @@ export class Board {
     let applied = 0;
     for (const q of this.queue) {
       const m = cgToMove(p, q.orig, q.dest, q.promo);
-      if (!p.isLegal(m)) break;
-      p.play(m);
+      if (p.isLegal(m)) p.play(m);
+      else {
+        // not legal yet (e.g. taking back on a square your own piece stands on): show it anyway
+        const piece = p.board.get(sq(q.orig));
+        if (!piece || piece.color !== me) break;
+        p.board.take(sq(q.orig));
+        p.board.set(sq(q.dest), q.promo ? { role: q.promo, color: me, promoted: true } : piece);
+      }
       p.turn = me;
       applied++;
     }
@@ -109,7 +115,7 @@ export class Board {
         fen: fenOf(v), turnColor: this.premoveColor!, check: false,
         lastMove: (applied ? undefined : this.lastSq || undefined) as any,
         highlight: { custom },
-        movable: { color: this.premoveColor!, dests: dests(v, this.chess960) },
+        movable: { color: this.premoveColor!, dests: premoveDests(v, this.premoveColor!, this.chess960) },
       });
     } else {
       this.cg.set({
@@ -257,4 +263,51 @@ function material(pos: Position, c: Color): number {
   let v = 0;
   for (const s of pos.board[c]) { const p = pos.board.get(s); if (p) v += PIECE_VALUE[p.role]; }
   return v;
+}
+
+/**
+ * Premove targets by piece movement only (like lichess / chess.com): the opponent's reply is unknown,
+ * so a premove may go to a square your own piece stands on (to take back), pawns may premove diagonally,
+ * and sliding pieces may premove through pieces that could move away. Checked for real when it is played.
+ */
+export function premoveDests(pos: Position, color: Color, chess960 = false): Map<any, any[]> {
+  const out = new Map<any, any[]>();
+  const name = (f: number, r: number) => 'abcdefgh'[f] + (r + 1);
+  const on = (f: number, r: number) => f >= 0 && f < 8 && r >= 0 && r < 8;
+  for (const [s, piece] of pos.board) {
+    if (piece.color !== color) continue;
+    const f0 = s & 7, r0 = s >> 3;
+    const t: string[] = [];
+    const ray = (dirs: number[][], far: boolean) => { for (const [df, dr] of dirs) { let f = f0 + df, r = r0 + dr; while (on(f, r)) { t.push(name(f, r)); if (!far) break; f += df; r += dr; } } };
+    const KD = [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [-1, 0], [0, 1], [0, -1]];
+    switch (piece.role) {
+      case 'pawn': {
+        const dir = color === 'white' ? 1 : -1, start = color === 'white' ? 1 : 6;
+        if (on(f0, r0 + dir)) t.push(name(f0, r0 + dir));
+        if (r0 === start || (pos.rules === 'horde' && color === 'white' && r0 === 0)) t.push(name(f0, r0 + 2 * dir));
+        for (const df of [-1, 1]) if (on(f0 + df, r0 + dir)) t.push(name(f0 + df, r0 + dir));
+        break;
+      }
+      case 'knight': for (const [df, dr] of [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]) if (on(f0 + df, r0 + dr)) t.push(name(f0 + df, r0 + dr)); break;
+      case 'bishop': ray(KD.slice(0, 4), true); break;
+      case 'rook': ray(KD.slice(4), true); break;
+      case 'queen': ray(KD, true); break;
+      case 'king': {
+        ray(KD, false);
+        // castling while the rights are still there (two squares, or onto the rook in Chess960)
+        const back = color === 'white' ? 0 : 7;
+        if (r0 === back) for (const rs of pos.castles.castlingRights) {
+          const rr = rs >> 3, rf = rs & 7;
+          if (rr !== back) continue;
+          const rook = pos.board.get(rs);
+          if (!rook || rook.role !== 'rook' || rook.color !== color) continue;
+          t.push(name(rf, back));
+          if (!chess960) t.push(name(rf > f0 ? 6 : 2, back));
+        }
+        break;
+      }
+    }
+    if (t.length) out.set(name(f0, r0) as any, [...new Set(t)]);
+  }
+  return out;
 }

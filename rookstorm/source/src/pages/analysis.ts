@@ -50,6 +50,7 @@ export function analysisPage(root: HTMLElement): () => void {
   let cur = { inVar: false, ply: Math.min(input.ply ?? (input.autoReview ? 0 : main.ply), main.ply) };
   let engineOn = variantInfo(main.variant).sf;
   let liveLines: Line[] = [];
+  let lastBar: { cp: number; txt: string } | null = null;
   let liveDepth = 0;
   let evals: (Eval | null)[] = [];
   let reviews: (MoveReview | null)[] = [];
@@ -164,17 +165,20 @@ export function analysisPage(root: HTMLElement): () => void {
     let cp: number | null = null;
     let txt = '';
     const term = terminalEval(pos);
+    const saved = !cur.inVar ? evals[cur.ply] : null;
     if (term) { cp = term.cp; txt = term.label; }
     else if (engineOn && liveLines.length) {
-      cp = whiteCp(liveLines[0], pos.turn); txt = fmtScore(liveLines[0], pos.turn);
+      // the bar follows the engine only once its reading is solid (early depths jump around)
+      if (liveDepth >= 10 || !saved) { cp = whiteCp(liveLines[0], pos.turn); txt = fmtScore(liveLines[0], pos.turn); }
+      else { cp = saved.cp; txt = scoreText(saved.cp); }
       liveLines.forEach(l => {
         linesBox.append(h('button.line', { type: 'button', onclick: () => { const m = uciToMove(pos, l.pv[0]); if (m) userMove(m); } },
           h('span.score', { class: whiteCp(l, pos.turn) >= 0 ? 'w' : 'b' }, fmtScore(l, pos.turn)), h('span.pv', null, pvToSan(pos, l.pv, 10))));
       });
-    } else {
-      const e = !cur.inVar ? evals[cur.ply] : null;
-      if (e) { cp = e.cp; txt = scoreText(e.cp); }
-    }
+    } else if (saved) { cp = saved.cp; txt = scoreText(saved.cp); }
+    // no reading yet for this position: keep the bar where it is instead of dropping to the middle
+    if (cp === null && lastBar && engineOn && supported) { cp = lastBar.cp; txt = lastBar.txt; }
+    if (cp !== null) lastBar = { cp, txt };
     setBar(cp, txt);
     // arrows
     const shapes: any[] = [];
@@ -471,7 +475,7 @@ export function analysisPage(root: HTMLElement): () => void {
             setAnalysisInput({ variant: g.variant, startFen: g.fen, ucis: g.ucis, white: g.w, black: g.b, orientation: g.my || 'white' });
             route();
           },
-        }, h('b', null, `${g.w} – ${g.b}`), h('span.muted.small', null, ` ${t(variantInfo(g.variant).name)} · ${g.r === 'draw' ? '½–½' : g.r === 'white' ? '1–0' : g.r === 'black' ? '0–1' : '*'} · ${t('{0} moves', Math.ceil(g.ucis.length / 2))} · ${new Date(g.d).toLocaleDateString()}`))))) : '');
+        }, h('b', null, `${g.w} – ${g.b}`), h('span.muted.small', null, ` ${t(variantInfo(g.variant).name)} · ${g.r === 'draw' ? '½–½' : g.r === 'white' ? '1–0' : g.r === 'black' ? '0–1' : '*'} · ${t('{0} moves', Math.ceil(g.ucis.length / 2))} · ${new Date(g.d).toLocaleDateString()}`), g.hints ? h('span.hint-badge', { title: t('Hints used: {0}', g.hints) }, '💡 ' + g.hints) : null)))) : '');
   }
 
   const route = () => go('analysis');
