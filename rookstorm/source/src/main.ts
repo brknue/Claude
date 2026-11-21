@@ -14,6 +14,9 @@ import { editorPage } from './pages/editor';
 import { openingsPage } from './pages/openings';
 import { puzzlesPage } from './pages/puzzles';
 import { puzzleRating } from './pages/puzzles';
+import { chatListPage } from './pages/chat';
+import { dailyPage } from './pages/daily';
+import { initNotify, onCounts, setPopup, setNotify, notifyOn, webNotifySupported } from './notify';
 
 export type Cleanup = (() => void) | void;
 type PageFn = (root: HTMLElement, arg?: string) => Cleanup;
@@ -21,7 +24,7 @@ type PageFn = (root: HTMLElement, arg?: string) => Cleanup;
 const routes: Record<string, PageFn> = {
   '': homePage, play: playSetupPage, game: gamePage, join: joinPage,
   analysis: analysisPage, editor: editorPage, openings: openingsPage, puzzles: puzzlesPage,
-  table: tablePage,
+  table: tablePage, chat: chatListPage, daily: dailyPage,
   account: accountPage, profile: profilePage, friends: friendsPage, watch: watchPage,
   privacy: (r) => legalPage(r, 'privacy'), terms: (r) => legalPage(r, 'terms'),
 };
@@ -51,7 +54,7 @@ function route() {
   cleanup = undefined;
   main.innerHTML = '';
   main.className = 'page-' + (name || 'home');
-  const navName = name === 'game' || name === 'join' || name === 'table' ? 'play' : name === 'profile' ? 'account' : name === 'watch' ? 'friends' : name;
+  const navName = name === 'game' || name === 'join' || name === 'table' || name === 'daily' ? 'play' : name === 'profile' ? 'account' : name === 'watch' ? 'friends' : name;
   document.querySelectorAll('.nav a, .tabbar a, .top-actions a').forEach(a => a.classList.toggle('active', a.getAttribute('data-r') === navName));
   document.body.classList.remove('nav-open');
   window.scrollTo(0, 0);
@@ -68,25 +71,30 @@ function header() {
   const themeBtn = btn(themeIcon(), () => {
     settings.theme = settings.theme === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark') : settings.theme === 'dark' ? 'light' : 'dark';
     saveSettings(); themeBtn.replaceChildren(themeIcon());
-  }, 'icon ghost', t('Toggle dark / light mode'));
+  }, 'icon ghost theme-btn', t('Toggle dark / light mode'));
+  const chatBtn = h('a.btn.icon.ghost.chat-btn', { href: '#/chat', 'data-r': 'chat', title: t('Messages'), 'aria-label': t('Messages') }, icon('chat'), h('span.count-badge.hdr'));
   const friendsBtn = h('a.btn.icon.ghost.friends-btn', { href: '#/friends', 'data-r': 'friends', title: t('Friends'), 'aria-label': t('Friends') }, icon('users'), h('span.badge-dot'));
   const accBtn = h('a.btn.ghost.acc-btn', { href: '#/account', 'data-r': 'account' });
   const renderAcc = () => {
     friendsBtn.style.display = accountsEnabled() && me ? '' : 'none';
+    chatBtn.style.display = accountsEnabled() && me ? '' : 'none';
+    bar?.classList.toggle('signed', accountsEnabled() && !!me);
     accBtn.style.display = accountsEnabled() ? '' : 'none';
     accBtn.replaceChildren(...(me ? [h('span.avatar.xs', null, me.username[0].toUpperCase()), h('span.acc-name', null, me.username)] : [icon('user'), h('span.acc-name.signin', null, t('Sign in'))]));
     accBtn.setAttribute('aria-label', me ? t('Your profile') : t('Sign in'));
     accBtn.setAttribute('title', me ? t('Your profile') : t('Sign in'));
   };
-  renderAcc();
+  let bar: HTMLElement | null = null;
   onAccount(renderAcc);
-  return h('header.topbar', null,
+  bar = h('header.topbar', null,
     h('a.brand', { href: '#/', 'aria-label': 'Rookstorm' }, logo(), h('span', null, 'ROOK', h('b', null, 'STORM'))),
     h('nav.nav', null, NAV.map(([r, label, ic]) => h('a', { href: '#/' + r, 'data-r': r }, icon(ic), h('span', null, t(label))))),
     h('div.top-actions', null,
-      friendsBtn, accBtn, themeBtn,
+      chatBtn, friendsBtn, accBtn, themeBtn,
       btn(icon('gear'), openSettings, 'icon ghost', t('Settings')),
       btn(icon('menu'), () => document.body.classList.toggle('nav-open'), 'icon ghost menu-btn', t('Menu'))));
+  renderAcc();
+  return bar;
 }
 
 export function logo() {
@@ -116,6 +124,12 @@ function openSettings() {
     me ? null : h('label.field', null, h('span', null, t('Your name (shown to online opponents)')),
       h('input', { value: settings.name, maxLength: 20, placeholder: t('Anonymous'), oninput: (e: any) => { settings.name = e.target.value.slice(0, 20); saveSettings(); } })),
     h('p.muted.small', null, t('Board and animation changes apply to newly opened boards.')),
+    accountsEnabled() ? [
+      h('h3.set-h', null, t('Notifications')),
+      appBridge && !appBridge.notify ? h('p.muted.small', null, t('Update the Android app to get notifications:'), ' ', h('a', { href: APK, download: 'rookstorm.apk' }, t('Install the Android app')))
+      : appBridge || webNotifySupported() ? h('label.check', null, h('input', { type: 'checkbox', checked: notifyOn(), onchange: async (e: any) => { const on = await setNotify(e.target.checked); e.target.checked = on; if (e.target.checked !== on || (!on && !appBridge && 'Notification' in window && Notification.permission === 'denied')) toast(t('Notifications are blocked. Allow them for this site in your browser settings.')); } }),
+        h('span', null, t('Notify me about messages, challenges and daily games'), h('span.muted.small.block', null, appBridge ? t('Also when the app is closed (checked about every 15 minutes).') : t('While Rookstorm is open in a tab, even in the background.'))))
+        : h('p.muted.small', null, t('This browser does not support notifications. On iPhone, add Rookstorm to the Home Screen first.'))] : null,
     inApp ? null : [
       h('h3.set-h', null, t('Android app')),
       /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
@@ -141,6 +155,8 @@ function homePage(root: HTMLElement) {
       h('div.hero-board', { 'aria-hidden': 'true', html: heroBoard() })),
     h('section.features', null,
       card('play', 'cpu', t('Bot at any Elo'), t('Type a rating from 100 to 3200. Stockfish adapts, from beginner to engine strength.')),
+      accountsEnabled() ? card('daily', 'calendar', t('Daily games'), t('Play friends at your own pace: a few days per move, with notifications and a daily rating.')) : null,
+      accountsEnabled() ? card(me ? 'chat' : 'account/new', 'chat', t('Chat with friends'), t('Message your friends and send them games you played to replay and analyse.')) : null,
       card('play/friend', 'link', t('Play a friend'), t('Send a link and play in real time, or pass-and-play on one device with auto-flip.')),
       card('play/online', 'globe', t('Online arena'), t('Get matched with another player in your chosen time control.')),
       accountsEnabled() ? card(me ? 'friends' : 'account/new', 'users', t('Accounts and friends'), t('Keep your ratings (everyone starts at 1500), add friends, challenge them and watch their games live.')) : null,
@@ -219,6 +235,22 @@ async function init() {
   window.addEventListener('hashchange', route);
   window.addEventListener('beforeunload', (e) => { if (leaveGuard) { e.preventDefault(); e.returnValue = ''; } });
   onChallenges(showChallenges);
+  initNotify();
+  setPopup((_a, tx) => {
+    const kind = 'al-' + _a.key;
+    offerBar(kind, `${tx.title}: ${tx.body}`, [btn(t('Open'), () => { clearOffers(kind); location.hash = tx.url.slice(1); }, 'primary small'), btn(t('Close'), () => clearOffers(kind), 'small ghost')]);
+    setTimeout(() => clearOffers(kind), 9000);
+  });
+  onCounts((c) => {
+    const n = c.unread;
+    document.querySelectorAll('.chat-btn .count-badge').forEach(el => { el.textContent = n > 9 ? '9+' : String(n); (el as HTMLElement).style.display = n ? '' : 'none'; });
+    const d = c.my_turn + c.invites;
+    document.querySelectorAll('.nav a[data-r="play"], .tabbar a[data-r="play"]').forEach(a => {
+      let b = a.querySelector('.count-badge.nav') as HTMLElement | null;
+      if (!b) { b = h('span.count-badge.nav'); a.appendChild(b); }
+      b.textContent = d > 9 ? '9+' : String(d); b.style.display = d ? '' : 'none'; b.title = t('Daily games: your move');
+    });
+  });
   route();
   initAccount().catch(() => {});
 }

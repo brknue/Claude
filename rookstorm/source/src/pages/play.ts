@@ -1,3 +1,4 @@
+import { newDailyDialog } from './daily';
 import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers } from '../ui';
 import { t } from '../i18n';
 import { VARIANTS, VariantKey, variantInfo, variantName, variantDesc, startFenFor, materialDiff, outcomeText, reasonText, Color, Outcome, uciToMove, fenOf, moveSquares, Role } from '../chess';
@@ -13,7 +14,7 @@ import { Recorder, FinishInfo } from '../record';
 import { partySetup } from './party';
 import { queueReview, runReviews } from '../review';
 
-type Mode = 'bot' | 'local' | 'friend' | 'online' | 'party';
+type Mode = 'bot' | 'local' | 'friend' | 'online' | 'daily' | 'party';
 
 export interface GameConfig {
   mode: Mode; variant: VariantKey; startFen: string; time: number; inc: number;
@@ -47,12 +48,12 @@ export function eloLabel(e: number): string {
 export const tcLabel = (tm: number, i: number) => (tm === 0 ? '∞' : `${tm < 1 ? tm * 60 + 's' : tm} + ${i}`);
 const myName = () => me?.username || settings.name || '';
 const colorName = (c: Color) => (c === 'white' ? t('White') : t('Black'));
-export const modeLabel = (m: string) => ({ bullet: 'Bullet', blitz: 'Blitz', rapid: 'Rapid', classical: 'Classical', puzzle: 'Puzzles' } as Record<string, string>)[m] || variantInfo(m as VariantKey).name;
+export const modeLabel = (m: string) => ({ bullet: 'Bullet', blitz: 'Blitz', rapid: 'Rapid', classical: 'Classical', daily: 'Daily', puzzle: 'Puzzles' } as Record<string, string>)[m] || variantInfo(m as VariantKey).name;
 
 // ---------------- Setup page ----------------
 export function playSetupPage(root: HTMLElement, arg?: string) {
   const saved = loadRaw('setup', { mode: 'bot', variant: 'standard', time: 10, inc: 0, color: 'random', autoFlip: true, rated: false }) as any;
-  let mode: Mode = (['bot', 'local', 'friend', 'online', 'party'].includes(arg || '') ? arg : saved.mode) as Mode;
+  let mode: Mode = (['bot', 'local', 'friend', 'online', 'daily', 'party'].includes(arg || '') ? arg : saved.mode) as Mode;
   let variant: VariantKey = VARIANTS.some(v => v.key === saved.variant) ? saved.variant : 'standard';
   let time = saved.time, inc = saved.inc;
   let color: 'white' | 'black' | 'random' = saved.color;
@@ -63,7 +64,7 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
 
   const body = h('div.setup-body');
   const tabs = h('div.seg.mode-tabs', { role: 'tablist' });
-  const modes: [Mode, string, string][] = [['bot', 'Computer', 'cpu'], ['local', 'Same device', 'users'], ['friend', 'Friend link', 'link'], ['online', 'Online', 'globe'], ['party', 'Party', 'party']];
+  const modes: [Mode, string, string][] = [['bot', 'Computer', 'cpu'], ['local', 'Same device', 'users'], ['friend', 'Friend link', 'link'], ['online', 'Online', 'globe'], ['daily', 'Daily', 'calendar'], ['party', 'Party', 'party']];
 
   const persist = () => save('setup', { mode, variant, time, inc, color, autoFlip, rated, infPremoves });
 
@@ -74,6 +75,12 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
     }, icon(ic), h('span', null, t(label)))));
     body.replaceChildren();
     if (mode === 'party') { partySetup(body); return; }
+    if (mode === 'daily') {
+      body.append(h('p.muted', null, t('Play friends at your own pace: each player has a few days for every move. You get a notification when it is your turn.')));
+      if (!accountsEnabled() || !me) body.append(h('p.muted.small.rated-note', null, h('a', { href: '#/account' }, t('Sign in')), ' ' + t('to play daily games with your friends.')));
+      else body.append(h('div.row.wrap', null, btn(h('span', null, icon('calendar'), t('New daily game')), () => newDailyDialog(), 'primary big'), h('a.btn.big', { href: '#/daily' }, t('Your daily games'))));
+      return;
+    }
     const sf = variantInfo(variant).sf;
 
     if (mode === 'bot') {

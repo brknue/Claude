@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        s.setUserAgentString(s.getUserAgentString() + " RookstormApp/1");
+        s.setUserAgentString(s.getUserAgentString() + " RookstormApp/2");
         web.addJavascriptInterface(new Bridge(), "RookstormAndroid");
         web.setWebChromeClient(new WebChromeClient()); // enables alert/confirm/prompt dialogs
         web.setWebViewClient(new WebViewClient() {
@@ -97,6 +97,12 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() { web.onPause(); super.onPause(); }
 
+    static String nowIso() {
+        java.text.SimpleDateFormat f = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'+00:00'", java.util.Locale.US);
+        f.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        return f.format(new java.util.Date());
+    }
+
     static String offlinePage() {
         return "<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>"
             + "<body style='background:#14161b;color:#e8e8ea;font-family:sans-serif;display:flex;flex-direction:column;"
@@ -109,6 +115,40 @@ public class MainActivity extends Activity {
 
     /** Small native helpers the website uses when it runs inside the app. */
     class Bridge {
+        /** Show a notification (the page calls this while the app is in the background). */
+        @JavascriptInterface
+        public void notify(String key, String title, String body, String hash) {
+            Notifier.show(MainActivity.this, key, title, body, hash);
+        }
+
+        /** The page already showed this news: the background check must not notify it again. */
+        @JavascriptInterface
+        public void seen(String key) { Notifier.markSeen(MainActivity.this, key); }
+
+        /** Turn background checks on (all values given) or off (empty values). */
+        @JavascriptInterface
+        public void setBackground(String url, String anonKey, String deviceKey, String stringsJson) {
+            android.content.SharedPreferences.Editor e = Notifier.prefs(MainActivity.this).edit();
+            if (deviceKey == null || deviceKey.isEmpty()) {
+                e.remove("key").remove("since").apply();
+                PollJob.cancel(MainActivity.this);
+                return;
+            }
+            String old = Notifier.prefs(MainActivity.this).getString("key", "");
+            e.putString("url", url).putString("anon", anonKey).putString("key", deviceKey).putString("strings", stringsJson);
+            if (!deviceKey.equals(old)) e.putString("since", nowIso());
+            try { e.putString("channelName", new org.json.JSONObject(stringsJson).optString("channel", "Messages and games")); } catch (Exception ignored) { }
+            e.apply();
+            PollJob.schedule(MainActivity.this);
+        }
+
+        /** Android 13+: ask for the notification permission. */
+        @JavascriptInterface
+        public void requestPermission() {
+            if (Build.VERSION.SDK_INT >= 33 && !Notifier.allowed(MainActivity.this))
+                runOnUiThread(() -> requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 1));
+        }
+
         @JavascriptInterface
         public void share(String title, String text, String url) {
             Intent i = new Intent(Intent.ACTION_SEND);

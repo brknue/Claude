@@ -43,6 +43,9 @@ const ERRORS: [RegExp, string][] = [
   [/player not found/i, 'No player with that username.'],
   [/that is you/i, 'That is you!'],
   [/only challenge friends/i, 'You can only challenge friends.'],
+  [/only message friends/i, 'You can only chat with friends.'],
+  [/not your turn|out of sync/i, 'The game changed. It has been reloaded.'],
+  [/too many open daily/i, 'You have too many open daily games.'],
   [/too many open/i, 'You have too many open requests.'],
   [/not signed in|jwt|session/i, 'Please sign in again.'],
   [/failed to fetch|network|load failed/i, 'No connection to the account server. Check your internet connection.'],
@@ -150,7 +153,7 @@ export function ratingMode(variant: VariantKey, minutes: number, inc: number): s
   return est < 180 ? 'bullet' : est < 480 ? 'blitz' : est < 1500 ? 'rapid' : 'classical';
 }
 export const MODES: [string, string][] = [
-  ['bullet', 'Bullet'], ['blitz', 'Blitz'], ['rapid', 'Rapid'], ['classical', 'Classical'], ['puzzle', 'Puzzles'],
+  ['bullet', 'Bullet'], ['blitz', 'Blitz'], ['rapid', 'Rapid'], ['classical', 'Classical'], ['daily', 'Daily'], ['puzzle', 'Puzzles'],
   ['chess960', 'Chess960'], ['crazyhouse', 'Crazyhouse'], ['kingofthehill', 'King of the Hill'], ['3check', 'Three-check'],
   ['atomic', 'Atomic'], ['antichess', 'Antichess'], ['horde', 'Horde'], ['racingkings', 'Racing Kings'],
 ];

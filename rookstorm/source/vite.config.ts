@@ -21,6 +21,7 @@ export default defineConfig({
       maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
       navigateFallback: 'index.html',
       navigateFallbackDenylist: [/\.apk$/],
+      importScripts: ['sw-notify.js'],
       cleanupOutdatedCaches: true
     }
   })]

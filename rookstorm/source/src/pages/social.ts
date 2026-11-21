@@ -12,6 +12,7 @@ import { go } from '../main';
 import { setAnalysisInput } from './analysis';
 import { hostFriend, tcLabel, TIME_PRESETS, modeLabel, premoveBox } from './play';
 import { OPERATOR_NAME, OPERATOR_CONTACT, POLICY_DATE, POLICY_VERSION } from '../config';
+import { newDailyDialog } from './daily';
 import { reviewBacklog, onReviewsSaved, reviewsRunning, brilliantsAvailable, noteMissing } from '../review';
 
 const notReady = (root: HTMLElement) => root.append(h('section.card.setup', null, h('h1', null, t('Accounts')),
@@ -100,8 +101,8 @@ function showRecovery(code: string, fresh: boolean) {
 }
 
 // ---------------------------------------------------------------- profile
-const online = (iso?: string | null) => !!iso && Date.now() - new Date(iso).getTime() < 90000;
-const lastSeenText = (iso?: string | null) => {
+export const online = (iso?: string | null) => !!iso && Date.now() - new Date(iso).getTime() < 90000;
+export const lastSeenText = (iso?: string | null) => {
   if (!iso) return '';
   if (online(iso)) return t('Online now');
   const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
@@ -137,6 +138,8 @@ export function profilePage(root: HTMLElement, username?: string) {
     if (friend) {
       if (p.live) actions.push(h('a.btn.primary', { href: '#/watch/' + p.live }, icon('eye'), t('Watch live game')));
       actions.push(btn(h('span', null, icon('play'), t('Challenge')), () => challengeDialog(p.id, p.username), 'primary'));
+      actions.push(h('a.btn', { href: '#/chat/' + encodeURIComponent(p.username) }, icon('chat'), t('Message')));
+      actions.push(btn(h('span', null, icon('calendar'), t('Daily game')), () => newDailyDialog(p.id, p.username)));
       actions.push(btn(t('Remove friend'), async () => { if (!confirm(t('Remove {0} from your friends?', p.username))) return; await rpc('friend_remove', { p_other: p.id }).catch(e => toast(niceError(e))); load(); }, 'ghost'));
     } else if (!self) {
       if (p.relation === 'incoming') actions.push(btn(t('Accept friend request'), async () => { await rpc('friend_respond', { p_other: p.id, p_accept: true }).catch(e => toast(niceError(e))); load(); }, 'primary'));
@@ -234,13 +237,13 @@ function gameRow(g: any, uid: string) {
   return h('button.game-row', {
     type: 'button', class: live ? 'live' : res,
     onclick: () => {
-      if (live) { go('watch/' + g.id); return; }
+      if (live) { go((g.kind === 'daily' ? 'daily/' : 'watch/') + g.id); return; }
       setAnalysisInput({ variant: g.variant, startFen: g.start_fen, ucis: n ? g.moves.split(' ') : [], white: g.white_name, black: g.black_name, orientation: white ? 'white' : 'black', gameId: g.id, autoReview: brill > 0, ply: brill > 0 ? brillPly : undefined });
       go('analysis');
     },
   },
   h('span.gr-res', null, label),
-  h('span.gr-main', null, h('b', null, (white ? '○ ' : '● ') + t('vs {0}', opp)), h('span.muted.small', null, `${variantName(g.variant)} · ${g.time_base ? tcLabel(g.time_base, g.time_inc) : '∞'}${g.rated ? ' · ' + t('Rated') : ''} · ${t('{0} moves', Math.ceil(n / 2))}`)),
+  h('span.gr-main', null, h('b', null, (white ? '○ ' : '● ') + t('vs {0}', opp)), h('span.muted.small', null, `${variantName(g.variant)} · ${g.kind === 'daily' ? t('Daily') : g.time_base ? tcLabel(g.time_base, g.time_inc) : '∞'}${g.rated ? ' · ' + t('Rated') : ''} · ${t('{0} moves', Math.ceil(n / 2))}`)),
   h('span.gr-side', null, brill ? h('span.brill-badge', { title: t('Brilliant moves') }, '!! ×' + brill) : null, g.rated && diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, (diff >= 0 ? '+' : '') + diff) : null, h('span.muted.small', null, fmtDate(g.created_at))));
 }
 
@@ -326,6 +329,7 @@ export function friendsPage(root: HTMLElement) {
           h('span', null, h('b', null, r.username), h('span.muted.small.block', null, r.live ? t('Playing now') : lastSeenText(r.last_seen), best ? ` · ${t(modeLabel(best[0]))} ${best[1].r}` : ` · ${BASE_RATING}`))),
         h('div.row', null,
           r.live ? h('a.btn.small', { href: '#/watch/' + r.live }, icon('eye'), t('Watch')) : null,
+          h('a.btn.small.icon', { href: '#/chat/' + encodeURIComponent(r.username), title: t('Message'), 'aria-label': t('Message') }, icon('chat')),
           btn(h('span', null, icon('play'), t('Challenge')), () => challengeDialog(r.id, r.username), 'primary small')));
     }));
     if (out.length) out2.push(h('h2', null, t('Sent requests')), ...out.map(r => h('div.friend', null, h('a.fname', { href: '#/profile/' + r.username }, h('span.avatar.sm', null, r.username[0].toUpperCase()), h('b', null, r.username)),
@@ -459,6 +463,7 @@ export function legalPage(root: HTMLElement, which: 'privacy' | 'terms') {
     H('With an account'),
     P('We store: your username, a password hash (never the password itself), a hashed recovery code, the date you agreed to these terms, when you were last online, your ratings, your friend list, challenges, and the games you play while signed in (moves, result, players, date).'),
     P('We do not collect your e-mail address, real name, location or any other personal details.'),
+    P('If you use chat, your messages are stored on the account server so you and your friend can read them. They are deleted when either of you deletes the account. With notifications turned on, the Android app checks for news about every 15 minutes using a random device key; signing out deletes the key.'),
     P('Purpose and legal basis: providing the account features you asked for (GDPR Art. 6(1)(b)), and protecting the service against abuse (Art. 6(1)(f)).'),
     P('Who can see what: everyone signed in can find your username. Your ratings, online status and games are visible only to you and your friends. Your opponents see your username in games against them.'),
     P('Account data is stored with Supabase (Supabase Inc.) on servers in the EU (Frankfurt), under a data processing agreement. Supabase may use sub-processors outside the EU under EU Standard Contractual Clauses.'),

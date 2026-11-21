@@ -33,6 +33,8 @@ export const $ = (sel: string, root: ParentNode = document) => root.querySelecto
 export interface Settings {
   theme: 'system' | 'light' | 'dark'; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
   name: string; lastElo: number; animation: boolean; premove: boolean; points: boolean; lang: string;
+  /** notifications for messages, challenges and daily games (undefined = not decided yet) */
+  notify?: boolean;
 }
 const DEFAULTS: Settings = { theme: 'system', board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true, premove: true, points: true, lang: '' };
 
@@ -151,7 +153,16 @@ export function fmtClock(ms: number): string {
 }
 
 /** Native helpers when running inside the Rookstorm Android app (null in a normal browser). */
-export const appBridge: { share(title: string, text: string, url: string): void; saveFile(name: string, mime: string, content: string): boolean } | null =
+export interface AppBridge {
+  share(title: string, text: string, url: string): void;
+  saveFile(name: string, mime: string, content: string): boolean;
+  // app version 2+:
+  notify?(key: string, title: string, body: string, url: string): void;
+  seen?(key: string): void;
+  setBackground?(url: string, anonKey: string, deviceKey: string, stringsJson: string): void;
+  requestPermission?(): void;
+}
+export const appBridge: AppBridge | null =
   (window as any).RookstormAndroid || null;
 export const inApp = !!appBridge || /RookstormApp/.test(navigator.userAgent);
 
@@ -175,6 +186,8 @@ export const icon = (name: string) => {
     party: 'M12 2.5a2 2 0 100 4 2 2 0 000-4zM12 17.5a2 2 0 100 4 2 2 0 000-4zM2.5 12a2 2 0 104 0 2 2 0 00-4 0zM17.5 12a2 2 0 104 0 2 2 0 00-4 0zM8 8h8v8H8z',
     fire: 'M12 22a7 7 0 007-7c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-2 2-5 5-5 8a7 7 0 007 7z', check: 'M5 12l5 5L20 7',
     phone: 'M7 2h10v20H7zM11 18h2',
+    chat: 'M4 5h16v11H10l-6 4z', bell: 'M6 16v-5a6 6 0 0112 0v5l2 2H4zM10 21h4', send: 'M3 11l18-8-8 18-2-8z',
+    calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4', back: 'M15 5l-7 7 7 7',
   };
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic'); s.setAttribute('aria-hidden', 'true');

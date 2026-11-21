@@ -4,7 +4,7 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 
 **Play:** https://brknue.github.io/Claude/rookstorm/
 
-**Android app:** Settings → Install the Android app, or [rookstorm.apk](https://brknue.github.io/Claude/rookstorm/rookstorm.apk) (free, not from the Play Store: Android asks you to allow installing it). It opens the live site full screen, so app players and website players are matched with each other and the app updates together with the site. On iPhone use Safari → Share → Add to Home Screen.
+**Android app:** Settings → Install the Android app, or [rookstorm.apk](https://brknue.github.io/Claude/rookstorm/rookstorm.apk) (free, not from the Play Store: Android asks you to allow installing it). It opens the live site full screen, so app players and website players are matched with each other and the app updates together with the site. Version 2 adds native notifications for messages, challenges and daily games, also while the app is closed. On iPhone use Safari → Share → Add to Home Screen.
 
 ## Features
 
@@ -29,7 +29,8 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 - Engine: Stockfish 17.1 lite, single-threaded WebAssembly (no special server headers needed). Browsers without WebAssembly SIMD (e.g. iPads before iOS 16.4) automatically get Stockfish's pure-JavaScript build (`engine/sf-asm.js`, downloaded only when needed).
 - Offline: a service worker caches everything (about 11 MB), including the engine and all puzzles.
 - Friend and online games run peer-to-peer over WebRTC through the free PeerJS signalling server (`0.peerjs.com`). That is the only external service, and it is contacted only when you start a friend or online game. Matchmaking needs no server either: players race to claim a lobby ID per variant and time control.
-- Android app (`source/android/`): a tiny WebView wrapper (about 20 KB) that loads the live site and adds Android's share sheet and saving to Downloads. Built without Android Studio by `source/android/build.sh` (needs a JDK and the Android build-tools + platform packages).
+- Android app (`source/android/`): a tiny WebView wrapper (about 30 KB) that loads the live site and adds Android's share sheet and saving to Downloads. Built without Android Studio by `source/android/build.sh` (needs a JDK and the Android build-tools + platform packages).
+- Android app 2: native notifications; while the app is closed it checks about every 15 minutes with a random per-device key (`notify_poll`), never the sign-in session.
 - Settings, puzzle rating and recent games are stored only in this browser (`localStorage` keys start with `rs.`).
 
 ## Source and rebuilding
@@ -56,10 +57,10 @@ Because it bundles GPL code, Rookstorm is released under GPLv3.
 
 ## Accounts
 
-Sign up with a username and password (no e-mail; a recovery code resets a forgotten password). Accounts give saved ratings (everyone starts at 1500 in every mode), friends, rated friend games (tick "Rated game"), challenges, watching friends' live games, and friends' game history with analysis. The live site uses its own Supabase project; to run your own copy:
+Sign up with a username and password (no e-mail; a recovery code resets a forgotten password). Accounts give saved ratings (everyone starts at 1500 in every mode), friends, rated friend games (tick "Rated game"), challenges, watching friends' live games, friends' game history with analysis, **chat with friends** (send games you played; they open in the analysis board), **daily games** (1–14 days per move, their own Daily rating, timeouts handled on the server) and **notifications** for messages, challenges and daily moves (in-page, browser notifications while a tab is open, and native ones in the Android app). The live site uses its own Supabase project; to run your own copy:
 
 1. Create a free Supabase project (region Central EU / Frankfurt).
-2. Run [`source/supabase/schema.sql`](source/supabase/schema.sql) in the SQL editor.
+2. Run [`source/supabase/schema.sql`](source/supabase/schema.sql) in the SQL editor, then the add-ons [`add-brilliants.sql`](source/supabase/add-brilliants.sql) and [`add-social.sql`](source/supabase/add-social.sql) (chat, daily games, notifications).
 3. Authentication → Email: turn off "Confirm email" (accounts use username + password and a recovery code; no e-mail addresses are collected).
 4. Put the project URL and anon key into `source/src/config.ts` and rebuild.
 
