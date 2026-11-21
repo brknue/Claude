@@ -2,11 +2,13 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
   base: './',
+  // build time, shown in Settings so players can see which version they have
+  define: { __BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')) },
   build: { outDir: 'dist', assetsDir: 'assets', chunkSizeWarningLimit: 1500 },
   worker: { format: 'iife' },
   plugins: [VitePWA({
     registerType: 'autoUpdate',
-    injectRegister: 'auto',
+    injectRegister: false, // registered in src/main.ts, which also switches to new versions
     includeAssets: ['icon.svg', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
     manifest: {
       name: 'Rookstorm Chess', short_name: 'Rookstorm',
@@ -27,7 +29,9 @@ export default defineConfig({
       navigateFallback: 'index.html',
       navigateFallbackDenylist: [/\.apk$/],
       importScripts: ['sw-notify.js'],
-      cleanupOutdatedCaches: true
+      cleanupOutdatedCaches: true,
+      skipWaiting: true,
+      clientsClaim: true
     }
   })]
 });

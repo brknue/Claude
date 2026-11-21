@@ -65,6 +65,35 @@ export function go(path: string) {
   if (location.hash === '#/' + path) route(); else location.hash = '#/' + path;
 }
 
+/**
+ * Offline copy + updates. The service worker keeps the site on the device; when a new version is published it is
+ * downloaded in the background and this page switches to it (reloads), unless a game is in progress: then a
+ * "Reload" button waits. Checks on start, whenever the app comes back to the screen, and every 30 minutes.
+ */
+function setupUpdates() {
+  if (!('serviceWorker' in navigator) || import.meta.env.DEV) return;
+  let hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  const busy = () => !!leaveGuard || /^#\/(game|table|join)/.test(location.hash)
+    || [...document.querySelectorAll('textarea, input:not([type=checkbox]):not([type=range])')].some(el => (el as HTMLInputElement).value && el === document.activeElement);
+  const reload = () => { if (reloading) return; reloading = true; location.reload(); };
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) { hadController = true; return; } // first install took over this page: nothing to switch from
+    if (!busy()) { reload(); return; }
+    offerBar('update', t('A new version of Rookstorm is ready.'), [btn(t('Reload'), () => reload(), 'primary small'), btn(t('Later'), () => clearOffers('update'), 'small ghost')]);
+  });
+  const start = async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' });
+      const check = () => { reg.update().catch(() => {}); };
+      setInterval(check, 30 * 60 * 1000);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+      window.addEventListener('online', check);
+    } catch { /* private mode etc.: the site still works online */ }
+  };
+  if (document.readyState === 'complete') start(); else window.addEventListener('load', start);
+}
+
 function themeIcon() { return icon(settings.theme === 'dark' ? 'moon' : settings.theme === 'light' ? 'sun' : 'half'); }
 
 function header() {
@@ -137,6 +166,7 @@ function openSettings() {
           h('p.muted.small', null, t('Free, from Safari: Share, then Add to Home Screen.'))])
         : [h('a.btn.block', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Install the Android app')),
           h('p.muted.small', null, t('Free, about 20 KB. Plays with website players. When you open the file, Android asks you to allow installing it.'))]],
+    h('p.muted.small.version', null, t('Version {0}', __BUILD__)),
     h('div.row.end', null, btn(t('Done'), () => close(), 'primary'))));
 }
 
@@ -274,6 +304,7 @@ async function init() {
   window.addEventListener('beforeunload', (e) => { if (leaveGuard) { e.preventDefault(); e.returnValue = ''; } });
   onChallenges(showChallenges);
   initNotify();
+  setupUpdates();
   setPopup((_a, tx) => {
     const kind = 'al-' + _a.key;
     offerBar(kind, `${tx.title}: ${tx.body}`, [btn(t('Open'), () => { clearOffers(kind); location.hash = tx.url.slice(1); }, 'primary small'), btn(t('Close'), () => clearOffers(kind), 'small ghost')]);
