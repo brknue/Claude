@@ -4,7 +4,7 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 
 **Play:** https://brknue.github.io/Claude/rookstorm/
 
-**Android app:** [rookstorm.apk](https://brknue.github.io/Claude/rookstorm/rookstorm.apk) (free, not from the Play Store: Android asks you to allow installing it). It opens the live site full screen, so app players and website players are matched with each other and the app updates together with the site. On iPhone use Safari → Share → Add to Home Screen.
+**Android app:** Settings → Install the Android app, or [rookstorm.apk](https://brknue.github.io/Claude/rookstorm/rookstorm.apk) (free, not from the Play Store: Android asks you to allow installing it). It opens the live site full screen, so app players and website players are matched with each other and the app updates together with the site. On iPhone use Safari → Share → Add to Home Screen.
 
 ## Features
 

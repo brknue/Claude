@@ -116,6 +116,12 @@ function openSettings() {
     me ? null : h('label.field', null, h('span', null, t('Your name (shown to online opponents)')),
       h('input', { value: settings.name, maxLength: 20, placeholder: t('Anonymous'), oninput: (e: any) => { settings.name = e.target.value.slice(0, 20); saveSettings(); } })),
     h('p.muted.small', null, t('Board and animation changes apply to newly opened boards.')),
+    inApp ? null : [
+      h('h3.set-h', null, t('Android app')),
+      /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+        ? h('p.muted.small', null, t('On iPhone or iPad: open this site in Safari, tap Share, then Add to Home Screen.'))
+        : [h('a.btn.block', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Install the Android app')),
+          h('p.muted.small', null, t('Free, about 20 KB. Plays with website players. When you open the file, Android asks you to allow installing it.'))]],
     h('div.row.end', null, btn(t('Done'), () => close(), 'primary'))));
 }
 
