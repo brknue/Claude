@@ -453,7 +453,8 @@ details.load[open] > *:not(summary) { margin-top: 8px; }
 .pk:not(:disabled):hover, .pk.on { border-color: var(--accent); background: var(--accent-soft); }
 .pk-n { position: absolute; right: -4px; bottom: -4px; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 8px; background: var(--accent); color: #fff; font: 800 .7rem/16px var(--font); text-align: center; }
 /* header account */
-.acc-btn { display: inline-flex; align-items: center; gap: 7px; max-width: 160px; padding-inline: 10px; }
+.acc-btn { display: inline-flex; align-items: center; gap: 6px; max-width: 160px; padding-inline: 10px; flex: none; }
+.acc-btn .ic { width: 20px; height: 20px; flex: none; }
 .acc-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
 .top-actions a.active { background: var(--accent-soft); }
 .friends-btn { position: relative; }
@@ -516,8 +517,9 @@ details.load[open] > *:not(summary) { margin-top: 8px; }
 /* right-to-left languages: the board itself always stays left-to-right */
 [dir=rtl] .board-wrap, [dir=rtl] .cg-wrap, [dir=rtl] .navrow, [dir=rtl] .clock, [dir=rtl] .movelist, [dir=rtl] .hb { direction: ltr; }
 @media (max-width: 760px) {
-  .acc-btn .acc-name { display: none; }
+  .acc-btn .acc-name:not(.signin) { display: none; }
   .acc-btn { padding-inline: 8px; }
+  .acc-btn .acc-name.signin { font-size: .85rem; }
   .profile-actions { margin-left: 0; width: 100%; }
   .game-row { grid-template-columns: 54px 1fr auto; padding: 9px 10px; }
 }
@@ -610,3 +612,27 @@ cg-board square.premove-sq { background-color: rgba(214, 64, 48, .5); }
 .pm-clear { display: none; position: absolute; left: 6px; bottom: 6px; z-index: 8; padding: 5px 10px; border-radius: 99px; border: 0; background: rgba(20, 20, 24, .78); color: #fff; font: 700 .78rem/1.2 var(--font); cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
 .board-wrap.has-premoves .pm-clear { display: block; }
 [dir=rtl] .pm-clear { left: auto; right: 6px; }
+
+/* very narrow phones: the sign-in button keeps its icon, the word goes */
+@media (max-width: 440px) {
+  .acc-btn .acc-name.signin { display: none; }
+  .top-actions { gap: 0; }
+  .top-actions .btn.icon { min-width: 38px; padding-inline: 5px; }
+  .acc-btn { padding-inline: 6px; }
+  .topbar { gap: 6px; padding-left: 10px; padding-right: 10px; }
+  .brand > span:not(.logo) { font-size: .95rem; letter-spacing: .06em; }
+  .brand .logo svg { width: 30px; height: 30px; }
+}
+@media (max-width: 350px) { .brand > span:not(.logo) { display: none; } }
+/* keep focused / scrolled-to elements clear of the sticky header and the bottom tab bar */
+html { scroll-padding-top: 76px; }
+@media (max-width: 1080px) { html { scroll-padding-bottom: calc(84px + env(safe-area-inset-bottom)); } }
+@media (max-width: 390px) { .tabbar a span { font-size: .66rem; letter-spacing: -.01em; } .tabbar a { padding-inline: 1px; } }
+/* tablets held sideways (bottom tab bar visible): boards fit between the header and the tab bar */
+@media (max-width: 1080px) and (orientation: landscape) and (min-height: 541px) {
+  .page-game .board-col { max-width: min(100%, calc(100vh - 300px)); max-width: min(100%, calc(100dvh - 300px)); }
+  .page-puzzles .board-col, .page-analysis .board-col, .page-openings .board-col { max-width: min(100%, calc(100vh - 220px)); max-width: min(100%, calc(100dvh - 220px)); }
+  .page-editor .board-col { max-width: min(100%, calc(100vh - 330px)); max-width: min(100%, calc(100dvh - 330px)); }
+  .page-table .game-layout.party .board-col, .page-table .game-layout.party.four .board-col { max-width: min(100%, calc(100vh - 190px)); max-width: min(100%, calc(100dvh - 190px)); }
+  .page-watch .board-col { max-width: min(100%, calc(100vh - 300px)); max-width: min(100%, calc(100dvh - 300px)); }
+}

@@ -74,7 +74,8 @@ function header() {
   const renderAcc = () => {
     friendsBtn.style.display = accountsEnabled() && me ? '' : 'none';
     accBtn.style.display = accountsEnabled() ? '' : 'none';
-    accBtn.replaceChildren(...(me ? [h('span.avatar.xs', null, me.username[0].toUpperCase()), h('span.acc-name', null, me.username)] : [h('span.acc-name', null, t('Sign in'))]));
+    accBtn.replaceChildren(...(me ? [h('span.avatar.xs', null, me.username[0].toUpperCase()), h('span.acc-name', null, me.username)] : [icon('user'), h('span.acc-name.signin', null, t('Sign in'))]));
+    accBtn.setAttribute('aria-label', me ? t('Your profile') : t('Sign in'));
     accBtn.setAttribute('title', me ? t('Your profile') : t('Sign in'));
   };
   renderAcc();
