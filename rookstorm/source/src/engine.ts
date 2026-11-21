@@ -168,7 +168,8 @@ export async function botMove(fen: string, elo: number, chess960: boolean, legal
     return r ? r.bestmove : null;
   }
   // Weak play model
-  const t = (SF_MIN_LIMIT - elo) / (SF_MIN_LIMIT - MIN_ELO); // 0 (1320) .. 1 (100)
+  // 0 (1320) .. 1 (100); starts above 0 so the level just below 1320 is not stronger than Stockfish's own 1320+
+  const t = 0.1 + 0.9 * (SF_MIN_LIMIT - elo) / (SF_MIN_LIMIT - MIN_ELO);
   const multipv = Math.min(legalCount, Math.round(4 + t * 8));
   const depth = Math.max(1, Math.round(9 - t * 7));
   const r = await engine.analyse({ fen, depth, chess960, elo: null, multipv });
@@ -176,10 +177,10 @@ export async function botMove(fen: string, elo: number, chess960: boolean, legal
   const lines = r.lines.filter(l => l.pv.length);
   if (!lines.length) return r.bestmove;
   // Pure blunder chance (random-ish candidate among all lines)
-  if (Math.random() < 0.05 + t * 0.25) return lines[Math.floor(Math.random() * lines.length)].pv[0];
+  if (Math.random() < 0.06 + t * 0.34) return lines[Math.floor(Math.random() * lines.length)].pv[0];
   const score = (l: Line) => l.mate !== undefined ? (l.mate > 0 ? 5000 - l.mate * 10 : -5000 - l.mate * 10) : l.cp!;
   const best = score(lines[0]);
-  const temp = 25 + t * 260;
+  const temp = 30 + t * 420;
   const weights = lines.map(l => Math.exp(-(best - score(l)) / temp));
   const sum = weights.reduce((a, b) => a + b, 0);
   let x = Math.random() * sum;

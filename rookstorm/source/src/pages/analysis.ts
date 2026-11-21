@@ -370,16 +370,22 @@ export function analysisPage(root: HTMLElement): () => void {
     return Math.max(0, cap(sign * eb.cp) - cap(sign * ea.cp));
   }
 
-  /** Performance rating estimate from accuracy and average centipawn loss (like chess.com's "Game Rating"). */
+  /**
+   * Performance rating estimate from accuracy and average centipawn loss (like chess.com's "Game Rating").
+   * Calibrated on games between the site's own Stockfish bots: a bot of level X gets about X.
+   */
   function gameElo(acc: number, acpl: number, moves: number): number {
     if (moves < 5) return 0;
-    const pts: [number, number][] = [[0, 100], [40, 250], [50, 400], [60, 700], [70, 1100], [80, 1600], [85, 1900], [90, 2250], [95, 2650], [98, 2900], [100, 3100]];
-    let fromAcc = 100;
-    for (let k = 1; k < pts.length; k++) if (acc <= pts[k][0]) { const [a0, e0] = pts[k - 1], [a1, e1] = pts[k]; fromAcc = e0 + (e1 - e0) * (acc - a0) / (a1 - a0); break; }
-    const fromCpl = 3100 * Math.exp(-0.0137 * acpl);
+    const interp = (x: number, pts: [number, number][]) => {
+      if (x <= pts[0][0]) return pts[0][1];
+      for (let k = 1; k < pts.length; k++) if (x <= pts[k][0]) { const [a0, e0] = pts[k - 1], [a1, e1] = pts[k]; return e0 + (e1 - e0) * (x - a0) / (a1 - a0); }
+      return pts[pts.length - 1][1];
+    };
+    const fromCpl = interp(-acpl, [[-250, 100], [-130, 400], [-78, 800], [-60, 1200], [-48, 1400], [-39, 1650], [-33, 2000], [-27, 2400], [-18, 2800], [-8, 3200]]);
+    const fromAcc = interp(acc, [[50, 100], [78, 400], [84.5, 800], [87, 1200], [89.5, 1450], [90.3, 1650], [91.4, 2000], [92.5, 2400], [93.9, 2800], [97, 3200]]);
     // Short games say little: pull them toward an average player.
     const conf = Math.min(1, moves / 25);
-    const est = (fromAcc * 0.6 + fromCpl * 0.4) * conf + 1500 * (1 - conf);
+    const est = (fromCpl * 0.5 + fromAcc * 0.5) * conf + 1500 * (1 - conf);
     return Math.round(Math.max(100, Math.min(3200, est)) / 10) * 10;
   }
 
