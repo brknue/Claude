@@ -19,6 +19,8 @@ export interface GameConfig {
   myColor: Color; elo?: number; link?: Link; oppName: string; autoFlip?: boolean; isHost?: boolean;
   /** network games: opponent's account id / rating, and whether the host asked for a rated game */
   oppId?: string | null; oppRating?: number | null; rated?: boolean;
+  /** friend games: the host turned 'Infinite premoves' off, so only one premove can be queued */
+  premoveOne?: boolean;
 }
 
 let pendingConfig: GameConfig | null = null;
@@ -56,12 +58,13 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
   let elo = settings.lastElo || 1200;
   let autoFlip = saved.autoFlip !== false;
   let rated = !!saved.rated;
+  let infPremoves = saved.infPremoves !== false;
 
   const body = h('div.setup-body');
   const tabs = h('div.seg.mode-tabs', { role: 'tablist' });
   const modes: [Mode, string, string][] = [['bot', 'Computer', 'cpu'], ['local', 'Same device', 'users'], ['friend', 'Friend link', 'link'], ['online', 'Online', 'globe'], ['party', 'Party', 'party']];
 
-  const persist = () => save('setup', { mode, variant, time, inc, color, autoFlip, rated });
+  const persist = () => save('setup', { mode, variant, time, inc, color, autoFlip, rated, infPremoves });
 
   function render() {
     tabs.replaceChildren(...modes.map(([m, label, ic]) => h('button', {
@@ -121,6 +124,7 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
       body.append(h('label.check', null, h('input', { type: 'checkbox', checked: autoFlip, onchange: (e: any) => { autoFlip = e.target.checked; persist(); } }), t('Flip the board after every move')));
     }
     if (mode === 'friend' || mode === 'online') body.append(ratedBox() || '');
+    if (mode === 'friend') body.append(premoveBox(infPremoves, (v) => { infPremoves = v; persist(); }));
     if (mode === 'friend') {
       body.append(h('p.muted', null, t('You get a link to send to your friend (message, AirDrop, email…). The game starts as soon as they open it. Moves travel directly between your devices.')));
       const codeIn = h('input', { placeholder: t('Got a code or link? Paste it here'), 'aria-label': t('Game code'), autocapitalize: 'off', autocomplete: 'off', spellcheck: false }) as HTMLInputElement;
@@ -159,7 +163,7 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
       startGame({ mode, variant, startFen, time, inc, myColor, elo, oppName: sf ? (elo >= 3190 ? 'Stockfish 17' : `Stockfish · ${elo}`) : `${t('Computer')} · ${elo}` });
     } else if (mode === 'local') {
       startGame({ mode, variant, startFen, time, inc, myColor: 'white', oppName: t('Black'), autoFlip });
-    } else if (mode === 'friend') hostFriend({ variant, startFen, time, inc, myColor, rated: isRated });
+    } else if (mode === 'friend') hostFriend({ variant, startFen, time, inc, myColor, rated: isRated, pm1: !infPremoves });
     else findOnline(variant, time, inc, isRated);
   }
 
@@ -170,7 +174,13 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
 const NO_RTC = () => t('This browser cannot make live peer-to-peer connections (WebRTC is turned off or missing). Try Safari, Chrome, Edge or Firefox, and turn off Lockdown Mode if it is on.');
 const noRtc = () => typeof (window as any).RTCPeerConnection === 'undefined';
 
-interface HostInfo { code?: string; variant: VariantKey; startFen: string; time: number; inc: number; myColor: Color; rated?: boolean }
+interface HostInfo { code?: string; variant: VariantKey; startFen: string; time: number; inc: number; myColor: Color; rated?: boolean; pm1?: boolean }
+
+/** 'Infinite premoves' checkbox for games against a friend (off = one premove at a time for both players). */
+export function premoveBox(on: boolean, set: (v: boolean) => void): HTMLElement {
+  return h('label.check', null, h('input', { type: 'checkbox', checked: on, onchange: (e: any) => set(e.target.checked) }),
+    h('span', null, t('Infinite premoves'), h('span.muted.small.block', null, t('Off: each player can queue only one premove.'))));
+}
 const myRatingFor = (v: VariantKey, tm: number, i: number) => { const m = ratingMode(v, tm, i); return me && m ? ratingIn(me.ratings, m) : undefined; };
 
 /**
@@ -228,9 +238,9 @@ export function hostFriend(info: HostInfo, challenge?: { to: string; toName: str
     if (m.t === 'hello' && !started) {
       started = true; clearInterval(poll);
       try { sessionStorage.removeItem('rs.hosting'); } catch { /* */ }
-      link.send({ t: 'start', variant: info.variant, fen: info.startFen, time: info.time, inc: info.inc, hostColor: info.myColor, name: myName(), uid: me?.id, rating: myRatingFor(info.variant, info.time, info.inc), rated: info.rated });
+      link.send({ t: 'start', variant: info.variant, fen: info.startFen, time: info.time, inc: info.inc, hostColor: info.myColor, name: myName(), uid: me?.id, rating: myRatingFor(info.variant, info.time, info.inc), rated: info.rated, pm1: !!info.pm1 });
       close();
-      startGame({ mode: 'friend', variant: info.variant, startFen: info.startFen, time: info.time, inc: info.inc, myColor: info.myColor, link, oppName: m.name || t('Friend'), isHost: true, oppId: m.uid || null, oppRating: m.rating ?? null, rated: !!info.rated && !!m.uid });
+      startGame({ mode: 'friend', variant: info.variant, startFen: info.startFen, time: info.time, inc: info.inc, myColor: info.myColor, link, premoveOne: !!info.pm1, oppName: m.name || t('Friend'), isHost: true, oppId: m.uid || null, oppRating: m.rating ?? null, rated: !!info.rated && !!m.uid });
     }
   };
 }
@@ -290,7 +300,7 @@ export function joinPage(root: HTMLElement, raw?: string) {
       const mr = me ? ratingIn(me.ratings, ratingMode(m.variant as VariantKey, m.time, m.inc) || 'x') : undefined;
       // tell the host our rating now that we know the time control
       if (mr) link.send({ t: 'hello', name: myName(), v: 1, uid: me?.id, rating: mr });
-      startGame({ mode: 'friend', variant: m.variant as VariantKey, startFen: m.fen, time: m.time, inc: m.inc, myColor: m.hostColor === 'white' ? 'black' : 'white', link, oppName: m.name || t('Friend'), oppId: m.uid || null, oppRating: m.rating ?? null, rated: !!m.rated && !!me });
+      startGame({ mode: 'friend', variant: m.variant as VariantKey, startFen: m.fen, time: m.time, inc: m.inc, myColor: m.hostColor === 'white' ? 'black' : 'white', link, premoveOne: !!m.pm1, oppName: m.name || t('Friend'), oppId: m.uid || null, oppRating: m.rating ?? null, rated: !!m.rated && !!me });
     } else if (m.t === 'busy') { status.textContent = t('This game already has two players. Ask your friend for a new link.'); clearInterval(helloTimer); }
   };
   link.join(code, (s) => { if (!started) status.textContent = s; }).then(() => {
@@ -348,6 +358,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   const board = new Board({ orientation: cfg.myColor, onMove: (m) => onUserMove(m) });
   board.chess960 = cfg.variant === 'chess960';
   board.antichess = cfg.variant === 'antichess';
+  board.premoveLimit = cfg.premoveOne ? 1 : Infinity; // online games always allow unlimited premoves
   board.movableColor = cfg.mode === 'local' ? 'both' : cfg.myColor;
   board.onPendingDrop = () => renderStrips();
   if (cfg.mode === 'local' && cfg.autoFlip) board.setOrientation('white');

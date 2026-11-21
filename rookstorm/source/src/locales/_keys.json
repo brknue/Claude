@@ -683,5 +683,8 @@
 "a piece type died out",
 "pawn promoted",
 "only kings left",
-"resignation"
+"resignation",
+"Clear premoves",
+"Infinite premoves",
+"Off: each player can queue only one premove."
 ]

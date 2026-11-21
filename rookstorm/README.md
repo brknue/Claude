@@ -13,7 +13,7 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 - **Same device:** pass-and-play with automatic board flipping.
 - **Friend link:** create a game, send the link (message, AirDrop, anything) or a short game code, and play in real time with clocks, chat, draw offers, takeback requests and rematches. If a phone drops the connection (e.g. switching apps), the game reconnects.
 - **Online:** get paired with the next player searching the same variant and time control; takeback requests work here too.
-- **Premoves:** plan your next move while the opponent thinks; one switch under the move list turns them on or off.
+- **Premoves:** queue as many premoves as you like while the opponent thinks; they play one after another, and if one becomes illegal the whole queue is cleared. Right-click or the ✕ button clears them; one switch under the move list turns premoves on or off. In friend games the host can untick "Infinite premoves" to allow only one premove; online games always allow unlimited.
 - **Capture points:** optional (Settings → Game): taking a piece pops up +3 / +5 …, losing one shows −3.
 - **20 languages:** English, Deutsch, Türkçe, Español, Français, Italiano, Português, Nederlands, Polski, Svenska, Русский, Українська, العربية, فارسی, हिन्दी, 中文, 日本語, 한국어, Bahasa Indonesia, Tiếng Việt (Settings → Language; Arabic and Persian right-to-left).
 - **Game review:** accuracy per player and every move classified (Brilliant, Great, Best, Excellent, Good, Book, Inaccuracy, Mistake, Miss, Blunder), with the best move shown, a badge on the piece that moved, an estimated game rating per player, an evaluation graph and an eval bar. Import any PGN or FEN.

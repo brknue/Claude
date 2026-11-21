@@ -10,7 +10,7 @@ import { Game } from '../game';
 import { Board } from '../board';
 import { go } from '../main';
 import { setAnalysisInput } from './analysis';
-import { hostFriend, tcLabel, TIME_PRESETS, modeLabel } from './play';
+import { hostFriend, tcLabel, TIME_PRESETS, modeLabel, premoveBox } from './play';
 import { OPERATOR_NAME, OPERATOR_CONTACT, POLICY_DATE, POLICY_VERSION } from '../config';
 
 const notReady = (root: HTMLElement) => root.append(h('section.card.setup', null, h('h1', null, t('Accounts')),
@@ -300,7 +300,7 @@ export function friendsPage(root: HTMLElement) {
 
 /** Pick game settings and send a challenge to a friend. */
 export function challengeDialog(to: string, toName: string) {
-  let variant: VariantKey = 'standard', time = 5, inc = 3, color: 'white' | 'black' | 'random' = 'random', rated = true;
+  let variant: VariantKey = 'standard', time = 5, inc = 3, color: 'white' | 'black' | 'random' = 'random', rated = true, infPremoves = true;
   const body = h('div');
   const close = modal(h('div.challenge', null, h('h2', null, t('Challenge {0}', toName)), body));
   function render() {
@@ -309,10 +309,11 @@ export function challengeDialog(to: string, toName: string) {
       h('div.field', null, h('span.lbl', null, t('Time control')), h('div.tc-grid.small', null, TIME_PRESETS.map(([tm, i]) => h('button.tc', { type: 'button', class: tm === time && i === inc ? 'on' : '', onclick: () => { time = tm; inc = i; render(); } }, h('b', null, tcLabel(tm, i)))))),
       h('div.field', null, h('span.lbl', null, t('Play as')), h('div.seg', null, (['white', 'random', 'black'] as const).map(c => h('button', { type: 'button', class: c === color ? 'on' : '', onclick: () => { color = c; render(); } }, h('span.cdot.' + c), c === 'white' ? t('White') : c === 'black' ? t('Black') : t('Random'))))),
       time ? h('label.check', null, h('input', { type: 'checkbox', checked: rated, onchange: (e: any) => { rated = e.target.checked; } }), t('Rated game')) : h('p.muted.small', null, t('Games without a clock cannot be rated.')),
+      premoveBox(infPremoves, (v) => { infPremoves = v; }),
       h('div.row.end', null, btn(t('Cancel'), () => close()), btn(h('span', null, icon('play'), t('Send challenge')), () => {
         close();
         const myColor: Color = color === 'random' ? (Math.random() < 0.5 ? 'white' : 'black') : color;
-        hostFriend({ variant, startFen: startFenFor(variant), time, inc, myColor, rated: rated && time > 0 }, { to, toName });
+        hostFriend({ variant, startFen: startFenFor(variant), time, inc, myColor, rated: rated && time > 0, pm1: !infPremoves }, { to, toName });
       }, 'primary')));
   }
   render();

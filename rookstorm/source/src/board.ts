@@ -22,6 +22,13 @@ export class Board {
   movableColor: Color | 'both' | null = 'both';
   /** colour allowed to premove while it is the opponent's turn (null = premoves off) */
   premoveColor: Color | null = null;
+  /** how many premoves can be queued (Infinity, or 1 when a friend game turned infinite premoves off) */
+  premoveLimit = Infinity;
+  /** queued premoves, played one after another as soon as it is our turn again */
+  private queue: { orig: string; dest: string; promo?: Role }[] = [];
+  private lastSq: [string, string] | null = null;
+  private interactiveFlag = true;
+  private clearBtn: HTMLElement;
   chess960 = false;
   antichess = false;
   private ro: ResizeObserver | null = null;
@@ -49,33 +56,87 @@ export class Board {
     });
     this.ro = new ResizeObserver(() => this.cg.redrawAll());
     this.ro.observe(this.el);
+    // right-click (like chess.com) or the small button clears all premoves
+    this.el.addEventListener('contextmenu', (e) => { if (this.queue.length) { e.preventDefault(); e.stopPropagation(); this.cancelPremove(); } }, true);
+    this.clearBtn = h('button.pm-clear', { type: 'button', onclick: (e: Event) => { e.stopPropagation(); this.cancelPremove(); } });
+    this.el.appendChild(this.clearBtn);
   }
 
   destroy() { this.ro?.disconnect(); this.cg.destroy(); }
 
   /** Show a position. lastMove optional normalized move that led to it (needs previous position for castle display). */
-  setPosition(pos: Position, lastMove?: [string, string] | null, interactive = true, premoveColor: Color | null = this.premoveColor) {
+  setPosition(pos: Position, lastMove?: [string, string] | null, interactive = true) {
     this.pos = pos;
-    const turn = pos.turn;
-    const canMove = interactive && (this.movableColor === 'both' || this.movableColor === turn);
-    const premove = !canMove && !!premoveColor && premoveColor !== turn;
-    if (!premoveColor) this.cg.cancelPremove();
-    this.cg.set({
-      fen: fenOf(pos),
-      turnColor: turn,
-      check: pos.isCheck() ? turn : false,
-      lastMove: (lastMove || undefined) as any,
-      premovable: { enabled: !!premoveColor },
-      movable: {
-        color: canMove ? turn : premove ? premoveColor! : undefined,
-        dests: canMove ? dests(pos, this.chess960) : new Map(),
-      },
-    });
+    this.lastSq = lastMove || null;
+    this.interactiveFlag = interactive;
+    this.redraw();
   }
 
-  /** Execute a queued premove (if any and legal). Returns true if one was played. */
-  playPremove(): boolean { return this.cg.playPremove(); }
-  cancelPremove() { this.cg.cancelPremove(); }
+  /** true while it is the opponent's turn and we may queue premoves */
+  private get premoveMode(): boolean {
+    const pos = this.pos;
+    if (!pos || !this.premoveColor) return false;
+    const canMove = this.interactiveFlag && (this.movableColor === 'both' || this.movableColor === pos.turn);
+    return !canMove && this.premoveColor !== pos.turn;
+  }
+
+  /** The real position with the queued premoves played on it (the opponent "passes"), for display and new premoves. */
+  private virtualPos(): { pos: Position; applied: number } {
+    const p = this.pos!.clone();
+    const me = this.premoveColor!;
+    p.turn = me;
+    let applied = 0;
+    for (const q of this.queue) {
+      const m = cgToMove(p, q.orig, q.dest, q.promo);
+      if (!p.isLegal(m)) break;
+      p.play(m);
+      p.turn = me;
+      applied++;
+    }
+    return { pos: p, applied };
+  }
+
+  private redraw() {
+    const pos = this.pos;
+    if (!pos) return;
+    const turn = pos.turn;
+    const canMove = this.interactiveFlag && (this.movableColor === 'both' || this.movableColor === turn);
+    if (this.premoveMode) {
+      const { pos: v, applied } = this.virtualPos();
+      const custom = new Map<any, string>();
+      this.queue.slice(0, applied).forEach(q => { custom.set(q.orig, 'premove-sq'); custom.set(q.dest, 'premove-sq'); });
+      this.cg.set({
+        fen: fenOf(v), turnColor: this.premoveColor!, check: false,
+        lastMove: (applied ? undefined : this.lastSq || undefined) as any,
+        highlight: { custom },
+        movable: { color: this.premoveColor!, dests: dests(v, this.chess960) },
+      });
+    } else {
+      this.cg.set({
+        fen: fenOf(pos), turnColor: turn,
+        check: pos.isCheck() ? turn : false,
+        lastMove: (this.lastSq || undefined) as any,
+        highlight: { custom: new Map() },
+        movable: { color: canMove ? turn : undefined, dests: canMove ? dests(pos, this.chess960) : new Map() },
+      });
+    }
+    this.el.classList.toggle('has-premoves', this.queue.length > 0);
+    this.clearBtn.textContent = this.queue.length ? `✕ ${t('Clear premoves')} (${this.queue.length})` : '';
+  }
+
+  /** Play the first queued premove if it is legal now; if it is not, every premove is dropped. */
+  playPremove(): boolean {
+    const pos = this.pos;
+    if (!pos || !this.queue.length || pos.turn !== this.premoveColor) return false;
+    const q = this.queue[0];
+    const m = cgToMove(pos, q.orig, q.dest, q.promo);
+    if (!pos.isLegal(m)) { this.cancelPremove(); return false; }
+    this.queue.shift();
+    this.opts.onMove?.(m, pos);
+    return true;
+  }
+  cancelPremove() { if (!this.queue.length) return; this.queue = []; this.redraw(); }
+  get premoveCount() { return this.queue.length; }
 
   setOrientation(c: Color) { this.cg.set({ orientation: c }); }
   flip() { this.cg.toggleOrientation(); }
@@ -99,6 +160,16 @@ export class Board {
   private async userMove(orig: string, dest: string, premove = false) {
     const pos = this.pos;
     if (!pos) return;
+    if (this.premoveMode) {
+      // queue a premove on the virtual board; pawns reaching the last rank become queens
+      const v = this.virtualPos().pos;
+      const promo: Role | undefined = isPromotion(v, sq(orig), sq(dest)) ? 'queen' : undefined;
+      const item = { orig, dest, promo };
+      if (this.premoveLimit <= 1) this.queue = [item];
+      else if (this.queue.length < this.premoveLimit) this.queue.push(item);
+      this.redraw();
+      return;
+    }
     let promo: Role | undefined;
     if (isPromotion(pos, sq(orig), sq(dest))) {
       promo = premove ? 'queen' : await this.askPromotion(pos.turn, dest);

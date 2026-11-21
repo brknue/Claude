@@ -605,3 +605,8 @@ piece.commoner { opacity: .85; filter: grayscale(.4); }
   .page-table .game-layout.party .board-col, .page-table .game-layout.party.four .board-col { width: calc(100vh - 66px); width: calc(100dvh - 66px); max-width: none; }
   .page-table main, main.page-table { padding-top: 6px !important; }
 }
+/* queued premoves */
+cg-board square.premove-sq { background-color: rgba(214, 64, 48, .5); }
+.pm-clear { display: none; position: absolute; left: 6px; bottom: 6px; z-index: 8; padding: 5px 10px; border-radius: 99px; border: 0; background: rgba(20, 20, 24, .78); color: #fff; font: 700 .78rem/1.2 var(--font); cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.board-wrap.has-premoves .pm-clear { display: block; }
+[dir=rtl] .pm-clear { left: auto; right: 6px; }

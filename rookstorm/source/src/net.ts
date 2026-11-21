@@ -9,7 +9,7 @@ import { t } from './i18n';
 
 export type Msg =
   | { t: 'hello'; name: string; v: number; uid?: string; rating?: number }
-  | { t: 'start'; variant: string; fen: string; time: number; inc: number; hostColor: 'white' | 'black'; name: string; uid?: string; rating?: number; rated?: boolean }
+  | { t: 'start'; variant: string; fen: string; time: number; inc: number; hostColor: 'white' | 'black'; name: string; uid?: string; rating?: number; rated?: boolean; pm1?: boolean }
   | { t: 'gid'; id: string } | { t: 'gid-ok'; rated: boolean }
   | { t: 'move'; uci: string; clock?: number; ply: number }
   | { t: 'resign' } | { t: 'draw-offer' } | { t: 'draw-accept' } | { t: 'draw-decline' }
