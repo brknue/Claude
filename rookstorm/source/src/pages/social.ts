@@ -12,6 +12,7 @@ import { go } from '../main';
 import { setAnalysisInput } from './analysis';
 import { hostFriend, tcLabel, TIME_PRESETS, modeLabel, premoveBox } from './play';
 import { OPERATOR_NAME, OPERATOR_CONTACT, POLICY_DATE, POLICY_VERSION } from '../config';
+import { reviewBacklog, onReviewsSaved, reviewsRunning, brilliantsAvailable, noteMissing } from '../review';
 
 const notReady = (root: HTMLElement) => root.append(h('section.card.setup', null, h('h1', null, t('Accounts')),
   h('p', null, t('Accounts are not set up on this site yet.')), h('a.btn', { href: '#/' }, t('Back'))));
@@ -148,13 +149,35 @@ export function profilePage(root: HTMLElement, username?: string) {
         h('div', null, h('h1', null, p.username, self ? h('span.tag', null, t('You')) : friend ? h('span.tag', null, t('Friend')) : null),
           h('div.muted.small', null, t('Member since {0}', fmtDate(p.created_at)), p.last_seen ? ' · ' : '', p.last_seen ? h('span', { class: online(p.last_seen) ? 'online' : '' }, lastSeenText(p.last_seen)) : null)),
         h('div.row.wrap.profile-actions', null, actions)),
+      brilliantCard(p.username, self),
       self || friend ? h('section.card', null, h('h2', null, t('Ratings')), ratingGrid(p.ratings)) : h('section.card', null, h('p.muted', null, t('Ratings and games are visible to friends only.'))),
       self || friend ? gamesCard(p.username, p.id) : '',
       self ? settingsCard() : '');
   }
   load();
+  if (name.toLowerCase() === me.username.toLowerCase()) reviewBacklog();
   const off = onAccount(() => { if (!me) go('account'); });
   return () => { alive = false; off(); };
+}
+
+/** Brilliant moves of a player: visible to everyone signed in. Hidden if the database add-on is missing. */
+function brilliantCard(username: string, self: boolean): HTMLElement {
+  const card = h('section.card.brill-card', { style: { display: 'none' } });
+  const draw = async () => {
+    let s: any = null;
+    if (!brilliantsAvailable()) { card.style.display = 'none'; return; }
+    try { s = await rpc('brilliant_stats', { p_username: username }); } catch (e) { noteMissing(e); card.style.display = 'none'; return; }
+    if (!s) { card.style.display = 'none'; return; }
+    card.style.display = '';
+    card.replaceChildren(
+      h('span.badge.big.brill', { 'aria-hidden': 'true' }, '!!'),
+      h('div', null, h('div.brill-num', null, String(s.total)), h('div.muted.small', null, t('Brilliant moves'))),
+      h('div.brill-side.muted.small', null, s.total ? t('in {0} games', s.games) : t('No brilliant moves yet'),
+        self && reviewsRunning() ? h('span.block', null, t('Reviewing your recent games…')) : null));
+  };
+  draw();
+  const off = onReviewsSaved(() => { if (card.isConnected) draw(); else off(); });
+  return card;
 }
 
 function resultFor(g: any, uid: string): 'win' | 'loss' | 'draw' | '' {
@@ -164,23 +187,36 @@ function resultFor(g: any, uid: string): 'win' | 'loss' | 'draw' | '' {
   return (g.result === '1-0') === white ? 'win' : 'loss';
 }
 
+const myBrilliants = (g: any, uid: string) => (g.white_id === uid ? g.white_brilliant : g.black_brilliant) || 0;
+
 function gamesCard(username: string, uid: string) {
   const list = h('div.games-list');
   const more = btn(t('Load more'), () => load(), 'ghost');
+  const rows: any[] = [];
   let before: string | null = null;
+  let onlyBrilliant = false;
+  const filter = h('label.check.small.brill-filter', null,
+    h('input', { type: 'checkbox', onchange: (e: any) => { onlyBrilliant = e.target.checked; draw(); } }),
+    h('span.badge.brill', null, '!!'), ' ', t('Only games with brilliant moves'));
+  function draw() {
+    const shown = onlyBrilliant ? rows.filter(g => myBrilliants(g, uid) > 0) : rows;
+    list.replaceChildren(...(shown.length ? shown.map(g => gameRow(g, uid)) : [h('p.muted', null, onlyBrilliant ? t('No brilliant moves yet') : t('No games yet.'))]));
+    filter.style.display = rows.some(g => g.reviewed_at !== undefined) ? '' : 'none';
+  }
   async function load() {
     more.disabled = true;
     try {
-      const rows = await rpc<any[]>('game_list', { p_username: username, p_before: before, p_limit: 20 });
-      if (!rows.length && !before) list.append(h('p.muted', null, t('No games yet.')));
-      for (const g of rows) list.append(gameRow(g, uid));
-      before = rows.length ? rows[rows.length - 1].created_at : before;
-      more.style.display = rows.length < 20 ? 'none' : '';
+      const got = await rpc<any[]>('game_list', { p_username: username, p_before: before, p_limit: 20 });
+      rows.push(...got);
+      before = got.length ? got[got.length - 1].created_at : before;
+      more.style.display = got.length < 20 ? 'none' : '';
+      draw();
     } catch (e) { list.append(h('p.err', null, niceError(e))); }
     more.disabled = false;
   }
   load();
-  return h('section.card', null, h('h2', null, t('Games')), list, more);
+  const off = onReviewsSaved(() => { if (!list.isConnected) { off(); return; } rows.length = 0; before = null; load(); });
+  return h('section.card', null, h('div.games-head', null, h('h2', null, t('Games')), filter), list, more);
 }
 
 function gameRow(g: any, uid: string) {
@@ -190,18 +226,22 @@ function gameRow(g: any, uid: string) {
   const diff = white ? g.white_diff : g.black_diff;
   const n = g.moves ? g.moves.split(' ').length : 0;
   const live = g.status === 'live';
+  const brill = myBrilliants(g, uid);
+  // jump straight to this player's first brilliant move
+  const startWhite = !/ b /.test(String(g.start_fen));
+  const brillPly = String(g.brilliant_plies || '').split(',').map(Number).filter(k => k > 0 && ((k % 2 === 1) === startWhite) === white)[0];
   const label = live ? t('Live') : g.status === 'aborted' ? t('Aborted') : g.status === 'disputed' ? t('Disputed') : res === 'win' ? t('Won') : res === 'loss' ? t('Lost') : t('Draw');
   return h('button.game-row', {
     type: 'button', class: live ? 'live' : res,
     onclick: () => {
       if (live) { go('watch/' + g.id); return; }
-      setAnalysisInput({ variant: g.variant, startFen: g.start_fen, ucis: n ? g.moves.split(' ') : [], white: g.white_name, black: g.black_name, orientation: white ? 'white' : 'black' });
+      setAnalysisInput({ variant: g.variant, startFen: g.start_fen, ucis: n ? g.moves.split(' ') : [], white: g.white_name, black: g.black_name, orientation: white ? 'white' : 'black', gameId: g.id, autoReview: brill > 0, ply: brill > 0 ? brillPly : undefined });
       go('analysis');
     },
   },
   h('span.gr-res', null, label),
   h('span.gr-main', null, h('b', null, (white ? '○ ' : '● ') + t('vs {0}', opp)), h('span.muted.small', null, `${variantName(g.variant)} · ${g.time_base ? tcLabel(g.time_base, g.time_inc) : '∞'}${g.rated ? ' · ' + t('Rated') : ''} · ${t('{0} moves', Math.ceil(n / 2))}`)),
-  h('span.gr-side', null, g.rated && diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, (diff >= 0 ? '+' : '') + diff) : null, h('span.muted.small', null, fmtDate(g.created_at))));
+  h('span.gr-side', null, brill ? h('span.brill-badge', { title: t('Brilliant moves') }, '!! ×' + brill) : null, g.rated && diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, (diff >= 0 ? '+' : '') + diff) : null, h('span.muted.small', null, fmtDate(g.created_at))));
 }
 
 function settingsCard() {

@@ -124,7 +124,7 @@ export class Link {
       peer.on('open', () => attempt());
       peer.on('error', (e: any) => {
         if (done) return;
-        if (e?.type === 'peer-unavailable') { onStatus(t('Waiting for your friend’s device… (keep their Rookstorm tab open)')); setTimeout(attempt, 2500); }
+        if (e?.type === 'peer-unavailable') { onStatus(Date.now() - t0 > 40000 ? t('Still waiting. If this takes long, the link may be old: ask for a new one.') : t('Waiting for your friend’s device… (keep their Rookstorm tab open)')); setTimeout(attempt, 2500); }
         else if (['network', 'server-error', 'socket-error', 'socket-closed', 'disconnected'].includes(e?.type)) { onStatus(t('Connection problem, retrying…')); setTimeout(attempt, 3000); }
         else if (e?.type === 'browser-incompatible') fail(t('This browser does not support peer-to-peer connections.'));
         else { setTimeout(attempt, 3000); }

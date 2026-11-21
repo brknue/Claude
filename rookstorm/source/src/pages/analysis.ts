@@ -9,10 +9,13 @@ import { Board, arrowFor } from '../board';
 import { engine, Line, whiteCp, fmtScore, winPct } from '../engine';
 import { openingIndex, Opening } from '../openings-db';
 import { go } from '../main';
+import { saveReview, dropQueued } from '../review';
 import { t } from '../i18n';
 
 export interface AnalysisInput {
   variant: VariantKey; startFen: string; ucis: string[]; orientation?: Color; white?: string; black?: string; autoReview?: boolean; ply?: number;
+  /** account game id: the review result (brilliant moves) is saved to the profile */
+  gameId?: string;
 }
 let pending: AnalysisInput | null = null;
 let lastInput: AnalysisInput | null = null;
@@ -266,6 +269,12 @@ export function analysisPage(root: HTMLElement): () => void {
     if (!complete) { summary.replaceChildren(); evals = []; update(); toast(t('Review cancelled')); return; }
     // classify
     for (let i = 0; i < n; i++) reviews[i] = classify(i, book);
+    if (input.gameId) {
+      const plies: number[] = []; let wb = 0, bb = 0;
+      reviews.forEach((r, i) => { if (r?.cls === 'brilliant') { plies.push(i + 1); if (main.positions[i].turn === 'white') wb++; else bb++; } });
+      const gid = input.gameId;
+      saveReview(gid, { white: wb, black: bb, plies }).then(ok => { if (ok) dropQueued(gid); });
+    }
     reviewed = true;
     cur = { inVar: false, ply: Math.min(cur.ply, main.ply) };
     renderSummary();

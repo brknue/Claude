@@ -250,6 +250,7 @@ export class TableGuest implements TableClient {
   private lastSeen = 0;
   private iv: any = 0;
 
+  private t0 = Date.now();
   constructor(public code: string, private myName: string) {}
 
   connect(onStatus: (s: string) => void) {
@@ -273,7 +274,7 @@ export class TableGuest implements TableClient {
     peer.on('open', attempt);
     peer.on('error', (e: any) => {
       if (this.closed) return;
-      if (e?.type === 'peer-unavailable') { this.status = t('Waiting for the host’s device… (keep their Rookstorm tab open)'); onStatus(this.status); setTimeout(attempt, 2500); }
+      if (e?.type === 'peer-unavailable') { this.status = Date.now() - this.t0 > 40000 ? t('Still waiting. If this takes long, the link may be old: ask for a new one.') : t('Waiting for the host’s device… (keep their Rookstorm tab open)'); onStatus(this.status); setTimeout(attempt, 2500); }
       else if (e?.type === 'browser-incompatible') { this.status = t('This browser does not support peer-to-peer connections.'); onStatus(this.status); }
       else setTimeout(attempt, 3000);
     });

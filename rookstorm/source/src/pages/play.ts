@@ -11,6 +11,7 @@ import { setAnalysisInput } from './analysis';
 import { me, ratingMode, ratingIn, rpc, niceError, refreshMe, accountsEnabled } from '../account';
 import { Recorder, FinishInfo } from '../record';
 import { partySetup } from './party';
+import { queueReview, runReviews } from '../review';
 
 type Mode = 'bot' | 'local' | 'friend' | 'online' | 'party';
 
@@ -590,7 +591,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   }
 
   function review() {
-    setAnalysisInput({ variant: cfg!.variant, startFen: game.startFen, ucis: game.ucis.slice(), orientation: cfg!.mode === 'local' ? 'white' : cfg!.myColor, white: nameOf('white'), black: nameOf('black'), autoReview: sf });
+    setAnalysisInput({ variant: cfg!.variant, startFen: game.startFen, ucis: game.ucis.slice(), orientation: cfg!.mode === 'local' ? 'white' : cfg!.myColor, white: nameOf('white'), black: nameOf('black'), autoReview: sf, gameId: rec?.id || undefined });
     go('analysis');
   }
 
@@ -612,7 +613,9 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     if (rec) {
       const r = game.result!;
       const thisRec = rec;
+      const endUcis = game.ucis.slice(), endFen = game.startFen;
       thisRec.finish(r.winner, r.reason, game.ucis).then(info => {
+        if (thisRec.id && sf && endUcis.length >= 2) { queueReview(thisRec.id, cfg!.variant, endFen, endUcis); setTimeout(() => runReviews(), 2500); }
         if (!alive || rec !== thisRec) return;
         ratingInfo = info || { status: 'error' };
         if (ratedNow) refreshMe();
