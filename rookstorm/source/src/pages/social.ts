@@ -287,7 +287,7 @@ function settingsCard() {
         } catch (e) { toast(niceError(e)); }
       }),
       btn(t('Sign out'), async () => { await signOut(); toast(t('Signed out')); go(''); })),
-    h('details.danger-zone', null, h('summary', null, t('Delete account')),
+    ((me as any)?.roles || []).includes('owner') ? null : h('details.danger-zone', null, h('summary', null, t('Delete account')),
       h('p.muted.small', null, t('Deletes your account, ratings, friends and your games against the computer for good. In games against other players your name is replaced by "Deleted player". This cannot be undone.')),
       btn(t('Delete my account'), async () => {
         const typed = prompt(t('Type your username to confirm: {0}', me!.username));

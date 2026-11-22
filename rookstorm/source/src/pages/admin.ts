@@ -16,14 +16,14 @@ const ago = (iso?: string | null) => { if (!iso) return '–'; const m = Math.ro
 export function adminPage(root: HTMLElement, tab?: string) {
   if (!accountsEnabled() || !me) { go('account'); return; }
   if (!isStaff()) { root.append(h('section.card.setup.center', null, h('h1', null, 'Admin'), h('p.muted', null, 'This page is for staff only.'), h('a.btn', { href: '#/' }, 'Back'))); return; }
-  let owner = false;
+  let owner = false, isRoot = false;
   const wrap = h('div.admin');
   root.append(wrap);
 
   async function start() {
     let st: any;
     try { st = await rpc('admin_status'); } catch (e) { wrap.replaceChildren(h('p.err', null, 'The admin add-on is not installed (supabase/add-admin.sql). ' + err(e))); return; }
-    owner = !!st.owner;
+    owner = !!st.owner; isRoot = !!st.root;
     if (st.unlocked) panel(tab || 'dashboard'); else unlockForm();
   }
 
@@ -102,7 +102,7 @@ export function adminPage(root: HTMLElement, tab?: string) {
     const ratings = Object.entries(u.ratings || {}) as [string, any][];
     // roles
     const roleBoxes = ROLES.map(r => {
-      const locked = (r.key === 'admin' || r.key === 'owner') && !owner;
+      const locked = (r.key === 'owner' && !isRoot) || (r.key === 'admin' && !owner) || ((u.roles || []).includes('owner') && u.id !== me!.id && !isRoot);
       return h('label.check.small', { class: locked ? 'disabled' : '' }, h('input', { type: 'checkbox', value: r.key, checked: (u.roles || []).includes(r.key), disabled: locked }), h('span', null, r.icon + ' ' + r.label));
     });
     const banned = u.banned_until && Date.parse(u.banned_until) > Date.now();
@@ -117,7 +117,7 @@ export function adminPage(root: HTMLElement, tab?: string) {
         act('Reset all ratings', async () => { if (!confirm(`Reset all ratings of ${u.username} to 1500?`)) throw new Error('cancelled'); await rpc('admin_reset_ratings', { p_id: id }); }, 'ghost')),
       h('h3.set-h', null, 'Roles & badges'), h('div.admin-roles', null, roleBoxes),
       act('Save roles', () => rpc('admin_set_roles', { p_id: id, p_roles: roleBoxes.map(l => l.querySelector('input') as HTMLInputElement).filter(i => i.checked).map(i => i.value) }), 'primary'),
-      h('p.muted.small', null, 'Admin gives access to this panel (the admin password is still needed). Only the owner can give or take admin.'),
+      h('p.muted.small', null, 'Admin gives access to this panel (the admin password is still needed). Owners give or take admin; only Crb gives or takes owner. Crb’s own top roles can never be removed.'),
       h('h3.set-h', null, 'Account'),
       h('div.row.wrap', null,
         act('Reset password', async () => { const p = prompt(`New password for ${u.username} (8+ characters):`); if (!p) throw new Error('cancelled'); await rpc('admin_set_password', { p_id: id, p_new: p }); }),
@@ -181,10 +181,10 @@ export function adminPage(root: HTMLElement, tab?: string) {
       h('section.card', null, h('h2', null, 'Your session'), h('p.muted.small', null, 'Unlocked for 30 minutes; every action extends it. Lock when you leave the device.'),
         btn('Refresh my roles', async () => { await refreshMe(); toast('Done'); })),
     ];
-    if (owner) {
+    if (isRoot) {
       const a = h('input', { type: 'password', placeholder: 'New admin password (8+)', autocomplete: 'new-password' }) as HTMLInputElement;
       const c = h('input', { type: 'password', placeholder: 'Repeat', autocomplete: 'new-password' }) as HTMLInputElement;
-      items.push(h('section.card', null, h('h2', null, 'Change the admin password'), h('p.muted.small', null, 'Owner only. All other admins are locked out until they enter the new password.'),
+      items.push(h('section.card', null, h('h2', null, 'Change the admin password'), h('p.muted.small', null, 'Only Crb can do this. All other admins are locked out until they enter the new password.'),
         h('div.row.wrap', null, a, c, btn('Change', async () => {
           if (a.value !== c.value) { toast('The passwords do not match.'); return; }
           try { await rpc('admin_change_password', { p_new: a.value }); a.value = c.value = ''; toast('Admin password changed'); } catch (e) { toast(err(e)); }

@@ -13,7 +13,7 @@ window.PLAIN_FILES = {
    "rookstorm/assets/fr-B4ddPd7i.js",
    "rookstorm/assets/hi-yxT2KVzR.js",
    "rookstorm/assets/id-Ch77Femq.js",
-   "rookstorm/assets/index-BzFGmWsy.js",
+   "rookstorm/assets/index-CQUhnXRI.js",
    "rookstorm/assets/index-Dr_Jz48K.css",
    "rookstorm/assets/it-BOSgoDNu.js",
    "rookstorm/assets/ja-qmZm-Cfi.js",
@@ -145,6 +145,7 @@ window.PLAIN_FILES = {
    "rookstorm/source/src/vengine.ts",
    "rookstorm/source/src/vsearch.ts",
    "rookstorm/source/src/vworker.ts",
+   "rookstorm/source/supabase/add-admin-protect.sql",
    "rookstorm/source/supabase/add-admin.sql",
    "rookstorm/source/supabase/add-brilliants.sql",
    "rookstorm/source/supabase/add-daily-puzzles.sql",
@@ -159,7 +160,7 @@ window.PLAIN_FILES = {
    "rookstorm/sw.js",
    "rookstorm/workbox-ebea30cf.js"
   ],
-  "bytes": 24784609
+  "bytes": 24795693
  },
  "bio-genetik": {
   "files": [
