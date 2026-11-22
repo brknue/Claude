@@ -1,4 +1,5 @@
 /** Daily games: correspondence chess with friends, a few days per move, rated in their own 'daily' rating. */
+import { badges } from '../badges';
 import { h, icon, btn, toast, modal } from '../ui';
 import { t } from "../i18n";
 import { me, rpc, niceError, onAccount } from '../account';
@@ -101,7 +102,7 @@ export function dailyPage(root: HTMLElement, id?: string) {
     const el = h('div.daily-row', { class: r.my_turn ? 'turn' : r.incoming ? 'invite' : '' },
       h('a.dr-main', { href: '#/daily/' + r.id },
         h('span.cdot.' + (white ? 'white' : 'black')),
-        h('span', null, h('b', null, t('vs {0}', opp)), h('span.muted.small.block', null, `${variantName(r.variant)} · ${daysLabel(r.days)}${r.rated ? ' · ' + t('Rated') : ''} · ${t('{0} moves', Math.ceil(n / 2))}`)),
+        h('span', null, h('b', null, t('vs {0}', opp), badges(opp)), h('span.muted.small.block', null, `${variantName(r.variant)} · ${daysLabel(r.days)}${r.rated ? ' · ' + t('Rated') : ''} · ${t('{0} moves', Math.ceil(n / 2))}`)),
         h('span.dr-status', { class: r.my_turn ? 'hot' : '' }, status)),
       side.length ? h('div.row.dr-acts', null, side) : null);
     return el;
@@ -142,7 +143,7 @@ export function dailyGamePage(root: HTMLElement, id: string) {
     const name = c === 'white' ? row.white_name : row.black_name;
     const toMove = row.status === 'live' && game && game.pos.turn === c;
     const diff = row.status === 'finished' && row.rated ? (c === 'white' ? row.white_diff : row.black_diff) : null;
-    return h('div.pinfo', { class: toMove ? 'turn' : '' }, h('span.cdot.' + c), h('div.pname', null, h('b', null, name), diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, ' ' + (diff >= 0 ? '+' : '') + diff) : null),
+    return h('div.pinfo', { class: toMove ? 'turn' : '' }, h('span.cdot.' + c), h('div.pname', null, h('b', null, name, badges(name)), diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, ' ' + (diff >= 0 ? '+' : '') + diff) : null),
       toMove ? h('div.clock.daily-clock', null, timeLeft(row.deadline)) : null);
   };
   function render() {

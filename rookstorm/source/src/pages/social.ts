@@ -1,4 +1,5 @@
 /** Account, profile, friends, live watching and legal pages. */
+import { badges } from '../badges';
 import { h, icon, btn, toast, modal, copyText, appBridge } from '../ui';
 import { t, fmtDate } from '../i18n';
 import {
@@ -150,7 +151,7 @@ export function profilePage(root: HTMLElement, username?: string) {
     wrap.replaceChildren(
       h('section.card.profile-head', null,
         h('div.avatar', { 'aria-hidden': 'true' }, p.username.slice(0, 1).toUpperCase()),
-        h('div', null, h('h1', null, p.username, self ? h('span.tag', null, t('You')) : friend ? h('span.tag', null, t('Friend')) : null),
+        h('div', null, h('h1', null, p.username, badges(p.username), self ? h('span.tag', null, t('You')) : friend ? h('span.tag', null, t('Friend')) : null),
           h('div.muted.small', null, t('Member since {0}', fmtDate(p.created_at)), p.last_seen ? ' · ' : '', p.last_seen ? h('span', { class: online(p.last_seen) ? 'online' : '' }, lastSeenText(p.last_seen)) : null)),
         h('div.row.wrap.profile-actions', null, actions)),
       brilliantCard(p.username, self),
@@ -319,7 +320,7 @@ export function friendsPage(root: HTMLElement) {
     try {
       const rows = await rpc<{ username: string }[]>('search_users', { p_query: v });
       if (my !== q || !alive) return;
-      results.replaceChildren(...(rows.length ? rows.map(r => h('a.user-row', { href: '#/profile/' + encodeURIComponent(r.username) }, h('span.avatar.sm', null, r.username[0].toUpperCase()), h('b', null, r.username), h('span.muted.small', null, t('View profile')))) : [h('p.muted.small', null, t('No players found.'))]));
+      results.replaceChildren(...(rows.length ? rows.map(r => h('a.user-row', { href: '#/profile/' + encodeURIComponent(r.username) }, h('span.avatar.sm', null, r.username[0].toUpperCase()), h('b', null, r.username, badges(r.username)), h('span.muted.small', null, t('View profile')))) : [h('p.muted.small', null, t('No players found.'))]));
     } catch (e) { results.replaceChildren(h('p.err', null, niceError(e))); }
   });
 
@@ -340,7 +341,7 @@ export function friendsPage(root: HTMLElement) {
       const best = Object.entries((r.ratings || {}) as Record<string, Stat>).sort((a, b) => b[1].g - a[1].g)[0];
       return h('div.friend', null,
         h('a.fname', { href: '#/profile/' + r.username }, h('span.avatar.sm', { class: online(r.last_seen) ? 'on' : '' }, r.username[0].toUpperCase()),
-          h('span', null, h('b', null, r.username), h('span.muted.small.block', null, r.live ? t('Playing now') : lastSeenText(r.last_seen), best ? ` · ${t(modeLabel(best[0]))} ${best[1].r}` : ` · ${BASE_RATING}`))),
+          h('span', null, h('b', null, r.username, badges(r.username)), h('span.muted.small.block', null, r.live ? t('Playing now') : lastSeenText(r.last_seen), best ? ` · ${t(modeLabel(best[0]))} ${best[1].r}` : ` · ${BASE_RATING}`))),
         h('div.row', null,
           r.live ? h('a.btn.small', { href: '#/watch/' + r.live }, icon('eye'), t('Watch')) : null,
           h('a.btn.small.icon', { href: '#/chat/' + encodeURIComponent(r.username), title: t('Message'), 'aria-label': t('Message') }, icon('chat')),

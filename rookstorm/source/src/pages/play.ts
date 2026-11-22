@@ -1,3 +1,4 @@
+import { badges } from '../badges';
 import { newDailyDialog } from './daily';
 import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame } from '../ui';
 import { t } from '../i18n';
@@ -425,7 +426,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     const mat = h('div.mat.cg-wrap.pc');
     const name = h('b');
     const pocket = h('div.pocket.cg-wrap.pc');
-    const el = h('div.pinfo', null, h('span.cdot.' + c), h('div.pname', null, name, mat), clockEl);
+    const el = h('div.pinfo', null, h('span.cdot.' + c), h('div.pname', null, name, badges(typeof name === 'string' ? name : (name as any)?.textContent), mat), clockEl);
     stripEls[c] = { clock: clockEl, mat, el, name, pocket };
     return h('div.pwrap', null, el, zh ? pocket : null);
   }

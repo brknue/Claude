@@ -1,4 +1,5 @@
 /** Chat with friends and send them games. */
+import { badges } from '../badges';
 import { h, icon, btn, toast, modal } from '../ui';
 import { t, fmtDate, lang } from '../i18n';
 import { me, accountsEnabled, rpc, niceError, onAccount } from '../account';
@@ -37,7 +38,7 @@ export function chatListPage(root: HTMLElement, username?: string) {
     if (!rows.length) { list.replaceChildren(h('p.muted', null, t('No friends yet. Add friends to chat with them.')), h('a.btn', { href: '#/friends' }, icon('users'), t('Friends'))); return; }
     list.replaceChildren(...rows.map(r => h('a.chat-row', { href: '#/chat/' + encodeURIComponent(r.username), class: r.unread ? 'unread' : '' },
       h('span.avatar.sm', { class: online(r.last_seen) ? 'on' : '' }, r.username[0].toUpperCase()),
-      h('span.cr-main', null, h('b', null, r.username),
+      h('span.cr-main', null, h('b', null, r.username, badges(r.username)),
         h('span.muted.small.cr-last', null, r.last_at ? (r.last_mine ? t('You:') + ' ' : '') + (r.last_game && !r.last_body ? '♟ ' + t('Game') : r.last_body) : t('Say hello!'))),
       h('span.cr-side', null, r.last_at ? h('span.muted.small', null, shortWhen(r.last_at)) : null, r.unread ? h('span.count-badge', null, String(r.unread)) : null))));
   }
@@ -80,7 +81,7 @@ export function chatPage(root: HTMLElement, username: string) {
     head.replaceChildren(
       h('a.btn.icon.ghost', { href: '#/chat', title: t('Back'), 'aria-label': t('Back') }, icon('back')),
       h('a.chat-who', { href: '#/profile/' + encodeURIComponent(friend.username) }, h('span.avatar.sm', { class: online(friend.last_seen) ? 'on' : '' }, friend.username[0].toUpperCase()),
-        h('span', null, h('b', null, friend.username), h('span.muted.small.block', null, lastSeenText(friend.last_seen)))),
+        h('span', null, h('b', null, friend.username, badges(friend.username)), h('span.muted.small.block', null, lastSeenText(friend.last_seen)))),
       h('div.row.chat-acts', null,
         btn(h('span', null, icon('play'), h('span.hide-xs', null, t('Challenge'))), () => challengeDialog(friend.id, friend.username), 'small'),
         btn(h('span', null, icon('calendar'), h('span.hide-xs', null, t('Daily game'))), () => newDailyDialog(friend.id, friend.username), 'small')));

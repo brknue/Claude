@@ -15,6 +15,8 @@ import { openingsPage } from './pages/openings';
 import { puzzlesPage } from './pages/puzzles';
 import { puzzleRating } from './pages/puzzles';
 import { chatListPage } from './pages/chat';
+import { adminPage, staff } from './pages/admin';
+import { badgeEls } from './badges';
 import { dailyPage } from './pages/daily';
 import { puzzleDayPage, puzzleCalendarPage, resultOf, currentPeriod, msLeft, countdown } from './pages/dailypuzzle';
 import { initNotify, onCounts, setPopup, setNotify, notifyOn, webNotifySupported } from './notify';
@@ -25,7 +27,7 @@ type PageFn = (root: HTMLElement, arg?: string) => Cleanup;
 const routes: Record<string, PageFn> = {
   '': homePage, play: playSetupPage, game: gamePage, join: joinPage,
   analysis: analysisPage, editor: editorPage, openings: openingsPage, puzzles: puzzlesPage,
-  table: tablePage, chat: chatListPage, daily: dailyPage, app: appPage,
+  table: tablePage, chat: chatListPage, daily: dailyPage, app: appPage, admin: adminPage,
   dpuzzle: (r, a) => puzzleDayPage('daily', r, a), wpuzzle: (r, a) => puzzleDayPage('weekly', r, a), pcalendar: puzzleCalendarPage,
   account: accountPage, profile: profilePage, friends: friendsPage, watch: watchPage,
   privacy: (r) => legalPage(r, 'privacy'), terms: (r) => legalPage(r, 'terms'),
@@ -73,6 +75,31 @@ export function go(path: string) {
  * downloaded in the background and this page switches to it (reloads), unless a game is in progress: then a
  * "Reload" button waits. Checks on start, whenever the app comes back to the screen, and every 30 minutes.
  */
+/** Site-wide message from the admins (read without loading the account library). */
+async function showAnnouncement() {
+  if (!accountsEnabled()) return;
+  let a: any = null;
+  try { const c = JSON.parse(sessionStorage.getItem('rs.announce') || 'null'); if (c && Date.now() - c.t < 300000) a = c.a; } catch { /* */ }
+  if (!a) {
+    try {
+      const { SUPABASE_URL, SUPABASE_ANON_KEY } = await import('./config');
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_announcement`, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, body: '{}' });
+      a = r.ok ? await r.json() : null;
+      try { sessionStorage.setItem('rs.announce', JSON.stringify({ t: Date.now(), a })); } catch { /* */ }
+    } catch { return; }
+  }
+  if (!a?.text || loadRaw('announceClosed', '') === a.at) return;
+  const bar = h('div.announce', { class: a.level || 'info' }, h('span', null, a.text),
+    h('button.btn.icon.ghost.small', { type: 'button', 'aria-label': t('Close'), onclick: () => { save('announceClosed', a.at); bar.remove(); } }, '✕'));
+  document.body.insertBefore(bar, document.querySelector('main'));
+}
+function showBan() {
+  document.querySelector('.ban-bar')?.remove();
+  const b = (me as any)?.banned_until;
+  if (!b || Date.parse(b) < Date.now()) return;
+  document.body.insertBefore(h('div.announce.warning.ban-bar', null, h('span', null, t('Your account is banned until {0}.', new Date(b).toLocaleString()), (me as any).ban_reason ? ' ' + t('Reason: {0}', (me as any).ban_reason) : '')), document.querySelector('main'));
+}
+
 function setupUpdates() {
   if (!('serviceWorker' in navigator) || import.meta.env.DEV) return;
   let hadController = !!navigator.serviceWorker.controller;
@@ -104,15 +131,17 @@ function header() {
     settings.theme = settings.theme === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark') : settings.theme === 'dark' ? 'light' : 'dark';
     saveSettings(); themeBtn.replaceChildren(themeIcon());
   }, 'icon ghost theme-btn', t('Toggle dark / light mode'));
+  const adminBtn = h('a.btn.icon.ghost.admin-btn', { href: '#/admin', 'data-r': 'admin', title: 'Admin', 'aria-label': 'Admin' }, '🛡');
   const chatBtn = h('a.btn.icon.ghost.chat-btn', { href: '#/chat', 'data-r': 'chat', title: t('Messages'), 'aria-label': t('Messages') }, icon('chat'), h('span.count-badge.hdr'));
   const friendsBtn = h('a.btn.icon.ghost.friends-btn', { href: '#/friends', 'data-r': 'friends', title: t('Friends'), 'aria-label': t('Friends') }, icon('users'), h('span.badge-dot'));
   const accBtn = h('a.btn.ghost.acc-btn', { href: '#/account', 'data-r': 'account' });
   const renderAcc = () => {
     friendsBtn.style.display = accountsEnabled() && me ? '' : 'none';
     chatBtn.style.display = accountsEnabled() && me ? '' : 'none';
+    adminBtn.style.display = staff() ? '' : 'none';
     bar?.classList.toggle('signed', accountsEnabled() && !!me);
     accBtn.style.display = accountsEnabled() ? '' : 'none';
-    accBtn.replaceChildren(...(me ? [h('span.avatar.xs', null, me.username[0].toUpperCase()), h('span.acc-name', null, me.username)] : [icon('user'), h('span.acc-name.signin', null, t('Sign in'))]));
+    accBtn.replaceChildren(...(me ? [h('span.avatar.xs', null, me.username[0].toUpperCase()), h('span.acc-name', null, me.username, ...badgeEls(((me as any).roles || []).slice(0, 2)))] : [icon('user'), h('span.acc-name.signin', null, t('Sign in'))]));
     accBtn.setAttribute('aria-label', me ? t('Your profile') : t('Sign in'));
     accBtn.setAttribute('title', me ? t('Your profile') : t('Sign in'));
   };
@@ -122,7 +151,7 @@ function header() {
     h('a.brand', { href: '#/', 'aria-label': 'Rookstorm' }, logo(), h('span', null, 'ROOK', h('b', null, 'STORM'))),
     h('nav.nav', null, NAV.map(([r, label, ic]) => h('a', { href: '#/' + r, 'data-r': r }, icon(ic), h('span', null, t(label))))),
     h('div.top-actions', null,
-      chatBtn, friendsBtn, accBtn, themeBtn,
+      adminBtn, chatBtn, friendsBtn, accBtn, themeBtn,
       btn(icon('gear'), openSettings, 'icon ghost', t('Settings')),
       btn(icon('menu'), () => document.body.classList.toggle('nav-open'), 'icon ghost menu-btn', t('Menu'))));
   renderAcc();
@@ -315,6 +344,8 @@ async function init() {
   onChallenges(showChallenges);
   initNotify();
   setupUpdates();
+  showAnnouncement();
+  onAccount(showBan); showBan();
   setPopup((_a, tx) => {
     const kind = 'al-' + _a.key;
     offerBar(kind, `${tx.title}: ${tx.body}`, [btn(t('Open'), () => { clearOffers(kind); location.hash = tx.url.slice(1); }, 'primary small'), btn(t('Close'), () => clearOffers(kind), 'small ghost')]);
