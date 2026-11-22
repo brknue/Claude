@@ -1,6 +1,7 @@
 import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.cburnett.css';
 import './style.css';
+import './simple.css';
 import { h, icon, settings, saveSettings, applyTheme, modal, closeModals, btn, offerBar, clearOffers, toast, appBridge, inApp, isIOS, isAndroid, installed, loadRaw, save, askConfirm } from './ui';
 import { t, LANGS, setLang, detectLang } from './i18n';
 import { accountPage, profilePage, friendsPage, watchPage, legalPage } from './pages/social';
@@ -241,6 +242,7 @@ function openSettings() {
     h('h2', null, t('Settings')),
     h('h3.set-h', null, t('Appearance')),
     sel(t('Language'), 'lang', [['', t('Match my device')], ...LANGS], async () => { await setLang(detectLang(settings.lang)); close(); rebuild(); }),
+    chk(t('Simple look'), 'simple', t('Plain white, black and grey without effects, like Simple Chess.')),
     sel(t('Theme'), 'theme', [['system', t('Match my device')], ['light', t('Light')], ['dark', t('Dark')]]),
     sel(t('Board colors'), 'board', [['wood', t('Wood')], ['blue', t('Ice blue')], ['green', t('Tournament green')], ['slate', t('Slate')]]),
     chk(t('Board coordinates'), 'coords'), chk(t('Piece animation'), 'animation'),

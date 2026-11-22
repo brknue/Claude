@@ -254,16 +254,16 @@ function openSettings() {
     h('p.muted.small', null, t('Board and animation changes apply to newly opened boards.')),
     accountsEnabled() ? [
       h('h3.set-h', null, t('Notifications')),
-      appBridge && !appBridge.notify ? h('p.muted.small', null, t('Update the Android app to get notifications:'), ' ', h('a', { href: APK, download: 'app.apk' }, t('Install the Android app')))
+      appBridge && !appBridge.notify ? h('p.muted.small', null, t('Update the Android app to get notifications:'), ' ', h('a', { href: APK, download: 'simplechess.apk' }, t('Install the Android app')))
       : appBridge || webNotifySupported() ? h('label.check', null, h('input', { type: 'checkbox', checked: notifyOn(), onchange: async (e: any) => { const on = await setNotify(e.target.checked); e.target.checked = on; if (e.target.checked !== on || (!on && !appBridge && 'Notification' in window && Notification.permission === 'denied')) toast(t('Notifications are blocked. Allow them for this site in your browser settings.')); } }),
         h('span', null, t('Notify me about messages, challenges and daily games'), h('span.muted.small.block', null, appBridge ? t('Also when the app is closed (checked about every 15 minutes).') : t('While Simple Chess is open in a tab, even in the background.'))))
         : h('p.muted.small', null, t('This browser does not support notifications. On iPhone, add Simple Chess to the Home Screen first.'))] : null,
-    inApp || !isIOS ? null : [
-      h('h3.set-h', null, t('iPhone app')),
+    inApp ? null : [
+      h('h3.set-h', null, isIOS ? t('iPhone app') : t('Android app')),
       isIOS
         ? (installed ? h('p.muted.small', null, t('Simple Chess is installed on this device.')) : [h('a.btn.block', { href: '#/app', onclick: () => close() }, icon('phone'), t('Install on iPhone or iPad')),
           h('p.muted.small', null, t('Free, from Safari: Share, then Add to Home Screen.'))])
-        : [h('a.btn.block', { href: APK, download: 'app.apk' }, icon('phone'), t('Install the Android app')),
+        : [h('a.btn.block', { href: APK, download: 'simplechess.apk' }, icon('phone'), t('Install the Android app')),
           h('p.muted.small', null, t('Free, about 20 KB. Plays with website players. When you open the file, Android asks you to allow installing it.'))]],
     h('h3.set-h', null, t('App updates')),
     h('div.row.wrap.update-row', null, btn(h('span', null, icon('retry'), t('Check for updates')), () => checkUpdates(), ''), h('span.muted.small.version', null, t('Version {0}', __BUILD__), appVer() ? ' · ' + t('Android app {0}', appVer()) : '')),
@@ -282,7 +282,7 @@ function homePage(root: HTMLElement) {
           h('a.btn.primary.big', { href: '#/play' }, icon('cpu'), t('Play the bot')),
           h('a.btn.big', { href: '#/play/online' }, icon('globe'), t('Play online')),
           h('a.btn.big', { href: '#/puzzles' }, icon('puzzle'), t('Puzzles')),
-          
+          !inApp && isAndroid ? h('a.btn.big', { href: APK, download: 'simplechess.apk' }, icon('phone'), t('Android app')) : null,
           isIOS && !installed ? h('a.btn.big', { href: '#/app' }, icon('phone'), t('iPhone app')) : null)),
       h('div.hero-board', { 'aria-hidden': 'true', html: heroBoard() })),
     h('section.features', null,
@@ -329,15 +329,15 @@ function appPage(root: HTMLElement) {
     h('h2', null, t('Android')),
     inApp ? h('p.app-done', null, '✓ ', t('Simple Chess is installed on this device.')) : null,
     h('p.muted', null, t('Free, about 30 KB. Plays with website players. When you open the file, Android asks you to allow installing it.')),
-    inApp ? null : h('a.btn.primary', { href: APK, download: 'app.apk' }, icon('phone'), t('Install the Android app')));
+    inApp ? null : h('a.btn.primary', { href: APK, download: 'simplechess.apk' }, icon('phone'), t('Install the Android app')));
   const pc = h('section.card.app-card', { id: 'computer' },
     h('h2', null, t('Computer')),
     h('p.muted', null, t('In Chrome or Edge, click the install icon at the right end of the address bar. Simple Chess then opens in its own window and works offline.')));
-  void android; const cards = isIOS ? [ios, pc] : [pc, ios];
+  const cards = isIOS ? [ios, android, pc] : isAndroid ? [android, ios, pc] : [pc, ios, android];
   root.append(h('div.app-page', null, h('h1', null, t('Get the app')),
     h('p.lead.muted', null, t('Simple Chess works on every device. App, website and Android players all play each other.')), ...cards));
 }
-const APK = '';
+const APK = 'simplechess.apk';
 
 function dailyCardText(): string {
   const r = resultOf('daily', currentPeriod('daily'));

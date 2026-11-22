@@ -31,12 +31,12 @@ export const $ = (sel: string, root: ParentNode = document) => root.querySelecto
 
 // ---------- Settings ----------
 export interface Settings {
-  theme: 'system' | 'light' | 'dark'; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
+  theme: 'system' | 'light' | 'dark'; simple: boolean; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
   name: string; lastElo: number; animation: boolean; premove: boolean; points: boolean; lang: string;
   /** notifications for messages, challenges and daily games (undefined = not decided yet) */
   notify?: boolean;
 }
-const DEFAULTS: Settings = { theme: 'system', board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true, premove: true, points: true, lang: '' };
+const DEFAULTS: Settings = { theme: 'system', simple: false, board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true, premove: true, points: true, lang: '' };
 
 export function load<T>(key: string, def: T): T {
   try { const v = localStorage.getItem('rs.' + key); return v ? { ...def as any, ...JSON.parse(v) } : def; } catch { return def; }
@@ -54,8 +54,9 @@ export function applyTheme() {
   if (settings.theme === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', settings.theme);
   root.setAttribute('data-board', settings.board);
   root.classList.toggle('no-coords', !settings.coords);
+  root.classList.toggle('simple-look', !!settings.simple);
   const dark = settings.theme === 'dark' || (settings.theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#14161b' : '#f4f1ea');
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', settings.simple ? '#ffffff' : dark ? '#14161b' : '#f4f1ea');
 }
 
 // ---------- Toast / modal ----------
