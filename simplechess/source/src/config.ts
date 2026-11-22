@@ -2,8 +2,8 @@
  * Site configuration. Fill in after creating the Supabase project (see supabase/README.md).
  * The anon key is public by design: the database only allows what supabase/schema.sql permits.
  */
-export const SUPABASE_URL = 'https://kgipnaxujhrfyrfxcemo.supabase.co';
-export const SUPABASE_ANON_KEY = 'sb_publishable_dQgU7-U7mVS4TeT8WxOByw_RsKEhcC7';
+export const SUPABASE_URL = 'https://pwrmrjxrxpmftzeptytq.supabase.co';
+export const SUPABASE_ANON_KEY = 'sb_publishable_KNY5G20ZQgWEOq-uRR4NkQ_P3RJjOdb';
 
 /** Shown in the privacy policy as the responsible operator (GDPR Art. 13). */
 export const OPERATOR_NAME = 'Crb';
