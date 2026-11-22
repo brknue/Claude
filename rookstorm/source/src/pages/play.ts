@@ -1,5 +1,5 @@
 import { newDailyDialog } from './daily';
-import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers } from '../ui';
+import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame } from '../ui';
 import { t } from '../i18n';
 import { VARIANTS, VariantKey, variantInfo, variantName, variantDesc, startFenFor, materialDiff, outcomeText, reasonText, Color, Outcome, uciToMove, fenOf, moveSquares, Role } from '../chess';
 import { Game } from '../game';
@@ -209,7 +209,7 @@ export function hostFriend(info: HostInfo, challenge?: { to: string; toName: str
     if (location.hash.startsWith('#/join/')) go('play/friend');
   };
   const close = modal(h('div', null, h('h2', null, challenge ? t('Challenge {0}', challenge.toName) : t('Invite a friend')), status, linkBox,
-    h('div.row.end', null, btn(t('Cancel'), cancel))), { dismissable: false });
+    h('div.row.end', null, btn(t('Cancel'), cancel))), { dismissable: false, onClose: () => { if (!started) cancel(); } });
   link.host(info.code).then(async code => {
     if (started) return;
     if (challenge) {
@@ -348,6 +348,9 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   let game = new Game(cfg.variant, cfg.startFen);
   let clock = new Clock(cfg.time * 60000, cfg.inc * 1000);
   const net = cfg.mode === 'friend' || cfg.mode === 'online';
+  // anti-cheat: while this game against a person runs, engine pages in every tab of this browser are locked
+  const liveBeat = net ? setInterval(() => { if (!game.result) markLiveGame(true); }, 3000) : 0;
+  if (net) markLiveGame(true);
   const sf = variantInfo(cfg.variant).sf;
   const zh = cfg.variant === 'crazyhouse';
   let alive = true;
@@ -604,6 +607,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   }
 
   function finish(o: Outcome) {
+    if (net) markLiveGame(false);
     if (shown) return;
     shown = true;
     game.end(o);
@@ -992,6 +996,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   if (net) toast(cfg.myColor === 'white' ? t('Game on! You play white.') : t('Game on! You play black.'));
 
   return () => {
+    clearInterval(liveBeat); if (net) markLiveGame(false);
     alive = false;
     clearInterval(timer);
     engine.stop(); variantStop();

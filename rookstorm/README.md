@@ -32,6 +32,7 @@ Chess website in 20 languages: play Stockfish 17 at any Elo and every chess vari
 - Friend and online games run peer-to-peer over WebRTC through the free PeerJS signalling server (`0.peerjs.com`). That is the only external service, and it is contacted only when you start a friend or online game. Matchmaking needs no server either: players race to claim a lobby ID per variant and time control.
 - Android app (`source/android/`): a tiny WebView wrapper (about 30 KB) that loads the live site and adds Android's share sheet and saving to Downloads. Built without Android Studio by `source/android/build.sh` (needs a JDK and the Android build-tools + platform packages).
 - Android app 2: native notifications; while the app is closed it checks about every 15 minutes with a random per-device key (`notify_poll`), never the sign-in session.
+- Anti-cheat (first step): while a live game against a person runs, the analysis board, the engine and the board editor are locked in every Rookstorm tab of that browser (a heartbeat in `localStorage`). It cannot stop a second device or another site.
 - Settings, puzzle rating and recent games are stored only in this browser (`localStorage` keys start with `rs.`).
 
 ## Source and rebuilding

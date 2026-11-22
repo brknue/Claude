@@ -1,5 +1,5 @@
 import { Chessground } from 'chessground';
-import { h, icon, btn, iconBtn, toast, copyText, settings } from '../ui';
+import { h, icon, btn, iconBtn, toast, copyText, settings, engineLock, liveGameActive } from '../ui';
 import { posFromFen, positionError, fenOf, pvToSan, Color, Role } from '../chess';
 import { arrowFor } from '../board';
 import { engine, Line, fmtScore, whiteCp, winPct } from '../engine';
@@ -143,6 +143,7 @@ export function editorPage(root: HTMLElement, arg?: string) {
   }
 
   async function analyse() {
+    if (liveGameActive()) return;
     const fen = fullFen();
     if (positionError(fen)) return;
     const pos = posFromFen(fen)!;
@@ -198,5 +199,6 @@ export function editorPage(root: HTMLElement, arg?: string) {
     h('aside.side.card', null, h('h2', null, t('Board editor')), h('p.muted.small', null, t('Drag pieces from the trays, or pick one and tap squares. Drag a piece off the board to remove it. Then let Stockfish find the best move.')), controls, err, result)));
   renderTools(); renderControls(); changed();
 
-  return () => { alive = false; engine.stop(); ro.disconnect(); cg.destroy(); };
+  const unlock = engineLock(root, (locked) => { if (locked) { analysing = false; engine.stop(); } });
+  return () => { unlock(); alive = false; engine.stop(); ro.disconnect(); cg.destroy(); };
 }

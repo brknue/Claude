@@ -1,7 +1,7 @@
 import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.cburnett.css';
 import './style.css';
-import { h, icon, settings, saveSettings, applyTheme, modal, btn, offerBar, clearOffers, toast, appBridge, inApp, isIOS, isAndroid, installed, loadRaw, save } from './ui';
+import { h, icon, settings, saveSettings, applyTheme, modal, closeModals, btn, offerBar, clearOffers, toast, appBridge, inApp, isIOS, isAndroid, installed, loadRaw, save } from './ui';
 import { t, LANGS, setLang, detectLang } from './i18n';
 import { accountPage, profilePage, friendsPage, watchPage, legalPage } from './pages/social';
 import { me, initAccount, onAccount, onChallenges, accountsEnabled, rpc, niceError, Challenge } from './account';
@@ -50,6 +50,7 @@ function route() {
     leaveGuard = null;
   }
   lastHash = location.hash;
+  closeModals();
   const [name, arg] = location.hash.replace(/^#\/?/, '').split('/');
   const fn = routes[name] || homePage;
   if (typeof cleanup === 'function') cleanup();

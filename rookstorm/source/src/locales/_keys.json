@@ -886,5 +886,7 @@
 "Ultra hard · no hints",
 "The hardest · one try",
 "Calendar",
-"If you play the daily or weekly puzzle while signed in, your result for it (solved or not, and how long it took) is stored and shown on your profile."
+"If you play the daily or weekly puzzle while signed in, your result for it (solved or not, and how long it took) is stored and shown on your profile.",
+"Locked during your live game",
+"Analysis, the engine and the board editor are switched off in every tab while you play a game against a person. They come back when the game is over."
 ]

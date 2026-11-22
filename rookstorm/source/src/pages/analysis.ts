@@ -2,7 +2,7 @@ import { parsePgn, startingPosition } from 'chessops/pgn';
 import { parseSan } from 'chessops/san';
 import { makeFen } from 'chessops/fen';
 import { makeSquare } from 'chessops/util';
-import { h, icon, btn, iconBtn, toast, copyText, loadRaw, debounce } from '../ui';
+import { h, icon, btn, iconBtn, toast, copyText, loadRaw, debounce, engineLock } from '../ui';
 import { VariantKey, variantInfo, posFromFen, fenOf, uciToMove, moveSquares, pvToSan, PIECE_VALUE, Position, Move, Color, startFenFor, positionError } from '../chess';
 import { Game } from '../game';
 import { Board, arrowFor } from '../board';
@@ -553,7 +553,9 @@ export function analysisPage(root: HTMLElement): () => void {
   };
   document.addEventListener('keydown', keys);
 
+  const unlock = engineLock(root, (locked) => { if (locked) { reviewing = false; engineOn = false; engine.stop(); liveLines = []; update(); } });
   function cleanup() {
+    unlock();
     alive = false; reviewing = false;
     engine.stop();
     document.removeEventListener('keydown', keys);

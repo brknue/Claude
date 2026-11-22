@@ -67,8 +67,13 @@ export function toast(msg: string, ms = 2600) {
   setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, ms);
 }
 
+const openModals = new Set<() => void>();
+/** Close every open dialog (called when the page changes, so no dialog is left over another page). */
+export function closeModals() { [...openModals].forEach(c => c()); }
 export function modal(content: HTMLElement, opts: { onClose?: () => void; dismissable?: boolean } = {}): () => void {
-  const close = () => { back.remove(); document.removeEventListener('keydown', onKey); opts.onClose?.(); };
+  let closed = false;
+  const close = () => { if (closed) return; closed = true; openModals.delete(close); back.remove(); document.removeEventListener('keydown', onKey); opts.onClose?.(); };
+  openModals.add(close);
   const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && opts.dismissable !== false) close(); };
   const back = h('div.modal-back', { onclick: (e: Event) => { if (e.target === back && opts.dismissable !== false) close(); } },
     h('div.modal', { role: 'dialog', 'aria-modal': 'true' }, content));
@@ -170,6 +175,35 @@ export const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.
 export const isAndroid = /Android/i.test(navigator.userAgent);
 /** running as an installed app (Home Screen web app, installed PWA, or the Android app) */
 export const installed = inApp || !!(navigator as any).standalone || matchMedia('(display-mode: standalone)').matches;
+
+// ---------- anti-cheat: a live game against a person locks the engine tools in every tab of this browser ----------
+const LIVE_KEY = 'rs.liveGame';
+/** called every few seconds by a live game against a person (null = the game is over) */
+export function markLiveGame(on: boolean) { try { if (on) localStorage.setItem(LIVE_KEY, String(Date.now())); else localStorage.removeItem(LIVE_KEY); } catch { /* */ } }
+export const liveGameActive = () => { try { return Date.now() - Number(localStorage.getItem(LIVE_KEY) || 0) < 9000; } catch { return false; } };
+/**
+ * Puts a lock screen over an engine page (analysis, editor) while a live game is running in any tab.
+ * Returns a cleanup function. onChange(locked) lets the page stop its engine.
+ */
+export function engineLock(root: HTMLElement, onChange: (locked: boolean) => void): () => void {
+  let locked = false;
+  const cover = h('div.engine-lock', null, h('div.engine-lock-box', null, h('div.engine-lock-ic', null, '🔒'),
+    h('b', null, t('Locked during your live game')),
+    h('p.muted.small', null, t('Analysis, the engine and the board editor are switched off in every tab while you play a game against a person. They come back when the game is over.'))));
+  const check = () => {
+    const now = liveGameActive();
+    if (now === locked) return;
+    locked = now;
+    if (locked) root.appendChild(cover); else cover.remove();
+    root.classList.toggle('locked', locked);
+    onChange(locked);
+  };
+  check();
+  const iv = setInterval(check, 1500);
+  const onStorage = (e: StorageEvent) => { if (e.key === LIVE_KEY) check(); };
+  window.addEventListener('storage', onStorage);
+  return () => { clearInterval(iv); window.removeEventListener('storage', onStorage); cover.remove(); };
+}
 
 export const icon = (name: string) => {
   const paths: Record<string, string> = {
