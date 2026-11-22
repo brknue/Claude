@@ -12,7 +12,7 @@ import { needAccount, socialMissing } from './chat';
 import { onDailyRow, pollAlerts, setFocus, notifyBanner, missingSocial, socialAvailable } from '../notify';
 
 export const DAYS = [1, 2, 3, 5, 7, 14];
-const abortText = (r: string) => r === 'declined' ? t('Invitation declined') : r === 'cancelled' ? t('Invitation cancelled') : r === 'not accepted' ? t('Invitation not accepted in time') : reasonText(r);
+const abortText = (r: string) => r === 'no moves for a week' ? t('Nobody moved for a week: no winner') : r === 'declined' ? t('Invitation declined') : r === 'cancelled' ? t('Invitation cancelled') : r === 'not accepted' ? t('Invitation not accepted in time') : reasonText(r);
 const daysLabel = (d: number) => d === 1 ? t('1 day per move') : t('{0} days per move', d);
 
 export function timeLeft(deadline?: string | null): string {
@@ -97,7 +97,7 @@ export function dailyPage(root: HTMLElement, id?: string) {
     } else {
       const res = r.result;
       const won = res && res !== '1/2-1/2' && (res === '1-0') === white;
-      status = r.status === 'aborted' ? t('Aborted') : res === '1/2-1/2' ? t('Draw') : won ? t('Won') : t('Lost');
+      status = r.status === 'aborted' ? (r.reason === 'no moves for a week' ? t('Aborted') + ' · ' + t('no moves for a week') : t('Aborted')) : res === '1/2-1/2' ? t('Draw') : won ? t('Won') : t('Lost');
     }
     const el = h('div.daily-row', { class: r.my_turn ? 'turn' : r.incoming ? 'invite' : '' },
       h('a.dr-main', { href: '#/daily/' + r.id },
