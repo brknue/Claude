@@ -1,5 +1,5 @@
 /** Party variants: setup inside Play, the table lobby (pick a seat) and the game itself. */
-import { h, icon, btn, toast, copyText, settings, loadRaw, save, sound } from '../ui';
+import { h, icon, btn, toast, copyText, settings, loadRaw, save, sound, askConfirm } from '../ui';
 import { t } from '../i18n';
 import { PARTY_VARIANTS, partyVariant, SPEEDS, Variant, State, inCheck } from '../arcade/rules';
 import { PartyBoard, seatColor } from '../arcade/view';
@@ -160,13 +160,13 @@ export function tablePage(root: HTMLElement, code?: string) {
     board.update(st, canAct);
     if (st.ply !== lastPly) { if (lastPly >= 0) sound.move(); lastPly = st.ply; }
     if (st.over && !endPlayed) { endPlayed = true; sound.end(); } else if (!st.over) endPlayed = false;
-    setLeaveGuard(canAct ? () => confirm(t('Leave this game? It will be lost.')) : null);
+    setLeaveGuard(canAct ? () => true : null);
     const players = L.seats.map((s, i) => h('div.pplayer', { class: `c-${seatColor(v, i)}${!st.alive[i] ? ' out' : ''}${!v.realtime && !st.over && st.turn === i ? ' turn' : ''}${i === mine ? ' me' : ''}` },
       h('span.sdot'), h('b', null, seatLabel(L, i) || t(COLOR_NAME[seatColor(v, i)])),
       h('span.muted.small', null, [i === mine ? t('You') : '', s.away ? t('away') : '', !st.alive[i] ? t('out') : '', v.teams ? t('Team {0}', (i % 2) + 1) : ''].filter(Boolean).join(' · ')),
       client.isHost && s.kind === 'human' && s.away && !st.over ? btn(t('Let the computer play'), () => client.setSeat!(i, 'bot'), 'small') : null));
     const acts: (HTMLElement | null)[] = [];
-    if (canAct) acts.push(btn(h('span', null, icon('flag'), t('Resign')), () => { if (confirm(t('Resign this game?'))) client.resign(); }, 'danger'));
+    if (canAct) acts.push(btn(h('span', null, icon('flag'), t('Resign')), async () => { if (await askConfirm(t('Resign this game?'), { ok: t('Resign'), danger: true })) client.resign(); }, 'danger'));
     if (st.over && client.isHost) acts.push(btn(h('span', null, icon('retry'), t('Play again')), () => client.start!(), 'primary'), btn(t('Back to table'), () => client.toLobby!()));
     if (st.over && !client.isHost) acts.push(h('p.muted.small', null, t('Waiting for the host…')));
     acts.push(btn(t('Leave table'), leave, 'ghost'));
@@ -179,8 +179,8 @@ export function tablePage(root: HTMLElement, code?: string) {
     view.replaceChildren(h('div.game-layout.party', { class: v.players === 4 ? 'four' : '' }, col, side));
   }
 
-  function leave() {
-    if (client.st && !client.st.over && client.mySeat() !== null && !confirm(t('Leave this game? It will be lost.'))) return;
+  async function leave() {
+    if (client.st && !client.st.over && client.mySeat() !== null && !(await askConfirm(t('Leave this game? It will be lost.'), { ok: t('Leave'), danger: true }))) return;
     setLeaveGuard(null);
     go('play/party');
   }

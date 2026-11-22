@@ -1,6 +1,6 @@
 import { badges } from '../badges';
 import { newDailyDialog } from './daily';
-import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame } from '../ui';
+import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame, askConfirm } from '../ui';
 import { t } from '../i18n';
 import { VARIANTS, VariantKey, variantInfo, variantName, variantDesc, startFenFor, materialDiff, outcomeText, reasonText, Color, Outcome, uciToMove, fenOf, moveSquares, Role } from '../chess';
 import { Game } from '../game';
@@ -704,7 +704,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     if (ply >= 1) clock.start(game.pos.turn);
     drawOffered = false;
     if (cfg!.mode === 'local' && cfg!.autoFlip) board.setOrientation(game.pos.turn);
-    setLeaveGuard(game.ply >= 1 && !game.result ? () => confirm(t('Leave this game? It will be lost.')) : null);
+    setLeaveGuard(game.ply >= 1 && !game.result ? () => true : null);
   }
 
   function onUserMove(m: any) {
@@ -802,7 +802,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
 
   async function offerDraw() {
     if (game.result || drawOffered) return;
-    if (cfg!.mode === 'local') { if (confirm(t('Agree to a draw?'))) finish({ reason: 'agreement' }); return; }
+    if (cfg!.mode === 'local') { if (await askConfirm(t('Agree to a draw?'), { ok: t('Draw') })) finish({ reason: 'agreement' }); return; }
     if (cfg!.mode === 'bot') {
       if (game.ply < 20) { toast(t('The computer declines: too early for a draw.')); return; }
       drawOffered = true; renderActions();
@@ -817,9 +817,9 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     drawOffered = true; cfg!.link!.send({ t: 'draw-offer' }); toast(t('Draw offer sent')); renderActions();
   }
 
-  function resign() {
+  async function resign() {
     if (game.result) return;
-    if (!confirm(t('Resign this game?'))) return;
+    if (!(await askConfirm(t('Resign this game?'), { ok: t('Resign'), danger: true })) || game.result) return;
     const loser: Color = cfg!.mode === 'local' ? game.pos.turn : cfg!.myColor;
     if (net) cfg!.link!.send({ t: 'resign' });
     finish({ winner: loser === 'white' ? 'black' : 'white', reason: loser === 'white' ? 'White resigned' : 'Black resigned' });

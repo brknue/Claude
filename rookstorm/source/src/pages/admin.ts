@@ -2,7 +2,7 @@
  * Admin panel (staff only, English). Needs an account with the admin/owner role AND the admin password;
  * every action is checked by the server (supabase/add-admin.sql) and written to the audit log.
  */
-import { h, btn, toast, modal } from '../ui';
+import { h, btn, toast, modal, askConfirm, askText } from '../ui';
 import { me, rpc, accountsEnabled, refreshMe, MODES } from '../account';
 import { ROLES, badgeEls, forgetBadges, TITLES, titleEl } from '../badges';
 import { go } from '../main';
@@ -117,7 +117,7 @@ export function adminPage(root: HTMLElement, tab?: string) {
       h('h3.set-h', null, 'Ratings'),
       h('div.admin-ratings', null, ratings.length ? ratings.map(([m, s]) => h('span.tag', null, `${m}: ${s.r} (${s.g} games)`)) : h('span.muted.small', null, 'No ratings yet (1500 everywhere).')),
       h('div.row.wrap', null, modeSel, ratingIn, act('Set rating', () => rpc('admin_set_rating', { p_id: id, p_mode: modeSel.value, p_rating: +ratingIn.value })),
-        act('Reset all ratings', async () => { if (!confirm(`Reset all ratings of ${u.username} to 1500?`)) throw new Error('cancelled'); await rpc('admin_reset_ratings', { p_id: id }); }, 'ghost')),
+        act('Reset all ratings', async () => { if (!await askConfirm(`Reset all ratings of ${u.username} to 1500?`)) throw new Error('cancelled'); await rpc('admin_reset_ratings', { p_id: id }); }, 'ghost')),
       extra ? [h('h3.set-h', null, 'Title'), h('div.row.wrap', null, titleEl(extra.title) || h('span.muted.small', null, 'none'), titleSel, act('Save title', () => rpc('admin_set_title', { p_id: id, p_title: titleSel.value })))] : h('p.muted.small', null, 'Titles and extra brilliant moves need supabase/add-titles.sql.'),
       extra ? [h('h3.set-h', null, 'Brilliant moves'), h('div.row.wrap', null, h('span.muted.small', null, `added by admins so far: ${extra.brilliant_bonus}`), brillIn, act('Add brilliant moves', () => rpc('admin_add_brilliants', { p_id: id, p_count: parseInt(brillIn.value) || 0 })), h('span.muted.small', null, 'Use a negative number to take some away.'))] : null,
       h('h3.set-h', null, 'Roles & badges'), h('div.admin-roles', null, roleBoxes),
@@ -125,15 +125,15 @@ export function adminPage(root: HTMLElement, tab?: string) {
       h('p.muted.small', null, 'Admin gives access to this panel (the admin password is still needed). Owners give or take admin; only Crb gives or takes owner. Crb’s own top roles can never be removed.'),
       h('h3.set-h', null, 'Account'),
       h('div.row.wrap', null,
-        act('Reset password', async () => { const p = prompt(`New password for ${u.username} (8+ characters):`); if (!p) throw new Error('cancelled'); await rpc('admin_set_password', { p_id: id, p_new: p }); }),
-        act('Rename', async () => { const n = prompt('New username:', u.username); if (!n || n === u.username) throw new Error('cancelled'); await rpc('admin_rename', { p_id: id, p_username: n }); }),
+        act('Reset password', async () => { const p = await askText(`New password for ${u.username} (8+ characters):`); if (!p) throw new Error('cancelled'); await rpc('admin_set_password', { p_id: id, p_new: p }); }),
+        act('Rename', async () => { const n = await askText('New username:', { value: u.username }); if (!n || n === u.username) throw new Error('cancelled'); await rpc('admin_rename', { p_id: id, p_username: n }); }),
         banned ? act('Unban', () => rpc('admin_ban', { p_id: id, p_hours: 0, p_reason: '' })) : act('Ban…', async () => {
-          const hrs = prompt('Ban for how many hours? (24 = 1 day, 168 = 1 week, 87600 = 10 years)', '24'); if (!hrs) throw new Error('cancelled');
-          const reason = prompt('Reason (shown to the player):', '') ?? '';
+          const hrs = await askText('Ban for how many hours? (24 = 1 day, 168 = 1 week, 87600 = 10 years)', { value: '24' }); if (!hrs) throw new Error('cancelled');
+          const reason = await askText('Reason (shown to the player):') ?? '';
           await rpc('admin_ban', { p_id: id, p_hours: Math.max(1, parseInt(hrs) || 24), p_reason: reason });
         }, 'danger'),
-        act('Delete messages', async () => { if (!confirm(`Delete every chat message sent by ${u.username}?`)) throw new Error('cancelled'); await rpc('admin_clear_messages', { p_id: id }); }, 'ghost'),
-        act('Delete account', async () => { const typed = prompt(`Type ${u.username} to delete this account for good:`); if (typed !== u.username) throw new Error('cancelled'); await rpc('admin_delete_user', { p_id: id }); el.replaceChildren(); }, 'danger')),
+        act('Delete messages', async () => { if (!await askConfirm(`Delete every chat message sent by ${u.username}?`)) throw new Error('cancelled'); await rpc('admin_clear_messages', { p_id: id }); }, 'ghost'),
+        act('Delete account', async () => { const typed = await askText(`Type ${u.username} to delete this account for good:`); if (typed !== u.username) throw new Error('cancelled'); await rpc('admin_delete_user', { p_id: id }); el.replaceChildren(); }, 'danger')),
       h('h3.set-h', null, 'Recent games'),
       h('div.admin-list.small', null, (u.recent_games || []).map((g: any) => gameRow(g, () => userDetail(el, id, reload))))));
   }
@@ -150,7 +150,7 @@ export function adminPage(root: HTMLElement, tab?: string) {
   // ------------------------------------------------------------ games
   function gameRow(g: any, after: () => void) {
     const live = g.status === 'live' || g.status === 'pending' || g.status === 'disputed';
-    const end = (res: string | null) => btn(res ?? 'Abort', async () => { if (!confirm(res ? `End the game as ${res}?` : 'Abort this game?')) return; try { await rpc('admin_end_game', { p_id: g.id, p_result: res }); toast('Done'); after(); } catch (e) { toast(err(e)); } }, 'small ghost');
+    const end = (res: string | null) => btn(res ?? 'Abort', async () => { if (!await askConfirm(res ? `End the game as ${res}?` : 'Abort this game?')) return; try { await rpc('admin_end_game', { p_id: g.id, p_result: res }); toast('Done'); after(); } catch (e) { toast(err(e)); } }, 'small ghost');
     return h('div.admin-game', null,
       h('a', { href: g.kind === 'daily' ? '#/daily/' + g.id : '#/watch/' + g.id }, h('b', null, `${g.white} – ${g.black}`)),
       h('span.muted.small', null, `${g.kind} · ${g.variant} · ${g.status}${g.result ? ' ' + g.result : ''}${g.rated ? ' · rated' : ''}${g.moves !== undefined ? ' · ' + g.moves + ' plies' : ''} · ${ago(g.updated_at || g.created_at)}`),

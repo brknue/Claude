@@ -1,6 +1,6 @@
 /** Account, profile, friends, live watching and legal pages. */
 import { badges } from '../badges';
-import { h, icon, btn, toast, modal, copyText, appBridge } from '../ui';
+import { h, icon, btn, toast, modal, copyText, appBridge, askConfirm, askText } from '../ui';
 import { t, fmtDate } from '../i18n';
 import {
   me, accountsEnabled, signIn, signUp, signOut, resetPassword, newRecoveryCode, changePassword, deleteAccount,
@@ -142,7 +142,7 @@ export function profilePage(root: HTMLElement, username?: string) {
       actions.push(btn(h('span', null, icon('play'), t('Challenge')), () => challengeDialog(p.id, p.username), 'primary'));
       actions.push(h('a.btn', { href: '#/chat/' + encodeURIComponent(p.username) }, icon('chat'), t('Message')));
       actions.push(btn(h('span', null, icon('calendar'), t('Daily game')), () => newDailyDialog(p.id, p.username)));
-      actions.push(btn(t('Remove friend'), async () => { if (!confirm(t('Remove {0} from your friends?', p.username))) return; await rpc('friend_remove', { p_other: p.id }).catch(e => toast(niceError(e))); load(); }, 'ghost'));
+      actions.push(btn(t('Remove friend'), async () => { if (!(await askConfirm(t('Remove {0} from your friends?', p.username), { ok: t('Remove'), danger: true }))) return; await rpc('friend_remove', { p_other: p.id }).catch(e => toast(niceError(e))); load(); }, 'ghost'));
     } else if (!self) {
       if (p.relation === 'incoming') actions.push(btn(t('Accept friend request'), async () => { await rpc('friend_respond', { p_other: p.id, p_accept: true }).catch(e => toast(niceError(e))); load(); }, 'primary'));
       else if (p.relation === 'outgoing') actions.push(h('span.muted', null, t('Friend request sent')));
@@ -275,7 +275,7 @@ function settingsCard() {
       try { await changePassword(pw.value); pw.value = ''; toast(t('Password changed')); } catch (e) { toast(niceError(e)); }
     }))),
     h('div.row.wrap', null,
-      btn(t('New recovery code'), async () => { if (!confirm(t('Your old recovery code will stop working. Continue?'))) return; try { showRecovery(await newRecoveryCode(), false); } catch (e) { toast(niceError(e)); } }),
+      btn(t('New recovery code'), async () => { if (!(await askConfirm(t('Your old recovery code will stop working. Continue?')))) return; try { showRecovery(await newRecoveryCode(), false); } catch (e) { toast(niceError(e)); } }),
       btn(h('span', null, icon('copy'), t('Download my data')), async () => {
         try {
           const data: any = await rpc('export_my_data');
@@ -290,7 +290,7 @@ function settingsCard() {
     ((me as any)?.roles || []).includes('owner') ? null : h('details.danger-zone', null, h('summary', null, t('Delete account')),
       h('p.muted.small', null, t('Deletes your account, ratings, friends and your games against the computer for good. In games against other players your name is replaced by "Deleted player". This cannot be undone.')),
       btn(t('Delete my account'), async () => {
-        const typed = prompt(t('Type your username to confirm: {0}', me!.username));
+        const typed = await askText(t('Type your username to confirm: {0}', me!.username), { ok: t('Delete') });
         if (typed !== me!.username) { if (typed !== null) toast(t('The username did not match.')); return; }
         try { await deleteAccount(); toast(t('Your account was deleted.')); go(''); } catch (e) { toast(niceError(e)); }
       }, 'danger')),

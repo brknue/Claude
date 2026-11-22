@@ -103,6 +103,36 @@ export function offerBar(kind: string, text: string, buttons: HTMLElement[]) {
   sound.low();
   return el;
 }
+let askN = 0;
+/**
+ * In-page yes/no question (replaces the browser's confirm()), shown like a takeback request.
+ * Resolves true for the main button, false for Cancel / Escape.
+ */
+export function askConfirm(text: string, opts: { ok?: string; cancel?: string; danger?: boolean } = {}): Promise<boolean> {
+  return new Promise(resolve => {
+    const kind = 'ask-' + (++askN);
+    let done = false;
+    const finish = (v: boolean) => { if (done) return; done = true; clearOffers(kind); document.removeEventListener('keydown', onKey); resolve(v); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') finish(false); };
+    offerBar(kind, text, [btn(opts.ok || t('OK'), () => finish(true), opts.danger ? 'danger small' : 'primary small'), btn(opts.cancel || t('Cancel'), () => finish(false), 'small')]);
+    document.querySelector(`#offers [data-kind="${kind}"]`)?.classList.add('ask');
+    document.addEventListener('keydown', onKey);
+    setTimeout(() => (document.querySelector(`#offers [data-kind="${kind}"] button`) as HTMLElement | null)?.focus(), 30);
+  });
+}
+/** In-page text question (replaces the browser's prompt()). Resolves null on Cancel. */
+export function askText(text: string, opts: { value?: string; ok?: string; password?: boolean; placeholder?: string } = {}): Promise<string | null> {
+  return new Promise(resolve => {
+    let done = false;
+    const input = h('input', { type: opts.password ? 'password' : 'text', value: opts.value ?? '', placeholder: opts.placeholder || '', autocomplete: 'off', 'aria-label': text }) as HTMLInputElement;
+    const finish = (v: string | null) => { if (done) return; done = true; close(); resolve(v); };
+    const close = modal(h('form.ask-text', { onsubmit: (e: Event) => { e.preventDefault(); finish(input.value); } },
+      h('p', null, text), input,
+      h('div.row.end', null, btn(t('Cancel'), () => finish(null)), h('button.btn.primary', { type: 'submit' }, opts.ok || t('OK')))), { onClose: () => finish(null) });
+    setTimeout(() => { input.focus(); input.select(); }, 40);
+  });
+}
+
 export function clearOffers(kind?: string) { document.querySelectorAll(kind ? `#offers [data-kind="${kind}"]` : '#offers .offer').forEach(e => e.remove()); }
 
 // ---------- Sounds (WebAudio, no assets so it works offline) ----------

@@ -1,7 +1,7 @@
 import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.cburnett.css';
 import './style.css';
-import { h, icon, settings, saveSettings, applyTheme, modal, closeModals, btn, offerBar, clearOffers, toast, appBridge, inApp, isIOS, isAndroid, installed, loadRaw, save } from './ui';
+import { h, icon, settings, saveSettings, applyTheme, modal, closeModals, btn, offerBar, clearOffers, toast, appBridge, inApp, isIOS, isAndroid, installed, loadRaw, save, askConfirm } from './ui';
 import { t, LANGS, setLang, detectLang } from './i18n';
 import { accountPage, profilePage, friendsPage, watchPage, legalPage } from './pages/social';
 import { me, initAccount, onAccount, onChallenges, accountsEnabled, rpc, niceError, Challenge } from './account';
@@ -75,8 +75,11 @@ let lastHash = location.hash;
 
 function route() {
   if (leaveGuard && location.hash !== lastHash) {
-    if (!leaveGuard()) { history.replaceState(null, '', lastHash || '#/'); return; }
-    leaveGuard = null;
+    // leaving a running game (back button, typed address): ask in the page, stay until confirmed
+    const target = location.hash;
+    history.replaceState(null, '', lastHash || '#/');
+    if (leaveGuard()) askConfirm(t('Leave this game? It will be lost.'), { ok: t('Leave'), danger: true }).then(ok => { if (ok) { leaveGuard = null; location.hash = target; } });
+    return;
   }
   lastHash = location.hash;
   closeModals();
@@ -173,12 +176,12 @@ async function checkUpdates() {
   const { APK_DOWNLOAD } = await import('./config');
   // 1. the Android app itself
   if (inApp && appVer() && v.android > appVer()) {
-    if (confirm(t('A new Android app (version {0}) is available. Download it to update?', v.android) + '\n\n' + t('After the download, open the file and tap Install. Your games and settings stay.'))) location.href = APK_DOWNLOAD;
+    if (await askConfirm(t('A new Android app (version {0}) is available. Download it to update?', v.android) + ' ' + t('After the download, open the file and tap Install. Your games and settings stay.'), { ok: t('Download') })) location.href = APK_DOWNLOAD;
     return;
   }
   // 2. the website (also what the iPhone / Android apps show)
   if (v.build !== __BUILD__) {
-    if (confirm(t('A new version of Rookstorm is ready ({0}). Update now?', v.build))) {
+    if (await askConfirm(t('A new version of Rookstorm is ready ({0}). Update now?', v.build), { ok: t('Update') })) {
       try { const reg = await navigator.serviceWorker?.getRegistration(); await reg?.update(); } catch { /* */ }
       setTimeout(() => location.reload(), 1200);
     }
@@ -404,7 +407,7 @@ async function init() {
   document.body.append(main);
   buildChrome();
   window.addEventListener('hashchange', route);
-  window.addEventListener('beforeunload', (e) => { if (leaveGuard) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', (e) => { if (leaveGuard && leaveGuard()) { e.preventDefault(); e.returnValue = ''; } });
   onChallenges(showChallenges);
   if (embedded) document.documentElement.classList.add('embedded');
   if (!embedded) { initNotify(); setupUpdates(); showAnnouncement(); }
