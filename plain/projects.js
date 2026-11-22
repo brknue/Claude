@@ -67,6 +67,32 @@ window.PLAIN_PROJECTS = [
     }
   },
   {
+    id: 'simplechess', name: 'Simple Chess', entry: 'simplechess/index.html', open: 'simplechess/',
+    tags: ['learning', 'explore'], lang: '', notes: ['external'],
+    desc: {
+      en: 'Rookstorm in a plain look: white, black and grey, no effects. Every feature: Stockfish at any Elo, all variants, friends, online, daily games, chat, analysis, openings, puzzles; offline.',
+      de: 'Rookstorm in schlichtem Aussehen: weiß, schwarz und grau, ohne Effekte. Alle Funktionen: Stockfish mit jeder Elo, alle Varianten, Freunde, online, Daily-Partien, Chat, Analyse, Eröffnungen, Puzzles; offline.',
+      tr: 'Sade görünümlü Rookstorm: beyaz, siyah ve gri, efekt yok. Tüm özellikler: her Elo’da Stockfish, tüm varyantlar, arkadaşlar, çevrim içi, günlük oyunlar, sohbet, analiz, açılışlar, bulmacalar; çevrimdışı.',
+      es: 'Rookstorm con un aspecto sencillo: blanco, negro y gris, sin efectos. Todas las funciones: Stockfish con cualquier Elo, variantes, amigos, en línea, partidas diarias, chat, análisis, aperturas, problemas; sin conexión.',
+      fr: 'Rookstorm en version sobre : blanc, noir et gris, sans effets. Toutes les fonctions : Stockfish à tout Elo, variantes, amis, en ligne, parties par correspondance, chat, analyse, ouvertures, problèmes ; hors ligne.',
+      it: 'Rookstorm in versione semplice: bianco, nero e grigio, senza effetti. Tutte le funzioni: Stockfish a ogni Elo, varianti, amici, online, partite per corrispondenza, chat, analisi, aperture, problemi; offline.',
+      pt: 'Rookstorm com visual simples: branco, preto e cinza, sem efeitos. Todos os recursos: Stockfish em qualquer Elo, variantes, amigos, online, partidas diárias, chat, análise, aberturas, problemas; offline.',
+      nl: 'Rookstorm in een eenvoudig jasje: wit, zwart en grijs, zonder effecten. Alle functies: Stockfish op elke Elo, varianten, vrienden, online, dagpartijen, chat, analyse, openingen, puzzels; offline.',
+      pl: 'Rookstorm w prostym wyglądzie: biel, czerń i szarość, bez efektów. Wszystkie funkcje: Stockfish na każdym Elo, warianty, znajomi, online, partie korespondencyjne, czat, analiza, debiuty, zadania; offline.',
+      ru: 'Rookstorm в простом виде: белый, чёрный и серый, без эффектов. Все функции: Stockfish на любом Эло, варианты, друзья, онлайн, игра по переписке, чат, анализ, дебюты, задачи; офлайн.',
+      uk: 'Rookstorm у простому вигляді: білий, чорний і сірий, без ефектів. Усі функції: Stockfish на будь-якому Ело, варіанти, друзі, онлайн, листування, чат, аналіз, дебюти, задачі; офлайн.',
+      ar: 'Rookstorm بمظهر بسيط: أبيض وأسود ورمادي بلا مؤثرات. كل الميزات: Stockfish بأي تصنيف، كل الأنواع، الأصدقاء، اللعب عبر الإنترنت، المباريات اليومية، الدردشة، التحليل، الافتتاحيات، الألغاز؛ دون اتصال.',
+      fa: 'Rookstorm با ظاهری ساده: سفید، سیاه و خاکستری، بدون جلوه. همه امکانات: Stockfish با هر ریتینگ، همه گونه‌ها، دوستان، آنلاین، بازی روزانه، گفتگو، تحلیل، گشایش‌ها، معماها؛ آفلاین.',
+      hi: 'सादे रूप में Rookstorm: सफ़ेद, काला और ग्रे, कोई इफ़ेक्ट नहीं। सभी फ़ीचर: किसी भी Elo पर Stockfish, सभी वेरिएंट, दोस्त, ऑनलाइन, डेली गेम, चैट, विश्लेषण, ओपनिंग, पहेलियाँ; ऑफ़लाइन।',
+      zh: '外观极简的 Rookstorm：只有白、黑、灰，没有特效。功能齐全：任意等级的 Stockfish、所有变体、好友、在线、每日对局、聊天、分析、开局、谜题；可离线使用。',
+      ja: 'シンプルな見た目のRookstorm：白・黒・グレーだけで装飾なし。全機能：任意のEloのStockfish、全バリアント、友だち、オンライン、デイリー対局、チャット、解析、オープニング、パズル；オフライン対応。',
+      ko: '단순한 모습의 Rookstorm: 흰색, 검은색, 회색뿐이고 효과 없음. 모든 기능: 모든 Elo의 Stockfish, 모든 변형, 친구, 온라인, 데일리 게임, 채팅, 분석, 오프닝, 퍼즐; 오프라인 지원.',
+      id: 'Rookstorm dengan tampilan sederhana: putih, hitam, dan abu-abu tanpa efek. Semua fitur: Stockfish di Elo mana pun, semua varian, teman, online, permainan harian, obrolan, analisis, pembukaan, teka-teki; offline.',
+      vi: 'Rookstorm với giao diện đơn giản: trắng, đen và xám, không hiệu ứng. Đầy đủ tính năng: Stockfish mọi mức Elo, mọi biến thể, bạn bè, trực tuyến, ván hằng ngày, trò chuyện, phân tích, khai cuộc, câu đố; ngoại tuyến.',
+      sv: 'Rookstorm i enkel stil: vitt, svart och grått, utan effekter. Alla funktioner: Stockfish på alla Elo, alla varianter, vänner, online, dagspartier, chatt, analys, öppningar, problem; offline.'
+    }
+  },
+  {
     id: 'bio-genetik', name: 'Gene Guide', entry: 'bio-genetik/index.html', open: 'bio-genetik/',
     tags: ['science', 'learning'], lang: 'de', notes: ['german'],
     desc: {

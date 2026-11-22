@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Simple Chess</title>
+  <meta name="description" content="Play chess against Stockfish 17 at any Elo, review games with accuracy and blunder detection, learn 3,800+ openings and solve endless rated puzzles. Works offline." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <!-- iPhone / iPad: "Add to Home Screen" opens Simple Chess full screen like an app -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Simple Chess" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="format-detection" content="telephone=no" />
+  <script>
+    if (navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)) document.documentElement.classList.add('standalone');
+    try { var s = JSON.parse(localStorage.getItem('sc.settings') || '{}'); if (s.theme && s.theme !== 'system') document.documentElement.setAttribute('data-theme', s.theme); if (s.board) document.documentElement.setAttribute('data-board', s.board); } catch (e) {}
+  </script>
+</head>
+<body>
+  <noscript>Simple Chess needs JavaScript to run.</noscript>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
