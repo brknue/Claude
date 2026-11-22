@@ -1,4 +1,4 @@
--- Rookstorm add-on: brilliant moves on profiles.
+-- Simple Chess add-on: brilliant moves on profiles.
 -- Run once in Supabase → SQL Editor → New query → Run (after schema.sql). Safe to run again.
 
 alter table public.games add column if not exists white_brilliant int;

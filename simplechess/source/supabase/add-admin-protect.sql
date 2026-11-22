@@ -1,4 +1,4 @@
--- Rookstorm add-on: Crb's highest privileges can never be taken away.
+-- Simple Chess add-on: Crb's highest privileges can never be taken away.
 -- Run once in Supabase → SQL Editor → New query → paste this whole file → Run. Safe to run again.
 -- Needs add-admin.sql first.
 --

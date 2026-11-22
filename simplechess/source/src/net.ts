@@ -18,7 +18,7 @@ export type Msg =
   | { t: 'resume'; ucis: string[]; reply?: boolean }
   | { t: 'chat'; text: string } | { t: 'busy' } | { t: 'ping' } | { t: 'leave' };
 
-export const PREFIX = 'rookstorm-v1-';
+export const PREFIX = 'simplechess-v1-';
 /** Several STUN servers plus PeerJS's TURN relay, so phones on mobile data / strict Wi-Fi can still connect. */
 export const PEER_OPTS = {
   debug: 0,

@@ -1,4 +1,4 @@
--- Rookstorm add-on: ratings are visible to everyone by default; each player can limit them to friends or to nobody.
+-- Simple Chess add-on: ratings are visible to everyone by default; each player can limit them to friends or to nobody.
 -- Run once in Supabase → SQL Editor → New query → paste this whole file → Run. Safe to run again.
 -- Needs schema.sql first.
 

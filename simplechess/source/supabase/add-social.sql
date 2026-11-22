@@ -1,4 +1,4 @@
--- Rookstorm add-on: chat with friends, sending games, daily (correspondence) games with their own rating,
+-- Simple Chess add-on: chat with friends, sending games, daily (correspondence) games with their own rating,
 -- and notification checks for the Android app.
 -- Run once in Supabase → SQL Editor → New query → paste this whole file → Run. Safe to run again.
 -- Needs schema.sql first.

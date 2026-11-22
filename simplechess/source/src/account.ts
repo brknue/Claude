@@ -80,7 +80,7 @@ export async function signUp(username: string, password: string): Promise<string
   const c = await sb();
   if (!(await rpc<boolean>('username_available', { p_username: username }))) throw new Error('already exists');
   const local = [...crypto.getRandomValues(new Uint8Array(12))].map(b => b.toString(16).padStart(2, '0')).join('');
-  const { data, error } = await c.auth.signUp({ email: `u${local}@rookstorm.invalid`, password });
+  const { data, error } = await c.auth.signUp({ email: `u${local}@simplechess.invalid`, password });
   if (error) throw error;
   if (!data.session) throw new Error('Sign-up needs "Confirm email" turned off in Supabase.');
   const recovery = randomCode();

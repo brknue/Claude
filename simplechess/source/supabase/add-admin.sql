@@ -1,4 +1,4 @@
--- Rookstorm add-on: admin panel, roles with badges, bans, announcements, audit log.
+-- Simple Chess add-on: admin panel, roles with badges, bans, announcements, audit log.
 -- Run once in Supabase → SQL Editor → New query → paste this whole file → Run. Safe to run again.
 -- Needs schema.sql (and the other add-ons) first. The account "Crb" must exist: it becomes the owner.
 --

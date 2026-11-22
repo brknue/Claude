@@ -280,7 +280,7 @@ function settingsCard() {
         try {
           const data: any = await rpc('export_my_data');
           try { data.puzzle_days = await rpc('export_puzzle_days'); } catch { /* add-on not installed */ }
-          const name = `rookstorm-${me!.username}.json`, json = JSON.stringify(data, null, 2);
+          const name = `simplechess-${me!.username}.json`, json = JSON.stringify(data, null, 2);
           if (appBridge?.saveFile(name, 'application/json', json)) { toast(t('Saved to Downloads')); return; }
           const a = h('a', { href: URL.createObjectURL(new Blob([json], { type: 'application/json' })), download: name }) as HTMLAnchorElement;
           document.body.append(a); a.click(); a.remove();

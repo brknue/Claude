@@ -13,7 +13,7 @@ export const OPERATOR_CONTACT = '88crab88@gmail.com';
 /** newest Android app (versionCode in android/AndroidManifest.xml); written to version.json at build time */
 export const ANDROID_APP_VERSION = 3;
 /** direct APK download that also works from inside the Android app (it opens the browser to download) */
-export const APK_DOWNLOAD = 'https://github.com/brknue/Claude/raw/main/rookstorm/rookstorm.apk';
+export const APK_DOWNLOAD = '';
 
 export const POLICY_VERSION = '1';
 export const POLICY_DATE = '2026-11-20';

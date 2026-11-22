@@ -1,5 +1,5 @@
--- Rookstorm accounts: run this whole file once in Supabase → SQL Editor → New query → Run.
--- Safe to run again (it drops and recreates only Rookstorm's own functions; tables are kept).
+-- Simple Chess accounts: run this whole file once in Supabase → SQL Editor → New query → Run.
+-- Safe to run again (it drops and recreates only Simple Chess's own functions; tables are kept).
 --
 -- Design:
 --  * No e-mail addresses are collected. Each account gets a random sign-in address

@@ -1,4 +1,4 @@
--- Rookstorm add-on: daily and weekly puzzle results (shown on profiles).
+-- Simple Chess add-on: daily and weekly puzzle results (shown on profiles).
 -- Run once in Supabase → SQL Editor → New query → paste this whole file → Run. Safe to run again.
 -- Needs schema.sql first.
 --

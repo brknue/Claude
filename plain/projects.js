@@ -70,8 +70,8 @@ window.PLAIN_PROJECTS = [
     id: 'simplechess', name: 'Simple Chess', entry: 'simplechess/index.html', open: 'simplechess/',
     tags: ['learning', 'explore'], lang: '', notes: ['external'],
     desc: {
-      en: 'Rookstorm in a plain look: white, black and grey, no effects. Every feature: Stockfish at any Elo, all variants, friends, online, daily games, chat, analysis, openings, puzzles; offline.',
-      de: 'Rookstorm in schlichtem Aussehen: weiß, schwarz und grau, ohne Effekte. Alle Funktionen: Stockfish mit jeder Elo, alle Varianten, Freunde, online, Daily-Partien, Chat, Analyse, Eröffnungen, Puzzles; offline.',
+      en: 'A full chess site in a plain look: white, black and grey, no effects. Every feature: Stockfish at any Elo, all variants, friends, online, daily games, chat, analysis, openings, puzzles; offline.',
+      de: 'Eine komplette Schachseite in schlichtem Aussehen: weiß, schwarz und grau, ohne Effekte. Alle Funktionen: Stockfish mit jeder Elo, alle Varianten, Freunde, online, Daily-Partien, Chat, Analyse, Eröffnungen, Puzzles; offline.',
       tr: 'Sade görünümlü Rookstorm: beyaz, siyah ve gri, efekt yok. Tüm özellikler: her Elo’da Stockfish, tüm varyantlar, arkadaşlar, çevrim içi, günlük oyunlar, sohbet, analiz, açılışlar, bulmacalar; çevrimdışı.',
       es: 'Rookstorm con un aspecto sencillo: blanco, negro y gris, sin efectos. Todas las funciones: Stockfish con cualquier Elo, variantes, amigos, en línea, partidas diarias, chat, análisis, aperturas, problemas; sin conexión.',
       fr: 'Rookstorm en version sobre : blanc, noir et gris, sans effets. Toutes les fonctions : Stockfish à tout Elo, variantes, amis, en ligne, parties par correspondance, chat, analyse, ouvertures, problèmes ; hors ligne.',

@@ -1,4 +1,4 @@
--- Rookstorm add-on: chess titles (GM, IM, WGM …) and extra brilliant moves, set in the admin panel.
+-- Simple Chess add-on: chess titles (GM, IM, WGM …) and extra brilliant moves, set in the admin panel.
 -- Run once in Supabase → SQL Editor → New query → paste this whole file → Run. Safe to run again.
 -- Needs add-brilliants.sql, add-admin.sql and add-admin-protect.sql first.
 

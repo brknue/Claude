@@ -1,4 +1,4 @@
--- Rookstorm add-on: daily games where nobody moved for a week are aborted (no winner, ratings unchanged).
+-- Simple Chess add-on: daily games where nobody moved for a week are aborted (no winner, ratings unchanged).
 -- Run once in Supabase → SQL Editor → New query → paste this whole file → Run. Safe to run again.
 -- Needs add-social.sql first.
 --
