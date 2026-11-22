@@ -96,7 +96,7 @@ export class PartyBoard {
       const p = hidden ? null : st.board[i];
       c.classList.toggle('fog', hidden);
       c.classList.toggle('last', !hidden && !!st.last && (st.last.f === i || st.last.t === i));
-      c.classList.toggle('check', !hidden && checked.has(i));
+      c.classList.toggle('in-check', !hidden && checked.has(i));
       c.classList.toggle('sel', this.sel === i);
       c.classList.toggle('dest', this.targets.some(m => m.t === i));
       c.classList.toggle('cap', this.targets.some(m => m.t === i) && !!p);

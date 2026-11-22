@@ -147,9 +147,7 @@ cg-board square.selected { background-color: var(--sel); }
 cg-board square.move-dest { background: radial-gradient(rgba(20, 85, 30, .5) 19%, rgba(0, 0, 0, 0) 20%); }
 cg-board square.oc.move-dest { background: radial-gradient(transparent 0%, transparent 79%, rgba(20, 85, 0, .3) 80%); }
 cg-board square.move-dest:hover { background: rgba(20, 85, 30, .3); }
-cg-board square.check { background: radial-gradient(ellipse at center, rgba(255, 40, 40, 1) 0%, rgba(230, 0, 0, .95) 30%, rgba(169, 0, 0, .35) 70%, rgba(158, 0, 0, 0) 100%); animation: check-glow 1.1s ease-in-out infinite alternate; }
-@keyframes check-glow { from { box-shadow: inset 0 0 6px 2px rgba(255, 0, 0, .55); } to { box-shadow: inset 0 0 18px 6px rgba(255, 0, 0, .9); } }
-@media (prefers-reduced-motion: reduce) { cg-board square.check, .psq.check { animation: none; } }
+cg-board square.check { background: radial-gradient(ellipse at center, rgba(255, 0, 0, 1) 0%, rgba(231, 0, 0, 1) 25%, rgba(169, 0, 0, 0) 89%, rgba(158, 0, 0, 0) 100%); }
 cg-board square.current-premove { background-color: rgba(20, 30, 85, .5); }
 /* Coordinates: each label sits inside its own square (exactly 1/8 of the board), so they line up on every device and font. */
 .cg-wrap coords { opacity: 1; font-family: var(--font); z-index: 3; text-shadow: 0 0 2px rgba(0,0,0,.25); }
@@ -863,7 +861,7 @@ h1 .role-badge, h2 .role-badge { height: 22px; min-width: 24px; font-size: .8rem
 @media (max-width: 760px) { .admin-split { grid-template-columns: 1fr; } .admin-list { max-height: none; } }
 
 /* party boards: a royal piece in check glows red */
-.psq.check { background-image: radial-gradient(ellipse at center, rgba(255, 40, 40, .95) 0%, rgba(230, 0, 0, .8) 35%, rgba(169, 0, 0, 0) 85%) !important; animation: check-glow 1.1s ease-in-out infinite alternate; }
+.psq.in-check { background-image: radial-gradient(ellipse at center, rgba(255, 0, 0, 1) 0%, rgba(231, 0, 0, 1) 25%, rgba(169, 0, 0, 0) 89%, rgba(158, 0, 0, 0) 100%); }
 /* player names that open the profile */
 a.plink { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }
 a.plink:hover { color: var(--accent); }
@@ -875,3 +873,4 @@ a.plink:hover { color: var(--accent); }
 .embedded .tabbar { display: none !important; }
 .embedded main { padding-bottom: 20px !important; }
 .game-elsewhere { justify-content: center; }
+.psq.in-check.last, .psq.in-check.sel { box-shadow: none; }
