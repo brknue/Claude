@@ -874,3 +874,10 @@ a.plink:hover { color: var(--accent); }
 .embedded main { padding-bottom: 20px !important; }
 .game-elsewhere { justify-content: center; }
 .psq.in-check.last, .psq.in-check.sel { box-shadow: none; }
+
+.title-badge { display: inline-grid; place-items: center; height: 18px; padding: 0 4px; border-radius: 4px; font: 800 .68rem/1 var(--font); letter-spacing: .02em; color: #fff; background: #b8262b; vertical-align: middle; margin-inline-end: 3px; }
+.title-badge.bot { background: #7c3aed; }
+h1 .title-badge, h2 .title-badge { height: 22px; font-size: .82rem; }
+.role-badges .title-badge { order: -1; }
+
+.update-row { align-items: center; gap: 10px; }

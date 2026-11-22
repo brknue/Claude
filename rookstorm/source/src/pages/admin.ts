@@ -4,7 +4,7 @@
  */
 import { h, btn, toast, modal } from '../ui';
 import { me, rpc, accountsEnabled, refreshMe, MODES } from '../account';
-import { ROLES, badgeEls, forgetBadges } from '../badges';
+import { ROLES, badgeEls, forgetBadges, TITLES, titleEl } from '../badges';
 import { go } from '../main';
 import { fmtDate } from '../i18n';
 
@@ -106,6 +106,9 @@ export function adminPage(root: HTMLElement, tab?: string) {
       return h('label.check.small', { class: locked ? 'disabled' : '' }, h('input', { type: 'checkbox', value: r.key, checked: (u.roles || []).includes(r.key), disabled: locked }), h('span', null, r.icon + ' ' + r.label));
     });
     const banned = u.banned_until && Date.parse(u.banned_until) > Date.now();
+    const extra = await rpc<any>('admin_user_extra', { p_id: id }).catch(() => null);
+    const titleSel = h('select', { 'aria-label': 'Title' }, [h('option', { value: '' }, '— no title —'), ...TITLES.map(([k, n]) => h('option', { value: k, selected: extra?.title === k }, `${k} · ${n}`))]) as HTMLSelectElement;
+    const brillIn = h('input', { type: 'number', step: 1, value: 1, 'aria-label': 'Brilliant moves to add' }) as HTMLInputElement;
     el.replaceChildren(h('section.card', null,
       h('div.admin-user-head', null, h('div', null, h('h2', null, u.username, ...badgeEls(u.roles || [])),
         h('span.muted.small', null, `joined ${fmtDate(u.created_at)} · seen ${ago(u.last_seen)} · ${u.friends} friends · ${u.games} games · ${u.messages_sent} messages · ${u.daily_solved} daily puzzles · ratings ${u.rating_visibility || 'everyone'}`)),
@@ -115,6 +118,8 @@ export function adminPage(root: HTMLElement, tab?: string) {
       h('div.admin-ratings', null, ratings.length ? ratings.map(([m, s]) => h('span.tag', null, `${m}: ${s.r} (${s.g} games)`)) : h('span.muted.small', null, 'No ratings yet (1500 everywhere).')),
       h('div.row.wrap', null, modeSel, ratingIn, act('Set rating', () => rpc('admin_set_rating', { p_id: id, p_mode: modeSel.value, p_rating: +ratingIn.value })),
         act('Reset all ratings', async () => { if (!confirm(`Reset all ratings of ${u.username} to 1500?`)) throw new Error('cancelled'); await rpc('admin_reset_ratings', { p_id: id }); }, 'ghost')),
+      extra ? [h('h3.set-h', null, 'Title'), h('div.row.wrap', null, titleEl(extra.title) || h('span.muted.small', null, 'none'), titleSel, act('Save title', () => rpc('admin_set_title', { p_id: id, p_title: titleSel.value })))] : h('p.muted.small', null, 'Titles and extra brilliant moves need supabase/add-titles.sql.'),
+      extra ? [h('h3.set-h', null, 'Brilliant moves'), h('div.row.wrap', null, h('span.muted.small', null, `added by admins so far: ${extra.brilliant_bonus}`), brillIn, act('Add brilliant moves', () => rpc('admin_add_brilliants', { p_id: id, p_count: parseInt(brillIn.value) || 0 })), h('span.muted.small', null, 'Use a negative number to take some away.'))] : null,
       h('h3.set-h', null, 'Roles & badges'), h('div.admin-roles', null, roleBoxes),
       act('Save roles', () => rpc('admin_set_roles', { p_id: id, p_roles: roleBoxes.map(l => l.querySelector('input') as HTMLInputElement).filter(i => i.checked).map(i => i.value) }), 'primary'),
       h('p.muted.small', null, 'Admin gives access to this panel (the admin password is still needed). Owners give or take admin; only Crb gives or takes owner. Crb’s own top roles can never be removed.'),

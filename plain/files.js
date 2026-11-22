@@ -38,36 +38,36 @@ window.PLAIN_FILES = {
    "physica/js/pdf.js",
    "physica/manifest.webmanifest"
   ],
-  "bytes": 983346
+  "bytes": 993029
  },
  "rookstorm": {
   "files": [
    "rookstorm/README.md",
    "rookstorm/apple-touch-icon.png",
-   "rookstorm/assets/_keys-BIymZfHd.js",
-   "rookstorm/assets/ar-BzjrDyPo.js",
-   "rookstorm/assets/de-KYIdCHUs.js",
+   "rookstorm/assets/_keys-BmHasCm3.js",
+   "rookstorm/assets/ar-D2VoqQxH.js",
+   "rookstorm/assets/de-llYtzbgy.js",
    "rookstorm/assets/dist-DwhOg3L3.js",
-   "rookstorm/assets/es-D3UP1My1.js",
-   "rookstorm/assets/fa-CIi4TLJz.js",
-   "rookstorm/assets/fr-B4ddPd7i.js",
-   "rookstorm/assets/hi-yxT2KVzR.js",
-   "rookstorm/assets/id-Ch77Femq.js",
-   "rookstorm/assets/index-4wPfD6mf.css",
-   "rookstorm/assets/index-NUDGcp6X.js",
-   "rookstorm/assets/it-BOSgoDNu.js",
-   "rookstorm/assets/ja-qmZm-Cfi.js",
-   "rookstorm/assets/ko-B4at6gVl.js",
-   "rookstorm/assets/nl-9m-VG975.js",
-   "rookstorm/assets/pl-BKNfjhKh.js",
-   "rookstorm/assets/pt-BnL7g7N2.js",
-   "rookstorm/assets/ru-Cu195Wdd.js",
-   "rookstorm/assets/sv-By9sI5nZ.js",
-   "rookstorm/assets/tr-Bs887djv.js",
-   "rookstorm/assets/uk-DYlSp3p3.js",
-   "rookstorm/assets/vi-B-2uyGly.js",
+   "rookstorm/assets/es-ts8wj5ZU.js",
+   "rookstorm/assets/fa-BJWeIJwq.js",
+   "rookstorm/assets/fr-CXkghvQ1.js",
+   "rookstorm/assets/hi-ktgLaoyI.js",
+   "rookstorm/assets/id-BpwasGsf.js",
+   "rookstorm/assets/index-BtdhX7xC.css",
+   "rookstorm/assets/index-DSIingRZ.js",
+   "rookstorm/assets/it-s2Qz_mfh.js",
+   "rookstorm/assets/ja-BjeLYY68.js",
+   "rookstorm/assets/ko-DAOWoP8F.js",
+   "rookstorm/assets/nl-BV3e1bc2.js",
+   "rookstorm/assets/pl-eznEZNwB.js",
+   "rookstorm/assets/pt-BHFTZGJZ.js",
+   "rookstorm/assets/ru-DSX5JC0D.js",
+   "rookstorm/assets/sv-HAp9xA3g.js",
+   "rookstorm/assets/tr-DilhymcP.js",
+   "rookstorm/assets/uk-BKQ6OjuK.js",
+   "rookstorm/assets/vi-DN3BVRxJ.js",
    "rookstorm/assets/vworker-PfNb6flF.js",
-   "rookstorm/assets/zh-BsfqGoJy.js",
+   "rookstorm/assets/zh-XOvZNo7D.js",
    "rookstorm/data/openings.json",
    "rookstorm/data/puzzles/index.json",
    "rookstorm/data/puzzles/r1000.json",
@@ -191,6 +191,7 @@ window.PLAIN_FILES = {
    "rookstorm/source/supabase/add-daily-puzzles.sql",
    "rookstorm/source/supabase/add-rating-privacy.sql",
    "rookstorm/source/supabase/add-social.sql",
+   "rookstorm/source/supabase/add-titles.sql",
    "rookstorm/source/supabase/schema.sql",
    "rookstorm/source/tools/build-openings.mjs",
    "rookstorm/source/tools/copy-assets.mjs",
@@ -198,9 +199,10 @@ window.PLAIN_FILES = {
    "rookstorm/source/vite.config.ts",
    "rookstorm/sw-notify.js",
    "rookstorm/sw.js",
+   "rookstorm/version.json",
    "rookstorm/workbox-ebea30cf.js"
   ],
-  "bytes": 24784754
+  "bytes": 24845272
  },
  "bio-genetik": {
   "files": [
@@ -221,7 +223,7 @@ window.PLAIN_FILES = {
    "bio-genetik/styles.css",
    "bio-genetik/tests.mjs"
   ],
-  "bytes": 553890
+  "bytes": 557665
  },
  "fuel-check": {
   "files": [
@@ -236,7 +238,7 @@ window.PLAIN_FILES = {
    "fuel-check/local-engine.js",
    "fuel-check/tools/build-stores.mjs"
   ],
-  "bytes": 710566
+  "bytes": 713785
  },
  "plain-wiki": {
   "files": [
@@ -245,7 +247,7 @@ window.PLAIN_FILES = {
    "plain-wiki/vendor/marked-LICENSE.md",
    "plain-wiki/vendor/marked.min.js"
   ],
-  "bytes": 142824
+  "bytes": 143388
  },
  "mathe-klar": {
   "files": [
@@ -259,7 +261,7 @@ window.PLAIN_FILES = {
    "mathe-klar/tests.mjs",
    "mathe-klar/visuals.js"
   ],
-  "bytes": 209808
+  "bytes": 213701
  },
  "lingua-local": {
   "files": [
@@ -273,7 +275,7 @@ window.PLAIN_FILES = {
    "lingua-local/sw.js",
    "lingua-local/upstream-swadesh.json"
   ],
-  "bytes": 253042
+  "bytes": 263004
  },
  "der-die-das": {
   "files": [
@@ -295,7 +297,7 @@ window.PLAIN_FILES = {
    "der-die-das/sw.js",
    "der-die-das/template.html"
   ],
-  "bytes": 292987
+  "bytes": 293969
  },
  "fluent-path": {
   "files": [
@@ -326,7 +328,7 @@ window.PLAIN_FILES = {
    "fluent-path/tests.mjs",
    "fluent-path/tools/build_tatoeba.py"
   ],
-  "bytes": 1188641
+  "bytes": 1195500
  },
  "youtube-to-pdf": {
   "files": [
@@ -349,14 +351,14 @@ window.PLAIN_FILES = {
    "youtube-to-pdf/server.mjs",
    "youtube-to-pdf/test/youtube.test.mjs"
   ],
-  "bytes": 51722
+  "bytes": 52669
  },
  "molecule-lab": {
   "files": [
    "molecule-lab/README.md",
    "molecule-lab/index.html"
   ],
-  "bytes": 3283098
+  "bytes": 3284690
  },
  "verity": {
   "files": [
@@ -375,7 +377,7 @@ window.PLAIN_FILES = {
    "verity/verity-local.js",
    "verity/worker.mjs"
   ],
-  "bytes": 111909
+  "bytes": 112713
  },
  "citypulse": {
   "files": [
@@ -384,6 +386,6 @@ window.PLAIN_FILES = {
    "citypulse/index.html",
    "citypulse/track.html"
   ],
-  "bytes": 22437
+  "bytes": 22609
  }
 };

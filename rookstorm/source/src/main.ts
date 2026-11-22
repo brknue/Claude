@@ -161,6 +161,32 @@ function setupUpdates() {
   if (document.readyState === 'complete') start(); else window.addEventListener('load', start);
 }
 
+/** Android app version from its user agent ("RookstormApp/3"), 0 when not in the app */
+const appVer = () => Number(/RookstormApp\/(\d+)/.exec(navigator.userAgent)?.[1] || 0);
+
+/** Settings → Check for updates: a newer Android app (download it?) and a newer website version (reload?). */
+async function checkUpdates() {
+  toast(t('Checking for updates…'));
+  let v: { build: string; android: number } | null = null;
+  try { v = await (await fetch('version.json?t=' + Date.now(), { cache: 'no-store' })).json(); } catch { toast(t('No connection. Try again when you are online.')); return; }
+  if (!v) return;
+  const { APK_DOWNLOAD } = await import('./config');
+  // 1. the Android app itself
+  if (inApp && appVer() && v.android > appVer()) {
+    if (confirm(t('A new Android app (version {0}) is available. Download it to update?', v.android) + '\n\n' + t('After the download, open the file and tap Install. Your games and settings stay.'))) location.href = APK_DOWNLOAD;
+    return;
+  }
+  // 2. the website (also what the iPhone / Android apps show)
+  if (v.build !== __BUILD__) {
+    if (confirm(t('A new version of Rookstorm is ready ({0}). Update now?', v.build))) {
+      try { const reg = await navigator.serviceWorker?.getRegistration(); await reg?.update(); } catch { /* */ }
+      setTimeout(() => location.reload(), 1200);
+    }
+    return;
+  }
+  toast(t('You have the newest version.'));
+}
+
 function themeIcon() { return icon(settings.theme === 'dark' ? 'moon' : settings.theme === 'light' ? 'sun' : 'half'); }
 
 function header() {
@@ -235,7 +261,8 @@ function openSettings() {
           h('p.muted.small', null, t('Free, from Safari: Share, then Add to Home Screen.'))])
         : [h('a.btn.block', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Install the Android app')),
           h('p.muted.small', null, t('Free, about 20 KB. Plays with website players. When you open the file, Android asks you to allow installing it.'))]],
-    h('p.muted.small.version', null, t('Version {0}', __BUILD__)),
+    h('h3.set-h', null, t('App updates')),
+    h('div.row.wrap.update-row', null, btn(h('span', null, icon('retry'), t('Check for updates')), () => checkUpdates(), ''), h('span.muted.small.version', null, t('Version {0}', __BUILD__), appVer() ? ' · ' + t('Android app {0}', appVer()) : '')),
     h('div.row.end', null, btn(t('Done'), () => close(), 'primary'))));
 }
 
