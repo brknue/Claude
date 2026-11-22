@@ -416,7 +416,7 @@ PhysLab.define({
           if (P.length * gw * gh < 2.5e6 || frameNo % 2 === 0 || !pc._drawn) { drawPotential(ctx); pc._drawn = true; }
           else ctx.drawImage(pc, 0, 0, gw * res, gh * res);
         } else {
-          ctx.fillStyle = '#070b18';
+          ctx.fillStyle = '#111214';
           ctx.fillRect(0, 0, W, H);
           ctx.strokeStyle = 'rgba(120,150,255,0.06)';
           ctx.lineWidth = 1;

@@ -241,7 +241,7 @@ PhysLab.define({
       },
       draw(ctx) {
         const W = env.W, H = env.H, G = geo(), sx = W / N;
-        ctx.fillStyle = '#07060f'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#111214'; ctx.fillRect(0, 0, W, H);
         // energy grid
         ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.fillStyle = 'rgba(200,210,255,0.5)'; ctx.font = '10px Consolas, monospace'; ctx.textBaseline = 'middle'; ctx.lineWidth = 1;
         ctx.beginPath();

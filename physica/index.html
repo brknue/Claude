@@ -3,34 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#05070f">
-<meta name="description" content="Physica — 15 interactive physics labs that run in any browser, on phones, tablets and computers.">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Physica — virtual physics laboratory: 23 simulations with experiment runner, parameter sweeps, curve fitting and PDF/CSV data export.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Physica">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <title>Physica — Virtual Physics Laboratory</title>
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 
 <section id="menu" class="view">
-  <canvas id="menu-bg"></canvas>
   <header class="hero">
-    <div class="badge"><span class="dot"></span> <b id="lab-count">15</b>&nbsp;interactive laboratories · real equations · runs on phones, tablets &amp; computers</div>
-    <h1>PHYSICA</h1>
-    <p class="lead">A virtual physics laboratory. Choose a lab, step inside and experiment with real equations running live in your browser — electrons, orbits, waves, chaos, gases, light, fluids and more.</p>
+    <h1>Physica</h1>
+    <p class="lead">A virtual physics laboratory: <b id="lab-count">23</b> numerical simulations with real equations. Set parameters, run time series or parameter sweeps, fit models to the results and download every data point as a PDF report, CSV or JSON. Runs in the browser on phones, tablets and computers; nothing is uploaded.</p>
   </header>
   <div class="menubar">
-    <input id="search" type="search" placeholder="Search labs — try “waves”, “chaos”, “quantum”…" autocomplete="off">
+    <input id="search" type="search" placeholder="Search labs (e.g. resonance, diffusion, spectrum)" autocomplete="off">
     <div id="chips"></div>
   </div>
   <div id="lab-grid"></div>
   <div id="no-results" class="hidden">No labs match that search.</div>
-  <footer class="foot"><span class="kbd-only">Inside a lab: <kbd>Space</kbd> pause · <kbd>R</kbd> reset · <kbd>H</kbd> hide panel · <kbd>[</kbd> <kbd>]</kbd> switch lab · <kbd>Esc</kbd> back to this menu</span><span class="touch-only">Inside a lab: drag the handle at the bottom to open the controls · tap <b>⋯</b> for speed, quality and more · tip: add Physica to your home screen to use it like an app</span></footer>
+  <footer class="foot">
+    <p><b>How it works:</b> open a lab · adjust the controls · <b>Experiment</b> tab → record a time series or sweep a parameter · <b>Data</b> tab → plot any quantity against any other, fit a model (linear, power law, exponential, sinusoid, Gaussian…), read statistics and download the PDF report.</p>
+    <p class="kbd-only">Keyboard inside a lab: <kbd>Space</kbd> pause · <kbd>R</kbd> reset · <kbd>H</kbd> hide panel · <kbd>[</kbd> <kbd>]</kbd> previous / next lab · <kbd>Esc</kbd> back to this list</p>
+    <p class="touch-only">On a phone: drag the handle at the bottom of a lab to open the controls; tap ⋯ for speed and quality.</p>
+    <p>All results are simulated. Models, equations and assumptions are listed in each lab’s <b>Theory</b> tab and in every report.</p>
+  </footer>
 </section>
 
 <section id="lab" class="view hidden">
@@ -54,7 +57,7 @@
       </div>
       <label class="tsel" title="Simulation speed"><span>Speed</span>
         <select id="speed">
-          <option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option>
+          <option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option><option value="16">16×</option>
         </select>
       </label>
       <label class="tsel" title="Quality — lower it on slow devices"><span>Quality</span>
@@ -74,22 +77,26 @@
       <div id="hint" role="status"></div>
       <button id="alt-btn" class="alt-btn hidden" aria-pressed="false"></button>
       <div id="pausedTag">PAUSED</div>
+      <div id="recTag"></div>
       <div id="fps"></div>
     </div>
     <aside id="panel">
       <div id="sheet-handle" title="Drag or tap to open the controls"><span></span></div>
       <div class="ptabs">
         <button class="ptab active" data-tab="controls">Controls</button>
-        <button class="ptab" data-tab="missions">Missions</button>
-        <button class="ptab" data-tab="theory">Theory &amp; Guide</button>
+        <button class="ptab" data-tab="experiment">Experiment</button>
+        <button class="ptab" data-tab="data">Data</button>
+        <button class="ptab" data-tab="theory">Theory</button>
       </div>
       <div id="tab-controls" class="tabbody">
-        <div class="sec">Live data <button id="btn-csv" class="mini" title="Download everything logged so far as a spreadsheet (CSV)">&#11015; CSV</button></div>
+        <div class="sec">Readouts</div>
+        <p class="note small">Click a value to graph it. Everything is logged continuously; use the Experiment tab for controlled runs.</p>
         <div id="readouts"></div>
         <div id="charts"></div>
         <div id="controls"></div>
       </div>
-      <div id="tab-missions" class="tabbody hidden"></div>
+      <div id="tab-experiment" class="tabbody hidden"></div>
+      <div id="tab-data" class="tabbody hidden"></div>
       <div id="tab-theory" class="tabbody hidden">
         <div id="howto"></div>
         <div id="theory"></div>
@@ -100,24 +107,33 @@
 
 <div id="toast"></div>
 
-<script src="js/core.js?v=6"></script>
-<script src="js/thumbs.js?v=6"></script>
-<script src="js/missions.js?v=6"></script>
-<script src="js/labs/electrons.js?v=6"></script>
-<script src="js/labs/gravity.js?v=6"></script>
-<script src="js/labs/ripple.js?v=6"></script>
-<script src="js/labs/pendulum.js?v=6"></script>
-<script src="js/labs/gas.js?v=6"></script>
-<script src="js/labs/lorentz.js?v=6"></script>
-<script src="js/labs/optics.js?v=6"></script>
-<script src="js/labs/fluid.js?v=6"></script>
-<script src="js/labs/projectile.js?v=6"></script>
-<script src="js/labs/cloth.js?v=6"></script>
-<script src="js/labs/quantum.js?v=6"></script>
-<script src="js/labs/blackhole.js?v=6"></script>
-<script src="js/labs/matter.js?v=6"></script>
-<script src="js/labs/ising.js?v=6"></script>
-<script src="js/labs/string.js?v=6"></script>
+<script src="js/core.js?v=7"></script>
+<script src="js/pdf.js?v=7"></script>
+<script src="js/meta.js?v=7"></script>
+<script src="js/experiment.js?v=7"></script>
+<script src="js/labs/oscillator.js?v=7"></script>
+<script src="js/labs/projectile.js?v=7"></script>
+<script src="js/labs/pendulum.js?v=7"></script>
+<script src="js/labs/gravity.js?v=7"></script>
+<script src="js/labs/fluid.js?v=7"></script>
+<script src="js/labs/cloth.js?v=7"></script>
+<script src="js/labs/string.js?v=7"></script>
+<script src="js/labs/ripple.js?v=7"></script>
+<script src="js/labs/diffraction.js?v=7"></script>
+<script src="js/labs/optics.js?v=7"></script>
+<script src="js/labs/heat.js?v=7"></script>
+<script src="js/labs/gas.js?v=7"></script>
+<script src="js/labs/brownian.js?v=7"></script>
+<script src="js/labs/matter.js?v=7"></script>
+<script src="js/labs/ising.js?v=7"></script>
+<script src="js/labs/blackbody.js?v=7"></script>
+<script src="js/labs/circuit.js?v=7"></script>
+<script src="js/labs/electrons.js?v=7"></script>
+<script src="js/labs/lorentz.js?v=7"></script>
+<script src="js/labs/photoelectric.js?v=7"></script>
+<script src="js/labs/decay.js?v=7"></script>
+<script src="js/labs/quantum.js?v=7"></script>
+<script src="js/labs/blackhole.js?v=7"></script>
 <script>PhysLab.start();</script>
 </body>
 </html>

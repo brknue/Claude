@@ -450,7 +450,7 @@ PhysLab.define({
       draw(ctx) {
         const W = env.W, H = env.H;
         if (dirty) retrace();
-        ctx.fillStyle = '#05060c'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#111214'; ctx.fillRect(0, 0, W, H);
         ctx.fillStyle = 'rgba(120,140,190,0.13)';
         for (let y = 20; y < H; y += 40) for (let x = 20; x < W; x += 40) ctx.fillRect(x - 1, y - 1, 2, 2);
         // optical elements (below rays)

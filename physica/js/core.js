@@ -124,6 +124,45 @@
       const f = raw / p;
       return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p;
     },
+    /** draws axes, grid and labels for a data plot inside a lab canvas; returns coordinate mappers */
+    plot(ctx, x, y, w, h, o) {
+      const fs = o.fs || 11, L = x + fs * 4.6, R = x + w - 8, T = y + (o.title ? fs * 1.9 : 8), B = y + h - fs * 2.9;
+      const lx = !!o.logx, ly = !!o.logy;
+      const fx = (v) => (lx ? Math.log10(Math.max(v, 1e-300)) : v), fy = (v) => (ly ? Math.log10(Math.max(v, 1e-300)) : v);
+      const X0 = fx(o.x0), X1 = fx(o.x1), Y0 = fy(o.y0), Y1 = fy(o.y1);
+      const sx = (v) => L + ((fx(v) - X0) / (X1 - X0 || 1)) * (R - L), sy = (v) => B - ((fy(v) - Y0) / (Y1 - Y0 || 1)) * (B - T);
+      ctx.save();
+      ctx.fillStyle = '#17181b'; ctx.fillRect(L, T, R - L, B - T);
+      ctx.font = `${fs}px system-ui, sans-serif`; ctx.lineWidth = 1;
+      const ticks = (a, b, n, log) => { const out = []; if (log) { for (let k = Math.ceil(a); k <= b; k++) out.push(k); return out; } const st = U.niceStep(b - a, n); for (let v = Math.ceil(a / st) * st; v <= b + st * 1e-6; v += st) out.push(Math.abs(v) < st * 1e-9 ? 0 : v); out.step = st; return out; };
+      const lab = (v, log, st) => {
+        if (log) return '1e' + Math.round(v);
+        if (v === 0) return '0';
+        const big = Math.max(Math.abs(v), st || 0);
+        if (big >= 1e5 || (st && st < 1e-4)) return v.toExponential(Math.max(0, Math.min(3, Math.round(Math.log10(big / (st || big))))));
+        return v.toFixed(st ? Math.max(0, Math.min(6, -Math.floor(Math.log10(st) + 1e-9))) : 2);
+      };
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      const xt = ticks(X0, X1, Math.max(2, (R - L) / 70), lx), yt = ticks(Y0, Y1, Math.max(2, (B - T) / 46), ly);
+      for (const v of xt) { const px = L + ((v - X0) / (X1 - X0 || 1)) * (R - L); ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.beginPath(); ctx.moveTo(px, T); ctx.lineTo(px, B); ctx.stroke(); ctx.fillStyle = '#a9adb4'; ctx.fillText(lab(v, lx, xt.step), px, B + 3); }
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      for (const v of yt) { const py = B - ((v - Y0) / (Y1 - Y0 || 1)) * (B - T); ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.beginPath(); ctx.moveTo(L, py); ctx.lineTo(R, py); ctx.stroke(); ctx.fillStyle = '#a9adb4'; ctx.fillText(lab(v, ly, yt.step), L - 4, py); }
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.strokeRect(L + 0.5, T + 0.5, R - L - 1, B - T - 1);
+      ctx.fillStyle = '#d4d7dc'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      if (o.xl) ctx.fillText(o.xl, (L + R) / 2, y + h - 1);
+      if (o.title) { ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = `600 ${fs}px system-ui, sans-serif`; ctx.fillText(o.title, x + 4, y + 3); }
+      if (o.yl) { ctx.save(); ctx.translate(x + fs * 0.9, (T + B) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `${fs}px system-ui, sans-serif`; ctx.fillText(o.yl, 0, 0); ctx.restore(); }
+      ctx.restore();
+      return { sx, sy, L, R, T, B, clip() { ctx.save(); ctx.beginPath(); ctx.rect(L, T, R - L, B - T); ctx.clip(); } };
+    },
+    /** strokes y = f(x) or arrays inside a plot frame */
+    curve(ctx, F, xs, ys, color, width, dash) {
+      ctx.strokeStyle = color; ctx.lineWidth = width || 1.6; ctx.setLineDash(dash || []);
+      ctx.beginPath(); let pen = false;
+      for (let i = 0; i < xs.length; i++) { const px = F.sx(xs[i]), py = F.sy(ys[i]); if (!isFinite(px) || !isFinite(py)) { pen = false; continue; } if (pen) ctx.lineTo(px, py); else { ctx.moveTo(px, py); pen = true; } }
+      ctx.stroke(); ctx.setLineDash([]);
+    },
+    label(ctx, x, y, text, color, align, size) { ctx.fillStyle = color || '#d4d7dc'; ctx.font = `${size || 11}px system-ui, sans-serif`; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle'; ctx.fillText(text, x, y); },
     distToSeg(px, py, x1, y1, x2, y2) {
       const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy;
       let t = L2 ? ((px - x1) * dx + (py - y1) * dy) / L2 : 0;
@@ -156,10 +195,13 @@
   }
 
   /* ---------------- UI builder (side panel controls) ---------------- */
+  // every control a lab creates is registered here, so experiments can read, sweep and report parameters
+  const reg = { params: [], actions: [], section: '' };
+  const plainText = (h) => { const d = document.createElement('div'); d.innerHTML = h; return (d.textContent || '').trim(); };
   function UIBuilder(root) {
     const api = {
       root,
-      section(title) { root.appendChild(el('div', 'sec', title)); return api; },
+      section(title) { root.appendChild(el('div', 'sec', title)); reg.section = plainText(title); return api; },
       note(html) { const n = el('div', 'note', html); root.appendChild(n); return n; },
       slider(label, o) {
         const row = el('div', 'ctl slider');
@@ -175,22 +217,45 @@
         else { inp.min = o.min; inp.max = o.max; inp.step = o.step != null ? o.step : 0.01; }
         inp.value = fromVal(o.value);
         const fmt = o.fmt || ((v) => String(+v.toFixed(3)));
+        let cur = o.value; // the exact value (typed values are not snapped to the slider grid)
         const upd = () => {
-          const v = toVal(+inp.value);
-          val.textContent = fmt(v);
+          val.textContent = fmt(cur);
           const p = ((+inp.value - +inp.min) / (+inp.max - +inp.min)) * 100;
           inp.style.setProperty('--p', p + '%');
         };
-        inp.addEventListener('input', () => { upd(); if (o.onInput) o.onInput(toVal(+inp.value)); });
-        if (o.onChange) inp.addEventListener('change', () => o.onChange(toVal(+inp.value)));
+        inp.addEventListener('input', () => { cur = toVal(+inp.value); upd(); if (o.onInput) o.onInput(cur); });
+        if (o.onChange) inp.addEventListener('change', () => o.onChange(cur));
+        // click the value to type an exact number
+        val.title = 'Click to type an exact value';
+        val.classList.add('editable');
+        val.addEventListener('click', () => {
+          if (val.querySelector('input')) return;
+          const box = el('input', 'valedit');
+          box.type = 'number'; box.step = 'any'; box.value = +(+cur).toPrecision(8);
+          val.textContent = ''; val.appendChild(box); box.focus(); box.select();
+          let done = false;
+          const commit = (ok) => {
+            if (done) return; done = true;
+            const v = parseFloat(box.value);
+            if (ok && isFinite(v)) {
+              const c = Math.min(o.max, Math.max(o.min, v));
+              if (c !== v) toast(`Allowed range: ${o.min} … ${o.max}`);
+              h.set(c, true);
+            } else upd();
+          };
+          box.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') commit(true); if (e.key === 'Escape') commit(false); });
+          box.addEventListener('blur', () => commit(true));
+        });
         row.append(head, inp);
         root.appendChild(row);
         upd();
-        return {
+        const h = {
           el: row,
-          get value() { return toVal(+inp.value); },
-          set(v, fire) { inp.value = fromVal(v); upd(); if (fire && o.onInput) o.onInput(toVal(+inp.value)); },
+          get value() { return cur; },
+          set(v, fire) { cur = +v; inp.value = fromVal(cur); upd(); if (fire && o.onInput) o.onInput(cur); if (fire && o.onChange) o.onChange(cur); },
         };
+        reg.params.push({ kind: 'slider', label: plainText(label), section: reg.section, el: row, min: o.min, max: o.max, log: log, step: o.step, get value() { return h.value; }, get text() { return fmt(cur); }, set: (v) => h.set(v, true) });
+        return h;
       },
       toggle(label, value, onChange) {
         const row = el('div', 'ctl toggle' + (value ? ' on' : ''));
@@ -198,7 +263,9 @@
         let v = !!value;
         row.addEventListener('click', () => { v = !v; row.classList.toggle('on', v); onChange && onChange(v); });
         root.appendChild(row);
-        return { el: row, get value() { return v; }, set(nv, fire) { v = !!nv; row.classList.toggle('on', v); if (fire && onChange) onChange(v); } };
+        const h = { el: row, get value() { return v; }, set(nv, fire) { if (!!nv === v && fire) return; v = !!nv; row.classList.toggle('on', v); if (fire && onChange) onChange(v); } };
+        reg.params.push({ kind: 'toggle', label: plainText(label), section: reg.section, el: row, get value() { return v; }, get text() { return v ? 'on' : 'off'; }, set: (nv) => h.set(nv === true || nv === 'on' || nv === 1 || nv === '1', true) });
+        return h;
       },
       select(label, options, value, onChange) {
         const row = el('div', 'ctl sel');
@@ -213,7 +280,8 @@
         s.addEventListener('change', () => { onChange && onChange(s.value); s.blur(); });
         row.append(el('span', '', label), s);
         root.appendChild(row);
-        return { el: row, get value() { return s.value; }, set(v) { s.value = v; } };
+        reg.params.push({ kind: 'select', label: plainText(label), section: reg.section, el: row, get value() { return s.value; }, get text() { return s.options[s.selectedIndex] ? s.options[s.selectedIndex].textContent : s.value; }, set: (v) => { if (s.value === String(v)) return; s.value = v; onChange && onChange(s.value); } });
+        return { el: row, get value() { return s.value; }, set(v, fire) { s.value = v; if (fire && onChange) onChange(s.value); } };
       },
       buttons(list) {
         const row = el('div', 'btns');
@@ -224,6 +292,7 @@
           btn.addEventListener('click', () => { btn.blur(); b.onClick && b.onClick(); });
           row.appendChild(btn);
           map[b.id || b.label] = btn;
+          if (b.onClick) reg.actions.push({ label: plainText(b.label), el: btn, run: () => b.onClick() });
         }
         root.appendChild(row);
         return map;
@@ -339,12 +408,14 @@
     c.innerHTML = '';
     $('#readouts').innerHTML = '';
     env.q = computeQ();
+    reg.params.length = 0; reg.actions.length = 0; reg.section = '';
     env.ui = UIBuilder(c);
     app.lab = app.def.create(env) || {};
     app.extCap = false;
+    app.simT = 0;
     resetData();
-    renderMissions();
     renderReadouts();
+    if (PhysLab.onBuild) PhysLab.onBuild(app.def);
   }
   function enterLab(id) {
     const def = Labs.find((l) => l.id === id);
@@ -352,7 +423,6 @@
     app.def = def;
     $('#menu').classList.add('hidden');
     $('#lab').classList.remove('hidden');
-    document.documentElement.style.setProperty('--acc', def.color);
     const idx = Labs.indexOf(def);
     $('#lab-num').textContent = String(idx + 1).padStart(2, '0');
     $('#lab-title').textContent = def.title;
@@ -363,6 +433,7 @@
     document.title = def.title + ' — Physica';
     $('#theory').innerHTML = def.theory || '';
     $('#howto').innerHTML = def.howto ? '<h3>How to use</h3><ul>' + def.howto.map((h) => `<li>${h}</li>`).join('') + '</ul>' : '';
+    if (PhysLab.onEnter) PhysLab.onEnter(def);
     app.paused = false;
     updatePause();
     app.autoCap = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -378,15 +449,14 @@
     app.def = null;
     $('#lab').classList.add('hidden');
     $('#menu').classList.remove('hidden');
-    document.documentElement.style.setProperty('--acc', '#38bdf8');
     document.title = 'Physica — Virtual Physics Laboratory';
-    resizeMenuBg();
-    sizeThumbs();
-    updateStars();
+    if (PhysLab.onMenu) PhysLab.onMenu();
   }
   function route() {
-    const m = location.hash.match(/^#\/lab\/([\w-]+)/);
-    if (m) enterLab(m[1]); else showMenu();
+    const m = location.hash.match(/^#\/lab\/([\w-]+)(?:\?(.*))?/);
+    if (!m) { showMenu(); return; }
+    if (!app.def || app.def.id !== m[1] || !app.lab) enterLab(m[1]);
+    if (m[2] && PhysLab.applyQuery) PhysLab.applyQuery(m[2]);
   }
   function go(delta) {
     if (!app.def) return;
@@ -406,29 +476,51 @@
     toast('Lab reset');
   }
 
-  /* ---------------- Live data: readouts, click-to-graph, CSV log ---------------- */
-  const data = { t: [], cols: {}, pins: [], t0: 0, last: [] };
-  function resetData() { data.t = []; data.cols = {}; data.pins = []; data.last = []; data.t0 = performance.now(); const c = $('#charts'); if (c) c.innerHTML = ''; }
-  function renderReadouts() {
+  /* ---------------- Live data: readouts, click-to-graph, continuous log (simulation time) ---------------- */
+  // A readout value like "12.3 m/s" or "4.1e-3 J" -> { v: 12.3, unit: 'm/s' }
+  function parseReading(val) {
+    if (typeof val === 'number') return { v: val, unit: '' };
+    const s = String(val).trim().replace(/−/g, '-').replace(/×\s*10\^?([-+]?\d+)/, 'e$1');
+    const m = s.match(/^([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*(.*)$/);
+    if (!m) return { v: NaN, unit: '' };
+    let unit = m[2].trim(), v = parseFloat(m[1]);
+    // a lone "k" (or "k " before a unit) is the thousands suffix used by some readouts
+    if (/^k(\s|$)/.test(unit)) { v *= 1000; unit = unit.slice(1).trim(); }
+    if (/[\/]\s*[-+.\d]/.test(unit.replace(/^1\//, '')) || unit.length > 16 || /^([×*+(]|x\s)/.test(unit)) unit = '';
+    return { v, unit };
+  }
+  const data = { t: [], cols: {}, units: {}, pins: [], last: [] };
+  const LOG_MAX = 6000;
+  function resetData() { data.t = []; data.cols = {}; data.units = {}; data.pins = []; data.last = []; data.lastT = -1; const c = $('#charts'); if (c) c.innerHTML = ''; }
+  /** reads the lab's readouts once: [[name, text, value, unit], ...] */
+  function sampleReadouts() {
     const lab = app.lab;
-    if (!lab || !lab.readouts) return;
-    const r = lab.readouts();
-    if (!r) return;
-    data.last = r;
-    if (!app.paused) {
-      data.t.push((performance.now() - data.t0) / 1000);
-      const L = data.t.length;
-      for (const [k, v] of r) {
-        const n = parseFloat(v);
-        let col = data.cols[k];
-        if (!col) { col = data.cols[k] = []; while (col.length < L - 1) col.push(NaN); }
-        col.push(isFinite(n) ? n : NaN);
-      }
-      for (const k in data.cols) { const c = data.cols[k]; while (c.length < L) c.push(NaN); }
-      if (L > 1600) { data.t.shift(); for (const k in data.cols) data.cols[k].shift(); }
+    if (!lab || !lab.readouts) return [];
+    let r;
+    try { r = lab.readouts() || []; } catch (e) { return []; }
+    return r.map(([k, v]) => { const p = parseReading(v); return [String(k), String(v), p.v, p.unit]; });
+  }
+  function logSample(r) {
+    if (app.simT === data.lastT) return;
+    data.lastT = app.simT;
+    data.t.push(app.simT);
+    const L = data.t.length;
+    for (const [k, , n, unit] of r) {
+      let col = data.cols[k];
+      if (!col) { col = data.cols[k] = []; while (col.length < L - 1) col.push(NaN); }
+      if (unit && !data.units[k]) data.units[k] = unit;
+      col.push(isFinite(n) ? n : NaN);
     }
+    for (const k in data.cols) { const c = data.cols[k]; while (c.length < L) c.push(NaN); }
+    if (L > LOG_MAX) { data.t.shift(); for (const k in data.cols) data.cols[k].shift(); }
+  }
+  function renderReadouts() {
+    const r = sampleReadouts();
+    if (!r.length) { $('#readouts').innerHTML = '<div class="note">This lab has no numeric readouts.</div>'; return; }
+    data.last = r;
+    if (!app.paused) logSample(r);
     let h = '';
-    r.forEach(([k, v], i) => { h += `<div class="ro${data.pins.includes(k) ? ' pin' : ''}" data-i="${i}" title="Click to graph this value over time"><span>${k}</span><b>${v}</b></div>`; });
+    r.forEach(([k, v], i) => { h += `<div class="ro${data.pins.includes(k) ? ' pin' : ''}" data-i="${i}" title="Click to graph this quantity against time"><span>${escHTML(k)}</span><b>${escHTML(v)}</b></div>`; });
     $('#readouts').innerHTML = h;
     drawCharts();
   }
@@ -437,7 +529,7 @@
     if (i >= 0) data.pins.splice(i, 1); else { data.pins.push(k); if (data.pins.length > 3) data.pins.shift(); }
     const box = $('#charts');
     box.innerHTML = '';
-    data.pins.forEach(() => { const c = el('canvas', 'chart'); c.width = 600; c.height = 150; box.appendChild(c); });
+    data.pins.forEach(() => { const c = el('canvas', 'chart'); c.width = 640; c.height = 170; box.appendChild(c); });
     drawCharts();
   }
   function drawCharts() {
@@ -445,81 +537,48 @@
     data.pins.forEach((k, idx) => {
       const c = cs[idx]; if (!c) return;
       const g = c.getContext('2d'), W = c.width, H = c.height, col = data.cols[k] || [];
-      g.fillStyle = '#0b1430'; g.fillRect(0, 0, W, H);
-      const n = Math.min(col.length, 400), st = col.length - n;
+      g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
+      const n = Math.min(col.length, 500), st = col.length - n;
       let lo = Infinity, hi = -Infinity;
       for (let i = st; i < col.length; i++) { const v = col[i]; if (v === v) { if (v < lo) lo = v; if (v > hi) hi = v; } }
-      g.font = '22px Consolas, monospace'; g.textBaseline = 'top'; g.textAlign = 'left';
-      g.fillStyle = '#9fb3e0'; g.fillText(k, 12, 8);
-      if (lo === Infinity) { g.fillStyle = '#6b7aa5'; g.fillText('no numeric data yet', 12, 60); return; }
+      g.font = '20px system-ui, sans-serif'; g.textBaseline = 'top'; g.textAlign = 'left';
+      g.fillStyle = '#333'; g.fillText(k + (data.units[k] ? ` (${data.units[k]})` : ''), 12, 8);
+      if (lo === Infinity) { g.fillStyle = '#777'; g.fillText('no numeric data yet', 12, 70); return; }
       const pad = (hi - lo) * 0.1 || Math.abs(hi) * 0.1 || 1;
       lo -= pad; hi += pad;
-      g.strokeStyle = (getComputedStyle(document.documentElement).getPropertyValue('--acc') || '#38bdf8').trim(); g.lineWidth = 3; g.beginPath();
+      g.strokeStyle = '#e3e3e3'; g.lineWidth = 1;
+      for (let j = 0; j <= 4; j++) { const y = 40 + (j / 4) * (H - 56); g.beginPath(); g.moveTo(10, y); g.lineTo(W - 10, y); g.stroke(); }
+      g.strokeStyle = '#1f5fbf'; g.lineWidth = 2.5; g.beginPath();
       let pen = false;
       for (let i = 0; i < n; i++) {
         const v = col[st + i]; if (v !== v) { pen = false; continue; }
-        const x = 10 + (i / Math.max(1, n - 1)) * (W - 20), y = H - 12 - ((v - lo) / (hi - lo)) * (H - 52);
+        const x = 10 + (i / Math.max(1, n - 1)) * (W - 20), y = H - 16 - ((v - lo) / (hi - lo)) * (H - 56);
         if (pen) g.lineTo(x, y); else { g.moveTo(x, y); pen = true; }
       }
       g.stroke();
-      g.fillStyle = '#6b7aa5'; g.textAlign = 'right';
-      g.fillText(U.fmt(hi - pad, 3), W - 10, 8); g.textBaseline = 'bottom'; g.fillText(U.fmt(lo + pad, 3), W - 10, H - 6);
-      g.textAlign = 'left';
-    });
-  }
-  function exportCSV() {
-    const keys = Object.keys(data.cols);
-    if (!data.t.length) { toast('No data logged yet'); return; }
-    const q = (s) => '"' + String(s).replace(/"/g, '""') + '"';
-    let out = ['time_s', ...keys].map(q).join(',') + '\n';
-    for (let i = 0; i < data.t.length; i++) out += data.t[i].toFixed(2) + ',' + keys.map((k) => { const v = data.cols[k][i]; return v === v ? v : ''; }).join(',') + '\n';
-    const a = el('a'); a.href = URL.createObjectURL(new Blob([out], { type: 'text/csv' })); a.download = `physica-${app.def.id}-data.csv`;
-    document.body.appendChild(a); a.click(); a.remove();
-    toast(`Exported ${data.t.length} samples of ${keys.length} quantities`);
-  }
-
-  /* ---------------- Missions (per-lab challenges, auto-checked) ---------------- */
-  const mKey = (id) => 'physica-missions-' + id;
-  function mLoad(id) { try { return JSON.parse(localStorage.getItem(mKey(id)) || '[]'); } catch (e) { return []; } }
-  const missionsOf = (id) => (window.PhysLab.missions && window.PhysLab.missions[id]) || [];
-  function renderMissions() {
-    const box = $('#tab-missions');
-    if (!app.def || !box) return;
-    const ms = missionsOf(app.def.id), done = mLoad(app.def.id), nd = ms.filter((m, i) => done[i]).length;
-    box.innerHTML = `<h3>Missions <span class="mcount">${nd} / ${ms.length} ★</span></h3><p class="note">Complete these experiments — the lab checks them automatically and saves your stars.</p>` +
-      ms.map((m, i) => `<div class="mission${done[i] ? ' done' : ''}"><span class="star">${done[i] ? '★' : '☆'}</span><div><b>${m.t}</b><small>${m.h || ''}</small></div></div>`).join('') +
-      (nd ? '<div class="btns"><button class="btn" id="m-reset">Reset this lab\'s stars</button></div>' : '');
-    const rb = $('#m-reset');
-    if (rb) rb.onclick = () => { localStorage.removeItem(mKey(app.def.id)); renderMissions(); };
-    const tab = document.querySelector('.ptab[data-tab="missions"]');
-    if (tab) tab.textContent = `Missions ${nd}/${ms.length}`;
-  }
-  function checkMissions() {
-    const lab = app.lab;
-    if (!lab || !lab.probe || !app.def) return;
-    const ms = missionsOf(app.def.id);
-    if (!ms.length) return;
-    const done = mLoad(app.def.id);
-    if (ms.every((m, i) => done[i])) return;
-    let p;
-    try { p = lab.probe(); } catch (e) { return; }
-    let ch = false;
-    ms.forEach((m, i) => {
-      if (done[i]) return;
-      let ok = false;
-      try { ok = !!m.ok(p); } catch (e) { ok = false; }
-      if (ok) { done[i] = 1; ch = true; toast('★ Mission complete: ' + m.t, 3800); }
-    });
-    if (ch) { for (let i = 0; i < ms.length; i++) done[i] = done[i] ? 1 : 0; localStorage.setItem(mKey(app.def.id), JSON.stringify(done)); renderMissions(); }
-  }
-  function updateStars() {
-    document.querySelectorAll('.stars').forEach((e) => {
-      const ms = missionsOf(e.dataset.id), done = mLoad(e.dataset.id), nd = ms.filter((m, i) => done[i]).length;
-      e.textContent = ms.length ? '★'.repeat(nd) + '☆'.repeat(ms.length - nd) : '';
+      g.fillStyle = '#555'; g.textAlign = 'right'; g.font = '18px ui-monospace, Consolas, monospace';
+      g.fillText('max ' + U.fmt(hi - pad, 4), W - 10, 8); g.textBaseline = 'bottom'; g.fillText('min ' + U.fmt(lo + pad, 4), W - 10, H - 2);
+      const t0 = data.t[st], t1 = data.t[data.t.length - 1];
+      g.textAlign = 'left'; g.fillText(`t = ${U.fmt(t0, 1)} … ${U.fmt(t1, 1)} s`, 12, H - 2);
     });
   }
 
   /* ---------------- Main loop ---------------- */
+  /** advances the lab by dt simulated seconds (speeds above 4x run several sub-steps per frame) */
+  function stepLab(dt, rdt) {
+    const lab = app.lab;
+    if (!lab) return;
+    // while an experiment samples faster than one frame, split the frame so every sample time is honoured
+    let k = Math.max(1, Math.ceil(app.speed / 4));
+    if (PhysLab.maxStep > 0) k = Math.min(64, Math.max(k, Math.ceil(dt / PhysLab.maxStep - 1e-9)));
+    const h = dt / k;
+    for (let i = 0; i < k; i++) {
+      if (lab.step) lab.step(h, rdt);
+      if (lab.ext && lab.ext.step) lab.ext.step(h, rdt);
+      app.simT += h;
+      if (PhysLab.onStep) PhysLab.onStep(app.simT);
+    }
+  }
   let last = performance.now();
   function frame(now) {
     requestAnimationFrame(frame);
@@ -527,10 +586,7 @@
     last = now;
     if (rdt > 0.1) rdt = 0.1;
     if (rdt <= 0) rdt = 1 / 60;
-    if (!app.lab) {
-      if (!$('#menu').classList.contains('hidden')) { drawMenuBg(rdt); drawThumbs(now); }
-      return;
-    }
+    if (!app.lab) return;
     app.fpsEma += (1 / Math.max(rdt, 1e-3) - app.fpsEma) * 0.05;
     if (qualityMode() === 'auto' && !document.hidden) {
       if (app.fpsEma < 40) app.slowTime += rdt; else app.slowTime = 0;
@@ -538,13 +594,12 @@
         app.autoCap = Math.max(0.6, app.autoCap - 0.25);
         app.slowTime = 0;
         resize();
-        toast('Auto quality: lowering render resolution for smoother frames');
+        toast('Auto quality: render resolution lowered for smoother frames');
       }
     }
     const lab = app.lab;
     try {
-      if (!app.paused && lab.step) lab.step(rdt * app.speed, rdt);
-      if (!app.paused && lab.ext && lab.ext.step) lab.ext.step(rdt * app.speed, rdt);
+      if (!app.paused) stepLab(rdt * app.speed, rdt);
       ctx.setTransform(app.dpr, 0, 0, app.dpr, 0, 0);
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
@@ -556,90 +611,41 @@
       updatePause();
       toast('Simulation error: ' + err.message);
     }
+    if (PhysLab.onFrame) PhysLab.onFrame(now);
     if (now - app.lastReadout > 220) {
       app.lastReadout = now;
       renderReadouts();
-      checkMissions();
-      $('#fps').textContent = `${Math.round(app.fpsEma)} fps · q${env.q} · ${app.dpr.toFixed(2)}x`;
+      $('#fps').textContent = `${Math.round(app.fpsEma)} fps · t = ${app.simT.toFixed(2)} s`;
     }
   }
 
-  /* ---------------- Menu background ---------------- */
-  const mb = { cv: null, ctx: null, pts: [], W: 0, H: 0 };
-  function resizeMenuBg() {
-    if (!mb.cv) return;
-    mb.W = window.innerWidth; mb.H = window.innerHeight;
-    mb.cv.width = mb.W; mb.cv.height = mb.H;
-    const n = Math.min(80, Math.round((mb.W * mb.H) / 18000));
-    const cols = ['#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fbbf24'];
-    while (mb.pts.length < n) mb.pts.push({ x: Math.random() * mb.W, y: Math.random() * mb.H, vx: U.rand(-12, 12), vy: U.rand(-12, 12), c: cols[(Math.random() * cols.length) | 0], r: U.rand(1, 2.4) });
-    mb.pts.length = n;
-  }
-  function drawMenuBg(dt) {
-    const { ctx: g, W, H, pts } = mb;
-    g.clearRect(0, 0, W, H);
-    for (const p of pts) {
-      p.x += p.vx * dt; p.y += p.vy * dt;
-      if (p.x < 0) p.x += W; if (p.x > W) p.x -= W;
-      if (p.y < 0) p.y += H; if (p.y > H) p.y -= H;
-    }
-    g.lineWidth = 1;
-    for (let i = 0; i < pts.length; i++) {
-      const a = pts[i];
-      for (let j = i + 1; j < pts.length; j++) {
-        const b = pts[j], dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
-        if (d2 < 140 * 140) {
-          g.strokeStyle = `rgba(130,160,255,${(1 - Math.sqrt(d2) / 140) * 0.16})`;
-          g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
-        }
-      }
-    }
-    for (const p of pts) {
-      g.fillStyle = p.c;
-      g.globalAlpha = 0.75;
-      g.beginPath(); g.arc(p.x, p.y, p.r, 0, TAU); g.fill();
-    }
-    g.globalAlpha = 1;
-  }
-
-  /* ---------------- Menu cards with live previews, search & categories ---------------- */
+  /* ---------------- Menu: plain list of labs, search & categories ---------------- */
   const cards = [];
   const filter = { cat: 'All', text: '' };
-  const catOf = (l) => l.cat || (window.PhysLab.meta && window.PhysLab.meta[l.id]) || 'Other';
+  const catOf = (l) => (window.PhysLab.meta && window.PhysLab.meta[l.id]) || l.cat || 'Other';
+  const escHTML = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function buildMenu() {
     const grid = $('#lab-grid');
     grid.innerHTML = '';
     cards.length = 0;
-    const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { const c = cards.find((k) => k.a === e.target); if (c) c.vis = e.isIntersecting; })) : null;
     Labs.forEach((l, i) => {
       const a = el('a', 'card');
       a.href = '#/lab/' + l.id;
-      a.style.setProperty('--c', l.color);
-      a.innerHTML = `<canvas class="thumb"></canvas>
-        <div class="cbody"><div class="top"><span class="n">LAB ${String(i + 1).padStart(2, '0')} · ${catOf(l)}</span><div class="ic">${l.icon || ''}</div></div>
+      a.innerHTML = `<div class="top"><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="cat">${catOf(l)}</span></div>
         <h3>${l.title}</h3><p>${l.subtitle}</p>
-        <div class="tags">${(l.tags || []).map((t) => `<span class="tag">${t}</span>`).join('')}</div>
-        <div class="enter">Enter lab <span>&#8594;</span><b class="stars" data-id="${l.id}"></b></div></div>`;
+        <div class="tags">${(l.tags || []).map((t) => `<span class="tag">${t}</span>`).join('')}</div>`;
       grid.appendChild(a);
-      const tc = a.querySelector('.thumb');
-      const rec = { a, lab: l, cv: tc, g: tc.getContext('2d'), vis: !io, hover: false, drawn: false, w: 0, h: 0 };
-      a.addEventListener('pointerenter', () => (rec.hover = true));
-      a.addEventListener('pointerleave', () => (rec.hover = false));
-      if (io) io.observe(a);
-      cards.push(rec);
+      cards.push({ a, lab: l });
     });
-    // category chips
     const cats = ['All', ...new Set(Labs.map(catOf))];
     const chips = $('#chips');
     chips.innerHTML = '';
     cats.forEach((c) => {
-      const b = el('button', 'chip' + (c === filter.cat ? ' active' : ''), c + (c === 'All' ? ` · ${Labs.length}` : ` · ${Labs.filter((l) => catOf(l) === c).length}`));
+      const b = el('button', 'chip' + (c === filter.cat ? ' active' : ''), c + (c === 'All' ? ` (${Labs.length})` : ` (${Labs.filter((l) => catOf(l) === c).length})`));
       b.onclick = () => { filter.cat = c; chips.querySelectorAll('.chip').forEach((x) => x.classList.toggle('active', x === b)); applyFilter(); };
       chips.appendChild(b);
     });
     $('#lab-count').textContent = Labs.length;
-    updateStars();
-    sizeThumbs();
   }
   function applyFilter() {
     const q = filter.text.trim().toLowerCase();
@@ -651,30 +657,6 @@
       if (ok) shown++;
     }
     $('#no-results').classList.toggle('hidden', shown > 0);
-  }
-  function sizeThumbs() {
-    const d = Math.min(window.devicePixelRatio || 1, 1.5);
-    for (const c of cards) {
-      const w = c.cv.clientWidth || 300, h = c.cv.clientHeight || 118;
-      c.w = w; c.h = h; c.cv.width = Math.round(w * d); c.cv.height = Math.round(h * d); c.d = d; c.drawn = false;
-    }
-  }
-  let thumbTick = 0;
-  function drawThumbs(now) {
-    if (++thumbTick % 2) return;
-    const lowPower = computeQ() < 0.75, t = now / 1000, th = window.PhysLab.thumbs || {};
-    for (const c of cards) {
-      if (!c.vis || !th[c.lab.id] || c.a.classList.contains('hidden')) continue;
-      if (lowPower && !c.hover && c.drawn) continue;
-      const g = c.g;
-      g.setTransform(c.d, 0, 0, c.d, 0, 0);
-      g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.lineWidth = 1; g.setLineDash([]);
-      g.fillStyle = '#070b18'; g.fillRect(0, 0, c.w, c.h);
-      g.save();
-      try { th[c.lab.id](g, c.w, c.h, t + Labs.indexOf(c.lab) * 3.3, c.lab.color); } catch (e) { /* preview only */ }
-      g.restore();
-      c.drawn = true;
-    }
   }
 
   /* ---------------- Wiring ---------------- */
@@ -806,22 +788,19 @@
     stage = $('#stage');
     env.canvas = cv;
     env.ctx = ctx;
-    mb.cv = $('#menu-bg');
-    mb.ctx = mb.cv.getContext('2d');
 
     const savedQ = localStorage.getItem('physica-quality');
     if (savedQ) $('#quality').value = savedQ;
 
+    const SUB = window.PhysLab.subtitles || {};
+    for (const l of Labs) if (SUB[l.id]) l.subtitle = SUB[l.id];
     buildMenu();
-    resizeMenuBg();
 
     new ResizeObserver(() => { if (app.def) resize(); }).observe(stage);
-    window.addEventListener('resize', () => { resizeMenuBg(); sizeThumbs(); });
     $('#search').addEventListener('input', (e) => { filter.text = e.target.value; applyFilter(); });
     const sw = $('#lab-switch');
     Labs.forEach((l, i) => { const o = el('option', '', String(i + 1).padStart(2, '0') + ' · ' + l.title); o.value = l.id; sw.appendChild(o); });
     sw.onchange = () => { location.hash = '#/lab/' + sw.value; sw.blur(); };
-    $('#btn-csv').onclick = (e) => { e.currentTarget.blur(); exportCSV(); };
     $('#readouts').addEventListener('click', (e) => { const t = e.target.closest('.ro'); if (t && data.last[+t.dataset.i]) togglePin(data.last[+t.dataset.i][0]); });
     $('#btn-shot').onclick = (e) => {
       e.currentTarget.blur();
@@ -939,8 +918,7 @@
     $('#btn-step').onclick = (e) => {
       e.currentTarget.blur();
       if (!app.paused) { app.paused = true; updatePause(); }
-      if (app.lab && app.lab.step) app.lab.step((1 / 60) * app.speed, 1 / 60);
-      if (app.lab && app.lab.ext && app.lab.ext.step) app.lab.ext.step((1 / 60) * app.speed, 1 / 60);
+      stepLab((1 / 60) * app.speed, 1 / 60);
     };
     $('#btn-reset').onclick = (e) => { e.currentTarget.blur(); resetLab(); };
     $('#speed').onchange = (e) => { app.speed = +e.target.value; e.target.blur(); closeMore(); };
@@ -968,7 +946,10 @@
     document.querySelectorAll('.ptab').forEach((t) => {
       t.onclick = () => {
         document.querySelectorAll('.ptab').forEach((x) => x.classList.toggle('active', x === t));
-        for (const n of ['controls', 'missions', 'theory']) $('#tab-' + n).classList.toggle('hidden', t.dataset.tab !== n);
+        for (const n of ['controls', 'experiment', 'data', 'theory']) $('#tab-' + n).classList.toggle('hidden', t.dataset.tab !== n);
+        document.body.classList.toggle('wide-panel', t.dataset.tab === 'data');
+        if (!sheet.on) resize();
+        if (PhysLab.onTab) PhysLab.onTab(t.dataset.tab);
         if (sheet.on && !sheetOpen()) setSheet(sheetLimits().half);
       };
     });
@@ -992,5 +973,10 @@
     requestAnimationFrame((t) => { last = t; frame(t); });
   }
 
-  window.PhysLab = { define(d) { Labs.push(d); }, start, labs: Labs, get current() { return app.lab; } };
+  function showTab(name) { const t = document.querySelector(`.ptab[data-tab="${name}"]`); if (t) t.click(); }
+  const PhysLab = (window.PhysLab = window.PhysLab || {});
+  Object.assign(PhysLab, {
+    define(d) { Labs.push(d); }, start, labs: Labs, get current() { return app.lab; },
+    internal: { app, env, data, reg, cv: () => cv, sampleReadouts, parseReading, stepLab, toast, showTab, escHTML, el, updatePause, buildLab, resetLab, sheet: () => sheet },
+  });
 })();

@@ -332,7 +332,7 @@ PhysLab.define({
           else { let hb = B[0]; for (const b of B) if (b.m > hb.m) hb = b; tx = hb.x; ty = hb.y; }
           cam.x += (tx - cam.x) * 0.12; cam.y += (ty - cam.y) * 0.12;
         }
-        ctx.fillStyle = '#02040a';
+        ctx.fillStyle = '#111214';
         ctx.fillRect(0, 0, W, H);
         for (const s of stars) {
           const x = (((s[0] * W - cam.x * 0.03 * s[2]) % W) + W) % W, y = (((s[1] * H - cam.y * 0.03 * s[2]) % H) + H) % H;

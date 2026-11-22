@@ -279,7 +279,7 @@ PhysLab.define({
       },
       draw(ctx) {
         render();
-        ctx.fillStyle = '#060c1c'; ctx.fillRect(0, 0, env.W, env.H);
+        ctx.fillStyle = '#111214'; ctx.fillRect(0, 0, env.W, env.H);
         ctx.imageSmoothingEnabled = true;
         ctx.drawImage(off, 0, 0, gw * cs, gh * cs);
         const pulse = 0.5 + 0.5 * Math.sin(omega() * steps);

@@ -16,6 +16,31 @@
  */
 window.PLAIN_PROJECTS = [
   {
+    id: 'physica', name: 'Physica', entry: 'physica/index.html', open: 'physica/',
+    tags: ['science'], lang: 'en', notes: [],
+    desc: {
+      en: 'Virtual physics lab, 23 simulations: run experiments and parameter sweeps, fit models, download all data as PDF report or CSV.',
+      de: 'Virtuelles Physiklabor, 23 Simulationen: Experimente und Parameterreihen, Modellanpassung, alle Daten als PDF-Bericht oder CSV.',
+      tr: 'Sanal fizik laboratuvarı, 23 simülasyon: deney ve parametre taramaları, model uydurma, tüm veriler PDF rapor veya CSV olarak.',
+      es: 'Laboratorio de física virtual, 23 simulaciones: experimentos y barridos de parámetros, ajuste de modelos, datos en PDF o CSV.',
+      fr: 'Labo de physique virtuel, 23 simulations : expériences et balayages de paramètres, ajustement de modèles, données en PDF ou CSV.',
+      it: 'Laboratorio di fisica virtuale, 23 simulazioni: esperimenti e scansioni di parametri, fit di modelli, dati in PDF o CSV.',
+      pt: 'Laboratório de física virtual, 23 simulações: experimentos e varreduras de parâmetros, ajuste de modelos, dados em PDF ou CSV.',
+      nl: 'Virtueel natuurkundelab, 23 simulaties: experimenten en parameterreeksen, modelfits, alle data als PDF-rapport of CSV.',
+      pl: 'Wirtualne laboratorium fizyki, 23 symulacje: eksperymenty i serie parametrów, dopasowanie modeli, dane jako raport PDF lub CSV.',
+      ru: 'Виртуальная физлаборатория, 23 симуляции: эксперименты и серии параметров, подгонка моделей, все данные в PDF или CSV.',
+      uk: 'Віртуальна фізлабораторія, 23 симуляції: експерименти й серії параметрів, підгонка моделей, усі дані в PDF або CSV.',
+      ar: 'مختبر فيزياء افتراضي بـ 23 محاكاة: تجارب ومسح للمعاملات وملاءمة نماذج وتنزيل كل البيانات كتقرير PDF أو CSV.',
+      fa: 'آزمایشگاه مجازی فیزیک با ۲۳ شبیه\u200cسازی: آزمایش و پیمایش پارامتر، برازش مدل، دریافت همه داده\u200cها به صورت PDF یا CSV.',
+      hi: '23 सिमुलेशन वाली वर्चुअल भौतिकी लैब: प्रयोग और पैरामीटर स्वीप, मॉडल फिट, सारा डेटा PDF रिपोर्ट या CSV में।',
+      zh: '虚拟物理实验室，23 个模拟：运行实验和参数扫描、拟合模型，并将全部数据下载为 PDF 报告或 CSV。',
+      ja: '23のシミュレーションを備えた仮想物理実験室：実験とパラメータ掃引、モデルフィット、全データをPDFレポートやCSVで保存。',
+      ko: '시뮬레이션 23개의 가상 물리 실험실: 실험과 매개변수 스윕, 모델 피팅, 모든 데이터를 PDF 보고서나 CSV로 저장.',
+      id: 'Lab fisika virtual, 23 simulasi: eksperimen dan sapuan parameter, pencocokan model, unduh semua data sebagai PDF atau CSV.',
+      vi: 'Phòng thí nghiệm vật lý ảo, 23 mô phỏng: thí nghiệm và quét tham số, khớp mô hình, tải mọi dữ liệu dạng PDF hoặc CSV.',
+      sv: 'Virtuellt fysiklabb, 23 simuleringar: experiment och parametersvep, modellanpassning, all data som PDF-rapport eller CSV.'
+    }
+  },  {
     id: 'rookstorm', name: 'Rookstorm', entry: 'rookstorm/index.html', open: 'rookstorm/',
     tags: ['learning', 'explore'], lang: '', notes: ['external'],
     desc: {
@@ -275,32 +300,7 @@ window.PLAIN_PROJECTS = [
       sv: 'Kemilekplats: bygg molekyler av alla 118 grundämnen, sök bland 52 000 ämnen, gas- och DNA-labb.'
     }
   },
-  {
-    id: 'physica', name: 'Physica', entry: 'physica/index.html', open: 'physica/',
-    tags: ['science'], lang: 'en', notes: [],
-    desc: {
-      en: 'Virtual physics lab with 15 live simulations: electrons, orbits, waves, gases, optics, fluids, black holes and more.',
-      de: 'Virtuelles Physiklabor mit 15 Live-Simulationen: Elektronen, Umlaufbahnen, Wellen, Gase, Optik, Schwarze Löcher …',
-      tr: '15 canlı simülasyonlu sanal fizik laboratuvarı: elektronlar, yörüngeler, dalgalar, gazlar, optik, kara delikler…',
-      es: 'Laboratorio de física virtual con 15 simulaciones: electrones, órbitas, ondas, gases, óptica, agujeros negros y más.',
-      fr: 'Labo de physique virtuel avec 15 simulations : électrons, orbites, ondes, gaz, optique, trous noirs et plus.',
-      it: 'Laboratorio di fisica virtuale con 15 simulazioni: elettroni, orbite, onde, gas, ottica, buchi neri e altro.',
-      pt: 'Laboratório de física virtual com 15 simulações: elétrons, órbitas, ondas, gases, óptica, buracos negros e mais.',
-      nl: 'Virtueel natuurkundelab met 15 simulaties: elektronen, banen, golven, gassen, optica, zwarte gaten en meer.',
-      pl: 'Wirtualne laboratorium fizyki z 15 symulacjami: elektrony, orbity, fale, gazy, optyka, czarne dziury i więcej.',
-      ru: 'Виртуальная физлаборатория с 15 симуляциями: электроны, орбиты, волны, газы, оптика, чёрные дыры и др.',
-      uk: 'Віртуальна фізлабораторія з 15 симуляціями: електрони, орбіти, хвилі, гази, оптика, чорні діри тощо.',
-      ar: 'مختبر فيزياء افتراضي بـ 15 محاكاة: إلكترونات ومدارات وموجات وغازات وبصريات وثقوب سوداء وغيرها.',
-      fa: 'آزمایشگاه مجازی فیزیک با ۱۵ شبیه‌سازی: الکترون، مدار، موج، گاز، نور، سیاه‌چاله و بیشتر.',
-      hi: '15 लाइव सिमुलेशन वाली वर्चुअल भौतिकी लैब: इलेक्ट्रॉन, कक्षाएँ, तरंगें, गैसें, प्रकाशिकी, ब्लैक होल आदि।',
-      zh: '虚拟物理实验室，15 个实时模拟：电子、轨道、波、气体、光学、流体、黑洞等。',
-      ja: '15のシミュレーションがある仮想物理実験室：電子、軌道、波、気体、光学、流体、ブラックホールなど。',
-      ko: '실시간 시뮬레이션 15개의 가상 물리 실험실: 전자, 궤도, 파동, 기체, 광학, 블랙홀 등.',
-      id: 'Lab fisika virtual dengan 15 simulasi: elektron, orbit, gelombang, gas, optik, lubang hitam dan lainnya.',
-      vi: 'Phòng thí nghiệm vật lý ảo với 15 mô phỏng: electron, quỹ đạo, sóng, khí, quang học, hố đen và hơn thế.',
-      sv: 'Virtuellt fysiklabb med 15 simuleringar: elektroner, banor, vågor, gaser, optik, svarta hål och mer.'
-    }
-  },
+
   {
     id: 'verity', name: 'Know', entry: 'verity/index.html', open: 'verity/',
     tags: ['tools'], lang: '', notes: ['lookup'],

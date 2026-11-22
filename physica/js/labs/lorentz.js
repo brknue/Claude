@@ -217,7 +217,7 @@ PhysLab.define({
       },
       draw(ctx) {
         const W = env.W, H = env.H;
-        ctx.fillStyle = '#07061a'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#111214'; ctx.fillRect(0, 0, W, H);
         // regions
         ctx.fillStyle = 'rgba(167,139,250,0.07)';
         if (S.preset === 'selector') { ctx.fillRect(W * 0.3, H * 0.2, W * 0.38, H * 0.6); }

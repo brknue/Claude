@@ -199,7 +199,7 @@ PhysLab.define({
       draw(ctx) {
         const W = env.W, H = env.H, G = geo();
         const bg = ctx.createRadialGradient(G.cx, G.cy, 10, G.cx, G.cy, Math.max(W, H) * 0.7);
-        bg.addColorStop(0, '#141a33'); bg.addColorStop(1, '#05060d');
+        bg.addColorStop(0, '#111214'); bg.addColorStop(1, '#111214');
         ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
         // reach circle
         ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;

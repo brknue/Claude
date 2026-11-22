@@ -217,7 +217,7 @@ PhysLab.define({
       },
       draw(ctx) {
         const W = env.W, H = env.H, [cx, cy] = cxy(), R = rs();
-        ctx.fillStyle = '#020207'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#111214'; ctx.fillRect(0, 0, W, H);
         for (const s of stars) { ctx.fillStyle = `rgba(210,220,255,${0.2 + s[3] * 0.5})`; ctx.fillRect(s[0] * W, s[1] * H, s[2], s[2]); }
         ctx.save(); ctx.translate(cx, cy);
         // glow

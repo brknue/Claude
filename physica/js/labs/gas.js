@@ -302,7 +302,7 @@ PhysLab.define({
       },
       draw(ctx) {
         const W = env.W, H = env.H;
-        ctx.fillStyle = '#060a14'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#111214'; ctx.fillRect(0, 0, W, H);
         // box
         ctx.fillStyle = '#0a1224';
         ctx.fillRect(box.l, box.t, pistonX - box.l, box.b - box.t);

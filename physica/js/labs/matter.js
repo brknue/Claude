@@ -234,7 +234,7 @@ PhysLab.define({
       },
       draw(ctx) {
         const W = env.W, H = env.H;
-        ctx.fillStyle = '#05080f'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#111214'; ctx.fillRect(0, 0, W, H);
         ctx.fillStyle = '#080d1a'; ctx.fillRect(0, 0, bw * SIG, H);
         ctx.strokeStyle = 'rgba(120,220,160,0.25)'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, bw * SIG - 2, H - 2);
         const cols = S.color === 'coord' ? CCOL : SCOL, paths = cols.map(() => new Path2D()), R = SIG * 0.48, vs = Math.sqrt(Math.max(Tm, 0.02));

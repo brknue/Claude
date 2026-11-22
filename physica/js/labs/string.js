@@ -177,7 +177,7 @@ PhysLab.define({
       },
       draw(ctx) {
         const W = env.W, H = env.H, G = geo();
-        const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#100818'); bg.addColorStop(1, '#06040c');
+        const bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#111214'); bg.addColorStop(1, '#111214');
         ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
         analyse(); updateAudio();
         const X = (j) => G.x0 + (j / N) * (G.x1 - G.x0), Y = (v) => G.cy - U.clamp(v, -1.2, 1.2) * G.A;

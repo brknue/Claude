@@ -4,9 +4,9 @@ Things made with Claude.
 
 **See them all on [plain](https://brknue.github.io/Claude/)** — open each project in the browser, download it, or read its code. How to add a project: [`plain/README.md`](plain/README.md).
 
+- [`physica/`](physica/): virtual physics laboratory with 23 simulations (oscillators, circuits, diffraction, heat flow, Brownian motion, black body, photoelectric effect, radioactive decay, orbits, quantum and more): record time series and parameter sweeps, fit models with uncertainties, download every data point as a PDF report, CSV or JSON.
 - [`rookstorm/`](rookstorm/): chess site in 20 languages — play Stockfish 17 at any Elo (100–3200) and every chess variant vs the computer (incl. Crazyhouse), 17 party variants (4-player chess, kung fu chess, 4-player kung fu, fog of war, duck chess…) at a shared table for up to 4 friends, friends via link or online players, game review with accuracy, game rating and move badges, board editor, 3,800+ openings and endless rated puzzles; works offline. Accounts: saved ratings (start 1500), friends, rated friend games, challenges and watching friends live (Supabase, username + password, no e-mail).
 - [`molecule-lab/`](molecule-lab/): interactive chemistry playground (molecule builder, DNA lab, mitosis and meiosis animations).
-- [`physica/`](physica/): virtual physics laboratory with 15 interactive labs (electrons, orbits, waves, chaos, gases, optics, fluids, quantum tunnelling, black holes and more).
 - [`plain-wiki/`](plain-wiki/): paste any Wikipedia link and get the whole article rewritten so anyone can understand it (4 levels, 34 output languages, dark mode, 100 % local AI in the browser).
 - [`youtube-to-pdf/`](youtube-to-pdf/): paste a YouTube link and download everything said in the video as a PDF (captions, optional timestamps, language picker).
 - [`fluent-path/`](fluent-path/): offline language-learning site with a daily plan, spaced repetition and saved progress (Spanish, French, German, Italian, Portuguese, English; no build step, no external services).

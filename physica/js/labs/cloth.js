@@ -279,7 +279,7 @@ PhysLab.define({
       draw(ctx) {
         const W = env.W, H = env.H;
         const bg = ctx.createLinearGradient(0, 0, 0, H);
-        bg.addColorStop(0, '#0e1424'); bg.addColorStop(1, '#05070d');
+        bg.addColorStop(0, '#111214'); bg.addColorStop(1, '#111214');
         ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
         ctx.fillStyle = '#0b1120'; ctx.fillRect(0, H - 4, W, 4);
         if (S.preset === 'flag') { ctx.fillStyle = '#8b93a7'; ctx.fillRect(X[0] - 6, X[0] ? Y[0] - 20 : 0, 5, H); }

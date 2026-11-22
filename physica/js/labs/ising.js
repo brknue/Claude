@@ -175,7 +175,7 @@ PhysLab.define({
       },
       draw(ctx) {
         const W = env.W, H = env.H;
-        ctx.fillStyle = '#070912'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#111214'; ctx.fillRect(0, 0, W, H);
         if (S.view && S.view !== 'spins') renderView(); else for (let i = 0; i < N; i++) u32[i] = s[i] > 0 ? UPC : DNC;
         octx.putImageData(img, 0, 0);
         const side = W >= 860 ? 300 : 0;
