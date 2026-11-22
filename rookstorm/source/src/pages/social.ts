@@ -407,7 +407,8 @@ export function watchPage(root: HTMLElement, id?: string) {
       const s = Math.max(0, Math.round(ms / 1000));
       clock = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
     }
-    return h('div.pinfo', { class: game && game.pos.turn === c && row.status === 'live' ? 'turn' : '' }, h('span.cdot.' + c), h('div.pname', null, h('b', null, name)), clock ? h('div.clock', null, clock) : null);
+    const acct = c === 'white' ? row.white_id : row.black_id;
+    return h('div.pinfo', { class: game && game.pos.turn === c && row.status === 'live' ? 'turn' : '' }, h('span.cdot.' + c), h('div.pname', null, h('b', null, acct ? h('a.plink', { href: '#/profile/' + encodeURIComponent(name) }, name) : name, acct ? badges(name) : '')), clock ? h('div.clock', null, clock) : null);
   };
   function render() {
     if (!row || !game) return;

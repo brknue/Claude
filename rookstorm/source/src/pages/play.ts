@@ -426,7 +426,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     const mat = h('div.mat.cg-wrap.pc');
     const name = h('b');
     const pocket = h('div.pocket.cg-wrap.pc');
-    const el = h('div.pinfo', null, h('span.cdot.' + c), h('div.pname', null, name, badges(typeof name === 'string' ? name : (name as any)?.textContent), mat), clockEl);
+    const el = h('div.pinfo', null, h('span.cdot.' + c), h('div.pname', null, name, mat), clockEl);
     stripEls[c] = { clock: clockEl, mat, el, name, pocket };
     return h('div.pwrap', null, el, zh ? pocket : null);
   }
@@ -439,7 +439,10 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     const md = materialDiff(pos);
     for (const c of ['white', 'black'] as Color[]) {
       const r = ratingOf(c);
-      stripEls[c].name.textContent = nameOf(c) + (r ? ` (${r})` : '');
+      const nm = nameOf(c);
+      // account players: the name opens their profile (beside the game) and shows their badges
+      const acct = c === cfg!.myColor ? !!me && nm === me.username && cfg!.mode !== 'local' : !!cfg!.oppId;
+      stripEls[c].name.replaceChildren(acct ? h('a.plink', { href: '#/profile/' + encodeURIComponent(nm) }, nm) : nm, r ? ` (${r})` : '', acct ? badges(nm) : '');
       const roles = c === 'white' ? md.white : md.black;
       const adv = c === 'white' ? md.score : -md.score;
       stripEls[c].mat.replaceChildren(...(zh ? [] : roles.map(r2 => h('piece', { class: `${r2} ${c === 'white' ? 'black' : 'white'}` }))), !zh && adv > 0 ? h('span.adv', null, '+' + adv) : '');

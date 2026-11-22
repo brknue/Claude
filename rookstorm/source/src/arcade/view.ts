@@ -1,6 +1,6 @@
 /** Board for the party variants: any size, 2–4 players, rotates so your own army is at the bottom. Tap or drag. */
 import { h } from '../ui';
-import { Variant, State, Move, P, legalMoves, visibleSquares, onBoard, cooldownMs, duckSquares } from './rules';
+import { Variant, State, Move, P, legalMoves, visibleSquares, onBoard, cooldownMs, duckSquares, inCheck } from './rules';
 
 const ROLE: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king', m: 'king', x: 'knight' };
 export const SEAT_COLORS_4 = ['red', 'blue', 'yellow', 'green'];
@@ -82,6 +82,12 @@ export class PartyBoard {
     const cd = cooldownMs(st.speed);
     const duckMode = v.duck && st.duckPending && st.turn === this.seat && this.canAct;
     const duckOk = duckMode ? new Set(duckSquares(v, st, this.seat!)) : null;
+    // royal pieces under attack glow red (every variant, every seat)
+    const checked = new Set<number>();
+    if (!st.over) for (let s = 0; s < v.players; s++) {
+      if (!st.alive[s] || !inCheck(v, st, s)) continue;
+      st.board.forEach((p, i) => { if (p && p.o === s && v.royal.includes(p.t)) checked.add(i); });
+    }
     for (let i = 0; i < this.cells.length; i++) {
       const c = this.cells[i];
       if (c.classList.contains('hole')) continue;
@@ -90,6 +96,7 @@ export class PartyBoard {
       const p = hidden ? null : st.board[i];
       c.classList.toggle('fog', hidden);
       c.classList.toggle('last', !hidden && !!st.last && (st.last.f === i || st.last.t === i));
+      c.classList.toggle('check', !hidden && checked.has(i));
       c.classList.toggle('sel', this.sel === i);
       c.classList.toggle('dest', this.targets.some(m => m.t === i));
       c.classList.toggle('cap', this.targets.some(m => m.t === i) && !!p);

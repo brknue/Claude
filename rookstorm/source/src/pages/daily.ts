@@ -143,7 +143,7 @@ export function dailyGamePage(root: HTMLElement, id: string) {
     const name = c === 'white' ? row.white_name : row.black_name;
     const toMove = row.status === 'live' && game && game.pos.turn === c;
     const diff = row.status === 'finished' && row.rated ? (c === 'white' ? row.white_diff : row.black_diff) : null;
-    return h('div.pinfo', { class: toMove ? 'turn' : '' }, h('span.cdot.' + c), h('div.pname', null, h('b', null, name, badges(name)), diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, ' ' + (diff >= 0 ? '+' : '') + diff) : null),
+    return h('div.pinfo', { class: toMove ? 'turn' : '' }, h('span.cdot.' + c), h('div.pname', null, h('b', null, h('a.plink', { href: '#/profile/' + encodeURIComponent(name) }, name), badges(name)), diff != null ? h('span.delta', { class: diff >= 0 ? 'up' : 'down' }, ' ' + (diff >= 0 ? '+' : '') + diff) : null),
       toMove ? h('div.clock.daily-clock', null, timeLeft(row.deadline)) : null);
   };
   function render() {

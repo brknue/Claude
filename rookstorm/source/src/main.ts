@@ -39,6 +39,33 @@ const NAV = [
 ] as const;
 
 let cleanup: Cleanup;
+/** true inside the window that shows a page on top of a running game (see openAside) */
+export const embedded = new URLSearchParams(location.search).has('embed');
+const IN_GAME = 'rs.inGame';
+const inGameElsewhere = () => { try { return Date.now() - Number(localStorage.getItem(IN_GAME) || 0) < 7000; } catch { return false; } };
+/** pages where a game is on screen: links open without leaving it */
+const gameRoute = () => /^#\/(game|table|watch|daily\/[0-9a-f-]{8,})/.test(location.hash);
+
+/**
+ * Open a page without leaving the current game: a new tab in browsers; in the installed apps (no tabs) a
+ * full-screen window on top of the game with a "Back to the game" button. The game keeps running either way.
+ */
+export function openAside(href: string) {
+  const standalone = inApp || !!(navigator as any).standalone || matchMedia('(display-mode: standalone)').matches;
+  const url = location.href.split('#')[0].split('?')[0];
+  if (!standalone) {
+    const w = window.open(url + href, '_blank');
+    if (w) return;
+  }
+  document.querySelector('.aside-win')?.remove();
+  const close = () => { win.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+  const win = h('div.aside-win', { role: 'dialog', 'aria-modal': 'true' },
+    h('div.aside-bar', null, btn(h('span', null, icon('back'), t('Back to the game')), close, 'primary small'), h('b', null, 'Rookstorm')),
+    h('iframe', { src: url + '?embed=1' + href, title: 'Rookstorm' }));
+  document.body.appendChild(win);
+  document.addEventListener('keydown', onKey);
+}
 const main = h('main', { id: 'app' });
 
 /** Hook a page can set to confirm leaving (e.g. a game in progress). */
@@ -98,6 +125,16 @@ function showBan() {
   const b = (me as any)?.banned_until;
   if (!b || Date.parse(b) < Date.now()) return;
   document.body.insertBefore(h('div.announce.warning.ban-bar', null, h('span', null, t('Your account is banned until {0}.', new Date(b).toLocaleString()), (me as any).ban_reason ? ' ' + t('Reason: {0}', (me as any).ban_reason) : '')), document.querySelector('main'));
+}
+
+function backBar() {
+  const show = !embedded && !leaveGuard && inGameElsewhere() && !gameRoute();
+  const bar = document.querySelector('.game-elsewhere');
+  if (!show) { bar?.remove(); return; }
+  if (bar) return;
+  const canClose = !!window.opener;
+  document.body.insertBefore(h('div.announce.success.game-elsewhere', null, h('span', null, t('Your game is still running in your other tab.')),
+    canClose ? btn(t('Back to the game'), () => { try { window.opener?.focus(); } catch { /* */ } window.close(); }, 'small primary') : null), document.querySelector('main'));
 }
 
 function setupUpdates() {
@@ -342,9 +379,21 @@ async function init() {
   window.addEventListener('hashchange', route);
   window.addEventListener('beforeunload', (e) => { if (leaveGuard) { e.preventDefault(); e.returnValue = ''; } });
   onChallenges(showChallenges);
-  initNotify();
-  setupUpdates();
-  showAnnouncement();
+  if (embedded) document.documentElement.classList.add('embedded');
+  if (!embedded) { initNotify(); setupUpdates(); showAnnouncement(); }
+  // links clicked while a game is on screen open beside it, so the game is never left
+  document.addEventListener('click', (e) => {
+    if (embedded || e.defaultPrevented || (e as MouseEvent).button !== 0) return;
+    const a = (e.target as Element).closest?.('a[href]') as HTMLAnchorElement | null;
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    const href = a.getAttribute('href') || '';
+    if (!href.startsWith('#/') || href === location.hash) return;
+    if (!(leaveGuard || (gameRoute() && a.classList.contains('plink')))) return;
+    e.preventDefault(); e.stopPropagation();
+    openAside(href);
+  }, true);
+  // a game in progress tells other tabs about itself; other tabs offer the way back
+  setInterval(() => { if (leaveGuard && !embedded) { try { localStorage.setItem(IN_GAME, String(Date.now())); } catch { /* */ } } backBar(); }, 2500);
   onAccount(showBan); showBan();
   setPopup((_a, tx) => {
     const kind = 'al-' + _a.key;
