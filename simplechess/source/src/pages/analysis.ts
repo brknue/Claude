@@ -2,7 +2,7 @@ import { parsePgn, startingPosition } from 'chessops/pgn';
 import { parseSan } from 'chessops/san';
 import { makeFen } from 'chessops/fen';
 import { makeSquare } from 'chessops/util';
-import { h, icon, btn, iconBtn, toast, copyText, loadRaw, debounce, engineLock } from '../ui';
+import { h, icon, btn, iconBtn, scrollInside, toast, copyText, loadRaw, debounce, engineLock } from '../ui';
 import { VariantKey, variantInfo, posFromFen, fenOf, uciToMove, moveSquares, pvToSan, PIECE_VALUE, Position, Move, Color, startFenFor, positionError } from '../chess';
 import { Game } from '../game';
 import { Board, arrowFor } from '../board';
@@ -244,7 +244,7 @@ export function analysisPage(root: HTMLElement): () => void {
     });
     moveList.replaceChildren(...rows);
     if (!rows.length) moveList.append(h('p.muted.small.empty-moves', null, t('Play moves on the board, paste a PGN or FEN below, or finish a game and press Game review.')));
-    moveList.querySelector('.cur')?.scrollIntoView({ block: 'nearest' });
+    scrollInside(moveList, moveList.querySelector('.cur'));
     varBox.replaceChildren();
     if (vari) {
       const vg = vari.game;

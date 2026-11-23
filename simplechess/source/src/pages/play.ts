@@ -1,6 +1,6 @@
 import { badges } from '../badges';
 import { newDailyDialog } from './daily';
-import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame, askConfirm } from '../ui';
+import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame, askConfirm, scrollInside } from '../ui';
 import { t } from '../i18n';
 import { VARIANTS, VariantKey, variantInfo, variantName, variantDesc, startFenFor, materialDiff, outcomeText, reasonText, Color, Outcome, uciToMove, fenOf, moveSquares, Role } from '../chess';
 import { Game } from '../game';
@@ -522,7 +522,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     if (!rows.length) moveList.append(h('div.muted.small.empty-moves', null, t('Moves will appear here.')));
     const curEl = moveList.querySelector('.cur') as HTMLElement | null;
     if (curEl && viewPly === null) moveList.scrollTop = moveList.scrollHeight;
-    else curEl?.scrollIntoView({ block: 'nearest' });
+    else scrollInside(moveList, curEl);
   }
 
   function interactive() {

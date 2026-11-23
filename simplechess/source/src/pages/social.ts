@@ -4,7 +4,7 @@ import { h, icon, btn, toast, modal, copyText, appBridge, askConfirm, askText } 
 import { t, fmtDate } from '../i18n';
 import {
   me, accountsEnabled, signIn, signUp, signOut, resetPassword, newRecoveryCode, changePassword, deleteAccount,
-  rpc, niceError, validUsername, refreshMe, MODES, BASE_RATING, Stat, watchGame, onAccount,
+  rpc, niceError, validUsername, refreshMe, MODES, BASE_RATING, Stat, watchGame, onAccount, sb,
 } from '../account';
 import { VARIANTS, VariantKey, variantName, Color, startFenFor } from '../chess';
 import { Game } from '../game';
@@ -13,7 +13,7 @@ import { go } from '../main';
 import { setAnalysisInput } from './analysis';
 import { hostFriend, tcLabel, TIME_PRESETS, modeLabel, premoveBox } from './play';
 import { OPERATOR_NAME, OPERATOR_CONTACT, POLICY_DATE, POLICY_VERSION } from '../config';
-import { newDailyDialog } from './daily';
+import { newDailyDialog, timeLeft } from './daily';
 import { puzzleDaysCard } from './dailypuzzle';
 import { reviewBacklog, onReviewsSaved, reviewsRunning, brilliantsAvailable, noteMissing } from '../review';
 
@@ -137,6 +137,7 @@ export function profilePage(root: HTMLElement, username?: string) {
     if (!p) { wrap.replaceChildren(h('section.card', null, h('h1', null, t('Player not found')), h('a.btn', { href: '#/friends' }, t('Back')))); return; }
     const self = p.relation === 'self', friend = p.relation === 'friend';
     const actions: HTMLElement[] = [];
+    if (self || friend) actions.push(liveGamesButton(p.id, p.username, self));
     if (friend) {
       if (p.live) actions.push(h('a.btn.primary', { href: '#/watch/' + p.live }, icon('eye'), t('Watch live game')));
       actions.push(btn(h('span', null, icon('play'), t('Challenge')), () => challengeDialog(p.id, p.username), 'primary'));
@@ -166,6 +167,71 @@ export function profilePage(root: HTMLElement, username?: string) {
   if (name.toLowerCase() === me.username.toLowerCase()) reviewBacklog();
   const off = onAccount(() => { if (!me) go('account'); });
   return () => { alive = false; off(); };
+}
+
+/** Daily games that are still running, and a real-time game being played right now. */
+async function liveGamesOf(uid: string): Promise<any[]> {
+  const c = await sb();
+  const { data, error } = await c.from('games')
+    .select('id, kind, status, variant, start_fen, moves, white_id, black_id, white_name, black_name, deadline, last_move_at, updated_at, time_base, time_inc, rated')
+    .eq('status', 'live').or(`white_id.eq.${uid},black_id.eq.${uid}`).order('updated_at', { ascending: false }).limit(50);
+  if (error) throw error;
+  // a real-time game nobody touched for an hour was left open, not played
+  return (data || []).filter((g: any) => g.kind === 'daily' || Date.now() - new Date(g.updated_at).getTime() < 3600e3);
+}
+
+/** When a daily game ends without another move: the player to move loses on time, or after a week without moves nobody wins. */
+function dailyEnd(g: any): { at: number; what: 'time' | 'abort' } | null {
+  const dl = g.deadline ? new Date(g.deadline).getTime() : Infinity;
+  const ab = g.last_move_at ? new Date(g.last_move_at).getTime() + 7 * 864e5 : Infinity;
+  if (dl === Infinity && ab === Infinity) return null;
+  return dl <= ab ? { at: dl, what: 'time' } : { at: ab, what: 'abort' };
+}
+
+function liveGamesButton(uid: string, username: string, self: boolean): HTMLElement {
+  const count = h('span.count-badge', { style: { display: 'none' } });
+  const b = btn(h('span', null, icon('clock'), t('Live games'), ' ', count), () => openList(), '');
+  liveGamesOf(uid).then(gs => { if (gs.length) { count.textContent = String(gs.length); count.style.display = ''; } }).catch(() => {});
+  async function openList() {
+    const list = h('div.games-list.live-list', null, h('div.spinner-row', null, h('span.spinner'), t('Loading…')));
+    const close = modal(h('div.live-games', null, h('h2', null, self ? t('Your live games') : t('Live games of {0}', username)), list,
+      h('p.muted.small', null, t('Daily games end when the player to move runs out of time, or with no winner after a week without a move.')),
+      h('div.row.end', null, btn(t('Close'), () => close()))));
+    let gs: any[] = [];
+    try { gs = await liveGamesOf(uid); } catch (e) { list.replaceChildren(h('p.err', null, niceError(e))); return; }
+    let iv: any = 0;
+    const draw = () => {
+      if (!list.isConnected) { clearInterval(iv); return; }
+      list.replaceChildren(...(gs.length ? gs.map(g => liveRow(g, uid, () => close())) : [h('p.muted', null, t('No live games right now.'))]));
+    };
+    draw();
+    iv = setInterval(draw, 30000);
+  }
+  return b;
+}
+
+function liveRow(g: any, uid: string, close: () => void): HTMLElement {
+  const white = g.white_id === uid;
+  const opp = white ? g.black_name : g.white_name;
+  const n = g.moves ? g.moves.split(' ').length : 0;
+  const startBlack = / b /.test(String(g.start_fen || ''));
+  const whiteToMove = (n % 2 === 0) !== startBlack;
+  const toMoveName = whiteToMove ? g.white_name : g.black_name;
+  const daily = g.kind === 'daily';
+  const end = daily ? dailyEnd(g) : null;
+  const left = end ? timeLeft(new Date(end.at).toISOString()) : '';
+  const urgent = end ? end.at - Date.now() < 864e5 : false;
+  return h('button.game-row.live', {
+    type: 'button',
+    onclick: () => { close(); go((daily ? 'daily/' : 'watch/') + g.id); },
+  },
+  h('span.gr-res', null, daily ? t('Daily') : t('Live')),
+  h('span.gr-main', null, h('b', null, (white ? '○ ' : '● ') + t('vs {0}', opp)),
+    h('span.muted.small', null, `${variantName(g.variant)} · ${daily ? t('Daily') : g.time_base ? tcLabel(g.time_base, g.time_inc) : '∞'}${g.rated ? ' · ' + t('Rated') : ''} · ${t('{0} moves', Math.ceil(n / 2))}`),
+    h('span.small', null, !daily ? t('Playing now') : me && toMoveName === me.username ? t('Your move') : t('{0} to move', toMoveName))),
+  h('span.gr-side', null,
+    end ? h('span.deadline', { class: urgent ? 'urgent' : '', title: end.what === 'time' ? t('Then {0} loses on time', toMoveName) : t('Then the game is aborted: no winner') },
+      h('b', null, left), h('span.muted.small.block', null, end.what === 'time' ? t('until loss on time') : t('until aborted'))) : null));
 }
 
 /** Brilliant moves of a player: visible to everyone signed in. Hidden if the database add-on is missing. */

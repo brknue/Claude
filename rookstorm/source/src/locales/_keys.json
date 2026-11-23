@@ -940,5 +940,15 @@
 "Simple look",
 "Plain white, black and grey without effects, like Simple Chess.",
 "Play through the game",
-"Pause"
+"Pause",
+"Live games",
+"Your live games",
+"Live games of {0}",
+"Daily games end when the player to move runs out of time, or with no winner after a week without a move.",
+"No live games right now.",
+"{0} to move",
+"Then {0} loses on time",
+"Then the game is aborted: no winner",
+"until loss on time",
+"until aborted"
 ]

@@ -499,6 +499,19 @@ details.load[open] > *:not(summary) { margin-top: 8px; }
 .games-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 .game-row { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card2); color: inherit; text-align: start; cursor: pointer; font: inherit; }
 .game-row:hover { border-color: var(--accent-line); }
+.live-games { width: min(520px, 100%); max-width: 100%; }
+.live-games .game-row { grid-template-columns: auto minmax(0, 1fr) auto; }
+.live-games .gr-res { padding: 4px 8px; }
+@media (max-width: 600px) {
+  .live-games .game-row { grid-template-columns: auto minmax(0, 1fr); }
+  .live-games .gr-side { grid-column: 1 / -1; align-items: stretch; }
+  .live-games .deadline { display: flex; gap: 8px; align-items: baseline; text-align: start; border-top: 1px solid var(--line); padding-top: 6px; }
+  .live-games .deadline .block { display: inline; }
+}
+.live-list { max-height: 60vh; overflow: auto; margin: 8px 0; }
+.deadline { text-align: end; }
+.deadline b { font-variant-numeric: tabular-nums; }
+.deadline.urgent b { color: var(--bad); }
 .gr-res { font-weight: 800; font-size: .85rem; text-align: center; padding: 4px 0; border-radius: 7px; background: var(--card); }
 .game-row.win .gr-res { color: var(--good); } .game-row.loss .gr-res { color: var(--bad); } .game-row.live .gr-res { color: #fff; background: var(--bad); }
 .gr-main { display: flex; flex-direction: column; min-width: 0; }

@@ -58,6 +58,18 @@ export class Board {
     this.ro.observe(this.el);
     // right-click (like chess.com) or the small button clears all premoves
     this.el.addEventListener('contextmenu', (e) => { if (this.queue.length) { e.preventDefault(); e.stopPropagation(); this.cancelPremove(); } }, true);
+    // tapping an empty square (or a square the picked piece cannot go to) clears the premoves, also on phones and tablets
+    this.el.addEventListener('pointerdown', (e) => {
+      if (!this.queue.length || (e.pointerType === 'mouse' && e.button !== 0) || (e.target as HTMLElement).closest('.pm-clear')) return;
+      const key = this.cg.getKeyAtDomPos([e.clientX, e.clientY]);
+      if (!key) return;
+      const st = this.cg.state;
+      const sel = st.selected;
+      if (sel && (key === sel || st.movable.dests?.get(sel)?.includes(key))) return; // a premove destination: queue it
+      if (!sel && st.pieces.get(key)?.color === this.premoveColor) return; // picking up a piece for another premove
+      e.preventDefault();
+      this.cancelPremove();
+    }, true);
     this.clearBtn = h('button.pm-clear', { type: 'button', onclick: (e: Event) => { e.stopPropagation(); this.cancelPremove(); } });
     this.el.appendChild(this.clearBtn);
   }
