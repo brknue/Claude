@@ -75,10 +75,25 @@ export function analysisPage(root: HTMLElement): () => void {
   const toolsBox = h('div.tools');
   const openingEl = h('div.opening-name.muted.small');
 
+  // ▶ plays the game from the current move (from the start if at the end), one move per second
+  let playT: any = 0;
+  const playBtn = iconBtn('play', t('Play through the game'), () => togglePlay(), 'play-btn');
+  function stopPlay() {
+    if (!playT) return;
+    clearInterval(playT); playT = 0;
+    playBtn.replaceChildren(icon('play')); playBtn.classList.remove('on'); playBtn.title = t('Play through the game');
+  }
+  function togglePlay() {
+    if (playT) { stopPlay(); return; }
+    if (cur.ply >= curGame().ply) goto(0);
+    playBtn.replaceChildren(icon('pause')); playBtn.classList.add('on'); playBtn.title = t('Pause');
+    playT = setInterval(() => { if (!alive || cur.ply >= curGame().ply) { stopPlay(); return; } step(1); }, 1000);
+  }
   const side = h('aside.side.card', null, engineHead, linesBox, graph, explain, openingEl, moveList, varBox,
     h('div.navrow', null,
-      iconBtn('first', t('First'), () => goto(0)), iconBtn('prev', t('Previous'), () => step(-1)),
-      iconBtn('next', t('Next'), () => step(1)), iconBtn('last', t('Last'), () => goto(Infinity)),
+      iconBtn('first', t('First'), () => { stopPlay(); goto(0); }), iconBtn('prev', t('Previous'), () => { stopPlay(); step(-1); }),
+      playBtn,
+      iconBtn('next', t('Next'), () => { stopPlay(); step(1); }), iconBtn('last', t('Last'), () => { stopPlay(); goto(Infinity); }),
       iconBtn('flip', t('Flip board'), () => { board.flip(); renderEngine(); })),
     summary, toolsBox);
   root.append(h('div.game-layout.analysis', null, h('div.board-col', null, h('div.board-eval', null, evalBar, board.el)), side));
@@ -110,6 +125,7 @@ export function analysisPage(root: HTMLElement): () => void {
   }
 
   function userMove(m: Move) {
+    stopPlay();
     const pos = curPos();
     if (!cur.inVar) {
       if (cur.ply < main.ply && main.positions[cur.ply] === pos) {
@@ -222,7 +238,7 @@ export function analysisPage(root: HTMLElement): () => void {
       const rv = reviews[i];
       const c = rv ? CLS[rv.cls] : null;
       row.append(h('button.mv', {
-        type: 'button', class: !cur.inVar && cur.ply === i + 1 ? 'cur' : '', onclick: () => { cur = { inVar: false, ply: i + 1 }; update(); },
+        type: 'button', class: !cur.inVar && cur.ply === i + 1 ? 'cur' : '', onclick: () => { stopPlay(); cur = { inVar: false, ply: i + 1 }; update(); },
         title: c ? t(c.label) : undefined,
       }, san, c && !['best', 'excellent', 'good'].includes(rv!.cls) ? h('span.badge', { style: { background: c.color } }, c.sym) : null));
     });
@@ -545,16 +561,18 @@ export function analysisPage(root: HTMLElement): () => void {
   const keys = (e: KeyboardEvent) => {
     const t = (e.target as HTMLElement).tagName;
     if (t === 'INPUT' || t === 'TEXTAREA') return;
-    if (e.key === 'ArrowLeft') { step(-1); e.preventDefault(); }
-    else if (e.key === 'ArrowRight') { step(1); e.preventDefault(); }
-    else if (e.key === 'ArrowUp' || e.key === 'Home') { goto(0); e.preventDefault(); }
-    else if (e.key === 'ArrowDown' || e.key === 'End') { goto(Infinity); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { stopPlay(); step(-1); e.preventDefault(); }
+    else if (e.key === 'ArrowRight') { stopPlay(); step(1); e.preventDefault(); }
+    else if (e.key === 'ArrowUp' || e.key === 'Home') { stopPlay(); goto(0); e.preventDefault(); }
+    else if (e.key === 'ArrowDown' || e.key === 'End') { stopPlay(); goto(Infinity); e.preventDefault(); }
+    else if (e.key === ' ') { togglePlay(); e.preventDefault(); }
     else if (e.key === 'f') board.flip();
   };
   document.addEventListener('keydown', keys);
 
   const unlock = engineLock(root, (locked) => { if (locked) { reviewing = false; engineOn = false; engine.stop(); liveLines = []; update(); } });
   function cleanup() {
+    stopPlay();
     unlock();
     alive = false; reviewing = false;
     engine.stop();

@@ -2,7 +2,8 @@
  * Party table: the host's browser runs the game; up to 3 friends (plus spectators) connect to it
  * over WebRTC. Players pick a seat in the lobby; empty seats can be given to the computer.
  */
-import Peer, { DataConnection } from 'peerjs';
+import Peer from 'peerjs';
+import { hybrid, HybridConn } from '../relay';
 import { PREFIX, PEER_OPTS, CONN_OPTS } from '../net';
 import { Variant, State, Move, partyVariant, newState, applyMove, placeDuck, resign, fogView, cooldownMs } from './rules';
 import { botMove, botDuck } from './bot';
@@ -40,7 +41,7 @@ export class TableHost implements TableClient {
   onChange: () => void = () => {};
   private v: Variant;
   private peer: Peer | null = null;
-  private conns = new Map<string, DataConnection>(); // cid -> connection
+  private conns = new Map<string, HybridConn>(); // cid -> connection
   private botTimer: any = 0;
   private botNext: number[] = [];
   private closed = false;
@@ -63,13 +64,13 @@ export class TableHost implements TableClient {
       let opened = false;
       peer.on('open', () => { if (!opened) { opened = true; this.code = this.lobby.code = code; resolve(code); } });
       peer.on('error', (e: any) => { if (!opened) reject(e); });
-      peer.on('connection', (c) => this.accept(c));
+      peer.on('connection', (c) => this.accept(hybrid(c)));
       peer.on('disconnected', () => setTimeout(() => { if (!this.closed && !peer.destroyed && peer.disconnected) try { peer.reconnect(); } catch { /* */ } }, 800));
       this.keep = setInterval(() => { if (!this.closed && peer.disconnected && !peer.destroyed) try { peer.reconnect(); } catch { /* */ } this.send({ t: 'ping' }); }, 5000);
     });
   }
 
-  private accept(c: DataConnection) {
+  private accept(c: HybridConn) {
     let cid = '';
     c.on('data', (d: any) => {
       if (!d || typeof d.t !== 'string') return;
@@ -245,7 +246,7 @@ export class TableGuest implements TableClient {
   lobby: Lobby | null = null; st: State | null = null; hostNow = Date.now(); status = t('Connecting to the table…');
   onChange: () => void = () => {};
   private peer: Peer | null = null;
-  private conn: DataConnection | null = null;
+  private conn: HybridConn | null = null;
   private closed = false;
   private lastSeen = 0;
   private iv: any = 0;
@@ -260,7 +261,7 @@ export class TableGuest implements TableClient {
     const attempt = () => {
       if (this.closed) return;
       if (peer.disconnected) { try { peer.reconnect(); } catch { /* */ } setTimeout(attempt, 1500); return; }
-      const c = peer.connect(target, CONN_OPTS);
+      const c = hybrid(peer.connect(target, CONN_OPTS));
       let ok = false;
       const to = setTimeout(() => { if (!ok) { try { c.close(); } catch { /* */ } setTimeout(attempt, 1000); } }, 9000);
       c.on('open', () => {

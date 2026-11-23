@@ -138,3 +138,4 @@ main.locked > :not(.engine-lock) { filter: none !important; opacity: .15; }
 /* one look only: no light/dark switch */
 .theme-btn { display: none !important; }
 button.pm-clear { background: #000 !important; color: #fff !important; }
+.navrow .play-btn.on { background: #000 !important; color: #fff !important; }

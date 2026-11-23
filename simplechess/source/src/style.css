@@ -213,6 +213,7 @@ cg-board square.current-premove { background-color: rgba(20, 30, 85, .5); }
 .mv.empty { color: var(--muted); cursor: default; }
 .empty-moves { padding: 14px; margin: 0; }
 .navrow { display: flex; gap: 6px; justify-content: center; }
+.navrow .play-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
 .navrow .btn { flex: 1; max-width: 70px; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .actions .btn { flex: 1 1 auto; }
@@ -401,6 +402,16 @@ details.load[open] > *:not(summary) { margin-top: 8px; }
   .board-col, .page-game .board-col, .page-puzzles .board-col, .page-editor .board-col { max-width: min(100%, 720px, calc(100vh - 230px)); max-width: min(100%, 720px, calc(100dvh - 230px)); min-width: 0; }
   .side { position: static; max-height: none; overflow: visible; }
   .movelist { max-height: 160px; }
+  /* phones and tablets: the buttons you need next sit right under the board, no scrolling */
+  .game-layout.puzzles > .side > .pz-controls { order: -3; }
+  .game-layout.puzzles > .side > .navrow, .game-layout.analysis > .side > .navrow { order: -2; }
+  .game-layout.puzzles > .side > .pz-feedback { order: -1; }
+  /* the daily / weekly / calendar links go below the puzzle so the board starts at the top */
+  main.page-puzzles { display: flex; flex-direction: column; }
+  main.page-puzzles > .pday-strip { order: 2; margin: 14px 0 0; }
+  .page-puzzles .pz-top { min-height: 32px; }
+  .game-layout.puzzles > .side { gap: 8px; padding-top: 10px; }
+  .game-layout.puzzles > .side > .pz-feedback:empty { display: none; }
   .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 6px; }
   .hero-board { width: min(80%, 320px); grid-row: 1; }
 }
