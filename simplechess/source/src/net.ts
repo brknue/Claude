@@ -17,7 +17,8 @@ export type Msg =
   | { t: 'flag'; color: 'white' | 'black' } | { t: 'rematch' } | { t: 'rematch-accept' }
   | { t: 'takeback-offer'; ply: number } | { t: 'takeback-accept'; ply: number } | { t: 'takeback-decline' }
   | { t: 'resume'; ucis: string[]; reply?: boolean }
-  | { t: 'chat'; text: string } | { t: 'busy' } | { t: 'ping' } | { t: 'leave' };
+  | { t: 'chat'; text: string } | { t: 'busy' } | { t: 'ping' } | { t: 'leave' }
+  | { t: 'away'; on: boolean };
 
 export const PREFIX = 'simplechess-v1-';
 /** Several STUN servers plus PeerJS's TURN relay, so phones on mobile data / strict Wi-Fi can still connect. */
@@ -41,6 +42,8 @@ export class Link {
   onMsg: (m: Msg) => void = () => {};
   onOpen: () => void = () => {};
   onClose: () => void = () => {};
+  /** the connection came back after a break (phone was asleep, network switched) */
+  onReopen: () => void = () => {};
   closed = false;
 
   private bind(conn: HybridConn) {
@@ -48,10 +51,11 @@ export class Link {
     conn.on('data', (d: any) => { if (d && typeof d === 'object' && typeof d.t === 'string') this.onMsg(d as Msg); });
     conn.on('close', () => { if (!this.closed && this.conn === conn) this.onClose(); });
     conn.on('error', () => { if (!this.closed && this.conn === conn) this.onClose(); });
+    conn.on('reopen', () => { if (!this.closed && this.conn === conn) this.onReopen(); });
     if (conn.open) this.onOpen(); else conn.on('open', () => this.onOpen());
   }
 
-  send(m: Msg) { try { if (this.conn?.open) this.conn.send(m); } catch { /* ignore */ } }
+  send(m: Msg) { try { if (this.conn?.alive) this.conn.send(m); } catch { /* ignore */ } }
 
   destroy() {
     this.closed = true;

@@ -67,6 +67,8 @@ export interface State {
   startTypes: PT[][];
   /** moves since the last capture or pawn move (50-move rule in two-player variants with check rules) */
   quiet?: number;
+  /** pieces each seat has captured: type + original owner */
+  caps?: { t: PT; o: number }[][];
 }
 
 export const onBoard = (v: Variant, x: number, y: number) => x >= 0 && y >= 0 && x < v.w && y < v.h && !(v.holes && v.holes(x, y));
@@ -296,6 +298,7 @@ export function applyMove(v: Variant, st: State, seat: number, m: Move, now = 0,
   st.last = { f: legal.f, t: legal.t };
   st.ply++;
   st.quiet = victim || p.t === 'p' ? 0 : (st.quiet || 0) + 1;
+  if (victim) { if (!st.caps) st.caps = Array.from({ length: v.players }, () => []); st.caps[seat].push({ t: victim.t, o: victim.o }); }
   if (victim && !sameTeam(v, victim.o, seat)) {
     if (v.royal.includes(victim.t)) { st.reason = 'king captured'; eliminate(v, st, victim.o); }
     else if (v.win === 'extinction') {

@@ -23,6 +23,9 @@ export class HybridConn {
   private graceT: any = 0;
   /** messages that arrived before the page listened (or before 'open'): delivered right after */
   private pending: any[] = [];
+  /** messages sent while both paths were down (phone in the background): delivered when one comes back */
+  private outbox: any[] = [];
+  private wasDown = false;
   readonly connectionId: string;
   readonly peer: string;
 
@@ -41,7 +44,7 @@ export class HybridConn {
   get open() { return !this.ended && ((this.mode === 'dc' && this.dc.open) || (this.mode === 'relay' && this.relayUp)); }
   get viaRelay() { return this.mode === 'relay'; }
 
-  on(ev: 'open' | 'data' | 'close' | 'error', fn: Fn) {
+  on(ev: 'open' | 'data' | 'close' | 'error' | 'reopen', fn: Fn) {
     (this.h[ev] ||= []).push(fn);
     if (ev === 'data' && this.pending.length) queueMicrotask(() => this.flush());
     return this;
@@ -65,10 +68,19 @@ export class HybridConn {
   }
   private emit(ev: string, ...a: any[]) { for (const f of this.h[ev] || []) { try { f(...a); } catch (e) { console.warn(e); } } }
 
+  /** false only after close(): a connection that is down for a while (phone asleep) comes back by itself */
+  get alive() { return !this.ended; }
+
   send(m: any) {
     if (this.ended) return;
     if (this.mode === 'dc' && this.dc.open) { try { this.dc.send(m); return; } catch { /* fall through to the relay */ } }
-    if (this.relayUp && this.ch) this.ch.send({ type: 'broadcast', event: 'm', payload: { k: 'd', m } });
+    if (this.relayUp && this.ch) { this.ch.send({ type: 'broadcast', event: 'm', payload: { k: 'd', m } }); return; }
+    if (this.mode && this.outbox.length < 300) this.outbox.push(m);
+  }
+  private flushOut() {
+    if (!this.outbox.length || !this.open) return;
+    const q = this.outbox; this.outbox = [];
+    for (const m of q) this.send(m);
   }
 
   close() {
@@ -90,22 +102,28 @@ export class HybridConn {
       if (this.relayUp) return;
       this.relayUp = true;
       // prefer the direct path if it is about to open
-      if (!this.mode) this.graceT = setTimeout(() => this.setMode('relay'), this.dc.open ? 0 : DIRECT_GRACE_MS);
+      if (!this.mode) { this.graceT = setTimeout(() => this.setMode('relay'), this.dc.open ? 0 : DIRECT_GRACE_MS); return; }
+      if (!this.dc.open) this.mode = 'relay';
+      this.back();
       return;
     }
-    this.setMode('dc');
+    if (!this.mode) this.setMode('dc'); else { this.mode = 'dc'; this.back(); }
+  }
+  /** a path is up again after both were down: tell the page (it re-syncs the game) */
+  private back() {
+    this.flushOut();
+    if (this.wasDown) { this.wasDown = false; log('reopen', this.connectionId.slice(-6)); this.emit('reopen'); }
   }
 
   private down(which: 'dc' | 'relay') {
     log('down', which, this.connectionId.slice(-6), 'mode=' + this.mode);
     if (this.ended) return;
     if (which === 'relay') this.relayUp = false;
-    // switch paths if the other one is still there
-    if (this.mode === which) {
-      if (which === 'dc' && this.relayUp) { this.mode = 'relay'; return; }
-      if (which === 'relay' && this.dc.open) { this.mode = 'dc'; return; }
-      this.ended = true; this.emit('close');
-    }
+    if (!this.mode) return;
+    // switch paths if the other one is still there; if both are down, wait: the relay reconnects by itself
+    if (which === 'dc' && this.mode === 'dc') this.mode = 'relay';
+    if (which === 'relay' && this.mode === 'relay' && this.dc.open) this.mode = 'dc';
+    if (!this.open) this.wasDown = true;
   }
 
   private async startRelay() {
@@ -140,6 +158,12 @@ export class HybridConn {
     });
   }
 }
+
+// coming back to the app: reconnect the realtime socket right away instead of waiting for its heartbeat
+if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !accountsEnabled()) return;
+  sb().then(c => { const rt: any = c.realtime; if (rt && !rt.isConnected()) rt.connect(); }).catch(() => {});
+});
 
 /** Wrap a PeerJS connection so it also works where direct connections are blocked. */
 export const hybrid = (dc: DataConnection) => new HybridConn(dc);

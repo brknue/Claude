@@ -139,3 +139,9 @@ main.locked > :not(.engine-lock) { filter: none !important; opacity: .15; }
 .theme-btn { display: none !important; }
 button.pm-clear { background: #000 !important; color: #fff !important; }
 .navrow .play-btn.on { background: #000 !important; color: #fff !important; }
+.parked-bar, .away-note, .tb-ask { background: #e6e6e6 !important; border: 1px solid #000 !important; }
+.qcount, .qcount.on::before { color: #000 !important; }
+.qcount.on::before { background: #000 !important; }
+.promo-tag { border-top-color: #000 !important; }
+.psq.promo-row { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, .1) !important; }
+.psq.premove-sq { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, .3) !important; }

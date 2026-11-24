@@ -950,5 +950,20 @@
 "Then {0} loses on time",
 "Then the game is aborted: no winner",
 "until loss on time",
-"until aborted"
+"until aborted",
+"Promotion line",
+"See the result",
+"Captured pieces",
+"Takeback requested. Waiting for the other players…",
+"{0} searching",
+"{0} left the game. If they are not back within 3 minutes, you win.",
+"{0} left the game. Their clock keeps running: they can come back until it runs out.",
+"{0} is back.",
+"Opponent connection lost. Waiting for them to come back…",
+"{0} is away. You win if they are not back in {1}.",
+"{0} is away. Their clock keeps running.",
+"Your game vs {0} has ended.",
+"your clock {0}",
+"Your game vs {0} is still running",
+"come back within 3 minutes"
 ]

@@ -139,7 +139,8 @@ export class Board {
       });
     }
     this.el.classList.toggle('has-premoves', this.queue.length > 0);
-    this.clearBtn.textContent = this.queue.length ? `✕ ${t('Clear premoves')} (${this.queue.length})` : '';
+    this.clearBtn.textContent = this.queue.length ? `✕ ${this.queue.length}` : '';
+    this.clearBtn.title = t('Clear premoves'); this.clearBtn.setAttribute('aria-label', t('Clear premoves') + ` (${this.queue.length})`);
   }
 
   /** Play the first queued premove if it is legal now; if it is not, every premove is dropped. */

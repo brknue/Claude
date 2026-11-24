@@ -9,7 +9,7 @@ import { me, initAccount, onAccount, onChallenges, accountsEnabled, rpc, niceErr
 import { variantName } from './chess';
 import { tcLabel } from './pages/play';
 import { tablePage } from './pages/party';
-import { playSetupPage, gamePage, joinPage } from './pages/play';
+import { playSetupPage, gamePage, joinPage, hasPendingGame } from './pages/play';
 import { analysisPage } from './pages/analysis';
 import { editorPage } from './pages/editor';
 import { openingsPage } from './pages/openings';
@@ -74,8 +74,35 @@ export let leaveGuard: (() => boolean) | null = null;
 export const setLeaveGuard = (f: (() => boolean) | null) => { leaveGuard = f; };
 let lastHash = location.hash;
 
+/**
+ * A game against a person can be left without losing it: the page is "parked" (kept running, off screen) and a bar
+ * on every other page leads back. The game page describes itself with this hook while it can be parked.
+ */
+export interface ParkHook { label: () => string; over: () => boolean; onPark: () => void; onResume: () => void }
+let parkHook: ParkHook | null = null;
+export const setParkable = (p: ParkHook | null) => { parkHook = p; };
+let parked: { el: HTMLElement; cleanup: Cleanup; hook: ParkHook } | null = null;
+export const gameParked = () => !!parked && !parked.hook.over();
+
+function parkBar() {
+  let bar = document.querySelector('.parked-bar') as HTMLElement | null;
+  if (!parked || /^#\/game/.test(location.hash) || embedded) { bar?.remove(); return; }
+  const over = parked.hook.over();
+  if (!bar) {
+    bar = h('div.announce.parked-bar', null, h('span.parked-text'), btn('', () => go('game'), 'small primary'));
+    document.body.insertBefore(bar, document.querySelector('main'));
+  }
+  bar.classList.toggle('over', over);
+  bar.querySelector('.parked-text')!.textContent = parked.hook.label();
+  const b = bar.querySelector('button')!;
+  const label = over ? t('See the result') : t('Back to the game');
+  if (b.textContent !== label) b.textContent = label;
+}
+setInterval(parkBar, 1000);
+
 function route() {
-  if (leaveGuard && location.hash !== lastHash) {
+  const canPark = !!parkHook && !parkHook.over();
+  if (leaveGuard && !canPark && location.hash !== lastHash) {
     // leaving a running game (back button, typed address): ask in the page, stay until confirmed
     const target = location.hash;
     history.replaceState(null, '', lastHash || '#/');
@@ -86,6 +113,32 @@ function route() {
   closeModals();
   const [name, arg] = location.hash.replace(/^#\/?/, '').split('/');
   const fn = routes[name] || homePage;
+  // leaving a running game against a person: keep it going in the background
+  if (canPark && main.className === 'page-game' && name !== 'game') {
+    if (parked) parked.cleanup?.();
+    const el = document.createElement('div');
+    while (main.firstChild) el.appendChild(main.firstChild);
+    parked = { el, cleanup, hook: parkHook! };
+    parkHook = null; leaveGuard = null; cleanup = undefined;
+    parked.hook.onPark();
+  }
+  // back to the parked game
+  if (name === 'game' && parked && !hasPendingGame()) {
+    if (typeof cleanup === 'function') cleanup();
+    main.innerHTML = '';
+    main.className = 'page-game';
+    document.querySelectorAll('.nav a, .tabbar a, .top-actions a').forEach(a => a.classList.toggle('active', a.getAttribute('data-r') === 'play'));
+    document.body.classList.remove('nav-open');
+    window.scrollTo(0, 0);
+    const p = parked; parked = null;
+    while (p.el.firstChild) main.appendChild(p.el.firstChild);
+    cleanup = p.cleanup; parkHook = p.hook;
+    p.hook.onResume();
+    parkBar();
+    return;
+  }
+  // a new game replaces the parked one (it counts as left)
+  if (name === 'game' && parked) { const p = parked; parked = null; p.cleanup?.(); }
   if (typeof cleanup === 'function') cleanup();
   cleanup = undefined;
   main.innerHTML = '';
@@ -95,6 +148,7 @@ function route() {
   document.body.classList.remove('nav-open');
   window.scrollTo(0, 0);
   cleanup = fn(main, arg ? decodeURIComponent(arg) : undefined);
+  parkBar();
 }
 
 export function go(path: string) {
@@ -145,7 +199,7 @@ function setupUpdates() {
   if (!('serviceWorker' in navigator) || import.meta.env.DEV) return;
   let hadController = !!navigator.serviceWorker.controller;
   let reloading = false;
-  const busy = () => !!leaveGuard || /^#\/(game|table|join)/.test(location.hash)
+  const busy = () => !!leaveGuard || gameParked() || /^#\/(game|table|join)/.test(location.hash)
     || [...document.querySelectorAll('textarea, input:not([type=checkbox]):not([type=range])')].some(el => (el as HTMLInputElement).value && el === document.activeElement);
   const reload = () => { if (reloading) return; reloading = true; location.reload(); };
   navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -409,7 +463,7 @@ async function init() {
   document.body.append(main);
   buildChrome();
   window.addEventListener('hashchange', route);
-  window.addEventListener('beforeunload', (e) => { if (leaveGuard && leaveGuard()) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', (e) => { if ((leaveGuard && leaveGuard()) || gameParked()) { e.preventDefault(); e.returnValue = ''; } });
   onChallenges(showChallenges);
   if (embedded) document.documentElement.classList.add('embedded');
   if (!embedded) { initNotify(); setupUpdates(); showAnnouncement(); }
@@ -420,7 +474,9 @@ async function init() {
     if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
     const href = a.getAttribute('href') || '';
     if (!href.startsWith('#/') || href === location.hash) return;
-    if (!(leaveGuard || (gameRoute() && a.classList.contains('plink')))) return;
+    // a game against a person keeps running when you leave it (parked), so menu links just go there
+    const parkable = !!parkHook && !parkHook.over();
+    if (!((leaveGuard && !parkable) || (gameRoute() && a.classList.contains('plink')))) return;
     e.preventDefault(); e.stopPropagation();
     openAside(href);
   }, true);
