@@ -1,0 +1,54 @@
+/* Simple Mol Lab — plain look on top of the original styles: flat surfaces, no gradients or shadows, one accent colour */
+:root{--bg:#f6f7f9;--pn:#fff;--tx:#1b1f24;--mt:#5b6470;--ac:#1f5fbf;--bd:#dfe2e6;--cv:#fff;--bn:#3a4458;--dot:#e3e6ea}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#121416;--pn:#1a1d21;--tx:#e6e8eb;--mt:#9aa1ab;--ac:#6ea8fe;--bd:#2e3238;--cv:#16181b;--bn:#aeb4bd;--dot:#24272c}}
+:root[data-theme=dark]{--bg:#121416;--pn:#1a1d21;--tx:#e6e8eb;--mt:#9aa1ab;--ac:#6ea8fe;--bd:#2e3238;--cv:#16181b;--bn:#aeb4bd;--dot:#24272c}
+h1{font-weight:700;letter-spacing:0}h1 .gt{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--tx)}
+aside,.card,.stage,#crowd,#lab,#dock,#dp,#wb{box-shadow:none!important}
+aside,.card{border-radius:8px}.stage{border-radius:8px}
+button{border-radius:6px;transition:none}button:active{transform:none}
+nav{border-radius:8px}#wt button{border-radius:6px}
+.el{border-radius:6px}#pt button{border-radius:4px}
+#lab,#crowd,#dock,#dp{border-radius:8px}#wb{border-radius:8px}
+#toast{border-radius:6px}
+input[type=text]{border-radius:6px;letter-spacing:0}
+.ch .d{background:transparent}
+.hint{top:46px}
+
+/* ---- additions: report buttons, measurement panel, analysis lab ---- */
+.smlbtn{border-color:var(--ac)!important;color:var(--ac);font-weight:600}
+.smlrep{width:100%;margin-top:10px}
+#smlx{margin-top:6px;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--bg)}
+#smlx .rw{margin:4px 0}#smlx input[type=number]{width:70px;padding:3px 5px;border:1px solid var(--bd);border-radius:6px;background:var(--pn);color:var(--tx);font:12px ui-monospace,monospace}
+#smlx b{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mt)}
+#smlprog{height:4px;background:var(--bd);border-radius:2px;overflow:hidden;margin-top:4px}#smlprog i{display:block;height:100%;width:0;background:#c92a2a}
+
+#A{grid-template-columns:270px minmax(0,1fr) 380px}
+#A aside{font-size:13px}
+#A .ins{display:block;width:100%;text-align:left;margin:3px 0;padding:7px 9px}
+#A .ins small{display:block;color:var(--mt);font-size:11.5px;font-weight:400}
+#A .ins.on small{color:#e8eefc}
+#A .fld{display:flex;flex-direction:column;align-items:stretch;gap:3px;margin:7px 0;font-size:12.5px}
+#A .fld>span{color:var(--mt);display:flex;justify-content:space-between;gap:6px}
+#A .fld>span b{color:var(--ac);font:12px ui-monospace,monospace;font-weight:600}
+#A input[type=range]{width:100%}
+#A input[type=number],#A select,#A textarea{width:100%;box-sizing:border-box;padding:5px 7px;border:1px solid var(--bd);border-radius:6px;background:var(--pn);color:var(--tx);font:13px system-ui}
+#A input[type=number]{font-family:ui-monospace,monospace}
+#A .r2{display:grid;grid-template-columns:1fr 1fr;gap:6px}#A .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+#A .note{color:var(--mt);font-size:12px;line-height:1.45;margin:4px 0 8px}
+#A .btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#A .btns button{flex:1 1 auto}
+#A button.pri{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}
+#A button.stop{background:#c92a2a;color:#fff;border-color:#c92a2a;font-weight:600}
+#A .stage{display:flex;flex-direction:column}
+#A .stage canvas{position:relative;flex:1;min-height:0}
+#aplot{flex:1}
+#aread{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px;padding:8px;border-top:1px solid var(--bd);max-height:40%;overflow:auto}
+#aread div{background:var(--bg);border-radius:5px;padding:3px 7px;min-width:0}#aread span{display:block;font-size:11px;color:var(--mt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#aread b{font:600 13px ui-monospace,monospace;white-space:nowrap}
+#A .fitbox{border:1px solid var(--bd);border-left:3px solid #c92a2a;border-radius:6px;padding:6px 8px;margin:6px 0;font-size:12.5px}
+#A .fitbox table{border-collapse:collapse;font:12.5px ui-monospace,monospace}#A .fitbox td{padding:1px 10px 1px 0}#A .fitbox small{color:var(--mt)}
+#A .tsc{overflow:auto;border:1px solid var(--bd);border-radius:6px;max-height:240px;margin:4px 0}
+#A .dt{border-collapse:collapse;font-size:12px;width:100%}#A .dt th{position:sticky;top:0;background:var(--bg);text-align:right;padding:3px 6px;border-bottom:1px solid var(--bd);white-space:nowrap;font-weight:600}#A .dt td{padding:2px 6px;text-align:right;font-family:ui-monospace,monospace;border-bottom:1px solid var(--dot);white-space:nowrap}#A .dt th:first-child,#A .dt td:first-child{text-align:left}
+#A .eq{font:12.5px ui-monospace,monospace;background:var(--bg);border-left:3px solid var(--bd);padding:5px 8px;margin:6px 0;overflow-x:auto}
+#A h3{margin:14px 0 6px}
+#aprog{height:5px;background:var(--bd);border-radius:3px;overflow:hidden;margin:4px 0}#aprog i{display:block;height:100%;width:0;background:#c92a2a}
+@media(max-width:1200px){#A{grid-template-columns:250px minmax(0,1fr)}#A aside:last-child{grid-column:1/-1}}
+@media(max-width:900px){#A{display:flex;flex-direction:column}#A .stage{order:-1;height:62dvh;min-height:360px;flex:none}}

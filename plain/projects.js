@@ -16,6 +16,32 @@
  */
 window.PLAIN_PROJECTS = [
   {
+    id: 'simple-mol-lab', name: 'Simple Mol Lab', entry: 'simple-mol-lab/index.html', open: 'simple-mol-lab/',
+    tags: ['science'], lang: 'en', notes: [],
+    desc: {
+      en: 'Plain Molecule Lab copy for measuring: molecule builder, gas lab, DNA tools and an analysis lab (titration, kinetics, UV-Vis, real gases) with PDF reports.',
+      de: 'Schlichte Kopie des Molecule Lab zum Messen: Molekülbau, Gaslabor, DNA-Werkzeuge und Analyse-Labor (Titration, Kinetik, UV-Vis, reale Gase) mit PDF-Berichten.',
+      tr: 'Ölçüm için sade Molecule Lab kopyası: molekül kurucu, gaz laboratuvarı, DNA araçları ve analiz laboratuvarı (titrasyon, kinetik, UV-Vis, gerçek gazlar), PDF raporlarıyla.',
+      es: 'Copia sencilla de Molecule Lab para medir: constructor de moléculas, laboratorio de gases, ADN y laboratorio de análisis (valoración, cinética, UV-Vis, gases reales) con informes PDF.',
+      fr: 'Copie sobre de Molecule Lab pour mesurer : molécules, labo de gaz, outils ADN et labo d’analyse (titrage, cinétique, UV-Vis, gaz réels) avec rapports PDF.',
+      it: 'Copia essenziale di Molecule Lab per misurare: molecole, laboratorio dei gas, DNA e laboratorio di analisi (titolazione, cinetica, UV-Vis, gas reali) con report PDF.',
+      pt: 'Cópia simples do Molecule Lab para medir: moléculas, laboratório de gases, DNA e laboratório de análise (titulação, cinética, UV-Vis, gases reais) com relatórios PDF.',
+      nl: 'Eenvoudige kopie van Molecule Lab om te meten: moleculen, gaslab, DNA-tools en analyselab (titratie, kinetiek, UV-Vis, echte gassen) met PDF-rapporten.',
+      pl: 'Prosta kopia Molecule Lab do pomiarów: cząsteczki, laboratorium gazów, DNA i laboratorium analityczne (miareczkowanie, kinetyka, UV-Vis, gazy rzeczywiste) z raportami PDF.',
+      ru: 'Простая копия Molecule Lab для измерений: молекулы, газовая лаборатория, ДНК и аналитическая лаборатория (титрование, кинетика, УФ-вид, реальные газы) с отчётами PDF.',
+      uk: 'Проста копія Molecule Lab для вимірювань: молекули, газова лабораторія, ДНК та аналітична лабораторія (титрування, кінетика, УФ-вид, реальні гази) зі звітами PDF.',
+      ar: 'نسخة بسيطة من Molecule Lab للقياس: بناء الجزيئات ومختبر الغازات وأدوات DNA ومختبر تحليل (معايرة، حركية، مطيافية، غازات حقيقية) مع تقارير PDF.',
+      fa: 'نسخهٔ ساده Molecule Lab برای اندازه‌گیری: ساخت مولکول، آزمایشگاه گاز، ابزار DNA و آزمایشگاه تحلیل (تیتراسیون، سینتیک، طیف‌سنجی، گاز حقیقی) با گزارش PDF.',
+      hi: 'मापन के लिए सरल Molecule Lab प्रति: अणु निर्माता, गैस लैब, DNA उपकरण और विश्लेषण लैब (अनुमापन, गतिकी, UV-Vis, वास्तविक गैसें) PDF रिपोर्ट के साथ।',
+      zh: '用于测量的简洁版 Molecule Lab：分子构建、气体实验、DNA 工具和分析实验室（滴定、动力学、紫外可见光谱、真实气体），可导出 PDF 报告。',
+      ja: '測定向けのシンプルな Molecule Lab：分子ビルダー、気体ラボ、DNA ツール、分析ラボ（滴定・反応速度・UV-Vis・実在気体）と PDF レポート。',
+      ko: '측정용 간결한 Molecule Lab 사본: 분자 빌더, 기체 실험실, DNA 도구, 분석 실험실(적정, 반응 속도, UV-Vis, 실제 기체)과 PDF 보고서.',
+      id: 'Salinan Molecule Lab yang sederhana untuk pengukuran: penyusun molekul, lab gas, alat DNA, dan lab analisis (titrasi, kinetika, UV-Vis, gas nyata) dengan laporan PDF.',
+      vi: 'Bản Molecule Lab đơn giản để đo đạc: dựng phân tử, phòng thí nghiệm khí, công cụ DNA và phòng phân tích (chuẩn độ, động học, UV-Vis, khí thực) với báo cáo PDF.',
+      sv: 'Enkel kopia av Molecule Lab för mätningar: molekylbyggare, gaslabb, DNA-verktyg och analyslabb (titrering, kinetik, UV-Vis, verkliga gaser) med PDF-rapporter.'
+    }
+  },
+  {
     id: 'physica', name: 'Physica', entry: 'physica/index.html', open: 'physica/',
     tags: ['science'], lang: 'en', notes: [],
     desc: {
