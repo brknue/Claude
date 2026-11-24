@@ -2,16 +2,20 @@
  * Party table: the host's browser runs the game; up to 3 friends (plus spectators) connect to it
  * over WebRTC. Players pick a seat in the lobby; empty seats can be given to the computer.
  */
-import Peer, { DataConnection } from 'peerjs';
+import Peer from 'peerjs';
+import { hybrid, HybridConn } from '../relay';
 import { PREFIX, PEER_OPTS, CONN_OPTS } from '../net';
 import { Variant, State, Move, partyVariant, newState, applyMove, placeDuck, resign, fogView, cooldownMs } from './rules';
 import { botMove, botDuck } from './bot';
 import { t } from '../i18n';
 
 export interface Seat { kind: 'empty' | 'human' | 'bot'; name: string; cid?: string; away?: boolean }
-export interface Lobby { code: string; variant: string; speed: string; seats: Seat[]; phase: 'lobby' | 'game'; host: string; round: number }
+export interface Lobby { code: string; variant: string; speed: string; seats: Seat[]; phase: 'lobby' | 'game'; host: string; round: number;
+  /** open takeback request: who asked, whose answer is needed, who said yes */
+  tb?: { by: number; need: number[]; ok: number[] } | null }
 
-type ToHost = { t: 'hello'; cid: string; name: string } | { t: 'sit'; seat: number } | { t: 'stand' } | { t: 'move'; m: Move } | { t: 'duck'; sq: number } | { t: 'resign' } | { t: 'ping' };
+type ToHost = { t: 'hello'; cid: string; name: string } | { t: 'sit'; seat: number } | { t: 'stand' } | { t: 'move'; m: Move } | { t: 'duck'; sq: number } | { t: 'resign' } | { t: 'ping' }
+  | { t: 'tb' } | { t: 'tb-ans'; ok: boolean };
 type ToGuest = { t: 'lobby'; lobby: Lobby } | { t: 'state'; st: State; now: number } | { t: 'closed' } | { t: 'ping' };
 
 export function clientId(): string {
@@ -30,6 +34,7 @@ export interface TableClient {
   onChange: () => void;
   mySeat(): number | null;
   sit(seat: number): void; stand(): void; move(m: Move): void; duck(sq: number): void; resign(): void; leave(): void;
+  takeback(): void; answerTakeback(ok: boolean): void;
   // host only
   setSeat?(seat: number, kind: 'bot' | 'empty'): void; start?(): void; toLobby?(): void; configure?(variant: string, speed: string): void;
 }
@@ -40,7 +45,7 @@ export class TableHost implements TableClient {
   onChange: () => void = () => {};
   private v: Variant;
   private peer: Peer | null = null;
-  private conns = new Map<string, DataConnection>(); // cid -> connection
+  private conns = new Map<string, HybridConn>(); // cid -> connection
   private botTimer: any = 0;
   private botNext: number[] = [];
   private closed = false;
@@ -63,13 +68,13 @@ export class TableHost implements TableClient {
       let opened = false;
       peer.on('open', () => { if (!opened) { opened = true; this.code = this.lobby.code = code; resolve(code); } });
       peer.on('error', (e: any) => { if (!opened) reject(e); });
-      peer.on('connection', (c) => this.accept(c));
+      peer.on('connection', (c) => this.accept(hybrid(c)));
       peer.on('disconnected', () => setTimeout(() => { if (!this.closed && !peer.destroyed && peer.disconnected) try { peer.reconnect(); } catch { /* */ } }, 800));
       this.keep = setInterval(() => { if (!this.closed && peer.disconnected && !peer.destroyed) try { peer.reconnect(); } catch { /* */ } this.send({ t: 'ping' }); }, 5000);
     });
   }
 
-  private accept(c: DataConnection) {
+  private accept(c: HybridConn) {
     let cid = '';
     c.on('data', (d: any) => {
       if (!d || typeof d.t !== 'string') return;
@@ -123,6 +128,12 @@ export class TableHost implements TableClient {
         this.act(s, m);
         return;
       }
+      case 'tb': case 'tb-ans': {
+        const s = this.seatOf(cid);
+        if (s === null) return;
+        if (m.t === 'tb') this.askTakeback(s); else this.voteTakeback(s, m.ok);
+        return;
+      }
       default: return;
     }
     this.pushAll();
@@ -130,15 +141,58 @@ export class TableHost implements TableClient {
   private names = new Map<string, string>();
   private nameOf(cid: string) { return this.names.get(cid) || this.lobby.seats.find(s => s.cid === cid)?.name || ''; }
 
+  /** positions before every move (turn-based variants), for takebacks */
+  private hist: { seat: number; st: State }[] = [];
   private act(seat: number, m: ToHost): boolean {
     const st = this.st!; const now = Date.now();
     let ok = false;
+    const before = !this.v.realtime && m.t !== 'resign' ? JSON.parse(JSON.stringify(st)) as State : null;
     if (m.t === 'move') ok = applyMove(this.v, st, seat, m.m, now, cooldownMs(this.lobby.speed));
     else if (m.t === 'duck') ok = placeDuck(this.v, st, seat, m.sq);
     else if (m.t === 'resign') { resign(this.v, st, seat); ok = true; }
-    if (ok) { this.pushState(); this.scheduleBots(); }
+    if (ok) {
+      if (before) this.hist.push({ seat, st: before });
+      if (this.lobby.tb) { this.lobby.tb = null; this.send({ t: 'lobby', lobby: this.lobby }); }
+      this.pushState(); this.scheduleBots();
+    }
     return ok;
   }
+
+  // ---- takebacks: undo the asking player's last turn; every other human player must agree (the computer always does)
+  private tbIndex(seat: number): number {
+    let k = -1;
+    for (let i = this.hist.length - 1; i >= 0; i--) if (this.hist[i].seat === seat) { k = i; break; }
+    // the whole turn: a duck placement or several moves in one turn go back together
+    while (k > 0 && this.hist[k - 1].seat === seat && this.hist[k - 1].st.turnNo === this.hist[k].st.turnNo) k--;
+    return k;
+  }
+  private askTakeback(seat: number) {
+    const st = this.st;
+    if (!st || st.over || this.v.realtime || this.lobby.phase !== 'game' || this.lobby.tb || this.tbIndex(seat) < 0) return;
+    const need = this.lobby.seats.map((s, i) => (i !== seat && s.kind === 'human' && !s.away ? i : -1)).filter(i => i >= 0);
+    if (!need.length) { this.undo(seat); return; }
+    this.lobby.tb = { by: seat, need, ok: [] };
+    this.pushAll();
+  }
+  private voteTakeback(seat: number, ok: boolean) {
+    const tb = this.lobby.tb;
+    if (!tb || !tb.need.includes(seat) || tb.ok.includes(seat)) return;
+    if (!ok) { this.lobby.tb = null; this.pushAll(); return; }
+    tb.ok.push(seat);
+    if (tb.need.every(s => tb.ok.includes(s))) this.undo(tb.by); else this.pushAll();
+  }
+  private undo(seat: number) {
+    const k = this.tbIndex(seat);
+    this.lobby.tb = null;
+    if (k < 0) { this.pushAll(); return; }
+    this.st = this.hist[k].st;
+    this.hist.length = k;
+    clearTimeout(this.botTimer); this.botTimer = 0;
+    this.pushAll();
+    this.scheduleBots();
+  }
+  takeback() { const s = this.mySeat(); if (s !== null) this.askTakeback(s); }
+  answerTakeback(ok: boolean) { const s = this.mySeat(); if (s !== null) this.voteTakeback(s, ok); }
 
   // ---- local (host's own) actions ----
   sit(seat: number) { this.names.set(this.myCid, this.myName); this.handle(this.myCid, { t: 'sit', seat }, this.myName); }
@@ -170,6 +224,7 @@ export class TableHost implements TableClient {
   start() {
     if (this.lobby.seats.some(s => s.kind === 'empty')) return;
     this.st = newState(this.v, this.lobby.speed);
+    this.hist = []; this.lobby.tb = null;
     this.lobby.phase = 'game'; this.lobby.round++;
     this.botNext = this.lobby.seats.map(() => Date.now() + 1500 + Math.random() * 1500);
     this.pushAll();
@@ -245,7 +300,7 @@ export class TableGuest implements TableClient {
   lobby: Lobby | null = null; st: State | null = null; hostNow = Date.now(); status = t('Connecting to the table…');
   onChange: () => void = () => {};
   private peer: Peer | null = null;
-  private conn: DataConnection | null = null;
+  private conn: HybridConn | null = null;
   private closed = false;
   private lastSeen = 0;
   private iv: any = 0;
@@ -260,7 +315,7 @@ export class TableGuest implements TableClient {
     const attempt = () => {
       if (this.closed) return;
       if (peer.disconnected) { try { peer.reconnect(); } catch { /* */ } setTimeout(attempt, 1500); return; }
-      const c = peer.connect(target, CONN_OPTS);
+      const c = hybrid(peer.connect(target, CONN_OPTS));
       let ok = false;
       const to = setTimeout(() => { if (!ok) { try { c.close(); } catch { /* */ } setTimeout(attempt, 1000); } }, 9000);
       c.on('open', () => {
@@ -302,5 +357,7 @@ export class TableGuest implements TableClient {
   move(m: Move) { this.send({ t: 'move', m }); }
   duck(sq: number) { this.send({ t: 'duck', sq }); }
   resign() { this.send({ t: 'resign' }); }
+  takeback() { this.send({ t: 'tb' }); }
+  answerTakeback(ok: boolean) { this.send({ t: 'tb-ans', ok }); }
   leave() { this.closed = true; clearInterval(this.iv); try { this.conn?.close(); this.peer?.destroy(); } catch { /* */ } }
 }

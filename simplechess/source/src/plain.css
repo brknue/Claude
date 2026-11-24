@@ -1,0 +1,147 @@
+/*
+ * Simple Chess: the plain look. Loaded after style.css and overrides it.
+ * Three colors only (white, black, grey), no gradients, shadows, glows, animations or decorative icons.
+ * Meant to look like a small hand-made site from 2018.
+ */
+
+/* ---------- colors: the same in light and "dark" mode, on every board style ---------- */
+html, html[data-theme], html[data-board] {
+  --bg: #ffffff !important; --bg2: #f0f0f0 !important; --card: #ffffff !important; --card2: #f4f4f4 !important;
+  --line: #9a9a9a !important; --text: #000000 !important; --muted: #555555 !important;
+  --accent: #000000 !important; --accent2: #333333 !important; --gold: #555555 !important;
+  --good: #000000 !important; --bad: #000000 !important; --warn: #444444 !important;
+  --accent-soft: #e6e6e6 !important; --accent-line: #777777 !important; --gold-soft: #e6e6e6 !important; --good-soft: #e6e6e6 !important;
+  --zebra: #f4f4f4 !important; --topbar: #ffffff !important;
+  --shadow: none !important; --radius: 0 !important;
+  --sq-light: #e4e4e4 !important; --sq-dark: #a6a6a6 !important;
+  --hl: rgba(0, 0, 0, .16) !important; --sel: rgba(0, 0, 0, .3) !important;
+  --font: Verdana, Arial, Helvetica, sans-serif !important;
+  color-scheme: light !important;
+  filter: grayscale(1);
+}
+html, body { background: #ffffff !important; color: #000000 !important; }
+body { font: 14px/1.45 Verdana, Arial, Helvetica, sans-serif !important; }
+
+/* ---------- no effects anywhere (pieces and the board keep their images) ---------- */
+*:not(piece):not(cg-board):not(coords):not(coord), *::before, *::after {
+  box-shadow: none !important; text-shadow: none !important; animation: none !important; transition: none !important;
+  background-image: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
+* { border-radius: 0 !important; }
+.btn, input, select, textarea, .card, .modal, .chat-bubble { border-radius: 2px !important; }
+
+/* ---------- typography: plain ---------- */
+h1, h2, h3 { font-family: 'Times New Roman', Times, serif !important; font-weight: bold !important; letter-spacing: 0 !important; color: #000 !important; }
+h1 { font-size: 26px !important; } h2 { font-size: 20px !important; } h3 { font-size: 16px !important; }
+.set-h { text-transform: none !important; letter-spacing: 0 !important; font-size: 14px !important; color: #000 !important; border-bottom: 1px solid #9a9a9a; padding-bottom: 2px; }
+a { color: #000 !important; text-decoration: underline !important; }
+.btn, .card, .chat-row, .daily-row, .pick-row, .admin-row, .pcal-cell, .pcal-week, .user-row, .fname, .pday-link, .hist-item, .game-row, nav a, .tabbar a { text-decoration: none !important; }
+.muted, .small { color: #555 !important; }
+.grad { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
+.lead { font-size: 15px !important; }
+
+/* ---------- boxes ---------- */
+.card, section.card, aside.side, .modal, .admin-tile, .pdays-stats div, .rcell, .fb, .notify-banner, .announce, .chat-game, .chat-card, .pday-rules, .pz-rating {
+  background: #ffffff !important; border: 1px solid #9a9a9a !important;
+}
+.card2, .daily-row, .pick-row, .admin-row, .game-row, .pcal-week, .pday-link, .chat-row:hover, .user-row:hover { background: #f4f4f4 !important; }
+.modal-back { background: rgba(0, 0, 0, .45) !important; }
+.fb.good, .fb.bad { border-left: 4px solid #000 !important; }
+.fb b, .fb.good b, .fb.bad b { color: #000 !important; }
+
+/* ---------- buttons and form fields: grey, like a 2018 browser ---------- */
+.btn, button.btn, a.btn {
+  background: #e9e9e9 !important; color: #000 !important; border: 1px solid #7a7a7a !important;
+  font-weight: normal !important; padding: 4px 12px !important; min-height: 0 !important; font-size: 14px !important;
+}
+.btn:hover { background: #dcdcdc !important; }
+.btn.primary { background: #d0d0d0 !important; font-weight: bold !important; }
+.btn.danger { background: #e9e9e9 !important; color: #000 !important; text-decoration: underline !important; }
+.btn.ghost { background: transparent !important; border-color: transparent !important; text-decoration: underline !important; }
+.btn.big { font-size: 15px !important; padding: 6px 14px !important; }
+.btn.small { font-size: 13px !important; padding: 2px 8px !important; }
+input, select, textarea { background: #fff !important; color: #000 !important; border: 1px solid #7a7a7a !important; font: 14px Verdana, Arial, sans-serif !important; }
+.seg { background: #f0f0f0 !important; border: 1px solid #9a9a9a !important; padding: 0 !important; gap: 0 !important; }
+.seg button { background: transparent !important; color: #000 !important; border-right: 1px solid #9a9a9a !important; font-weight: normal !important; min-height: 30px !important; }
+.seg button.on { background: #cfcfcf !important; font-weight: bold !important; }
+.tc, .chip { background: #f4f4f4 !important; border: 1px solid #9a9a9a !important; color: #000 !important; }
+.tc.on, .chip.on { background: #cfcfcf !important; border-color: #000 !important; }
+
+/* ---------- decorative icons and pictures are gone; icon-only buttons keep their icon ---------- */
+.btn:not(.icon) .ic, .card .ic, .nav .ic, .tabbar .ic, h1 .ic, h2 .ic, .f-ic, .hero-board, .logo, .avatar-glyph, .pday-badge, .cg-ic, .engine-lock-ic { display: none !important; }
+.btn.icon .ic { display: inline-block !important; }
+
+/* ---------- header and bottom bar ---------- */
+.topbar { background: #ffffff !important; border-bottom: 2px solid #000 !important; }
+.brand { letter-spacing: 0 !important; font: bold 20px 'Times New Roman', Times, serif !important; color: #000 !important; }
+.brand b { color: #000 !important; }
+.nav a { color: #000 !important; font-weight: normal !important; text-decoration: underline !important; background: transparent !important; }
+.nav a.active, .tabbar a.active { font-weight: bold !important; background: transparent !important; color: #000 !important; }
+.tabbar { background: #ffffff !important; border-top: 2px solid #000 !important; }
+.tabbar a { color: #000 !important; font-size: 12px !important; justify-content: center !important; }
+.count-badge, .badge-dot { background: #000 !important; color: #fff !important; }
+
+/* ---------- home ---------- */
+.hero { display: block !important; padding: 10px 0 !important; border-bottom: 1px solid #9a9a9a; }
+.hero h1 { font-size: 30px !important; }
+.features { gap: 8px !important; }
+.card.feature { padding: 10px 12px !important; }
+.card.feature h3 { margin: 0 0 4px !important; text-decoration: underline; }
+.footer-note { color: #555 !important; border-top: 1px solid #9a9a9a; padding-top: 8px; }
+
+/* ---------- avatars, badges, tags: plain grey boxes ---------- */
+.avatar { background: #d6d6d6 !important; color: #000 !important; border: 1px solid #7a7a7a !important; }
+.avatar.sm.on::after { background: #000 !important; }
+.role-badge, .title-badge, .tag, .hint-badge, .brill-badge, .badge, .delta, .live-dot {
+  background: #ffffff !important; color: #000 !important; border: 1px solid #000 !important; font-weight: bold !important; font-family: Verdana, Arial, sans-serif !important;
+}
+.badge.big.brill { background: #e6e6e6 !important; color: #000 !important; }
+.brill-num, .rating-num { color: #000 !important; }
+
+/* ---------- board: grey squares, grey highlights; check = dark grey square ---------- */
+cg-board square.last-move { background: rgba(0, 0, 0, .18) !important; }
+cg-board square.selected { background: rgba(0, 0, 0, .3) !important; }
+cg-board square.move-dest { background: radial-gradient(rgba(0, 0, 0, .35) 19%, transparent 20%) !important; }
+cg-board square.check { background: rgba(0, 0, 0, .45) !important; }
+.psq.in-check { background-color: #6e6e6e !important; }
+.psq.last { box-shadow: none !important; outline: 3px solid rgba(0, 0, 0, .35); outline-offset: -3px; }
+.psq.sel { outline: 3px solid #000; outline-offset: -3px; }
+.psq.fog { background: #555 !important; }
+.duck { display: inline-grid; place-items: center; width: 70%; height: 70%; margin: 15%; border: 2px solid #000; background: #fff; font: bold 16px Verdana, sans-serif; color: #000; }
+.evalbar { background: #000 !important; border: 1px solid #000 !important; } .evalfill { background: #fff !important; }
+.pinfo.turn { outline: 2px solid #000; }
+.clock { background: #fff !important; color: #000 !important; border: 1px solid #000 !important; }
+.pinfo.turn .clock { background: #000 !important; color: #fff !important; }
+
+/* ---------- messages, pop-ups, banners ---------- */
+#offers .offer { background: #fff !important; border: 2px solid #000 !important; color: #000 !important; }
+#toasts .toast, .toast { background: #000 !important; color: #fff !important; border-radius: 0 !important; }
+.chat-msg.mine .chat-bubble { background: #e0e0e0 !important; color: #000 !important; border: 1px solid #9a9a9a; }
+.chat-msg.theirs .chat-bubble { background: #fff !important; border: 1px solid #9a9a9a; }
+.chat-msgs { background: #f4f4f4 !important; }
+.announce { border: 0 !important; border-bottom: 1px solid #000 !important; font-weight: normal !important; }
+.engine-lock { background: rgba(255, 255, 255, .85) !important; }
+.engine-lock-box { border: 2px solid #000 !important; }
+main.locked > :not(.engine-lock) { filter: none !important; opacity: .15; }
+
+/* ---------- calendar, daily puzzles, admin ---------- */
+.pcal-cell.solved, .pcal-cell.failed, .pcal-cell.practiced { background: #e0e0e0 !important; border-color: #000 !important; }
+.pcal-cell.today { outline: 2px solid #000; }
+.pd-dot.solved { background: #000 !important; border-color: #000 !important; } .pd-dot.failed { background: #9a9a9a !important; border-color: #555 !important; }
+.daily-row.turn, .daily-row.invite { background: #e6e6e6 !important; border-color: #000 !important; }
+.admin-bar i { background: #000 !important; }
+.switch span, .switch input:checked + span { background: #bbb !important; }
+
+/* ---------- review colors become grey too (the classification letters still show) ---------- */
+.badge, .mv .badge, .cls { color: #000 !important; }
+
+/* one look only: no light/dark switch */
+.theme-btn { display: none !important; }
+button.pm-clear { background: #000 !important; color: #fff !important; }
+.navrow .play-btn.on { background: #000 !important; color: #fff !important; }
+.parked-bar, .away-note, .tb-ask { background: #e6e6e6 !important; border: 1px solid #000 !important; }
+.qcount, .qcount.on::before { color: #000 !important; }
+.qcount.on::before { background: #000 !important; }
+.promo-tag { border-top-color: #000 !important; }
+.psq.promo-row { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, .1) !important; }
+.psq.premove-sq { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, .3) !important; }

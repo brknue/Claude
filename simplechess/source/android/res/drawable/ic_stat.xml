@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rookstorm rook, white silhouette for the status bar -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="512" android:viewportHeight="512">
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M168,132h40v40h32v-40h32v40h32v-40h40v88l-36,30v104l36,34v42H168v-42l36,-34V250l-36,-30z" />
+</vector>

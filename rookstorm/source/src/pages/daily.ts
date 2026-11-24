@@ -1,6 +1,6 @@
 /** Daily games: correspondence chess with friends, a few days per move, rated in their own 'daily' rating. */
 import { badges } from '../badges';
-import { h, icon, btn, toast, modal } from '../ui';
+import { h, icon, btn, toast, modal, askConfirm } from '../ui';
 import { t } from "../i18n";
 import { me, rpc, niceError, onAccount } from '../account';
 import { VARIANTS, VariantKey, variantName, Color, startFenFor, outcomeText, reasonText } from '../chess';
@@ -12,7 +12,7 @@ import { needAccount, socialMissing } from './chat';
 import { onDailyRow, pollAlerts, setFocus, notifyBanner, missingSocial, socialAvailable } from '../notify';
 
 export const DAYS = [1, 2, 3, 5, 7, 14];
-const abortText = (r: string) => r === 'declined' ? t('Invitation declined') : r === 'cancelled' ? t('Invitation cancelled') : r === 'not accepted' ? t('Invitation not accepted in time') : reasonText(r);
+const abortText = (r: string) => r === 'no moves for a week' ? t('Nobody moved for a week: no winner') : r === 'declined' ? t('Invitation declined') : r === 'cancelled' ? t('Invitation cancelled') : r === 'not accepted' ? t('Invitation not accepted in time') : reasonText(r);
 const daysLabel = (d: number) => d === 1 ? t('1 day per move') : t('{0} days per move', d);
 
 export function timeLeft(deadline?: string | null): string {
@@ -97,7 +97,7 @@ export function dailyPage(root: HTMLElement, id?: string) {
     } else {
       const res = r.result;
       const won = res && res !== '1/2-1/2' && (res === '1-0') === white;
-      status = r.status === 'aborted' ? t('Aborted') : res === '1/2-1/2' ? t('Draw') : won ? t('Won') : t('Lost');
+      status = r.status === 'aborted' ? (r.reason === 'no moves for a week' ? t('Aborted') + ' · ' + t('no moves for a week') : t('Aborted')) : res === '1/2-1/2' ? t('Draw') : won ? t('Won') : t('Lost');
     }
     const el = h('div.daily-row', { class: r.my_turn ? 'turn' : r.incoming ? 'invite' : '' },
       h('a.dr-main', { href: '#/daily/' + r.id },
@@ -183,7 +183,7 @@ export function dailyGamePage(root: HTMLElement, id: string) {
     } else if (row.status === 'live' && myColor) {
       if (row.draw_offer && row.draw_offer !== me!.id) a.push(btn(t('Accept draw'), () => action('accept'), 'primary'), btn(t('Decline draw'), () => action('decline')));
       else if (!row.draw_offer && game.ply >= 2) a.push(btn(h('span', null, icon('half'), t('Offer draw')), () => action('offer')));
-      a.push(btn(h('span', null, icon('flag'), t('Resign')), () => { if (confirm(t('Resign this game?'))) action('resign'); }, 'ghost'));
+      a.push(btn(h('span', null, icon('flag'), t('Resign')), async () => { if (await askConfirm(t('Resign this game?'), { ok: t('Resign'), danger: true })) action('resign'); }, 'ghost'));
     } else if (row.status !== 'live') {
       a.push(btn(h('span', null, icon('chart'), t('Analysis board')), () => {
         setAnalysisInput({ variant: row.variant, startFen: row.start_fen, ucis: game!.ucis.slice(), white: row.white_name, black: row.black_name, orientation: myColor || 'white', gameId: row.status === 'finished' ? row.id : undefined });

@@ -1,0 +1,107 @@
+/* Rookstorm: Settings -> "Simple look" = the plain look of Simple Chess (white, black, grey, no effects). Generated from simplechess/src/plain.css. */
+html.simple-look, html.simple-look[data-theme], html.simple-look[data-board] {
+  --bg: #ffffff !important; --bg2: #f0f0f0 !important; --card: #ffffff !important; --card2: #f4f4f4 !important;
+  --line: #9a9a9a !important; --text: #000000 !important; --muted: #555555 !important;
+  --accent: #000000 !important; --accent2: #333333 !important; --gold: #555555 !important;
+  --good: #000000 !important; --bad: #000000 !important; --warn: #444444 !important;
+  --accent-soft: #e6e6e6 !important; --accent-line: #777777 !important; --gold-soft: #e6e6e6 !important; --good-soft: #e6e6e6 !important;
+  --zebra: #f4f4f4 !important; --topbar: #ffffff !important;
+  --shadow: none !important; --radius: 0 !important;
+  --sq-light: #e4e4e4 !important; --sq-dark: #a6a6a6 !important;
+  --hl: rgba(0, 0, 0, .16) !important; --sel: rgba(0, 0, 0, .3) !important;
+  --font: Verdana, Arial, Helvetica, sans-serif !important;
+  color-scheme: light !important;
+  filter: grayscale(1); }
+html.simple-look, html.simple-look body { background: #ffffff !important; color: #000000 !important; }
+html.simple-look body { font: 14px/1.45 Verdana, Arial, Helvetica, sans-serif !important; }
+html.simple-look *:not(piece):not(cg-board):not(coords):not(coord), html.simple-look *::before, html.simple-look *::after {
+  box-shadow: none !important; text-shadow: none !important; animation: none !important; transition: none !important;
+  background-image: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html.simple-look * { border-radius: 0 !important; }
+html.simple-look .btn, html.simple-look input, html.simple-look select, html.simple-look textarea, html.simple-look .card, html.simple-look .modal, html.simple-look .chat-bubble { border-radius: 2px !important; }
+html.simple-look h1, html.simple-look h2, html.simple-look h3 { font-family: 'Times New Roman', Times, serif !important; font-weight: bold !important; letter-spacing: 0 !important; color: #000 !important; }
+html.simple-look h1 { font-size: 26px !important; }
+html.simple-look h2 { font-size: 20px !important; }
+html.simple-look h3 { font-size: 16px !important; }
+html.simple-look .set-h { text-transform: none !important; letter-spacing: 0 !important; font-size: 14px !important; color: #000 !important; border-bottom: 1px solid #9a9a9a; padding-bottom: 2px; }
+html.simple-look a { color: #000 !important; text-decoration: underline !important; }
+html.simple-look .btn, html.simple-look .card, html.simple-look .chat-row, html.simple-look .daily-row, html.simple-look .pick-row, html.simple-look .admin-row, html.simple-look .pcal-cell, html.simple-look .pcal-week, html.simple-look .user-row, html.simple-look .fname, html.simple-look .pday-link, html.simple-look .hist-item, html.simple-look .game-row, html.simple-look nav a, html.simple-look .tabbar a { text-decoration: none !important; }
+html.simple-look .muted, html.simple-look .small { color: #555 !important; }
+html.simple-look .grad { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
+html.simple-look .lead { font-size: 15px !important; }
+html.simple-look .card, html.simple-look section.card, html.simple-look aside.side, html.simple-look .modal, html.simple-look .admin-tile, html.simple-look .pdays-stats div, html.simple-look .rcell, html.simple-look .fb, html.simple-look .notify-banner, html.simple-look .announce, html.simple-look .chat-game, html.simple-look .chat-card, html.simple-look .pday-rules, html.simple-look .pz-rating {
+  background: #ffffff !important; border: 1px solid #9a9a9a !important; }
+html.simple-look .card2, html.simple-look .daily-row, html.simple-look .pick-row, html.simple-look .admin-row, html.simple-look .game-row, html.simple-look .pcal-week, html.simple-look .pday-link, html.simple-look .chat-row:hover, html.simple-look .user-row:hover { background: #f4f4f4 !important; }
+html.simple-look .modal-back { background: rgba(0, 0, 0, .45) !important; }
+html.simple-look .fb.good, html.simple-look .fb.bad { border-left: 4px solid #000 !important; }
+html.simple-look .fb b, html.simple-look .fb.good b, html.simple-look .fb.bad b { color: #000 !important; }
+html.simple-look .btn, html.simple-look button.btn, html.simple-look a.btn {
+  background: #e9e9e9 !important; color: #000 !important; border: 1px solid #7a7a7a !important;
+  font-weight: normal !important; padding: 4px 12px !important; min-height: 0 !important; font-size: 14px !important; }
+html.simple-look .btn:hover { background: #dcdcdc !important; }
+html.simple-look .btn.primary { background: #d0d0d0 !important; font-weight: bold !important; }
+html.simple-look .btn.danger { background: #e9e9e9 !important; color: #000 !important; text-decoration: underline !important; }
+html.simple-look .btn.ghost { background: transparent !important; border-color: transparent !important; text-decoration: underline !important; }
+html.simple-look .btn.big { font-size: 15px !important; padding: 6px 14px !important; }
+html.simple-look .btn.small { font-size: 13px !important; padding: 2px 8px !important; }
+html.simple-look input, html.simple-look select, html.simple-look textarea { background: #fff !important; color: #000 !important; border: 1px solid #7a7a7a !important; font: 14px Verdana, Arial, sans-serif !important; }
+html.simple-look .seg { background: #f0f0f0 !important; border: 1px solid #9a9a9a !important; padding: 0 !important; gap: 0 !important; }
+html.simple-look .seg button { background: transparent !important; color: #000 !important; border-right: 1px solid #9a9a9a !important; font-weight: normal !important; min-height: 30px !important; }
+html.simple-look .seg button.on { background: #cfcfcf !important; font-weight: bold !important; }
+html.simple-look .tc, html.simple-look .chip { background: #f4f4f4 !important; border: 1px solid #9a9a9a !important; color: #000 !important; }
+html.simple-look .tc.on, html.simple-look .chip.on { background: #cfcfcf !important; border-color: #000 !important; }
+html.simple-look .btn:not(.icon) .ic, html.simple-look .card .ic, html.simple-look .nav .ic, html.simple-look .tabbar .ic, html.simple-look h1 .ic, html.simple-look h2 .ic, html.simple-look .f-ic, html.simple-look .hero-board, html.simple-look .avatar-glyph, html.simple-look .pday-badge, html.simple-look .cg-ic, html.simple-look .engine-lock-ic { display: none !important; }
+html.simple-look .btn.icon .ic { display: inline-block !important; }
+html.simple-look .topbar { background: #ffffff !important; border-bottom: 2px solid #000 !important; }
+html.simple-look .brand { letter-spacing: 0 !important; font: bold 20px 'Times New Roman', Times, serif !important; color: #000 !important; }
+html.simple-look .brand b { color: #000 !important; }
+html.simple-look .nav a { color: #000 !important; font-weight: normal !important; text-decoration: underline !important; background: transparent !important; }
+html.simple-look .nav a.active, html.simple-look .tabbar a.active { font-weight: bold !important; background: transparent !important; color: #000 !important; }
+html.simple-look .tabbar { background: #ffffff !important; border-top: 2px solid #000 !important; }
+html.simple-look .tabbar a { color: #000 !important; font-size: 12px !important; justify-content: center !important; }
+html.simple-look .count-badge, html.simple-look .badge-dot { background: #000 !important; color: #fff !important; }
+html.simple-look .hero { display: block !important; padding: 10px 0 !important; border-bottom: 1px solid #9a9a9a; }
+html.simple-look .hero h1 { font-size: 30px !important; }
+html.simple-look .features { gap: 8px !important; }
+html.simple-look .card.feature { padding: 10px 12px !important; }
+html.simple-look .card.feature h3 { margin: 0 0 4px !important; text-decoration: underline; }
+html.simple-look .footer-note { color: #555 !important; border-top: 1px solid #9a9a9a; padding-top: 8px; }
+html.simple-look .avatar { background: #d6d6d6 !important; color: #000 !important; border: 1px solid #7a7a7a !important; }
+html.simple-look .avatar.sm.on::after { background: #000 !important; }
+html.simple-look .role-badge, html.simple-look .title-badge, html.simple-look .tag, html.simple-look .hint-badge, html.simple-look .brill-badge, html.simple-look .badge, html.simple-look .delta, html.simple-look .live-dot {
+  background: #ffffff !important; color: #000 !important; border: 1px solid #000 !important; font-weight: bold !important; font-family: Verdana, Arial, sans-serif !important; }
+html.simple-look .badge.big.brill { background: #e6e6e6 !important; color: #000 !important; }
+html.simple-look .brill-num, html.simple-look .rating-num { color: #000 !important; }
+html.simple-look cg-board square.last-move { background: rgba(0, 0, 0, .18) !important; }
+html.simple-look cg-board square.selected { background: rgba(0, 0, 0, .3) !important; }
+html.simple-look cg-board square.move-dest { background: radial-gradient(rgba(0, 0, 0, .35) 19%, transparent 20%) !important; }
+html.simple-look cg-board square.check { background: rgba(0, 0, 0, .45) !important; }
+html.simple-look .psq.in-check { background-color: #6e6e6e !important; }
+html.simple-look .psq.last { box-shadow: none !important; outline: 3px solid rgba(0, 0, 0, .35); outline-offset: -3px; }
+html.simple-look .psq.sel { outline: 3px solid #000; outline-offset: -3px; }
+html.simple-look .psq.fog { background: #555 !important; }
+html.simple-look .duck { display: inline-grid; place-items: center; width: 70%; height: 70%; margin: 15%; border: 2px solid #000; background: #fff; font: bold 16px Verdana, sans-serif; color: #000; }
+html.simple-look .evalbar { background: #000 !important; border: 1px solid #000 !important; }
+html.simple-look .evalfill { background: #fff !important; }
+html.simple-look .pinfo.turn { outline: 2px solid #000; }
+html.simple-look .clock { background: #fff !important; color: #000 !important; border: 1px solid #000 !important; }
+html.simple-look .pinfo.turn .clock { background: #000 !important; color: #fff !important; }
+html.simple-look #offers .offer { background: #fff !important; border: 2px solid #000 !important; color: #000 !important; }
+html.simple-look #toasts .toast, html.simple-look .toast { background: #000 !important; color: #fff !important; border-radius: 0 !important; }
+html.simple-look .chat-msg.mine .chat-bubble { background: #e0e0e0 !important; color: #000 !important; border: 1px solid #9a9a9a; }
+html.simple-look .chat-msg.theirs .chat-bubble { background: #fff !important; border: 1px solid #9a9a9a; }
+html.simple-look .chat-msgs { background: #f4f4f4 !important; }
+html.simple-look .announce { border: 0 !important; border-bottom: 1px solid #000 !important; font-weight: normal !important; }
+html.simple-look .engine-lock { background: rgba(255, 255, 255, .85) !important; }
+html.simple-look .engine-lock-box { border: 2px solid #000 !important; }
+html.simple-look main.locked > :not(.engine-lock) { filter: none !important; opacity: .15; }
+html.simple-look .pcal-cell.solved, html.simple-look .pcal-cell.failed, html.simple-look .pcal-cell.practiced { background: #e0e0e0 !important; border-color: #000 !important; }
+html.simple-look .pcal-cell.today { outline: 2px solid #000; }
+html.simple-look .pd-dot.solved { background: #000 !important; border-color: #000 !important; }
+html.simple-look .pd-dot.failed { background: #9a9a9a !important; border-color: #555 !important; }
+html.simple-look .daily-row.turn, html.simple-look .daily-row.invite { background: #e6e6e6 !important; border-color: #000 !important; }
+html.simple-look .admin-bar i { background: #000 !important; }
+html.simple-look .switch span, html.simple-look .switch input:checked + span { background: #bbb !important; }
+html.simple-look .badge, html.simple-look .mv .badge, html.simple-look .cls { color: #000 !important; }
+html.simple-look .theme-btn { display: none !important; }
+html.simple-look button.pm-clear { background: #000 !important; color: #fff !important; }

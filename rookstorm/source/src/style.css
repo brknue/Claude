@@ -133,6 +133,9 @@ label.check, .check:not(square) { display: flex; align-items: center; gap: 9px; 
 .tc b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
 .tc small { color: var(--muted); font-size: .75rem; text-align: center; }
 .tc b { max-width: 100%; overflow-wrap: anywhere; text-align: center; hyphens: auto; }
+.qcount { font-size: .68rem; font-weight: 800; color: var(--good); min-height: 0; line-height: 1.2; }
+.qcount.on { margin-top: 2px; }
+.qcount.on::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-inline-end: 4px; vertical-align: 1px; }
 .tc.on { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
 .custom-tc { gap: 12px; }
 .custom-tc .field { flex: 1; }
@@ -213,6 +216,7 @@ cg-board square.current-premove { background-color: rgba(20, 30, 85, .5); }
 .mv.empty { color: var(--muted); cursor: default; }
 .empty-moves { padding: 14px; margin: 0; }
 .navrow { display: flex; gap: 6px; justify-content: center; }
+.navrow .play-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
 .navrow .btn { flex: 1; max-width: 70px; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .actions .btn { flex: 1 1 auto; }
@@ -401,6 +405,16 @@ details.load[open] > *:not(summary) { margin-top: 8px; }
   .board-col, .page-game .board-col, .page-puzzles .board-col, .page-editor .board-col { max-width: min(100%, 720px, calc(100vh - 230px)); max-width: min(100%, 720px, calc(100dvh - 230px)); min-width: 0; }
   .side { position: static; max-height: none; overflow: visible; }
   .movelist { max-height: 160px; }
+  /* phones and tablets: the buttons you need next sit right under the board, no scrolling */
+  .game-layout.puzzles > .side > .pz-controls { order: -3; }
+  .game-layout.puzzles > .side > .navrow, .game-layout.analysis > .side > .navrow { order: -2; }
+  .game-layout.puzzles > .side > .pz-feedback { order: -1; }
+  /* the daily / weekly / calendar links go below the puzzle so the board starts at the top */
+  main.page-puzzles { display: flex; flex-direction: column; }
+  main.page-puzzles > .pday-strip { order: 2; margin: 14px 0 0; }
+  .page-puzzles .pz-top { min-height: 32px; }
+  .game-layout.puzzles > .side { gap: 8px; padding-top: 10px; }
+  .game-layout.puzzles > .side > .pz-feedback:empty { display: none; }
   .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 6px; }
   .hero-board { width: min(80%, 320px); grid-row: 1; }
 }
@@ -488,6 +502,19 @@ details.load[open] > *:not(summary) { margin-top: 8px; }
 .games-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 .game-row { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card2); color: inherit; text-align: start; cursor: pointer; font: inherit; }
 .game-row:hover { border-color: var(--accent-line); }
+.live-games { width: min(520px, 100%); max-width: 100%; }
+.live-games .game-row { grid-template-columns: auto minmax(0, 1fr) auto; }
+.live-games .gr-res { padding: 4px 8px; }
+@media (max-width: 600px) {
+  .live-games .game-row { grid-template-columns: auto minmax(0, 1fr); }
+  .live-games .gr-side { grid-column: 1 / -1; align-items: stretch; }
+  .live-games .deadline { display: flex; gap: 8px; align-items: baseline; text-align: start; border-top: 1px solid var(--line); padding-top: 6px; }
+  .live-games .deadline .block { display: inline; }
+}
+.live-list { max-height: 60vh; overflow: auto; margin: 8px 0; }
+.deadline { text-align: end; }
+.deadline b { font-variant-numeric: tabular-nums; }
+.deadline.urgent b { color: var(--bad); }
 .gr-res { font-weight: 800; font-size: .85rem; text-align: center; padding: 4px 0; border-radius: 7px; background: var(--card); }
 .game-row.win .gr-res { color: var(--good); } .game-row.loss .gr-res { color: var(--bad); } .game-row.live .gr-res { color: #fff; background: var(--bad); }
 .gr-main { display: flex; flex-direction: column; min-width: 0; }
@@ -601,7 +628,30 @@ piece.commoner { opacity: .85; filter: grayscale(.4); }
 .pplayer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: 10px; background: var(--card2); border: 1px solid var(--line); }
 .pplayer.turn { border-color: var(--accent); background: var(--accent-soft); }
 .pplayer.out { opacity: .55; text-decoration: line-through; }
+.away-note:empty { display: none; }
+.away-note { font-size: .85rem; font-weight: 650; padding: 8px 10px; border-radius: 10px; background: var(--gold-soft); border: 1px solid var(--line); }
+.parked-bar { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; background: var(--accent-soft); border-bottom: 1px solid var(--accent-line); font-weight: 650; }
+.parked-bar.over { background: var(--card2); }
 .pplayer.me b::after { content: ' ★'; color: var(--gold); }
+/* captured pieces under each name: wraps into rows inside the box, never pushes the page down */
+.pcaps { flex: 1 1 120px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-height: 22px; }
+.pcap { position: relative; display: inline-flex; align-items: center; gap: 1px; }
+.pcap piece { position: static; display: inline-block; width: 22px; height: 22px; background-size: contain; background-repeat: no-repeat; }
+.pcap small { font-size: .72rem; font-weight: 700; color: var(--muted); }
+.pcap-pts { margin-inline-start: 4px; font-weight: 700; }
+@media (max-width: 760px) { .game-layout.party.four .pplayers { display: grid; grid-template-columns: 1fr 1fr; } .game-layout.party.four .pplayer { padding: 6px 8px; } .pcap piece { width: 18px; height: 18px; } }
+.tb-ask { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--accent-line); background: var(--accent-soft); }
+.tb-ask b { font-size: .9rem; }
+/* party boards: premoves and the promotion line */
+.pboard-wrap { position: relative; }
+.pboard-wrap.has-premoves .pm-clear { display: block; }
+.psq.premove-sq { box-shadow: inset 0 0 0 999px rgba(20, 30, 90, .35); }
+.psq.promo-row { box-shadow: inset 0 0 0 999px rgba(255, 196, 0, .16); }
+.psq.promo-row.last, .psq.promo-row.sel, .psq.promo-row.premove-sq { box-shadow: inset 0 0 0 999px var(--sel); }
+.promo-tag { position: absolute; left: 0; right: 0; pointer-events: none; z-index: 3; border-top: 2px dashed rgba(230, 150, 0, .9); display: flex; align-items: flex-start; }
+.promo-tag span { position: absolute; right: calc(100% + 6px); top: -11px; white-space: nowrap; font: 700 .72rem/1.2 var(--font); color: var(--muted); background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; }
+/* no room beside the board (phones, portrait tablets): the label sits on the board's empty corner */
+@media (max-width: 1080px) { .promo-tag span { right: auto; left: 4px; top: -22px; background: rgba(255, 255, 255, .9); color: #333; } }
 @media (max-width: 760px) {
   .table-area.four { grid-template-columns: 1fr 1fr; grid-template-areas: "top top" "left right" "felt felt" "bottom bottom"; }
   .table-area .felt { max-width: 160px; }
@@ -615,7 +665,7 @@ piece.commoner { opacity: .85; filter: grayscale(.4); }
 }
 /* queued premoves */
 cg-board square.premove-sq { background-color: rgba(214, 64, 48, .5); }
-.pm-clear { display: none; position: absolute; left: 6px; bottom: 6px; z-index: 8; padding: 5px 10px; border-radius: 99px; border: 0; background: rgba(20, 20, 24, .78); color: #fff; font: 700 .78rem/1.2 var(--font); cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.pm-clear { display: none; position: absolute; left: 6px; bottom: 6px; z-index: 8; padding: 4px 9px; min-width: 34px; border-radius: 99px; border: 0; background: rgba(20, 20, 24, .78); color: #fff; font: 700 .78rem/1.2 var(--font); cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
 .board-wrap.has-premoves .pm-clear { display: block; }
 [dir=rtl] .pm-clear { left: auto; right: 6px; }
 
@@ -874,3 +924,33 @@ a.plink:hover { color: var(--accent); }
 .embedded main { padding-bottom: 20px !important; }
 .game-elsewhere { justify-content: center; }
 .psq.in-check.last, .psq.in-check.sel { box-shadow: none; }
+
+.title-badge { display: inline-grid; place-items: center; height: 18px; padding: 0 4px; border-radius: 4px; font: 800 .68rem/1 var(--font); letter-spacing: .02em; color: #fff; background: #b8262b; vertical-align: middle; margin-inline-end: 3px; }
+.title-badge.bot { background: #7c3aed; }
+h1 .title-badge, h2 .title-badge { height: 22px; font-size: .82rem; }
+.role-badges .title-badge { order: -1; }
+
+.update-row { align-items: center; gap: 10px; }
+
+#offers .offer.ask { border-color: var(--accent-line); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.ask-text { display: flex; flex-direction: column; gap: 10px; min-width: min(360px, 80vw); }
+.ask-text p { margin: 0; font-weight: 650; }
+.ask-text input { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card2); color: inherit; font: inherit; }
+
+/* ---------- tablets: big boards, like lichess ---------- */
+/* held upright: the board takes the full width (no 720px cap), leaving room for the clocks and the tab bar */
+@media (min-width: 700px) and (max-width: 860px) and (orientation: portrait) {
+  .board-col, .page-game .board-col, .page-analysis .board-col, .page-watch .board-col { max-width: min(100%, calc(100vh - 300px)); max-width: min(100%, calc(100dvh - 300px)); }
+  .page-table .game-layout.party .board-col, .page-table .game-layout.party.four .board-col { max-width: min(100%, calc(100vh - 230px)); max-width: min(100%, calc(100dvh - 230px)); }
+}
+/* held sideways: during a game the bottom tab bar steps aside (the menu stays in the header) and the board fills the height */
+@media (max-width: 1080px) and (orientation: landscape) and (min-height: 541px) {
+  body:has(main.page-game) .tabbar, body:has(main.page-table) .tabbar { display: none; }
+  main.page-game, main.page-table { padding-bottom: 16px; }
+  .page-game .board-col { max-width: min(100%, calc(100vh - 218px)); max-width: min(100%, calc(100dvh - 218px)); }
+  .page-table .game-layout.party .board-col, .page-table .game-layout.party.four .board-col { max-width: min(100%, calc(100vh - 100px)); max-width: min(100%, calc(100dvh - 100px)); }
+}
+@media (min-width: 1081px) and (max-width: 1400px) and (orientation: landscape) and (pointer: coarse) {
+  .page-game .board-col { max-width: min(100%, calc(100vh - 214px)); max-width: min(100%, calc(100dvh - 214px)); }
+  .page-table .game-layout.party .board-col, .page-table .game-layout.party.four .board-col { max-width: min(100%, calc(100vh - 100px)); max-width: min(100%, calc(100dvh - 100px)); }
+}

@@ -31,12 +31,12 @@ export const $ = (sel: string, root: ParentNode = document) => root.querySelecto
 
 // ---------- Settings ----------
 export interface Settings {
-  theme: 'system' | 'light' | 'dark'; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
+  theme: 'system' | 'light' | 'dark'; simple: boolean; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
   name: string; lastElo: number; animation: boolean; premove: boolean; points: boolean; lang: string;
   /** notifications for messages, challenges and daily games (undefined = not decided yet) */
   notify?: boolean;
 }
-const DEFAULTS: Settings = { theme: 'system', board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true, premove: true, points: true, lang: '' };
+const DEFAULTS: Settings = { theme: 'system', simple: false, board: 'wood', sound: true, coords: true, name: '', lastElo: 1200, animation: true, premove: true, points: true, lang: '' };
 
 export function load<T>(key: string, def: T): T {
   try { const v = localStorage.getItem('rs.' + key); return v ? { ...def as any, ...JSON.parse(v) } : def; } catch { return def; }
@@ -54,8 +54,9 @@ export function applyTheme() {
   if (settings.theme === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', settings.theme);
   root.setAttribute('data-board', settings.board);
   root.classList.toggle('no-coords', !settings.coords);
+  root.classList.toggle('simple-look', !!settings.simple);
   const dark = settings.theme === 'dark' || (settings.theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#14161b' : '#f4f1ea');
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', settings.simple ? '#ffffff' : dark ? '#14161b' : '#f4f1ea');
 }
 
 // ---------- Toast / modal ----------
@@ -103,6 +104,36 @@ export function offerBar(kind: string, text: string, buttons: HTMLElement[]) {
   sound.low();
   return el;
 }
+let askN = 0;
+/**
+ * In-page yes/no question (replaces the browser's confirm()), shown like a takeback request.
+ * Resolves true for the main button, false for Cancel / Escape.
+ */
+export function askConfirm(text: string, opts: { ok?: string; cancel?: string; danger?: boolean } = {}): Promise<boolean> {
+  return new Promise(resolve => {
+    const kind = 'ask-' + (++askN);
+    let done = false;
+    const finish = (v: boolean) => { if (done) return; done = true; clearOffers(kind); document.removeEventListener('keydown', onKey); resolve(v); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') finish(false); };
+    offerBar(kind, text, [btn(opts.ok || t('OK'), () => finish(true), opts.danger ? 'danger small' : 'primary small'), btn(opts.cancel || t('Cancel'), () => finish(false), 'small')]);
+    document.querySelector(`#offers [data-kind="${kind}"]`)?.classList.add('ask');
+    document.addEventListener('keydown', onKey);
+    setTimeout(() => (document.querySelector(`#offers [data-kind="${kind}"] button`) as HTMLElement | null)?.focus(), 30);
+  });
+}
+/** In-page text question (replaces the browser's prompt()). Resolves null on Cancel. */
+export function askText(text: string, opts: { value?: string; ok?: string; password?: boolean; placeholder?: string } = {}): Promise<string | null> {
+  return new Promise(resolve => {
+    let done = false;
+    const input = h('input', { type: opts.password ? 'password' : 'text', value: opts.value ?? '', placeholder: opts.placeholder || '', autocomplete: 'off', 'aria-label': text }) as HTMLInputElement;
+    const finish = (v: string | null) => { if (done) return; done = true; close(); resolve(v); };
+    const close = modal(h('form.ask-text', { onsubmit: (e: Event) => { e.preventDefault(); finish(input.value); } },
+      h('p', null, text), input,
+      h('div.row.end', null, btn(t('Cancel'), () => finish(null)), h('button.btn.primary', { type: 'submit' }, opts.ok || t('OK')))), { onClose: () => finish(null) });
+    setTimeout(() => { input.focus(); input.select(); }, 40);
+  });
+}
+
 export function clearOffers(kind?: string) { document.querySelectorAll(kind ? `#offers [data-kind="${kind}"]` : '#offers .offer').forEach(e => e.remove()); }
 
 // ---------- Sounds (WebAudio, no assets so it works offline) ----------
@@ -215,7 +246,7 @@ export const icon = (name: string) => {
     retry: 'M4 4v6h6M20 20v-6h-6M5 15a8 8 0 0014 3M19 9A8 8 0 005 6', search: 'M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-5-5',
     sun: 'M12 4V2M12 22v-2M4 12H2M22 12h-2M5 5L4 4M20 20l-1-1M5 19l-1 1M20 4l-1 1M12 7a5 5 0 100 10 5 5 0 000-10z',
     moon: 'M20 14A8 8 0 0110 4a8 8 0 1010 10z', gear: 'M12 9a3 3 0 100 6 3 3 0 000-6zM19 12l2-1-2-4-2 1-2-2V4h-4l-1 2-2 1-2-1-2 4 2 1v2l-2 1 2 4 2-1 2 2 1 2h4v-2l2-2 2 1 2-4-2-1z',
-    menu: 'M4 7h16M4 12h16M4 17h16', close: 'M6 6l12 12M18 6L6 18', play: 'M7 4l13 8-13 8z', trash: 'M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13',
+    menu: 'M4 7h16M4 12h16M4 17h16', close: 'M6 6l12 12M18 6L6 18', play: 'M7 4l13 8-13 8z', clock: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0', pause: 'M8 5v14M16 5v14', trash: 'M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13',
     cpu: 'M8 8h8v8H8zM4 10h2M4 14h2M18 10h2M18 14h2M10 4v2M14 4v2M10 18v2M14 18v2M6 6h12v12H6z', users: 'M9 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M16 3a4 4 0 010 8M22 21v-1a6 6 0 00-4-5.6',
     globe: 'M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c3 3 4 6 4 10s-1 7-4 10c-3-3-4-6-4-10s1-7 4-10z',
     puzzle: 'M10 3h4v3a2 2 0 104 0V3h3v7h-3a2 2 0 100 4h3v7h-7v-3a2 2 0 10-4 0v3H3v-7h3a2 2 0 100-4H3V3h7z',
@@ -238,6 +269,14 @@ export const icon = (name: string) => {
 export function btn(label: string | Node, onclick: () => void, cls = '', title?: string): HTMLButtonElement {
   return h('button.btn' + (cls ? '.' + cls.split(' ').join('.') : ''), { onclick, title, 'aria-label': title, type: 'button' }, label) as HTMLButtonElement;
 }
+/** Scroll a list so that el is visible, without scrolling the page (scrollIntoView would move the whole page on phones). */
+export function scrollInside(box: HTMLElement, el: Element | null | undefined) {
+  if (!el || box.scrollHeight <= box.clientHeight) return;
+  const b = box.getBoundingClientRect(), r = el.getBoundingClientRect();
+  if (r.top < b.top) box.scrollTop += r.top - b.top;
+  else if (r.bottom > b.bottom) box.scrollTop += r.bottom - b.bottom;
+}
+
 export function iconBtn(name: string, title: string, onclick: () => void, cls = ''): HTMLButtonElement {
   return btn(icon(name), onclick, 'icon ' + cls, title);
 }

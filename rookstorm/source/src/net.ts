@@ -4,8 +4,9 @@
  * - Online matchmaking: players race to claim a well-known lobby id per pool;
  *   the one who gets it waits, the next one connects to it, then the lobby id is released.
  */
-import Peer, { DataConnection } from 'peerjs';
+import Peer from 'peerjs';
 import { t } from './i18n';
+import { hybrid, HybridConn } from './relay';
 
 export type Msg =
   | { t: 'hello'; name: string; v: number; uid?: string; rating?: number }
@@ -16,7 +17,8 @@ export type Msg =
   | { t: 'flag'; color: 'white' | 'black' } | { t: 'rematch' } | { t: 'rematch-accept' }
   | { t: 'takeback-offer'; ply: number } | { t: 'takeback-accept'; ply: number } | { t: 'takeback-decline' }
   | { t: 'resume'; ucis: string[]; reply?: boolean }
-  | { t: 'chat'; text: string } | { t: 'busy' } | { t: 'ping' } | { t: 'leave' };
+  | { t: 'chat'; text: string } | { t: 'busy' } | { t: 'ping' } | { t: 'leave' }
+  | { t: 'away'; on: boolean };
 
 export const PREFIX = 'rookstorm-v1-';
 /** Several STUN servers plus PeerJS's TURN relay, so phones on mobile data / strict Wi-Fi can still connect. */
@@ -36,21 +38,24 @@ const rid = () => Math.random().toString(36).slice(2, 10);
 
 export class Link {
   peer: Peer | null = null;
-  conn: DataConnection | null = null;
+  conn: HybridConn | null = null;
   onMsg: (m: Msg) => void = () => {};
   onOpen: () => void = () => {};
   onClose: () => void = () => {};
+  /** the connection came back after a break (phone was asleep, network switched) */
+  onReopen: () => void = () => {};
   closed = false;
 
-  private bind(conn: DataConnection) {
+  private bind(conn: HybridConn) {
     this.conn = conn;
     conn.on('data', (d: any) => { if (d && typeof d === 'object' && typeof d.t === 'string') this.onMsg(d as Msg); });
     conn.on('close', () => { if (!this.closed && this.conn === conn) this.onClose(); });
     conn.on('error', () => { if (!this.closed && this.conn === conn) this.onClose(); });
+    conn.on('reopen', () => { if (!this.closed && this.conn === conn) this.onReopen(); });
     if (conn.open) this.onOpen(); else conn.on('open', () => this.onOpen());
   }
 
-  send(m: Msg) { try { if (this.conn?.open) this.conn.send(m); } catch { /* ignore */ } }
+  send(m: Msg) { try { if (this.conn?.alive) this.conn.send(m); } catch { /* ignore */ } }
 
   destroy() {
     this.closed = true;
@@ -88,7 +93,8 @@ export class Link {
         if (e?.type === 'unavailable-id' && existing) { setTimeout(() => { try { peer.reconnect(); } catch { /* */ } }, 2500); return; }
         reject(e);
       });
-      peer.on('connection', (c) => {
+      peer.on('connection', (dc) => {
+        const c = hybrid(dc);
         // Accept a reconnecting friend if the previous channel is gone.
         if (this.conn && this.conn.open) { c.on('open', () => { c.send({ t: 'busy' }); setTimeout(() => c.close(), 300); }); return; }
         this.bind(c);
@@ -110,7 +116,7 @@ export class Link {
         if (done || this.closed) return;
         if (Date.now() - t0 > maxMs) { fail('timeout'); return; }
         if (peer.disconnected) { setTimeout(attempt, 1500); return; }
-        const c = peer.connect(this.target, CONN_OPTS);
+        const c = hybrid(peer.connect(this.target, CONN_OPTS));
         let ok = false;
         const to = setTimeout(() => { if (!ok) { try { c.close(); } catch { /* */ } onStatus(t('Waiting for your friend’s device…')); setTimeout(attempt, 1000); } }, 9000);
         c.on('open', () => {
@@ -142,7 +148,7 @@ export class Link {
         if (this.closed) return;
         if (Date.now() - t0 > maxMs) { reject(new Error('timeout')); return; }
         if (peer.disconnected) { try { peer.reconnect(); } catch { /* */ } setTimeout(attempt, 1500); return; }
-        const c = peer.connect(this.target, CONN_OPTS);
+        const c = hybrid(peer.connect(this.target, CONN_OPTS));
         let ok = false;
         const to = setTimeout(() => { if (!ok) { try { c.close(); } catch { /* */ } attempt(); } }, 6000);
         c.on('open', () => { ok = true; clearTimeout(to); this.bind(c); resolve(); });
@@ -164,7 +170,8 @@ export class Link {
         this.peer = p;
         p.on('open', () => {
           onStatus(t('Waiting for an opponent to join…'));
-          p.on('connection', (c) => {
+          p.on('connection', (dc) => {
+            const c = hybrid(dc);
             if (this.conn || finished) { c.on('open', () => { c.send({ t: 'busy' }); setTimeout(() => c.close(), 200); }); return; }
             finished = true;
             this.bind(c);
@@ -180,7 +187,7 @@ export class Link {
             const g = new Peer(PEER_OPTS);
             this.peer = g;
             g.on('open', () => {
-              const c = g.connect(lobby, CONN_OPTS);
+              const c = hybrid(g.connect(lobby, CONN_OPTS));
               let opened = false;
               const to = setTimeout(() => { if (!opened && !finished) { this.conn = null; try { g.destroy(); } catch { /* */ } attempt(n + 1); } }, 8000);
               c.on('open', () => { opened = true; clearTimeout(to); });

@@ -44,9 +44,11 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        s.setUserAgentString(s.getUserAgentString() + " RookstormApp/2");
+        s.setUserAgentString(s.getUserAgentString() + " RookstormApp/3");
         web.addJavascriptInterface(new Bridge(), "RookstormAndroid");
         web.setWebChromeClient(new WebChromeClient()); // enables alert/confirm/prompt dialogs
+        // downloads (e.g. a newer version of this app) are handed to the browser
+        web.setDownloadListener((url, ua, cd, mime, len) -> { try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (Exception ignored) { } });
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest req) {
@@ -115,6 +117,10 @@ public class MainActivity extends Activity {
 
     /** Small native helpers the website uses when it runs inside the app. */
     class Bridge {
+        /** version of this app (versionCode) */
+        @JavascriptInterface
+        public int version() { return 3; }
+
         /** Show a notification (the page calls this while the app is in the background). */
         @JavascriptInterface
         public void notify(String key, String title, String body, String hash) {

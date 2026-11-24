@@ -1,6 +1,6 @@
 import { badges } from '../badges';
 import { newDailyDialog } from './daily';
-import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame } from '../ui';
+import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame, askConfirm, scrollInside } from '../ui';
 import { t } from '../i18n';
 import { VARIANTS, VariantKey, variantInfo, variantName, variantDesc, startFenFor, materialDiff, outcomeText, reasonText, Color, Outcome, uciToMove, fenOf, moveSquares, Role } from '../chess';
 import { Game } from '../game';
@@ -8,7 +8,8 @@ import { Board } from '../board';
 import { engine, botMove, MIN_ELO, MAX_ELO, whiteCp } from '../engine';
 import { variantMove, variantStop } from '../vengine';
 import { Link, Msg, cleanCode } from '../net';
-import { go, setLeaveGuard } from '../main';
+import { go, setLeaveGuard as setGuardGlobal, setParkable } from '../main';
+import { watchQueues, joinQueue, poolKey } from '../queue';
 import { setAnalysisInput } from './analysis';
 import { me, ratingMode, ratingIn, rpc, niceError, refreshMe, accountsEnabled } from '../account';
 import { Recorder, FinishInfo } from '../record';
@@ -28,6 +29,9 @@ export interface GameConfig {
 
 let pendingConfig: GameConfig | null = null;
 export function startGame(c: GameConfig) { pendingConfig = c; go('game'); }
+export const hasPendingGame = () => !!pendingConfig;
+/** the leave guard of pages other than a game (the game page uses its own, which knows when it is parked) */
+const setLeaveGuard = setGuardGlobal;
 
 export const TIME_PRESETS: [number, number, string][] = [
   [1, 0, 'Bullet'], [2, 1, 'Bullet'], [3, 0, 'Blitz'], [3, 2, 'Blitz'], [5, 0, 'Blitz'], [5, 3, 'Blitz'],
@@ -68,6 +72,19 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
   const modes: [Mode, string, string][] = [['bot', 'Computer', 'cpu'], ['local', 'Same device', 'users'], ['friend', 'Friend link', 'link'], ['online', 'Online', 'globe'], ['daily', 'Daily', 'calendar'], ['party', 'Party', 'party']];
 
   const persist = () => save('setup', { mode, variant, time, inc, color, autoFlip, rated, infPremoves });
+  // Online: live number of players searching in each time control
+  let qCounts = new Map<string, number>();
+  let stopQ: (() => void) | null = null;
+  const isRatedNow = (tm: number, i: number) => rated && !!me && !!ratingMode(variant, tm, i);
+  const qBadge = (tm: number, i: number) => h('span.qcount', { 'data-tm': String(tm), 'data-inc': String(i) });
+  function paintCounts() {
+    body.querySelectorAll<HTMLElement>('.qcount').forEach(el => {
+      const tm = Number(el.dataset.tm), i = Number(el.dataset.inc);
+      const n = qCounts.get(poolKey(variant, tm, i, isRatedNow(tm, i))) || 0;
+      el.textContent = n ? t('{0} searching', n) : '';
+      el.classList.toggle('on', n > 0);
+    });
+  }
 
   function render() {
     tabs.replaceChildren(...modes.map(([m, label, ic]) => h('button', {
@@ -115,8 +132,8 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
     const custom = !TIME_PRESETS.some(([tm, i]) => tm === time && i === inc);
     const grid = h('div.tc-grid', null, TIME_PRESETS.map(([tm, i, cat]) => h('button.tc', {
       type: 'button', class: tm === time && i === inc ? 'on' : '', onclick: () => { time = tm; inc = i; persist(); render(); },
-    }, h('b', null, tcLabel(tm, i)), h('small', null, t(cat)))),
-    h('button.tc', { type: 'button', class: custom ? 'on' : '', onclick: () => { if (!custom) { time = 7; inc = 2; } persist(); render(); } }, h('b', null, t('Custom')), h('small', null, custom ? tcLabel(time, inc) : t('Any time'))));
+    }, h('b', null, tcLabel(tm, i)), h('small', null, t(cat)), mode === 'online' ? qBadge(tm, i) : null)),
+    h('button.tc', { type: 'button', class: custom ? 'on' : '', onclick: () => { if (!custom) { time = 7; inc = 2; } persist(); render(); } }, h('b', null, t('Custom')), h('small', null, custom ? tcLabel(time, inc) : t('Any time')), mode === 'online' && custom ? qBadge(time, inc) : null));
     body.append(h('div.field', null, h('span.lbl', null, t('Time control')), grid));
     if (custom) {
       body.append(h('div.row.custom-tc', null,
@@ -145,6 +162,9 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
       if (!me) body.append(h('label.field', null, h('span.lbl', null, t('Your name')), h('input', { value: settings.name, maxLength: 20, placeholder: t('Anonymous'), oninput: (e: any) => { settings.name = e.target.value.slice(0, 20); saveSettings(); } })));
       body.append(h('p.muted', null, t('You are paired with the next player searching for the same variant and time control. Needs an internet connection.')));
     }
+    if (mode === 'online' && !stopQ) stopQ = watchQueues(c => { qCounts = c; paintCounts(); });
+    if (mode !== 'online' && stopQ) { stopQ(); stopQ = null; }
+    if (mode === 'online') setTimeout(paintCounts);
     const label = mode === 'bot' ? (sf ? t('Play vs Stockfish') : t('Play vs computer')) : mode === 'local' ? t('Start game') : mode === 'friend' ? t('Create invite link') : t('Find opponent');
     body.append(btn(h('span', null, icon('play'), label), start, 'primary big block'));
   }
@@ -178,6 +198,7 @@ export function playSetupPage(root: HTMLElement, arg?: string) {
 
   render();
   root.append(h('section.setup.card', null, h('h1', null, t('New game')), tabs, body));
+  return () => { stopQ?.(); stopQ = null; };
 }
 
 const NO_RTC = () => t('This browser cannot make live peer-to-peer connections (WebRTC is turned off or missing). Try Safari, Chrome, Edge or Firefox, and turn off Lockdown Mode if it is on.');
@@ -260,10 +281,12 @@ function findOnline(variant: VariantKey, time: number, inc: number, rated: boole
   const close = modal(h('div.center', null, h('h2', null, t('Finding an opponent')),
     h('p.muted', null, `${variantName(variant)} · ${tcLabel(time, inc)}${rated ? ' · ' + t('Rated') : ''}`), h('div.spinner-row', null, h('span.spinner'), status),
     h('p.muted.small', null, t('Tip: ask a friend to search for the same variant and time control to play each other.')),
-    h('div.row.center', null, btn(t('Cancel'), () => { link.destroy(); close(); }))), { dismissable: false });
+    h('div.row.center', null, btn(t('Cancel'), () => { leaveQ(); link.destroy(); close(); }))), { dismissable: false });
   const pool = `${variant}-${time}-${inc}${rated ? '-r' : ''}`.replace('.', '_');
   const myRating = myRatingFor(variant, time, inc);
+  const leaveQ = joinQueue(pool);
   link.matchmake(pool, s => { status.textContent = s; }).then(role => {
+    leaveQ();
     if (role === 'host') {
       link.onMsg = (m) => {
         if (m.t === 'hello') {
@@ -283,7 +306,7 @@ function findOnline(variant: VariantKey, time: number, inc: number, rated: boole
       };
       link.send({ t: 'hello', name: myName(), v: 1, uid: me?.id, rating: myRating });
     }
-  }).catch((e) => { status.textContent = noRtc() ? NO_RTC() : String(e?.message || t('Connection failed.')); });
+  }).catch((e) => { leaveQ(); status.textContent = noRtc() ? NO_RTC() : String(e?.message || t('Connection failed.')); });
 }
 
 export function joinPage(root: HTMLElement, raw?: string) {
@@ -367,6 +390,15 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   let ratingInfo: FinishInfo | null = null;
   let ratedNow = false;
   let shown = false;
+  // leaving the page parks a game against a person: it keeps running; the opponent sees that you are away
+  let parkedNow = false;
+  let endModalLater = false;
+  const guard = (f: (() => boolean) | null) => { if (!parkedNow) setGuardGlobal(f); };
+  /** when the opponent went away (left the page, phone asleep or no signal); 0 = here */
+  let oppAway = 0;
+  let oppAwayExplicit = false;
+  const longGame = !cfg.time || cfg.time >= 15;
+  const AWAY_LIMIT = 3 * 60000;
 
   const board = new Board({ orientation: cfg.myColor, onMove: (m) => onUserMove(m) });
   board.chess960 = cfg.variant === 'chess960';
@@ -381,6 +413,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   const status = h('div.status');
   const actions = h('div.actions');
   const endBox = h('div.endbox');
+  const awayNote = h('div.away-note');
   const chatLog = h('div.chat-log');
   const headInfo = h('span.muted');
   const nav = h('div.navrow', null,
@@ -390,7 +423,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
 
   const side = h('aside.side.card', null,
     h('div.side-head', null, h('div', null, h('b', null, variantName(cfg.variant)), headInfo), status),
-    moveList, nav, endBox, actions, h('div.game-opts', null, premoveToggle()),
+    awayNote, moveList, nav, endBox, actions, h('div.game-opts', null, premoveToggle()),
     net ? h('div.chat', null, chatLog, h('form.chat-form', { onsubmit: (e: Event) => { e.preventDefault(); const inp = (e.target as HTMLFormElement).querySelector('input')!; const text = inp.value.trim().slice(0, 140); if (!text) return; cfg.link!.send({ t: 'chat', text }); addChat(t('You'), text); inp.value = ''; } },
       h('input', { placeholder: t('Say something nice…'), maxLength: 140, 'aria-label': t('Chat message') }), btn(t('Send'), () => {}, 'small'))) : null);
 
@@ -522,7 +555,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     if (!rows.length) moveList.append(h('div.muted.small.empty-moves', null, t('Moves will appear here.')));
     const curEl = moveList.querySelector('.cur') as HTMLElement | null;
     if (curEl && viewPly === null) moveList.scrollTop = moveList.scrollHeight;
-    else curEl?.scrollIntoView({ block: 'nearest' });
+    else scrollInside(moveList, curEl);
   }
 
   function interactive() {
@@ -618,14 +651,14 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     clock.stop();
     engine.stop(); variantStop();
     botBusy = false;
-    setLeaveGuard(null);
+    guard(null);
     sound.end();
     board.cancelPremove();
     sync();
     renderEnd();
     saveHistory();
     clearOffers();
-    showEndModal();
+    if (parkedNow) endModalLater = true; else showEndModal();
     if (rec) {
       const r = game.result!;
       const thisRec = rec;
@@ -704,7 +737,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     if (ply >= 1) clock.start(game.pos.turn);
     drawOffered = false;
     if (cfg!.mode === 'local' && cfg!.autoFlip) board.setOrientation(game.pos.turn);
-    setLeaveGuard(game.ply >= 1 && !game.result ? () => confirm(t('Leave this game? It will be lost.')) : null);
+    guard(game.ply >= 1 && !game.result ? () => true : null);
   }
 
   function onUserMove(m: any) {
@@ -802,7 +835,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
 
   async function offerDraw() {
     if (game.result || drawOffered) return;
-    if (cfg!.mode === 'local') { if (confirm(t('Agree to a draw?'))) finish({ reason: 'agreement' }); return; }
+    if (cfg!.mode === 'local') { if (await askConfirm(t('Agree to a draw?'), { ok: t('Draw') })) finish({ reason: 'agreement' }); return; }
     if (cfg!.mode === 'bot') {
       if (game.ply < 20) { toast(t('The computer declines: too early for a draw.')); return; }
       drawOffered = true; renderActions();
@@ -817,9 +850,9 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     drawOffered = true; cfg!.link!.send({ t: 'draw-offer' }); toast(t('Draw offer sent')); renderActions();
   }
 
-  function resign() {
+  async function resign() {
     if (game.result) return;
-    if (!confirm(t('Resign this game?'))) return;
+    if (!(await askConfirm(t('Resign this game?'), { ok: t('Resign'), danger: true })) || game.result) return;
     const loser: Color = cfg!.mode === 'local' ? game.pos.turn : cfg!.myColor;
     if (net) cfg!.link!.send({ t: 'resign' });
     finish({ winner: loser === 'white' ? 'black' : 'white', reason: loser === 'white' ? 'White resigned' : 'Black resigned' });
@@ -947,8 +980,15 @@ export function gamePage(root: HTMLElement): (() => void) | void {
           break;
         case 'rematch-accept': if (game.result) doRematch(); break;
         case 'leave': if (!game.result) { toast(t('{0} left the game.', cfg.oppName)); finish({ winner: cfg.myColor, reason: 'opponent left' }); } else toast(t('{0} left.', cfg.oppName)); break;
+        case 'away':
+          if (game.result) return;
+          if (m.on) { if (!oppAway) oppAway = Date.now(); oppAwayExplicit = true; toast(longGame ? t('{0} left the game. If they are not back within 3 minutes, you win.', cfg.oppName) : t('{0} left the game. Their clock keeps running: they can come back until it runs out.', cfg.oppName)); }
+          else { if (oppAway) toast(t('{0} is back.', cfg.oppName)); oppAway = 0; oppAwayExplicit = false; }
+          renderAway();
+          break;
       }
     };
+    link.onReopen = () => { if (alive) link.send({ t: 'resume', ucis: game.ucis.slice() }); };
     link.onClose = () => {
       if (!alive || game.result) return;
       if (cfg.mode === 'friend') {
@@ -960,14 +1000,50 @@ export function gamePage(root: HTMLElement): (() => void) | void {
       finish({ winner: cfg.myColor, reason: 'opponent disconnected' });
     };
     const inner = link.onMsg;
-    link.onMsg = (m: Msg) => { lastSeen = Date.now(); if (m.t !== 'ping') inner(m); };
+    link.onMsg = (m: Msg) => {
+      lastSeen = Date.now();
+      // any message after a silence: they are back (unless they said they left the page)
+      if (oppAway && !oppAwayExplicit && m.t !== 'away') { oppAway = 0; toast(t('{0} is back.', cfg.oppName)); renderAway(); }
+      if (m.t !== 'ping') inner(m);
+    };
     heartbeat = setInterval(() => {
       link.send({ t: 'ping' });
-      if (alive && !game.result && Date.now() - lastSeen > 45000) { toast(t('Opponent connection lost.')); finish({ winner: cfg.myColor, reason: 'opponent disconnected' }); }
-    }, 4000);
+      if (!alive || game.result) return;
+      // silence: their phone sleeps or lost signal. Not a loss: their clock keeps running and they can come back
+      if (!oppAway && Date.now() - lastSeen > 20000) { oppAway = lastSeen; oppAwayExplicit = false; toast(t('Opponent connection lost. Waiting for them to come back…')); }
+      // long or unlimited games have no clock pressure: away for more than 3 minutes loses
+      if (oppAway && longGame && Date.now() - oppAway > AWAY_LIMIT) { finish({ winner: cfg.myColor, reason: 'opponent left' }); return; }
+      renderAway();
+    }, 2000);
     window.addEventListener('pagehide', onHide);
   }
-  function onHide() { cfg!.link?.send({ t: 'leave' }); }
+  /** closing the tab or the app: tell the opponent we are away (we may come back while our clock runs) */
+  function onHide() { cfg!.link?.send({ t: 'away', on: true }); }
+  function renderAway() {
+    if (!oppAway || game.result) { awayNote.replaceChildren(); return; }
+    const left = Math.max(0, AWAY_LIMIT - (Date.now() - oppAway));
+    awayNote.replaceChildren(h('span.live-dot'), ' ', longGame
+      ? t('{0} is away. You win if they are not back in {1}.', cfg!.oppName, `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')}`)
+      : t('{0} is away. Their clock keeps running.', cfg!.oppName));
+  }
+  if (net) setParkable({
+    over: () => !!game.result || !alive,
+    label: () => {
+      const opp = cfg!.oppName;
+      if (game.result) return t('Your game vs {0} has ended.', opp);
+      const mine = clock.enabled ? ' · ' + t('your clock {0}', fmtClock(clock.now(cfg!.myColor))) : '';
+      return t('Your game vs {0} is still running', opp) + ' · ' + (game.pos.turn === cfg!.myColor ? t('Your move') : t('Their move')) + mine + (longGame ? ' · ' + t('come back within 3 minutes') : '');
+    },
+    onPark: () => { parkedNow = true; cfg!.link?.send({ t: 'away', on: true }); },
+    onResume: () => {
+      parkedNow = false;
+      cfg!.link?.send({ t: 'away', on: false });
+      cfg!.link?.send({ t: 'resume', ucis: game.ucis.slice() });
+      guard(game.ply >= 1 && !game.result ? () => true : null);
+      sync(); renderClocks(); renderAway();
+      if (endModalLater) { endModalLater = false; showEndModal(); }
+    },
+  });
   let rematchCount = 0;
   function doRematch() {
     if (!game.result) return;
@@ -985,7 +1061,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   }
 
   const keys = (e: KeyboardEvent) => {
-    if ((e.target as HTMLElement).tagName === 'INPUT') return;
+    if ((e.target as HTMLElement).tagName === 'INPUT' || parkedNow) return;
     if (e.key === 'ArrowLeft') view((viewPly ?? game.ply) - 1);
     else if (e.key === 'ArrowRight') view((viewPly ?? game.ply) + 1);
     else if (e.key === 'f') { board.flip(); renderStrips(); }
@@ -1001,11 +1077,12 @@ export function gamePage(root: HTMLElement): (() => void) | void {
 
   return () => {
     clearInterval(liveBeat); if (net) markLiveGame(false);
+    if (net) setParkable(null);
     alive = false;
     clearInterval(timer);
     engine.stop(); variantStop();
     document.removeEventListener('keydown', keys);
-    setLeaveGuard(null);
+    guard(null);
     clearOffers(); closeEndModal?.();
     // leaving an unfinished game counts as a loss on the account
     if (rec && !game.result && game.ply >= 1) rec.finish(cfg.mode === 'local' ? undefined : cfg.myColor === 'white' ? 'black' : 'white', 'abandoned', game.ucis);

@@ -1,14 +1,15 @@
 import 'chessground/assets/chessground.base.css';
 import 'chessground/assets/chessground.cburnett.css';
 import './style.css';
-import { h, icon, settings, saveSettings, applyTheme, modal, closeModals, btn, offerBar, clearOffers, toast, appBridge, inApp, isIOS, isAndroid, installed, loadRaw, save } from './ui';
+import './simple.css';
+import { h, icon, settings, saveSettings, applyTheme, modal, closeModals, btn, offerBar, clearOffers, toast, appBridge, inApp, isIOS, isAndroid, installed, loadRaw, save, askConfirm } from './ui';
 import { t, LANGS, setLang, detectLang } from './i18n';
 import { accountPage, profilePage, friendsPage, watchPage, legalPage } from './pages/social';
 import { me, initAccount, onAccount, onChallenges, accountsEnabled, rpc, niceError, Challenge } from './account';
 import { variantName } from './chess';
 import { tcLabel } from './pages/play';
 import { tablePage } from './pages/party';
-import { playSetupPage, gamePage, joinPage } from './pages/play';
+import { playSetupPage, gamePage, joinPage, hasPendingGame } from './pages/play';
 import { analysisPage } from './pages/analysis';
 import { editorPage } from './pages/editor';
 import { openingsPage } from './pages/openings';
@@ -73,15 +74,71 @@ export let leaveGuard: (() => boolean) | null = null;
 export const setLeaveGuard = (f: (() => boolean) | null) => { leaveGuard = f; };
 let lastHash = location.hash;
 
+/**
+ * A game against a person can be left without losing it: the page is "parked" (kept running, off screen) and a bar
+ * on every other page leads back. The game page describes itself with this hook while it can be parked.
+ */
+export interface ParkHook { label: () => string; over: () => boolean; onPark: () => void; onResume: () => void }
+let parkHook: ParkHook | null = null;
+export const setParkable = (p: ParkHook | null) => { parkHook = p; };
+let parked: { el: HTMLElement; cleanup: Cleanup; hook: ParkHook } | null = null;
+export const gameParked = () => !!parked && !parked.hook.over();
+
+function parkBar() {
+  let bar = document.querySelector('.parked-bar') as HTMLElement | null;
+  if (!parked || /^#\/game/.test(location.hash) || embedded) { bar?.remove(); return; }
+  const over = parked.hook.over();
+  if (!bar) {
+    bar = h('div.announce.parked-bar', null, h('span.parked-text'), btn('', () => go('game'), 'small primary'));
+    document.body.insertBefore(bar, document.querySelector('main'));
+  }
+  bar.classList.toggle('over', over);
+  bar.querySelector('.parked-text')!.textContent = parked.hook.label();
+  const b = bar.querySelector('button')!;
+  const label = over ? t('See the result') : t('Back to the game');
+  if (b.textContent !== label) b.textContent = label;
+}
+setInterval(parkBar, 1000);
+
 function route() {
-  if (leaveGuard && location.hash !== lastHash) {
-    if (!leaveGuard()) { history.replaceState(null, '', lastHash || '#/'); return; }
-    leaveGuard = null;
+  const canPark = !!parkHook && !parkHook.over();
+  if (leaveGuard && !canPark && location.hash !== lastHash) {
+    // leaving a running game (back button, typed address): ask in the page, stay until confirmed
+    const target = location.hash;
+    history.replaceState(null, '', lastHash || '#/');
+    if (leaveGuard()) askConfirm(t('Leave this game? It will be lost.'), { ok: t('Leave'), danger: true }).then(ok => { if (ok) { leaveGuard = null; location.hash = target; } });
+    return;
   }
   lastHash = location.hash;
   closeModals();
   const [name, arg] = location.hash.replace(/^#\/?/, '').split('/');
   const fn = routes[name] || homePage;
+  // leaving a running game against a person: keep it going in the background
+  if (canPark && main.className === 'page-game' && name !== 'game') {
+    if (parked) parked.cleanup?.();
+    const el = document.createElement('div');
+    while (main.firstChild) el.appendChild(main.firstChild);
+    parked = { el, cleanup, hook: parkHook! };
+    parkHook = null; leaveGuard = null; cleanup = undefined;
+    parked.hook.onPark();
+  }
+  // back to the parked game
+  if (name === 'game' && parked && !hasPendingGame()) {
+    if (typeof cleanup === 'function') cleanup();
+    main.innerHTML = '';
+    main.className = 'page-game';
+    document.querySelectorAll('.nav a, .tabbar a, .top-actions a').forEach(a => a.classList.toggle('active', a.getAttribute('data-r') === 'play'));
+    document.body.classList.remove('nav-open');
+    window.scrollTo(0, 0);
+    const p = parked; parked = null;
+    while (p.el.firstChild) main.appendChild(p.el.firstChild);
+    cleanup = p.cleanup; parkHook = p.hook;
+    p.hook.onResume();
+    parkBar();
+    return;
+  }
+  // a new game replaces the parked one (it counts as left)
+  if (name === 'game' && parked) { const p = parked; parked = null; p.cleanup?.(); }
   if (typeof cleanup === 'function') cleanup();
   cleanup = undefined;
   main.innerHTML = '';
@@ -91,6 +148,7 @@ function route() {
   document.body.classList.remove('nav-open');
   window.scrollTo(0, 0);
   cleanup = fn(main, arg ? decodeURIComponent(arg) : undefined);
+  parkBar();
 }
 
 export function go(path: string) {
@@ -141,7 +199,7 @@ function setupUpdates() {
   if (!('serviceWorker' in navigator) || import.meta.env.DEV) return;
   let hadController = !!navigator.serviceWorker.controller;
   let reloading = false;
-  const busy = () => !!leaveGuard || /^#\/(game|table|join)/.test(location.hash)
+  const busy = () => !!leaveGuard || gameParked() || /^#\/(game|table|join)/.test(location.hash)
     || [...document.querySelectorAll('textarea, input:not([type=checkbox]):not([type=range])')].some(el => (el as HTMLInputElement).value && el === document.activeElement);
   const reload = () => { if (reloading) return; reloading = true; location.reload(); };
   navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -159,6 +217,32 @@ function setupUpdates() {
     } catch { /* private mode etc.: the site still works online */ }
   };
   if (document.readyState === 'complete') start(); else window.addEventListener('load', start);
+}
+
+/** Android app version from its user agent ("RookstormApp/3"), 0 when not in the app */
+const appVer = () => Number(/RookstormApp\/(\d+)/.exec(navigator.userAgent)?.[1] || 0);
+
+/** Settings → Check for updates: a newer Android app (download it?) and a newer website version (reload?). */
+async function checkUpdates() {
+  toast(t('Checking for updates…'));
+  let v: { build: string; android: number } | null = null;
+  try { v = await (await fetch('version.json?t=' + Date.now(), { cache: 'no-store' })).json(); } catch { toast(t('No connection. Try again when you are online.')); return; }
+  if (!v) return;
+  const { APK_DOWNLOAD } = await import('./config');
+  // 1. the Android app itself
+  if (inApp && appVer() && v.android > appVer()) {
+    if (await askConfirm(t('A new Android app (version {0}) is available. Download it to update?', v.android) + ' ' + t('After the download, open the file and tap Install. Your games and settings stay.'), { ok: t('Download') })) location.href = APK_DOWNLOAD;
+    return;
+  }
+  // 2. the website (also what the iPhone / Android apps show)
+  if (v.build !== __BUILD__) {
+    if (await askConfirm(t('A new version of Rookstorm is ready ({0}). Update now?', v.build), { ok: t('Update') })) {
+      try { const reg = await navigator.serviceWorker?.getRegistration(); await reg?.update(); } catch { /* */ }
+      setTimeout(() => location.reload(), 1200);
+    }
+    return;
+  }
+  toast(t('You have the newest version.'));
 }
 
 function themeIcon() { return icon(settings.theme === 'dark' ? 'moon' : settings.theme === 'light' ? 'sun' : 'half'); }
@@ -212,6 +296,7 @@ function openSettings() {
     h('h2', null, t('Settings')),
     h('h3.set-h', null, t('Appearance')),
     sel(t('Language'), 'lang', [['', t('Match my device')], ...LANGS], async () => { await setLang(detectLang(settings.lang)); close(); rebuild(); }),
+    chk(t('Simple look'), 'simple', t('Plain white, black and grey without effects, like Simple Chess.')),
     sel(t('Theme'), 'theme', [['system', t('Match my device')], ['light', t('Light')], ['dark', t('Dark')]]),
     sel(t('Board colors'), 'board', [['wood', t('Wood')], ['blue', t('Ice blue')], ['green', t('Tournament green')], ['slate', t('Slate')]]),
     chk(t('Board coordinates'), 'coords'), chk(t('Piece animation'), 'animation'),
@@ -235,7 +320,8 @@ function openSettings() {
           h('p.muted.small', null, t('Free, from Safari: Share, then Add to Home Screen.'))])
         : [h('a.btn.block', { href: APK, download: 'rookstorm.apk' }, icon('phone'), t('Install the Android app')),
           h('p.muted.small', null, t('Free, about 20 KB. Plays with website players. When you open the file, Android asks you to allow installing it.'))]],
-    h('p.muted.small.version', null, t('Version {0}', __BUILD__)),
+    h('h3.set-h', null, t('App updates')),
+    h('div.row.wrap.update-row', null, btn(h('span', null, icon('retry'), t('Check for updates')), () => checkUpdates(), ''), h('span.muted.small.version', null, t('Version {0}', __BUILD__), appVer() ? ' · ' + t('Android app {0}', appVer()) : '')),
     h('div.row.end', null, btn(t('Done'), () => close(), 'primary'))));
 }
 
@@ -377,7 +463,7 @@ async function init() {
   document.body.append(main);
   buildChrome();
   window.addEventListener('hashchange', route);
-  window.addEventListener('beforeunload', (e) => { if (leaveGuard) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', (e) => { if ((leaveGuard && leaveGuard()) || gameParked()) { e.preventDefault(); e.returnValue = ''; } });
   onChallenges(showChallenges);
   if (embedded) document.documentElement.classList.add('embedded');
   if (!embedded) { initNotify(); setupUpdates(); showAnnouncement(); }
@@ -388,7 +474,9 @@ async function init() {
     if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
     const href = a.getAttribute('href') || '';
     if (!href.startsWith('#/') || href === location.hash) return;
-    if (!(leaveGuard || (gameRoute() && a.classList.contains('plink')))) return;
+    // a game against a person keeps running when you leave it (parked), so menu links just go there
+    const parkable = !!parkHook && !parkHook.over();
+    if (!((leaveGuard && !parkable) || (gameRoute() && a.classList.contains('plink')))) return;
     e.preventDefault(); e.stopPropagation();
     openAside(href);
   }, true);

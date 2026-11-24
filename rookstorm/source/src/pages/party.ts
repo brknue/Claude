@@ -1,8 +1,8 @@
 /** Party variants: setup inside Play, the table lobby (pick a seat) and the game itself. */
-import { h, icon, btn, toast, copyText, settings, loadRaw, save, sound } from '../ui';
+import { h, icon, btn, toast, copyText, settings, loadRaw, save, sound, askConfirm } from '../ui';
 import { t } from '../i18n';
-import { PARTY_VARIANTS, partyVariant, SPEEDS, Variant, State, inCheck } from '../arcade/rules';
-import { PartyBoard, seatColor } from '../arcade/view';
+import { PARTY_VARIANTS, partyVariant, SPEEDS, Variant, State, inCheck, VALUE, PT } from '../arcade/rules';
+import { PartyBoard, seatColor, pieceEl } from '../arcade/view';
 import { TableHost, TableGuest, TableClient } from '../arcade/table';
 import { me } from '../account';
 import { go, setLeaveGuard } from '../main';
@@ -144,6 +144,18 @@ export function tablePage(root: HTMLElement, code?: string) {
     return check + turnName + (extra ? ' · ' + extra : '');
   }
 
+  /** pieces a player has taken, in the colour of the army they came from; grouped with a count so the row never grows long */
+  function capsRow(v: Variant, st: State, seat: number): HTMLElement | null {
+    const caps = st.caps?.[seat];
+    if (!caps?.length) return null;
+    const groups = new Map<string, { t: PT; o: number; n: number }>();
+    for (const c of caps) { const k = c.o + c.t; const g = groups.get(k); if (g) g.n++; else groups.set(k, { t: c.t, o: c.o, n: 1 }); }
+    const list = [...groups.values()].sort((a, b) => a.o - b.o || VALUE[b.t] - VALUE[a.t]);
+    const pts = caps.reduce((a, c) => a + (VALUE[c.t] >= 100 ? 0 : VALUE[c.t]), 0);
+    return h('div.pcaps', { title: t('Captured pieces') }, list.map(g => h('span.pcap.cg-wrap', null, pieceEl(v, { t: g.t, o: g.o }), g.n > 1 ? h('small', null, '×' + g.n) : null)),
+      pts ? h('span.pcap-pts.muted.small', null, '+' + pts) : null);
+  }
+
   function gameView(L: NonNullable<TableClient['lobby']>, st: State) {
     const v = partyVariant(L.variant);
     const mine = client.mySeat();
@@ -160,13 +172,22 @@ export function tablePage(root: HTMLElement, code?: string) {
     board.update(st, canAct);
     if (st.ply !== lastPly) { if (lastPly >= 0) sound.move(); lastPly = st.ply; }
     if (st.over && !endPlayed) { endPlayed = true; sound.end(); } else if (!st.over) endPlayed = false;
-    setLeaveGuard(canAct ? () => confirm(t('Leave this game? It will be lost.')) : null);
+    setLeaveGuard(canAct ? () => true : null);
     const players = L.seats.map((s, i) => h('div.pplayer', { class: `c-${seatColor(v, i)}${!st.alive[i] ? ' out' : ''}${!v.realtime && !st.over && st.turn === i ? ' turn' : ''}${i === mine ? ' me' : ''}` },
       h('span.sdot'), h('b', null, seatLabel(L, i) || t(COLOR_NAME[seatColor(v, i)])),
       h('span.muted.small', null, [i === mine ? t('You') : '', s.away ? t('away') : '', !st.alive[i] ? t('out') : '', v.teams ? t('Team {0}', (i % 2) + 1) : ''].filter(Boolean).join(' · ')),
-      client.isHost && s.kind === 'human' && s.away && !st.over ? btn(t('Let the computer play'), () => client.setSeat!(i, 'bot'), 'small') : null));
+      client.isHost && s.kind === 'human' && s.away && !st.over ? btn(t('Let the computer play'), () => client.setSeat!(i, 'bot'), 'small') : null,
+      capsRow(v, st, i)));
     const acts: (HTMLElement | null)[] = [];
-    if (canAct) acts.push(btn(h('span', null, icon('flag'), t('Resign')), () => { if (confirm(t('Resign this game?'))) client.resign(); }, 'danger'));
+    const tb = L.tb;
+    if (tb && !st.over) {
+      const who = seatLabel(L, tb.by) || t(COLOR_NAME[seatColor(v, tb.by)]);
+      if (tb.by === mine) acts.push(h('p.muted.small.tb-wait', null, t('Takeback requested. Waiting for the other players…')));
+      else if (mine !== null && tb.need.includes(mine) && !tb.ok.includes(mine)) acts.push(h('div.tb-ask', null, h('b', null, t('{0} asks to take back a move.', who)),
+        h('div.row', null, btn(t('Accept'), () => client.answerTakeback(true), 'primary small'), btn(t('Decline'), () => client.answerTakeback(false), 'small'))));
+      else acts.push(h('p.muted.small.tb-wait', null, t('{0} asks to take back a move.', who)));
+    } else if (canAct && !v.realtime && st.ply > 0) acts.push(btn(h('span', null, icon('back'), t('Takeback')), () => client.takeback(), ''));
+    if (canAct) acts.push(btn(h('span', null, icon('flag'), t('Resign')), async () => { if (await askConfirm(t('Resign this game?'), { ok: t('Resign'), danger: true })) client.resign(); }, 'danger'));
     if (st.over && client.isHost) acts.push(btn(h('span', null, icon('retry'), t('Play again')), () => client.start!(), 'primary'), btn(t('Back to table'), () => client.toLobby!()));
     if (st.over && !client.isHost) acts.push(h('p.muted.small', null, t('Waiting for the host…')));
     acts.push(btn(t('Leave table'), leave, 'ghost'));
@@ -179,8 +200,8 @@ export function tablePage(root: HTMLElement, code?: string) {
     view.replaceChildren(h('div.game-layout.party', { class: v.players === 4 ? 'four' : '' }, col, side));
   }
 
-  function leave() {
-    if (client.st && !client.st.over && client.mySeat() !== null && !confirm(t('Leave this game? It will be lost.'))) return;
+  async function leave() {
+    if (client.st && !client.st.over && client.mySeat() !== null && !(await askConfirm(t('Leave this game? It will be lost.'), { ok: t('Leave'), danger: true }))) return;
     setLeaveGuard(null);
     go('play/party');
   }

@@ -1,0 +1,29 @@
+{
+  "name": "simplechess",
+  "version": "1.0.0",
+  "description": "Simple Chess",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.119.2",
+    "chessground": "^9.2.1",
+    "chessops": "^0.15.1",
+    "peerjs": "^1.5.5",
+    "stockfish": "^17.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0"
+  },
+  "private": true
+}
