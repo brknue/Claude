@@ -671,6 +671,14 @@ piece.commoner { opacity: .85; filter: grayscale(.4); }
 .course-moves { display: flex; flex-wrap: wrap; gap: 4px 8px; }
 .course-moves .played { color: var(--text); } .course-moves .next { font-weight: 800; color: var(--accent); }
 @media (max-width: 860px) { .game-layout.lesson > .side > .pz-controls { order: -4; } .game-layout.lesson > .side > .pz-feedback { order: -3; } .game-layout.lesson > .side > .learn-head { order: -2; } }
+.news { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.news h1 { margin-bottom: 0; }
+.news-rel h2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 1.15rem; margin: 0 0 6px; }
+.news-rel .tag { font-size: .7rem; }
+.news-v { display: inline-block; min-width: 44px; text-align: center; padding: 2px 8px; border-radius: 99px; background: var(--card2); border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.news-rel.latest .news-v { background: var(--accent); color: #fff; border-color: var(--accent); }
+.news-rel ul { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 5px; line-height: 1.45; }
+.news-link { margin-top: 6px; }
 .coach:empty { display: none; }
 .coach-box { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card2); }
 .coach-box .coach-face { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }

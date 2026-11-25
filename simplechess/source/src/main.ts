@@ -12,6 +12,7 @@ import { tablePage } from './pages/party';
 import { playSetupPage, gamePage, joinPage, hasPendingGame } from './pages/play';
 import { analysisPage } from './pages/analysis';
 import { learnPage, lessonPage, coursePage } from './pages/learn';
+import { newsPage, announceVersion, VERSION } from './pages/news';
 import { editorPage } from './pages/editor';
 import { openingsPage } from './pages/openings';
 import { puzzlesPage } from './pages/puzzles';
@@ -29,7 +30,7 @@ type PageFn = (root: HTMLElement, arg?: string) => Cleanup;
 const routes: Record<string, PageFn> = {
   '': homePage, play: playSetupPage, game: gamePage, join: joinPage,
   analysis: analysisPage, editor: editorPage, openings: openingsPage, puzzles: puzzlesPage,
-  learn: learnPage, lesson: lessonPage, course: coursePage,
+  learn: learnPage, lesson: lessonPage, course: coursePage, news: newsPage,
   table: tablePage, chat: chatListPage, daily: dailyPage, app: appPage, admin: adminPage,
   dpuzzle: (r, a) => puzzleDayPage('daily', r, a), wpuzzle: (r, a) => puzzleDayPage('weekly', r, a), pcalendar: puzzleCalendarPage,
   account: accountPage, profile: profilePage, friends: friendsPage, watch: watchPage,
@@ -322,7 +323,8 @@ function openSettings() {
         : [h('a.btn.block', { href: APK, download: 'simplechess.apk' }, icon('phone'), t('Install the Android app')),
           h('p.muted.small', null, t('Free, about 20 KB. Plays with website players. When you open the file, Android asks you to allow installing it.'))]],
     h('h3.set-h', null, t('App updates')),
-    h('div.row.wrap.update-row', null, btn(h('span', null, icon('retry'), t('Check for updates')), () => checkUpdates(), ''), h('span.muted.small.version', null, t('Version {0}', __BUILD__), appVer() ? ' · ' + t('Android app {0}', appVer()) : '')),
+    h('div.row.wrap.update-row', null, btn(h('span', null, icon('retry'), t('Check for updates')), () => checkUpdates(), ''), h('span.muted.small.version', null, t('Version {0}', VERSION), ' (' + __BUILD__ + ')', appVer() ? ' · ' + t('Android app {0}', appVer()) : '')),
+    h('a.btn.block.news-link', { href: '#/news', onclick: () => close() }, icon('star'), t('What\'s new')),
     h('div.row.end', null, btn(t('Done'), () => close(), 'primary'))));
 }
 
@@ -355,7 +357,7 @@ function homePage(root: HTMLElement) {
       card('analysis', 'chart', t('Game review'), t('Accuracy, game rating, blunders, mistakes, brilliant moves and the best alternatives.')),
       card('editor', 'edit', t('Board editor'), t('Set up any position and ask the engine for the best move.'))),
     h('p.footer-note', null, t('Engine: Stockfish 17.1 (GPLv3). Openings and puzzles: lichess.org open databases (CC0).'), ' ',
-      h('a', { href: '#/privacy' }, t('Privacy policy')), ' · ', h('a', { href: '#/terms' }, t('Terms')),
+      h('a', { href: '#/news' }, t('What\'s new') + ' · ' + VERSION), ' · ', h('a', { href: '#/privacy' }, t('Privacy policy')), ' · ', h('a', { href: '#/terms' }, t('Terms')),
       installed ? null : [' · ', h('a', { href: '#/app' }, t('Get the app'))]));
   if (isIOS && !installed && !loadRaw('iosBannerClosed', false)) {
     const banner = h('div.notify-banner.ios-banner', null, h('span', null, icon('phone'), ' ', t('Get Simple Chess on your iPhone: free, full screen, works offline.')),
@@ -501,6 +503,7 @@ async function init() {
     });
   });
   route();
+  setTimeout(announceVersion, 2500);
   initAccount().catch(() => {});
 }
 
