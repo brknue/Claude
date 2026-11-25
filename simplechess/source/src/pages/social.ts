@@ -14,6 +14,9 @@ import { setAnalysisInput } from './analysis';
 import { hostFriend, tcLabel, TIME_PRESETS, modeLabel, premoveBox } from './play';
 import { OPERATOR_NAME, OPERATOR_CONTACT, POLICY_DATE, POLICY_VERSION } from '../config';
 import { newDailyDialog, timeLeft } from './daily';
+import { openingIndex } from '../openings-db';
+import { posFromFen, uciToMove, repKey } from '../chess';
+import { ratingMode } from '../account';
 import { puzzleDaysCard } from './dailypuzzle';
 import { reviewBacklog, onReviewsSaved, reviewsRunning, brilliantsAvailable, noteMissing } from '../review';
 
@@ -160,6 +163,7 @@ export function profilePage(root: HTMLElement, username?: string) {
       p.ratings ? h('section.card', null, h('h2', null, t('Ratings')), ratingGrid(p.ratings), self ? ratingPrivacy(p.rating_visibility) : null)
         : h('section.card', null, h('p.muted', null, t('This player keeps their ratings private.'))),
       !self && !friend ? h('section.card', null, h('p.muted', null, t('Games are visible to friends only.'))) : '',
+      self || friend ? statsCard(p.username, p.id, p.ratings) : '',
       self || friend ? gamesCard(p.username, p.id) : '',
       self ? settingsCard() : '');
   }
@@ -233,6 +237,103 @@ function liveRow(g: any, uid: string, close: () => void): HTMLElement {
     end ? h('span.deadline', { class: urgent ? 'urgent' : '', title: end.what === 'time' ? t('Then {0} loses on time', toMoveName) : t('Then the game is aborted: no winner') },
       h('b', null, left), h('span.muted.small.block', null, end.what === 'time' ? t('until loss on time') : t('until aborted'))) : null));
 }
+
+// ---------------------------------------------------------------- advanced stats
+/** Results, colours, time controls, rating history, openings and streaks, from the player's recent games. */
+function statsCard(username: string, uid: string, ratings: Record<string, Stat> | null): HTMLElement {
+  const body = h('div.stats-body');
+  const card = h('section.card.stats-card', null, h('div.games-head', null, h('h2', null, icon('chart'), ' ', t('Advanced stats'))), body);
+  body.append(btn(h('span', null, icon('chart'), t('Show advanced stats')), () => load(), 'primary'));
+  async function load() {
+    body.replaceChildren(h('div.spinner-row', null, h('span.spinner'), t('Loading…')));
+    const games: any[] = [];
+    let before: string | null = null;
+    try {
+      for (let page = 0; page < 6; page++) {
+        const got = await rpc<any[]>('game_list', { p_username: username, p_before: before, p_limit: 50 });
+        games.push(...got);
+        if (got.length < 50) break;
+        before = got[got.length - 1].created_at;
+      }
+    } catch (e) { body.replaceChildren(h('p.err', null, niceError(e))); return; }
+    const done = games.filter(g => g.status === 'finished' && g.result);
+    if (!done.length) { body.replaceChildren(h('p.muted', null, t('No finished games yet.'))); return; }
+    body.replaceChildren(...await render(done));
+  }
+  const resOf = (g: any): 'w' | 'd' | 'l' => g.result === '1/2-1/2' ? 'd' : (g.result === '1-0') === (g.white_id === uid) ? 'w' : 'l';
+  const modeOf = (g: any): string | null => g.kind === 'daily' ? 'daily' : ratingMode(g.variant, g.time_base || 0, g.time_inc || 0);
+  function wdl(list: any[]) {
+    const w = list.filter(g => resOf(g) === 'w').length, d = list.filter(g => resOf(g) === 'd').length, l = list.length - w - d;
+    const pct = (n: number) => list.length ? (n / list.length) * 100 : 0;
+    return h('div.wdl', null,
+      h('div.wdl-bar', { role: 'img', 'aria-label': `${w} / ${d} / ${l}` }, h('i.w', { style: { width: pct(w) + '%' } }), h('i.d', { style: { width: pct(d) + '%' } }), h('i.l', { style: { width: pct(l) + '%' } })),
+      h('div.wdl-nums.small', null, h('span.w', null, t('{0} won', w)), h('span.d', null, t('{0} drawn', d)), h('span.l', null, t('{0} lost', l)),
+        h('b', null, list.length ? Math.round(((w + d / 2) / list.length) * 100) + '%' : '–')));
+  }
+  function ratingChart(mode: string): HTMLElement | null {
+    const cur = ratings?.[mode]?.r;
+    const list = (ratings ? [] : []).concat();
+    const rated = games0.filter(g => g.rated && modeOf(g) === mode && (g.white_id === uid ? g.white_diff : g.black_diff) != null);
+    if (cur == null || rated.length < 2) return null;
+    // newest first: walk back from today's rating
+    let r = cur; const pts: number[] = [r];
+    for (const g of rated) { r -= (g.white_id === uid ? g.white_diff : g.black_diff) || 0; pts.push(r); }
+    void list;
+    pts.reverse();
+    const W = 320, H = 90, min = Math.min(...pts), max = Math.max(...pts), span = Math.max(20, max - min);
+    const xy = pts.map((v, i) => `${(i / (pts.length - 1)) * W},${H - 6 - ((v - min) / span) * (H - 12)}`).join(' ');
+    return h('div.rchart', null,
+      h('div.rchart-head.small', null, h('b', null, t(modeLabelOf(mode))), h('span.muted', null, ` ${pts[0]} → ${cur} · ${t('high {0}', max)} · ${t('low {0}', min)}`)),
+      h('div.rchart-svg', { html: `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${xy}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>` }));
+  }
+  let games0: any[] = [];
+  async function render(done: any[]): Promise<HTMLElement[]> {
+    games0 = done;
+    const white = done.filter(g => g.white_id === uid), black = done.filter(g => g.white_id !== uid);
+    const modes = [...new Set(done.map(modeOf).filter(Boolean) as string[])];
+    // streaks (oldest to newest)
+    let best = 0, run = 0;
+    for (const g of done.slice().reverse()) { if (resOf(g) === 'w') { run++; best = Math.max(best, run); } else run = 0; }
+    const lengths = done.map(g => Math.ceil((g.moves ? g.moves.split(' ').length : 0) / 2));
+    // openings (standard games from the normal start)
+    const ops = new Map<string, any[]>();
+    try {
+      const idx = await openingIndex();
+      for (const g of done) {
+        if (g.variant !== 'standard' || !g.moves) continue;
+        const pos = posFromFen(g.start_fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+        if (!pos || pos.fullmoves !== 1 || pos.turn !== 'white') continue;
+        let name = '';
+        for (const u of g.moves.split(' ').slice(0, 24)) { const m = uciToMove(pos, u); if (!m) break; pos.play(m); const o = idx.get(repKey(pos)); if (o) name = o.family; }
+        if (!name) continue;
+        if (!ops.has(name)) ops.set(name, []);
+        ops.get(name)!.push(g);
+      }
+    } catch { /* openings are optional */ }
+    const topOps = [...ops.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 6);
+    const charts = modes.map(ratingChart).filter(Boolean) as HTMLElement[];
+    const avg = (a: number[]) => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : 0;
+    return [
+      h('p.muted.small', null, t('Based on the last {0} finished games.', done.length)),
+      h('div.stats-grid', null,
+        h('div.stat-box', null, h('h3.set-h', null, t('All games')), wdl(done)),
+        h('div.stat-box', null, h('h3.set-h', null, t('As White')), wdl(white)),
+        h('div.stat-box', null, h('h3.set-h', null, t('As Black')), wdl(black))),
+      h('div.stats-grid.small-boxes', null,
+        h('div.stat-num', null, h('b', null, String(done.length)), h('span.muted.small', null, t('games'))),
+        h('div.stat-num', null, h('b', null, String(best)), h('span.muted.small', null, t('longest winning streak'))),
+        h('div.stat-num', null, h('b', null, String(avg(lengths))), h('span.muted.small', null, t('moves per game on average'))),
+        h('div.stat-num', null, h('b', null, String(done.filter(g => g.rated).length)), h('span.muted.small', null, t('rated games')))),
+      modes.length ? h('div.stat-box', null, h('h3.set-h', null, t('By time control')),
+        h('div.mode-rows', null, modes.map(m => { const l = done.filter(g => modeOf(g) === m); return h('div.mode-row', null, h('span.mode-name', null, t(modeLabelOf(m)), h('span.muted.small', null, ' · ' + t('{0} games', l.length))), wdl(l)); }))) : null,
+      charts.length ? h('div.stat-box', null, h('h3.set-h', null, t('Rating history')), h('div.rcharts', null, charts)) : null,
+      topOps.length ? h('div.stat-box', null, h('h3.set-h', null, t('Most played openings')),
+        h('div.mode-rows', null, topOps.map(([n, l]) => h('div.mode-row', null, h('span.mode-name', null, n, h('span.muted.small', null, ' · ' + t('{0} games', l.length))), wdl(l))))) : null,
+    ].filter(Boolean) as HTMLElement[];
+  }
+  return card;
+}
+const modeLabelOf = (m: string) => (MODES.find(([k]) => k === m)?.[1] as string) || m;
 
 /** Brilliant moves of a player: visible to everyone signed in. Hidden if the database add-on is missing. */
 function brilliantCard(username: string, self: boolean): HTMLElement {

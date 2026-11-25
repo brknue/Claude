@@ -11,6 +11,7 @@ import { tcLabel } from './pages/play';
 import { tablePage } from './pages/party';
 import { playSetupPage, gamePage, joinPage, hasPendingGame } from './pages/play';
 import { analysisPage } from './pages/analysis';
+import { learnPage, lessonPage, coursePage } from './pages/learn';
 import { editorPage } from './pages/editor';
 import { openingsPage } from './pages/openings';
 import { puzzlesPage } from './pages/puzzles';
@@ -28,6 +29,7 @@ type PageFn = (root: HTMLElement, arg?: string) => Cleanup;
 const routes: Record<string, PageFn> = {
   '': homePage, play: playSetupPage, game: gamePage, join: joinPage,
   analysis: analysisPage, editor: editorPage, openings: openingsPage, puzzles: puzzlesPage,
+  learn: learnPage, lesson: lessonPage, course: coursePage,
   table: tablePage, chat: chatListPage, daily: dailyPage, app: appPage, admin: adminPage,
   dpuzzle: (r, a) => puzzleDayPage('daily', r, a), wpuzzle: (r, a) => puzzleDayPage('weekly', r, a), pcalendar: puzzleCalendarPage,
   account: accountPage, profile: profilePage, friends: friendsPage, watch: watchPage,
@@ -35,7 +37,7 @@ const routes: Record<string, PageFn> = {
 };
 
 const NAV = [
-  ['play', 'Play', 'play'], ['puzzles', 'Puzzles', 'puzzle'], ['openings', 'Openings', 'book'],
+  ['play', 'Play', 'play'], ['puzzles', 'Puzzles', 'puzzle'], ['learn', 'Learn', 'school'], ['openings', 'Openings', 'book'],
   ['analysis', 'Analysis', 'chart'], ['editor', 'Editor', 'edit'],
 ] as const;
 
@@ -143,7 +145,7 @@ function route() {
   cleanup = undefined;
   main.innerHTML = '';
   main.className = 'page-' + (name || 'home');
-  const navName = name === 'dpuzzle' || name === 'wpuzzle' || name === 'pcalendar' ? 'puzzles' : name === 'game' || name === 'join' || name === 'table' || name === 'daily' ? 'play' : name === 'profile' ? 'account' : name === 'watch' ? 'friends' : name;
+  const navName = name === 'lesson' || name === 'course' ? 'learn' : name === 'dpuzzle' || name === 'wpuzzle' || name === 'pcalendar' ? 'puzzles' : name === 'game' || name === 'join' || name === 'table' || name === 'daily' ? 'play' : name === 'profile' ? 'account' : name === 'watch' ? 'friends' : name;
   document.querySelectorAll('.nav a, .tabbar a, .top-actions a').forEach(a => a.classList.toggle('active', a.getAttribute('data-r') === navName));
   document.body.classList.remove('nav-open');
   window.scrollTo(0, 0);
@@ -349,6 +351,7 @@ function homePage(root: HTMLElement) {
       accountsEnabled() ? card(me ? 'friends' : 'account/new', 'users', t('Accounts and friends'), t('Keep your ratings (everyone starts at 1500), add friends, challenge them and watch their games live.')) : null,
       card('dpuzzle', 'calendar', t('Daily and weekly puzzles'), dailyCardText()),
       card('puzzles', 'puzzle', t('Infinite puzzles'), t('Rated puzzles that adapt to you. Your rating: {0}.', Math.round(puzzleRating()))),
+      card('learn', 'school', t('Lessons and courses'), t('Learn checkmates, tactics and endgames with exercises, and opening courses move by move.')),
       card('openings', 'book', t('Opening library'), t('All 3,800+ named openings and variations. Browse, explore and drill them.')),
       card('analysis', 'chart', t('Game review'), t('Accuracy, game rating, blunders, mistakes, brilliant moves and the best alternatives.')),
       card('editor', 'edit', t('Board editor'), t('Set up any position and ask the engine for the best move.'))),
@@ -418,7 +421,7 @@ let headerEl: HTMLElement | null = null, tabbarEl: HTMLElement | null = null;
 function buildChrome() {
   headerEl?.remove(); tabbarEl?.remove();
   headerEl = header();
-  tabbarEl = h('nav.tabbar', null, [['', 'Home', 'home'], ...NAV].map(([r, label, ic]) =>
+  tabbarEl = h('nav.tabbar', null, [['', 'Home', 'home'], ...NAV.filter(n => n[0] !== 'editor')].map(([r, label, ic]) =>
     h('a', { href: '#/' + r, 'data-r': r }, icon(ic), h('span', null, t(label)))));
   document.body.prepend(headerEl);
   document.body.append(tabbarEl);

@@ -31,7 +31,7 @@ export const $ = (sel: string, root: ParentNode = document) => root.querySelecto
 
 // ---------- Settings ----------
 export interface Settings {
-  theme: 'system' | 'light' | 'dark'; simple: boolean; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
+  theme: 'system' | 'light' | 'dark'; coach?: boolean; simple: boolean; board: 'wood' | 'blue' | 'green' | 'slate'; sound: boolean; coords: boolean;
   name: string; lastElo: number; animation: boolean; premove: boolean; points: boolean; lang: string;
   /** notifications for messages, challenges and daily games (undefined = not decided yet) */
   notify?: boolean;
@@ -246,7 +246,7 @@ export const icon = (name: string) => {
     retry: 'M4 4v6h6M20 20v-6h-6M5 15a8 8 0 0014 3M19 9A8 8 0 005 6', search: 'M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-5-5',
     sun: 'M12 4V2M12 22v-2M4 12H2M22 12h-2M5 5L4 4M20 20l-1-1M5 19l-1 1M20 4l-1 1M12 7a5 5 0 100 10 5 5 0 000-10z',
     moon: 'M20 14A8 8 0 0110 4a8 8 0 1010 10z', gear: 'M12 9a3 3 0 100 6 3 3 0 000-6zM19 12l2-1-2-4-2 1-2-2V4h-4l-1 2-2 1-2-1-2 4 2 1v2l-2 1 2 4 2-1 2 2 1 2h4v-2l2-2 2 1 2-4-2-1z',
-    menu: 'M4 7h16M4 12h16M4 17h16', close: 'M6 6l12 12M18 6L6 18', play: 'M7 4l13 8-13 8z', clock: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0', pause: 'M8 5v14M16 5v14', trash: 'M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13',
+    menu: 'M4 7h16M4 12h16M4 17h16', close: 'M6 6l12 12M18 6L6 18', play: 'M7 4l13 8-13 8z', school: 'M2 9l10-5 10 5-10 5zM6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6', clock: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0', pause: 'M8 5v14M16 5v14', trash: 'M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13',
     cpu: 'M8 8h8v8H8zM4 10h2M4 14h2M18 10h2M18 14h2M10 4v2M14 4v2M10 18v2M14 18v2M6 6h12v12H6z', users: 'M9 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M16 3a4 4 0 010 8M22 21v-1a6 6 0 00-4-5.6',
     globe: 'M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c3 3 4 6 4 10s-1 7-4 10c-3-3-4-6-4-10s1-7 4-10z',
     puzzle: 'M10 3h4v3a2 2 0 104 0V3h3v7h-3a2 2 0 100 4h3v7h-7v-3a2 2 0 10-4 0v3H3v-7h3a2 2 0 100-4H3V3h7z',

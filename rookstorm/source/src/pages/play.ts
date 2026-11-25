@@ -2,10 +2,13 @@ import { badges } from '../badges';
 import { newDailyDialog } from './daily';
 import { h, icon, btn, iconBtn, settings, saveSettings, toast, modal, sound, fmtClock, copyText, loadRaw, save, offerBar, clearOffers, markLiveGame, askConfirm, scrollInside } from '../ui';
 import { t } from '../i18n';
-import { VARIANTS, VariantKey, variantInfo, variantName, variantDesc, startFenFor, materialDiff, outcomeText, reasonText, Color, Outcome, uciToMove, fenOf, moveSquares, Role } from '../chess';
+import { VARIANTS, VariantKey, variantInfo, variantName, variantDesc, startFenFor, materialDiff, outcomeText, reasonText, Color, Outcome, uciToMove, fenOf, moveSquares, Role, pvToSan } from '../chess';
+import type { Position } from 'chessops/chess';
+import { openingIndex } from '../openings-db';
+import { repKey } from '../chess';
 import { Game } from '../game';
 import { Board } from '../board';
-import { engine, botMove, MIN_ELO, MAX_ELO, whiteCp } from '../engine';
+import { engine, botMove, MIN_ELO, MAX_ELO, whiteCp, winPct } from '../engine';
 import { variantMove, variantStop } from '../vengine';
 import { Link, Msg, cleanCode } from '../net';
 import { go, setLeaveGuard as setGuardGlobal, setParkable } from '../main';
@@ -390,6 +393,11 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   let ratingInfo: FinishInfo | null = null;
   let ratedNow = false;
   let shown = false;
+  // Play Coach state (used while the side panel is built)
+  const coachable = cfg.mode === 'bot' && sf;
+  let coachOn = coachable && !!settings.coach;
+  let coachPre: Promise<{ fen: string; best: string; cp: number } | null> | null = null;
+  let coachFen = '';
   // leaving the page parks a game against a person: it keeps running; the opponent sees that you are away
   let parkedNow = false;
   let endModalLater = false;
@@ -413,6 +421,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   const status = h('div.status');
   const actions = h('div.actions');
   const endBox = h('div.endbox');
+  const coachEl = h('div.coach');
   const awayNote = h('div.away-note');
   const chatLog = h('div.chat-log');
   const headInfo = h('span.muted');
@@ -423,14 +432,78 @@ export function gamePage(root: HTMLElement): (() => void) | void {
 
   const side = h('aside.side.card', null,
     h('div.side-head', null, h('div', null, h('b', null, variantName(cfg.variant)), headInfo), status),
-    awayNote, moveList, nav, endBox, actions, h('div.game-opts', null, premoveToggle()),
+    awayNote, coachEl, moveList, nav, endBox, actions, h('div.game-opts', null, premoveToggle(), coachToggle()),
     net ? h('div.chat', null, chatLog, h('form.chat-form', { onsubmit: (e: Event) => { e.preventDefault(); const inp = (e.target as HTMLFormElement).querySelector('input')!; const text = inp.value.trim().slice(0, 140); if (!text) return; cfg.link!.send({ t: 'chat', text }); addChat(t('You'), text); inp.value = ''; } },
       h('input', { placeholder: t('Say something nice…'), maxLength: 140, 'aria-label': t('Chat message') }), btn(t('Send'), () => {}, 'small'))) : null);
 
-  root.append(h('div.game-layout', null, h('div.board-col', null, topStrip, board.el, botStrip), side));
+  const boardCol = h('div.board-col', null, topStrip, board.el, botStrip);
+  root.append(h('div.game-layout', null, boardCol, side));
+  // phones and upright tablets: the coach speaks right under the board, where you look; wide screens: in the side panel
+  const narrow = matchMedia('(max-width: 860px)');
+  const placeCoach = () => { if (narrow.matches) boardCol.appendChild(coachEl); else side.insertBefore(coachEl, moveList); };
+  placeCoach();
+  narrow.addEventListener?.('change', placeCoach);
 
   function renderHead() {
     headInfo.textContent = ' · ' + (cfg!.time ? tcLabel(cfg!.time, cfg!.inc) : t('Unlimited')) + ' · ' + modeName() + (ratedNow ? ' · ' + t('Rated') : '');
+  }
+
+  // ---- Play Coach: games against the computer with Stockfish. After each of your moves the coach rates it.
+  function coachToggle() {
+    if (!coachable) return null;
+    const inp = h('input', { type: 'checkbox', checked: coachOn, onchange: (e: any) => {
+      coachOn = settings.coach = e.target.checked; saveSettings();
+      if (coachOn) { coachEl.replaceChildren(coachBox('', t('Coach'), t('Play a move: I will tell you how good it was.'))); coachPrepare(); } else { coachEl.replaceChildren(); board.arrows([]); }
+    } });
+    return h('label.switch', { title: t('Your coach comments on every move you make.') }, inp, h('span'), ' ' + t('Play Coach'));
+  }
+  function coachBox(cls: string, title: string, text: string, extra?: HTMLElement | null) {
+    return h('div.coach-box', { class: cls }, h('span.coach-face', { 'aria-hidden': 'true' }, icon('bulb')), h('div', null, h('b', null, title), h('div.small', null, text), extra || null));
+  }
+  /** evaluate the position while it is your turn, so the verdict after your move comes fast */
+  function coachPrepare() {
+    if (!coachOn || game.result || game.pos.turn !== cfg!.myColor || viewPly !== null) return;
+    const fen = fenOf(game.pos), turn = game.pos.turn;
+    if (coachPre && coachFen === fen) return;
+    coachFen = fen;
+    coachPre = engine.analyse({ fen, depth: 15, multipv: 1, chess960: game.chess960 }).then(r => r && r.lines[0] ? { fen, best: r.bestmove, cp: whiteCp(r.lines[0], turn) } : null).catch(() => null);
+  }
+  /** after your move: compare with the best move, then let the computer reply */
+  async function coachJudge(before: Position, uci: string, pre: typeof coachPre): Promise<void> {
+    coachPre = null; coachFen = '';
+    if (!coachOn || !pre) return;
+    coachEl.replaceChildren(coachBox('thinking', t('Coach'), t('Coach is thinking…')));
+    const p = await pre;
+    if (!p || p.fen !== fenOf(before) || !alive) { coachEl.replaceChildren(); return; }
+    const after = game.pos;
+    let cpAfter = p.cp;
+    if (after.isCheckmate()) cpAfter = cfg!.myColor === 'white' ? 10000 : -10000;
+    else if (after.isEnd()) cpAfter = 0;
+    else {
+      const r = await engine.analyse({ fen: fenOf(after), depth: 14, multipv: 1, chess960: game.chess960 }).catch(() => null);
+      if (!alive || !r || !r.lines[0]) { coachEl.replaceChildren(); return; }
+      cpAfter = whiteCp(r.lines[0], after.turn);
+    }
+    const me2 = cfg!.myColor === 'white' ? 1 : -1;
+    const loss = Math.max(0, winPct(me2 * p.cp) - winPct(me2 * cpAfter));
+    const bestSan = pvToSan(before, [p.best], 1).replace(/^\d+\.+\s*/, '');
+    const isBest = uci === p.best || loss < 1;
+    let cls = 'good', title = '', text = '';
+    // a known opening position: a book move, whatever small difference the engine sees
+    let book: string | null = null;
+    if (game.ply <= 30) { try { const idx = await openingIndex(); const o = idx.get(repKey(after)); if (o) book = o.name; } catch { /* */ } }
+    const playedSan = game.sans[game.ply - 1] || '';
+    if (book && loss < 10) { title = t('Book'); text = t('{0} is a book move.', playedSan) + ' ' + book; }
+    else if (isBest) { title = t('Best move!'); text = t('That is exactly what the engine would play.'); }
+    else if (loss < 2) { title = t('Excellent move'); text = t('Almost as good as the best move, {0}.', bestSan); }
+    else if (loss < 5) { title = t('Good move'); text = t('Fine. {0} was a little stronger.', bestSan); }
+    else if (loss < 10) { cls = 'warn'; title = t('Inaccuracy'); text = t('Not the best. Better was {0}.', bestSan); }
+    else if (loss < 20) { cls = 'bad'; title = t('Mistake'); text = t('This loses ground. Better was {0}.', bestSan); }
+    else { cls = 'bad'; title = t('Blunder'); text = t('This can lose the game. Better was {0}.', bestSan); }
+    const extra = cls === 'bad' && !game.result ? btn(h('span', null, icon('back'), t('Take back and try again')), () => { coachEl.replaceChildren(); takeback(); }, 'small') : null;
+    coachEl.replaceChildren(coachBox(cls, title, text, extra));
+    const sq = cls !== 'good' ? (() => { const m = uciToMove(before, p.best); return m ? moveSquares(before, m) : null; })() : null;
+    if (sq) setTimeout(() => { if (alive) board.arrows([{ orig: sq[0] as any, dest: sq[1] as any, brush: 'green' }]); }, 50);
   }
 
   function premoveToggle() {
@@ -565,6 +638,7 @@ export function gamePage(root: HTMLElement): (() => void) | void {
   }
 
   function sync() {
+    setTimeout(() => { if (alive) coachPrepare(); });
     const idx = viewPly ?? game.ply;
     const pos = game.positions[idx];
     const last = idx > 0 ? moveSquares(game.positions[idx - 1], game.moves[idx - 1]) : null;
@@ -747,9 +821,12 @@ export function gamePage(root: HTMLElement): (() => void) | void {
     const san = game.play(m);
     if (!san) { sync(); return; }
     board.showMove(prev, m, game.pos, false);
+    board.arrows([]);
+    const pre = coachPre;
     afterMove(mover);
     if (net) cfg!.link!.send({ t: 'move', uci: game.ucis[game.ply - 1], clock: clock.enabled ? Math.round(clock.t[mover]) : undefined, ply: game.ply });
     sync();
+    if (cfg!.mode === 'bot' && coachOn) { const uci = game.ucis[game.ply - 1]; coachJudge(prev, uci, pre).then(() => { if (!game.result) botTurn(); }); return; }
     if (cfg!.mode === 'bot' && !game.result) botTurn();
   }
 
