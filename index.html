@@ -66,7 +66,7 @@ footer button{background:none;border:0;padding:0;text-decoration:underline;curso
 .toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;z-index:9}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:420px){.desc{font-size:14px}}
-@media (max-width:480px){header{gap:8px}.right{gap:6px}select{max-width:34vw}.navbtn{padding:0 10px}}
+@media (max-width:480px){header{gap:8px;flex-wrap:wrap}.right{gap:6px;flex-wrap:wrap;justify-content:flex-end}select{max-width:34vw}.navbtn{padding:0 10px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -76,6 +76,7 @@ footer button{background:none;border:0;padding:0;text-decoration:underline;curso
     <a class="logo" href="./" aria-label="CRB — plain">CRB</a>
     <div class="right">
       <a class="navbtn" href="/research/">Research</a>
+      <a class="navbtn" href="/learning/">Learning</a>
       <label class="vh" for="lang" data-t="language">Language</label>
       <select id="lang"></select>
       <button class="iconbtn" id="theme" type="button" aria-label="Dark mode"></button>
