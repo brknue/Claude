@@ -10,7 +10,7 @@ window.PLAIN_FILES = {
    "simple-mol-lab/reports.js",
    "simple-mol-lab/tools.js"
   ],
-  "bytes": 3393567
+  "bytes": 3396576
  },
  "physica": {
   "files": [
@@ -50,36 +50,37 @@ window.PLAIN_FILES = {
    "physica/js/pdf.js",
    "physica/manifest.webmanifest"
   ],
-  "bytes": 983346
+  "bytes": 993029
  },
  "rookstorm": {
   "files": [
+   "rookstorm/CHANGELOG.md",
    "rookstorm/README.md",
    "rookstorm/apple-touch-icon.png",
-   "rookstorm/assets/_keys-CUeOf2Y3.js",
-   "rookstorm/assets/ar-DnY4G8i6.js",
-   "rookstorm/assets/de-EPiOnFBn.js",
+   "rookstorm/assets/_keys-D4S2dODn.js",
+   "rookstorm/assets/ar-BYmFrR5w.js",
+   "rookstorm/assets/de-BSW_orFw.js",
    "rookstorm/assets/dist-DwhOg3L3.js",
-   "rookstorm/assets/es-vFWb2cfs.js",
-   "rookstorm/assets/fa-D3psP2Hr.js",
-   "rookstorm/assets/fr-gKGHoOrs.js",
-   "rookstorm/assets/hi-CwHC99MY.js",
-   "rookstorm/assets/id-CxNmc2xh.js",
-   "rookstorm/assets/index-Ceg6EJJC.css",
-   "rookstorm/assets/index-D6X5EZcE.js",
-   "rookstorm/assets/it-B4d8I2Lq.js",
-   "rookstorm/assets/ja-hfnyI754.js",
-   "rookstorm/assets/ko-DZ8sKz8L.js",
-   "rookstorm/assets/nl-DyynwuHw.js",
-   "rookstorm/assets/pl-BasZ6lGY.js",
-   "rookstorm/assets/pt--OYa_cz_.js",
-   "rookstorm/assets/ru-DTbFrUcG.js",
-   "rookstorm/assets/sv-dBjELsZI.js",
-   "rookstorm/assets/tr-DuCeAlQe.js",
-   "rookstorm/assets/uk-CHU7W7vW.js",
-   "rookstorm/assets/vi-CwChTn93.js",
+   "rookstorm/assets/es-CE8uHumX.js",
+   "rookstorm/assets/fa-Bsysf1CA.js",
+   "rookstorm/assets/fr-g_XIwH1G.js",
+   "rookstorm/assets/hi-Bn1D3q72.js",
+   "rookstorm/assets/id-ayAMM2zF.js",
+   "rookstorm/assets/index-Bzj-LVFw.css",
+   "rookstorm/assets/index-CILy7DKk.js",
+   "rookstorm/assets/it-B4e2_dCv.js",
+   "rookstorm/assets/ja-DmyC11D7.js",
+   "rookstorm/assets/ko-DZXZr9Af.js",
+   "rookstorm/assets/nl-D_H-Mjwq.js",
+   "rookstorm/assets/pl-Rc0EygDT.js",
+   "rookstorm/assets/pt-DM6sxxxW.js",
+   "rookstorm/assets/ru-B7xpRkUz.js",
+   "rookstorm/assets/sv-BZM4-r9K.js",
+   "rookstorm/assets/tr-CjJlDHe_.js",
+   "rookstorm/assets/uk-CClgZ2Ep.js",
+   "rookstorm/assets/vi-COPgD2zl.js",
    "rookstorm/assets/vworker-PfNb6flF.js",
-   "rookstorm/assets/zh-DNLT4Uvt.js",
+   "rookstorm/assets/zh-D5p3I7B9.js",
    "rookstorm/data/openings.json",
    "rookstorm/data/puzzles/index.json",
    "rookstorm/data/puzzles/r1000.json",
@@ -121,6 +122,7 @@ window.PLAIN_FILES = {
    "rookstorm/manifest.webmanifest",
    "rookstorm/rookstorm.apk",
    "rookstorm/source/.gitignore",
+   "rookstorm/source/CHANGELOG.md",
    "rookstorm/source/android/.gitignore",
    "rookstorm/source/android/AndroidManifest.xml",
    "rookstorm/source/android/build.sh",
@@ -185,6 +187,8 @@ window.PLAIN_FILES = {
    "rookstorm/source/src/pages/daily.ts",
    "rookstorm/source/src/pages/dailypuzzle.ts",
    "rookstorm/source/src/pages/editor.ts",
+   "rookstorm/source/src/pages/learn.ts",
+   "rookstorm/source/src/pages/news.ts",
    "rookstorm/source/src/pages/openings.ts",
    "rookstorm/source/src/pages/party.ts",
    "rookstorm/source/src/pages/play.ts",
@@ -218,36 +222,37 @@ window.PLAIN_FILES = {
    "rookstorm/version.json",
    "rookstorm/workbox-ebea30cf.js"
   ],
-  "bytes": 24980535
+  "bytes": 25307124
  },
  "simplechess": {
   "files": [
+   "simplechess/CHANGELOG.md",
    "simplechess/README.md",
    "simplechess/apple-touch-icon.png",
-   "simplechess/assets/_keys-2CHVL-eN.js",
-   "simplechess/assets/ar-xLoovc0y.js",
-   "simplechess/assets/de-25B91bu1.js",
+   "simplechess/assets/_keys-WJ-Xi_PE.js",
+   "simplechess/assets/ar-B3rlxrd5.js",
+   "simplechess/assets/de-DoJ_cjKW.js",
    "simplechess/assets/dist-DwhOg3L3.js",
-   "simplechess/assets/es-BrjF_ieD.js",
-   "simplechess/assets/fa-BStEqXgR.js",
-   "simplechess/assets/fr-Dx_8Q3qC.js",
-   "simplechess/assets/hi-B8rJT2Jo.js",
-   "simplechess/assets/id-QN4vlpYL.js",
-   "simplechess/assets/index-ADLZyZ-8.js",
-   "simplechess/assets/index-DcPKQGW9.css",
-   "simplechess/assets/it-DTh0kIdh.js",
-   "simplechess/assets/ja-DgDJX2oj.js",
-   "simplechess/assets/ko-B8xXcOic.js",
-   "simplechess/assets/nl-BklWX_nV.js",
-   "simplechess/assets/pl-COwPzgoy.js",
-   "simplechess/assets/pt-d3pIuKn8.js",
-   "simplechess/assets/ru-CvNbYi8m.js",
-   "simplechess/assets/sv-AO-slVru.js",
-   "simplechess/assets/tr-B9EdS4pu.js",
-   "simplechess/assets/uk-rzcxUEOA.js",
-   "simplechess/assets/vi-GcMNIaMO.js",
+   "simplechess/assets/es-DmP_dYcA.js",
+   "simplechess/assets/fa-BqH4LqJX.js",
+   "simplechess/assets/fr-BOP7F7EM.js",
+   "simplechess/assets/hi-BQZWtRdc.js",
+   "simplechess/assets/id-ghQOWWFy.js",
+   "simplechess/assets/index-CknAsbal.css",
+   "simplechess/assets/index-oCxudZKQ.js",
+   "simplechess/assets/it-BdvVnaeB.js",
+   "simplechess/assets/ja-eWSOiZQr.js",
+   "simplechess/assets/ko-K5kWXhrb.js",
+   "simplechess/assets/nl-CuGU5mju.js",
+   "simplechess/assets/pl-DmARsle6.js",
+   "simplechess/assets/pt-BgFYg9wo.js",
+   "simplechess/assets/ru-BJ5lT1OW.js",
+   "simplechess/assets/sv-DSJRhKnB.js",
+   "simplechess/assets/tr-CRKwuU5Z.js",
+   "simplechess/assets/uk-CX8uNK-C.js",
+   "simplechess/assets/vi-irPo_1PB.js",
    "simplechess/assets/vworker-PfNb6flF.js",
-   "simplechess/assets/zh-sKwQEgY3.js",
+   "simplechess/assets/zh-B_klZ-1_.js",
    "simplechess/data/openings.json",
    "simplechess/data/puzzles/index.json",
    "simplechess/data/puzzles/r1000.json",
@@ -288,6 +293,7 @@ window.PLAIN_FILES = {
    "simplechess/index.html",
    "simplechess/manifest.webmanifest",
    "simplechess/simplechess.apk",
+   "simplechess/source/CHANGELOG.md",
    "simplechess/source/android/AndroidManifest.xml",
    "simplechess/source/android/build.sh",
    "simplechess/source/android/res/drawable/ic_stat.xml",
@@ -385,6 +391,8 @@ window.PLAIN_FILES = {
    "simplechess/source/src/pages/daily.ts",
    "simplechess/source/src/pages/dailypuzzle.ts",
    "simplechess/source/src/pages/editor.ts",
+   "simplechess/source/src/pages/learn.ts",
+   "simplechess/source/src/pages/news.ts",
    "simplechess/source/src/pages/openings.ts",
    "simplechess/source/src/pages/party.ts",
    "simplechess/source/src/pages/play.ts",
@@ -418,7 +426,7 @@ window.PLAIN_FILES = {
    "simplechess/version.json",
    "simplechess/workbox-ebea30cf.js"
   ],
-  "bytes": 46600420
+  "bytes": 46919735
  },
  "bio-genetik": {
   "files": [
@@ -439,7 +447,7 @@ window.PLAIN_FILES = {
    "bio-genetik/styles.css",
    "bio-genetik/tests.mjs"
   ],
-  "bytes": 553890
+  "bytes": 557665
  },
  "fuel-check": {
   "files": [
@@ -454,7 +462,7 @@ window.PLAIN_FILES = {
    "fuel-check/local-engine.js",
    "fuel-check/tools/build-stores.mjs"
   ],
-  "bytes": 710566
+  "bytes": 713785
  },
  "plain-wiki": {
   "files": [
@@ -463,7 +471,7 @@ window.PLAIN_FILES = {
    "plain-wiki/vendor/marked-LICENSE.md",
    "plain-wiki/vendor/marked.min.js"
   ],
-  "bytes": 142824
+  "bytes": 143388
  },
  "mathe-klar": {
   "files": [
@@ -477,7 +485,7 @@ window.PLAIN_FILES = {
    "mathe-klar/tests.mjs",
    "mathe-klar/visuals.js"
   ],
-  "bytes": 209808
+  "bytes": 213701
  },
  "lingua-local": {
   "files": [
@@ -491,7 +499,7 @@ window.PLAIN_FILES = {
    "lingua-local/sw.js",
    "lingua-local/upstream-swadesh.json"
   ],
-  "bytes": 253042
+  "bytes": 263004
  },
  "der-die-das": {
   "files": [
@@ -513,7 +521,7 @@ window.PLAIN_FILES = {
    "der-die-das/sw.js",
    "der-die-das/template.html"
   ],
-  "bytes": 292987
+  "bytes": 293969
  },
  "fluent-path": {
   "files": [
@@ -544,7 +552,7 @@ window.PLAIN_FILES = {
    "fluent-path/tests.mjs",
    "fluent-path/tools/build_tatoeba.py"
   ],
-  "bytes": 1188641
+  "bytes": 1195500
  },
  "youtube-to-pdf": {
   "files": [
@@ -567,14 +575,14 @@ window.PLAIN_FILES = {
    "youtube-to-pdf/server.mjs",
    "youtube-to-pdf/test/youtube.test.mjs"
   ],
-  "bytes": 51722
+  "bytes": 52669
  },
  "molecule-lab": {
   "files": [
    "molecule-lab/README.md",
    "molecule-lab/index.html"
   ],
-  "bytes": 3283098
+  "bytes": 3284690
  },
  "verity": {
   "files": [
@@ -593,7 +601,7 @@ window.PLAIN_FILES = {
    "verity/verity-local.js",
    "verity/worker.mjs"
   ],
-  "bytes": 111909
+  "bytes": 112713
  },
  "citypulse": {
   "files": [
@@ -602,6 +610,6 @@ window.PLAIN_FILES = {
    "citypulse/index.html",
    "citypulse/track.html"
   ],
-  "bytes": 22437
+  "bytes": 22609
  }
 };

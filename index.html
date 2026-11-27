@@ -30,6 +30,8 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;pa
 select,.iconbtn{height:40px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:0 10px;cursor:pointer}
 select{max-width:46vw}
 .iconbtn{width:40px;padding:0;display:inline-grid;place-items:center}
+.navbtn{height:40px;border:1px solid var(--line);border-radius:8px;padding:0 12px;display:inline-flex;align-items:center;text-decoration:none;font-weight:600}
+.navbtn:hover{background:var(--hover)}
 .search{width:100%;height:46px;border:1px solid var(--line);border-radius:8px;padding:0 14px;background:var(--bg);margin:8px 0 12px;-webkit-appearance:none;appearance:none}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--mut);font-size:14px;margin-bottom:8px}
 .views{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
@@ -72,6 +74,7 @@ footer button{background:none;border:0;padding:0;text-decoration:underline;curso
   <header>
     <a class="logo" href="./" aria-label="CRB — plain">CRB</a>
     <div class="right">
+      <a class="navbtn" href="/research/">Research</a>
       <label class="vh" for="lang" data-t="language">Language</label>
       <select id="lang"></select>
       <button class="iconbtn" id="theme" type="button" aria-label="Dark mode"></button>
@@ -116,10 +119,10 @@ footer button{background:none;border:0;padding:0;text-decoration:underline;curso
 </dialog>
 
 <noscript><p style="padding:16px">plain needs JavaScript. All projects are also on <a href="https://github.com/brknue/claude">GitHub</a>.</p></noscript>
-<script src="plain/i18n.js?v=f87bb9135b"></script>
-<script src="plain/projects.js?v=f87bb9135b"></script>
-<script src="plain/files.js?v=f87bb9135b"></script>
-<script src="plain/zip.js?v=f87bb9135b"></script>
-<script src="plain/app.js?v=f87bb9135b"></script>
+<script src="plain/i18n.js?v=5aac91543c"></script>
+<script src="plain/projects.js?v=5aac91543c"></script>
+<script src="plain/files.js?v=5aac91543c"></script>
+<script src="plain/zip.js?v=5aac91543c"></script>
+<script src="plain/app.js?v=5aac91543c"></script>
 </body>
 </html>
